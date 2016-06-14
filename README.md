@@ -1,5 +1,16 @@
 # Simulating Bitcoin
 
+## Tasks
+
+* Configure ZFS volums using (fs)block based dedub (this is almost trivial)
+* Patch Bitcoind to align the persistence of (btc)blocks in the .dat files in the .bitcoin folder with the (fs)blocksize use for dedub.
+* Find a sweet spot of dedub (fs)blocksize and test if it works with Bitcoin
+* Patch Bitcoind to use configurable max (btc)blocksize. This should be easy, it is defined in a macro imho.
+* Patch Bitcoind to use configurable difficulty values. Here the testnet mode of Bitcoin can be used as a template but I guess this will be more work than the (btc)blocksize
+* Patch the Bitcoin regtest feature to make it possibe to set the above mentioned configuration options.
+* Instrument the Bitcoin regtest feature and write a management client (ideally in python) to spawn the required instances.
+* Run the emulations
+
 
 
 ## Meeting notes
@@ -17,7 +28,7 @@
     - *no timeslot yet*
 * Check for time required between BSc thesis registration and completion 
 
-### Links
+#### Links
 * https://github.com/bitcoinxt/bitcoinxt/commits/master/qa/rpc-tests/test_framework
 * https://github.com/btcsuite?page=1
 * http://hashingit.com/
