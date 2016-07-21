@@ -1,0 +1,12 @@
+FROM library/ubuntu:xenial-20160706
+RUN \
+     apt update &&\
+     apt install -y software-properties-common &&\
+     add-apt-repository ppa:bitcoin/bitcoin && \
+     apt update && \
+     apt install -y bitcoind
+RUN mkdir /data
+EXPOSE 8333
+CMD ["/usr/bin/bitcoind", "-datadir=/data", "--printtoconsole"]
+
+# adapted from https://hub.docker.com/r/abrkn/bitcoind/~/dockerfile/
