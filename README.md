@@ -18,12 +18,12 @@ steps to run a standard simulation
 
 ## setup on ubuntu 16.06 LTS
 
-generate node image `docker build --tag btn/base:v1 - < files/docker/baseimage` build
+generate node image `docker build --tag btn/base:v1 - < docker/baseimage` build
 
 run infrastructure
 
 1. checkout this projects sourcode from `github`
-4. run `docker build --tag btn/base:v1 - < files/docker/baseimage` to build the docker image 
+4. run `docker build --tag btn/base:v1 - < docker/baseimage` to build the docker image 
 5. run `setup.py` to run the simulation
 
 ## standard usage
