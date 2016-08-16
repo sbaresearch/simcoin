@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 import os
@@ -10,12 +10,20 @@ import os
 def check_dependencies():
     if (os.system('docker version') != 0):
         # sudo gpasswd -a ${USER} docker; sudo service docker restart; newgrp docker
-            exit("docker not found or not accessible")
+        exit("docker not found or not accessible")
 
-check_dependencies();
+check_dependencies()
 # etc
 
-os.system('docker network create --subnet=172.18.0.0/16 --driver bridge isolated_nw')
+# IP range from RFC6890
+# it does not conflict with https://github.com/bitcoin/bitcoin/blob/master/src/netbase.h
+ip_range = "240.0.0.0/4"
+ip_bootstrap = "240.0.0.2"
+
+conatiner_prefix = 'btn-'
+number_of_conatiners = 2
+
+os.system('docker network create --subnet=' + ip_range + ' --driver bridge isolated_nw')
 
 # python
 # import os
@@ -39,10 +47,10 @@ def bitcoindCmd (strategy = 'default'):
             'disablewallet': ' -disablewallet=1 ' # disable wallet
         },
         'user': {
- #           'dns' : ' -dns=1 ', # TODO check if necessary
+ #          'dns' : ' -dns=1 ', # TODO check if necessary
             'dnsseed' : ' -dnsseed=0 ',  # disable dns seed lookups, otherwise this gets seeds even with docker --internal network
-            'addnode' : ' -addnode=172.18.0.2 ', # only connect to ourself introductionary node
-            'seednode': ' -seednode=172.18.0.3 ',
+            'addnode' : ' -addnode=' + ip_bootstrap + ' ', # only connect ourself introductionary node
+            'seednode': ' -seednode=240.0.0.3 ',
             'keypool' : ' -keypool=1 '
         },
         'miner-solo' : {
@@ -58,7 +66,7 @@ def dockerBootstrapCmd ():
     ' docker run '
     '   --detach=true '
     '   --net=isolated_nw '
-    '   --ip=172.18.0.2 '
+    '   --ip=' + ip_bootstrap + ' '
     '   --name=bootstrap'   # conatiner name
     '   btn/base:v1 '      # image name # src: https://hub.docker.com/r/abrkn/bitcoind/
     ' '
@@ -77,7 +85,7 @@ def dockerNodeCmd (name):
 
 def cli(node,command):
     return (' '
-    ' docker exec -it ' 
+    ' docker exec ' 
     + node + 
     ' bitcoin-cli -regtest -datadir=/data '
     + command +
@@ -86,10 +94,10 @@ def cli(node,command):
 
 def nodeInfo(node):
     commands = [
-        'getconnectioncount',
-        'getblockcount',
-        'getinfo',
-        'getmininginfo',
+#        'getconnectioncount',
+#        'getblockcount',
+#        'getinfo',
+#        'getmininginfo',
         'getpeerinfo'
     ]
     return ';'.join([cli(node,cmd) for cmd in commands])
@@ -105,23 +113,40 @@ def dockerStp (name):
 def user(id):
     return ( dockerNodeCmd(id) + bitcoindCmd('user') )
 
+def status():
+    import subprocess
+    batcmd = cli('bootstrap','getpeerinfo')
+    result = subprocess.check_output(batcmd, shell=True)
+
+    import json
+    import codecs
+    pretty = json.loads(str(result))
+    return [ node['synced_headers'] for node in pretty]
 
 
-prefix = 'btn-test1-'
-ids = [ prefix + str(element) for element in range(3)]
+# config
+
+ids = [ conatiner_prefix + str(element) for element in range(number_of_conatiners)]
 commands = [ user(e) for e in ids ]
+
+# setup
 os.system( dockerBootstrapCmd() + bitcoindCmd('user') )
 [os.system(cmd) for cmd in commands]
 
 os.system('sleep 2') # wait before generating otherwise "Error -28" (still warming up)
 
-os.system(cli(ids[1],'generate 10'))
+# run
+# input("Press Enter to generate blocks ...")
+os.system(cli(ids[1],'generate 5'))
 
-os.system('sleep 100')
+os.system('sleep 2')
 
-#os.system(nodeInfo(ids[2]))
-os.system(nodeInfo('bootstrap'))
+print(status());
 
+
+# input("Press Enter to cleanup ...")
+
+# stop
 [os.system(dockerStp(id)) for id in ids]
 os.system(dockerStp('bootstrap'))
 

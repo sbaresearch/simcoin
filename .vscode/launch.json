@@ -7,10 +7,11 @@
             "request": "launch",
             "stopOnEntry": false,
             "program": "${workspaceRoot}/setup.py",
-            "externalConsole": false,
+            "externalConsole": true,
             "debugOptions": [
                 "WaitOnAbnormalExit",
-                "WaitOnNormalExit"
+                "WaitOnNormalExit",
+                "RedirectOutput"
             ]
         }
     ]
