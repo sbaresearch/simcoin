@@ -5,6 +5,10 @@ import os
 
 # os.system("git clone https://github.com/bitcoin/bitcoin src/bitcoin")
 
+# create execution plan
+import array
+plan = []
+
 ## check system for dependencies
 # git
 def check_dependencies():
@@ -12,7 +16,7 @@ def check_dependencies():
         # sudo gpasswd -a ${USER} docker; sudo service docker restart; newgrp docker
         exit("docker not found or not accessible")
 
-check_dependencies()
+# check_dependencies()
 # etc
 
 # IP range from RFC6890
@@ -20,10 +24,12 @@ check_dependencies()
 ip_range = "240.0.0.0/4"
 ip_bootstrap = "240.0.0.2"
 
+image = 'btn/base:v1'
 conatiner_prefix = 'btn-'
-number_of_conatiners = 2
+number_of_conatiners = 10
+number_of_blocks = '100'
 
-os.system('docker network create --subnet=' + ip_range + ' --driver bridge isolated_nw')
+plan.append('docker network create --subnet=' + ip_range + ' --driver bridge isolated_nw ; sleep 1')
 
 # python
 # import os
@@ -34,7 +40,7 @@ def bitcoindCmd (strategy = 'default'):
           'regtest': ' -regtest ',       # activate regtest mode
           'datadir': ' -datadir=/data ', # change the datadir
           'debug': ' -debug ',           # log all events
-          'printtoconsole': ' -printtoconsole ', # print the log to stdout instead of a file TODO `docker logs`
+          #'printtoconsole': ' -printtoconsole ', # print the log to stdout instead of a file TODO `docker logs`
           'logips': ' -logips ',         # enable ip loging
           'listen' : ' -listen ',        # ensure listening even if 'connect' is given
           'listenonion' : ' -listenonion=0 ', # disable tor 
@@ -43,11 +49,9 @@ def bitcoindCmd (strategy = 'default'):
     configs = {
         'default': {},
         'bootstrap' : {
-     #       'connect': ' -connect=0.0.0.0 ', # don't connect
             'disablewallet': ' -disablewallet=1 ' # disable wallet
         },
         'user': {
- #          'dns' : ' -dns=1 ', # TODO check if necessary
             'dnsseed' : ' -dnsseed=0 ',  # disable dns seed lookups, otherwise this gets seeds even with docker --internal network
             'addnode' : ' -addnode=' + ip_bootstrap + ' ', # only connect ourself introductionary node
             'seednode': ' -seednode=240.0.0.3 ',
@@ -59,27 +63,31 @@ def bitcoindCmd (strategy = 'default'):
         }
     }
     default.update(configs[strategy])
-    return daemon + ( ' '.join(default.values()) )
+    return  daemon + ( ' '.join(default.values()) )
 
-def dockerBootstrapCmd ():
+def dockerBootstrapCmd (cmd):
     return (' '
     ' docker run '
     '   --detach=true '
     '   --net=isolated_nw '
     '   --ip=' + ip_bootstrap + ' '
     '   --name=bootstrap'   # conatiner name
-    '   btn/base:v1 '      # image name # src: https://hub.docker.com/r/abrkn/bitcoind/
+    '   ' + image + ' '      # image name # src: https://hub.docker.com/r/abrkn/bitcoind/
+    '   ' + cmd + ' '
     ' '
     )
 
-def dockerNodeCmd (name):
+def dockerNodeCmd (name,cmd):
     return (' '
     ' docker run '
+    '   --cap-add=NET_ADMIN ' # for `tc`
     '   --detach=true '
     '   --net=isolated_nw '
-    '   --link=fst:fst '
     '   --name=' + name + ' '   # conatiner name
-    '   btn/base:v1 '      # image name # src: https://hub.docker.com/r/abrkn/bitcoind/
+    '   --hostname=' + name + ' '
+    '   --volume $PWD/datadirs/' + name + ':/data '
+    '   ' + image + ' '      # image name # src: https://hub.docker.com/r/abrkn/bitcoind/
+    '   bash -c "' + cmd + '" '
     ' '
     )
 
@@ -105,13 +113,10 @@ def nodeInfo(node):
 
 def dockerStp (name):
     return (' '
-    ' docker stop --time 0 ' + name + ' ; '
-    ' docker rm ' + name + ' ; '
+    ' ( docker stop --time 0 ' + name + ' ; '
+    ' docker rm ' + name + ' ) & '
     ' '
     )
-
-def user(id):
-    return ( dockerNodeCmd(id) + bitcoindCmd('user') )
 
 def status():
     import subprocess
@@ -123,31 +128,41 @@ def status():
     pretty = json.loads(str(result))
     return [ node['synced_headers'] for node in pretty]
 
+# src https://github.com/dcm-oss/blockade/blob/master/blockade/net.py
+def slow_network(cmd):
+    traffic_control = "tc qdisc replace dev eth0 root netem delay 75ms 100ms distribution normal"
+    return traffic_control + "; " + cmd
+    # apt install iproute2
+    # --cap-add=NET_ADMIN
 
 # config
 
 ids = [ conatiner_prefix + str(element) for element in range(number_of_conatiners)]
-commands = [ user(e) for e in ids ]
+commands = [ dockerNodeCmd(id,bitcoindCmd('user')) for id in ids ]
 
 # setup
-os.system( dockerBootstrapCmd() + bitcoindCmd('user') )
-[os.system(cmd) for cmd in commands]
+plan.append( dockerBootstrapCmd(bitcoindCmd('user')) )
+plan.extend( commands )
 
-os.system('sleep 2') # wait before generating otherwise "Error -28" (still warming up)
+plan.append('sleep 2') # wait before generating otherwise "Error -28" (still warming up)
 
 # run
 # input("Press Enter to generate blocks ...")
-os.system(cli(ids[1],'generate 5'))
+plan.append(cli(ids[1],'generate ' + number_of_blocks))
 
-os.system('sleep 2')
-
-print(status());
-
-
-# input("Press Enter to cleanup ...")
+plan.append('sleep 2') # wait for blocks to spread
 
 # stop
-[os.system(dockerStp(id)) for id in ids]
-os.system(dockerStp('bootstrap'))
+plan.extend( [ dockerStp(id) for id in ids] )
+plan.append( dockerStp('bootstrap') )
 
-os.system('docker network rm isolated_nw')
+plan.append('docker network rm isolated_nw')
+
+# fix permissions on datadirs
+plan.append('docker run --rm --volume $PWD/datadirs:/data ' + image + ' chmod a+rwx --recursive /data')
+
+# plan.append('cat datadirs/btn-1/regtest/debug.log')
+
+print('\n'.join(plan))
+
+[os.system(cmd) for cmd in plan] 
