@@ -1,2 +1,0 @@
-all:
-	setup.py
