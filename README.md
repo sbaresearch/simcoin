@@ -131,15 +131,16 @@ docker pull elasticsearch:2.3.5
 docker pull logstash:2.3.4-1
 docker pull kibana:4.5.4
 
-docker run --rm -d elasticsearch
+docker run --name elastic --detach elasticsearch:2.3.5
+docker run --name kibana --detach --link elastic:elasticsearch --publish 5601:5601 kibana:4.5.4
+docker run --name logstash --rm --link elastic:elastic -v "$PWD":/data logstash:2.3.4-1 logstash -f /data/docker/logstash.conf
+# ^^^^ will not terminate, wait for until the ouput stops and all entries are parsed and exit manually (ctrl+c)
 
-docker run -it --rm -v "$PWD":/data logstash:2.3.4-1 logstash -f /data/docker/logstash.conf
-
-docker run --rm --link elasticsearch:elasticsearch -p 5601:5601 -d kibana
 # open http://localhost:5601
+# beware of the timeframe (upper right corner) if no data is shown
 
-docker stop elasticsearch
-docker stop kibana
+docker rm --force elastic
+docker rm --force kibana
 '''
 
 ## Logfile Events

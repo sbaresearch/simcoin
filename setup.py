@@ -27,7 +27,7 @@ ip_bootstrap = "240.0.0.2"
 image = 'btn/base:v1'
 conatiner_prefix = 'btn-'
 number_of_conatiners = 10
-number_of_blocks = '100'
+number_of_blocks = '6'
 
 plan.append('docker network create --subnet=' + ip_range + ' --driver bridge isolated_nw ; sleep 1')
 
@@ -113,8 +113,7 @@ def nodeInfo(node):
 
 def dockerStp (name):
     return (' '
-    ' ( docker stop --time 0 ' + name + ' ; '
-    ' docker rm ' + name + ' ) & '
+    ' docker rm --force ' + name + ' & '
     ' '
     )
 
@@ -130,7 +129,7 @@ def status():
 
 # src https://github.com/dcm-oss/blockade/blob/master/blockade/net.py
 def slow_network(cmd):
-    traffic_control = "tc qdisc replace dev eth0 root netem delay 75ms 100ms distribution normal"
+    traffic_control = "tc qdisc replace dev eth0 root netem delay 500ms"
     return traffic_control + "; " + cmd
     # apt install iproute2
     # --cap-add=NET_ADMIN
@@ -138,7 +137,7 @@ def slow_network(cmd):
 # config
 
 ids = [ conatiner_prefix + str(element) for element in range(number_of_conatiners)]
-commands = [ dockerNodeCmd(id,bitcoindCmd('user')) for id in ids ]
+commands = [ dockerNodeCmd(id,slow_network(bitcoindCmd('user'))) for id in ids ]
 
 # setup
 plan.append( dockerBootstrapCmd(bitcoindCmd('user')) )
@@ -147,14 +146,14 @@ plan.extend( commands )
 plan.append('sleep 2') # wait before generating otherwise "Error -28" (still warming up)
 
 # run
-# input("Press Enter to generate blocks ...")
 plan.append(cli(ids[1],'generate ' + number_of_blocks))
 
-plan.append('sleep 2') # wait for blocks to spread
+plan.append('sleep 10') # wait for blocks to spread
 
 # stop
 plan.extend( [ dockerStp(id) for id in ids] )
 plan.append( dockerStp('bootstrap') )
+plan.append('sleep 2')
 
 plan.append('docker network rm isolated_nw')
 
@@ -165,4 +164,16 @@ plan.append('docker run --rm --volume $PWD/datadirs:/data ' + image + ' chmod a+
 
 print('\n'.join(plan))
 
+
+os.system("rm -rf ./datadirs/*")
+
 [os.system(cmd) for cmd in plan] 
+
+os.system(' '
+  ' docker run --name elastic --detach elasticsearch:2.3.5 '
+  ' ; docker run --name kibana --detach --link elastic:elasticsearch --publish 5601:5601 kibana:4.5.4 '
+  ' ; docker run --name logstash --rm --link elastic:elastic -v "$PWD":/data logstash:2.3.4-1 logstash -f /data/docker/logstash.conf '
+  ' '
+)
+# cleanup
+# `rm -rf ./datadirs/*`
