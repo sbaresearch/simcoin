@@ -8,5 +8,4 @@ RUN \
 RUN mkdir /data
 EXPOSE 8333
 
-# docker build --name btn/base:v2
 # adapted from https://hub.docker.com/r/abrkn/bitcoind/~/dockerfile/

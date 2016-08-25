@@ -24,7 +24,7 @@ def check_dependencies():
 ip_range = "240.0.0.0/4"
 ip_bootstrap = "240.0.0.2"
 
-image = 'btn/base:v1'
+image = 'btn/base:v2'
 conatiner_prefix = 'btn-'
 number_of_conatiners = 10
 number_of_blocks = '6'
@@ -129,7 +129,7 @@ def status():
 
 # src https://github.com/dcm-oss/blockade/blob/master/blockade/net.py
 def slow_network(cmd):
-    traffic_control = "tc qdisc replace dev eth0 root netem delay 500ms"
+    traffic_control = "tc qdisc replace dev eth0 root netem delay 1000ms"
     return traffic_control + "; " + cmd
     # apt install iproute2
     # --cap-add=NET_ADMIN
@@ -140,7 +140,7 @@ ids = [ conatiner_prefix + str(element) for element in range(number_of_conatiner
 commands = [ dockerNodeCmd(id,slow_network(bitcoindCmd('user'))) for id in ids ]
 
 # setup
-plan.append( dockerBootstrapCmd(bitcoindCmd('user')) )
+plan.append( dockerBootstrapCmd(slow_network(bitcoindCmd('user'))) )
 plan.extend( commands )
 
 plan.append('sleep 2') # wait before generating otherwise "Error -28" (still warming up)
@@ -153,7 +153,7 @@ plan.append('sleep 10') # wait for blocks to spread
 # stop
 plan.extend( [ dockerStp(id) for id in ids] )
 plan.append( dockerStp('bootstrap') )
-plan.append('sleep 2')
+plan.append('sleep 5')
 
 plan.append('docker network rm isolated_nw')
 
@@ -175,5 +175,8 @@ os.system(' '
   ' ; docker run --name logstash --rm --link elastic:elastic -v "$PWD":/data logstash:2.3.4-1 logstash -f /data/docker/logstash.conf '
   ' '
 )
-# cleanup
-# `rm -rf ./datadirs/*`
+
+os.system(' '
+  ' docker rm --force elastic kibana'
+  ' '
+)
