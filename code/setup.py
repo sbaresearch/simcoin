@@ -5,10 +5,6 @@ import os
 
 # os.system("git clone https://github.com/bitcoin/bitcoin src/bitcoin")
 
-# create execution plan
-import array
-plan = []
-
 ## check system for dependencies
 # git
 def check_dependencies():
@@ -28,8 +24,6 @@ image = 'btn/base:v2'
 conatiner_prefix = 'btn-'
 number_of_conatiners = 10
 number_of_blocks = '6'
-
-plan.append('docker network create --subnet=' + ip_range + ' --driver bridge isolated_nw ; sleep 1')
 
 # python
 # import os
@@ -134,49 +128,56 @@ def slow_network(cmd):
     # apt install iproute2
     # --cap-add=NET_ADMIN
 
-# config
+# create execution plan
+import array
+plan = []
 
-ids = [ conatiner_prefix + str(element) for element in range(number_of_conatiners)]
-commands = [ dockerNodeCmd(id,slow_network(bitcoindCmd('user'))) for id in ids ]
+class Network():
+    def __enter__(self):
+        plan.append('docker network create --subnet=' + ip_range + ' --driver bridge isolated_nw ; sleep 1')
+    def __exit__(self):
+        plan.append('docker network rm isolated_nw')
 
-# setup
-plan.append( dockerBootstrapCmd(slow_network(bitcoindCmd('user'))) )
-plan.extend( commands )
+class Nodes():
+    def __init__(self):
+        self.ids = [ conatiner_prefix + str(element) for element in range(number_of_conatiners)]
+        self.nodes = [ dockerNodeCmd(id,slow_network(bitcoindCmd('user'))) for id in self.ids ]
+    def __enter__(self):
+        plan.append( dockerBootstrapCmd(slow_network(bitcoindCmd('user'))) )
+        plan.extend( self.nodes )
+        plan.append('sleep 2') # wait before generating otherwise "Error -28" (still warming up)
+    def __exit__(self):
+        plan.extend( [ dockerStp(id) for id in self.ids] )
+        plan.append( dockerStp('bootstrap') )
+        plan.append('sleep 5')
 
-plan.append('sleep 2') # wait before generating otherwise "Error -28" (still warming up)
+# setup network
 
-# run
-plan.append(cli(ids[1],'generate ' + number_of_blocks))
+# setup nodes
 
-plan.append('sleep 10') # wait for blocks to spread
+with Network():
+    with Nodes() as nds:
+        os.system("rm -rf ./datadirs/*")
 
-# stop
-plan.extend( [ dockerStp(id) for id in ids] )
-plan.append( dockerStp('bootstrap') )
-plan.append('sleep 5')
+        plan.append(cli(nds.ids[1],'generate ' + number_of_blocks))
+        plan.append('sleep 10') # wait for blocks to spread
 
-plan.append('docker network rm isolated_nw')
-
-# fix permissions on datadirs
-plan.append('docker run --rm --volume $PWD/datadirs:/data ' + image + ' chmod a+rwx --recursive /data')
-
-# plan.append('cat datadirs/btn-1/regtest/debug.log')
+        plan.append('docker run --rm --volume $PWD/datadirs:/data ' + image + ' chmod a+rwx --recursive /data') # fix permissions on datadirs
 
 print('\n'.join(plan))
-
-
-os.system("rm -rf ./datadirs/*")
-
 [os.system(cmd) for cmd in plan] 
 
-os.system(' '
-  ' docker run --name elastic --detach elasticsearch:2.3.5 '
-  ' ; docker run --name kibana --detach --link elastic:elasticsearch --publish 5601:5601 kibana:4.5.4 '
-  ' ; docker run --name logstash --rm --link elastic:elastic -v "$PWD":/data logstash:2.3.4-1 logstash -f /data/docker/logstash.conf '
-  ' '
-)
+def runAnalytics():
+    os.system(' '
+    ' docker run --name elastic --detach elasticsearch:2.3.5 '
+    ' ; docker run --name kibana --detach --link elastic:elasticsearch --publish 5601:5601 kibana:4.5.4 '
+    ' ; docker run --name logstash --rm --link elastic:elastic -v "$PWD":/data logstash:2.3.4-1 logstash -f /data/docker/logstash.conf '
+    ' '
+    )
 
-os.system(' '
-  ' docker rm --force elastic kibana'
-  ' '
-)
+    os.system(' '
+    ' docker rm --force elastic kibana'
+    ' '
+    )
+
+runAnalytics()
