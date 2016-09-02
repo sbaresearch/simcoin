@@ -126,7 +126,7 @@ ELK stands for Elastic, Logstash, Kibana.
 
 ## Setting up ELK
 
-'''
+```
 docker pull elasticsearch:2.3.5
 docker pull logstash:2.3.4-1
 docker pull kibana:4.5.4
@@ -141,7 +141,7 @@ docker run --name logstash --rm --link elastic:elastic -v "$PWD":/data logstash:
 
 docker rm --force elastic
 docker rm --force kibana
-'''
+```
 
 ## Logfile Events
 
