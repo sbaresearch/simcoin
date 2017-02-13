@@ -26,7 +26,7 @@ ip_bootstrap = "240.0.0.2"
 
 image = 'btn/base:v2'
 conatiner_prefix = 'btn-'
-number_of_conatiners = 2
+number_of_containers = 2
 number_of_blocks = '6'
 
 # python
@@ -155,7 +155,7 @@ class Network():
 
 class Nodes():
     def __init__(self):
-        self.ids = [ conatiner_prefix + str(element) for element in range(number_of_conatiners)]
+        self.ids = [ conatiner_prefix + str(element) for element in range(number_of_containers)]
         self.nodes = [ dockerNodeCmd(id,slow_network(bitcoindCmd('user'))) for id in self.ids ]
 
     def __enter__(self):
