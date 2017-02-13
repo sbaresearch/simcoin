@@ -1,5 +1,17 @@
 # Meeting Minutes
 
+## 2016-09-02 
+
+* Discussion of *On the Security and Performance of Proof of Work Blockchains*
+
+* Talk about current state of project and tx generation strategies 
+	+ go with tx generation by miners for now
+	
+* Possible areas of bitcoin-core which might need adaptation  
+	+ Timestamp granularity 
+	+ Connection behaviour (inc. outgoing) this is trivial
+	+ Log IP addresses instead of names 
+
 ## 2016-07-15
 
 * `tc` 
