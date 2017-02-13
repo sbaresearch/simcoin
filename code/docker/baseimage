@@ -4,7 +4,7 @@ RUN \
      apt install -y software-properties-common &&\
      add-apt-repository ppa:bitcoin/bitcoin && \
      apt update && \
-     apt install -y bitcoind iproute2
+     apt install -y bitcoind iproute2 jq
 RUN mkdir /data
 EXPOSE 8333
 

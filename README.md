@@ -25,7 +25,7 @@ generate node image `docker build --tag btn/base:v1 - < docker/baseimage` build
 run infrastructure
 
 1. checkout this projects sourcode from `github`
-4. run `docker build --tag btn/base:v2 - < docker/baseimage` to build the docker image 
+4. run `docker build --tag btn/base:v3 - < code/docker/baseimage` to build the docker image 
 5. run `setup.py` to run the simulation
 
 standard usage

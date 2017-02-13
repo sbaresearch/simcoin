@@ -24,7 +24,7 @@ def check_dependencies():
 ip_range = "240.0.0.0/4"
 ip_bootstrap = "240.0.0.2"
 
-image = 'btn/base:v2'
+image = 'btn/base:v3'
 conatiner_prefix = 'btn-'
 number_of_conatiners = 2
 number_of_blocks = '6'
@@ -154,20 +154,21 @@ class Network():
         plan.append('docker network rm isolated_nw')
 
 class Nodes():
-    def __init__(self):
+    def __init__(self,plan):
         self.ids = [ conatiner_prefix + str(element) for element in range(number_of_conatiners)]
         self.nodes = [ dockerNodeCmd(id,slow_network(bitcoindCmd('user'))) for id in self.ids ]
+        self.plan = plan
 
     def __enter__(self):
-        plan.append( dockerBootstrapCmd(slow_network(bitcoindCmd('user'))) )
-        plan.extend( self.nodes )
-        plan.append('sleep 2') # wait before generating otherwise "Error -28" (still warming up)
+        self.plan.append( dockerBootstrapCmd(slow_network(bitcoindCmd('user'))) )
+        self.plan.extend( self.nodes )
+        self.plan.append('sleep 2') # wait before generating otherwise "Error -28" (still warming up)
         return self
 
     def __exit__(self, excpetion_type, exception_value, traceback):
-        plan.extend( [ dockerStp(id) for id in self.ids] )
-        plan.append( dockerStp('bootstrap') )
-        plan.append( 'sleep 5')
+        self.plan.extend( [ dockerStp(id) for id in self.ids] )
+        self.plan.append( dockerStp('bootstrap') )
+        self.plan.append( 'sleep 5')
 
     def randomNode(self):
         import random
@@ -178,11 +179,11 @@ class Nodes():
 
     def generateRandomTransaction(self):
         node = self.randomNode()
-        plan.append( cli(node, 'getnewaddress > tmpaddress') )
-        plan.append( cli(node, 'sendtoaddress $(cat tmpaddress) 1') )
+        self.plan.append( cli(node, 'getnewaddress > tmpaddress') )
+        self.plan.append( cli(node, 'sendtoaddress $(cat tmpaddress) 1') )
 
     def generateRandomBlock(self):
-        plan.append( cli(self.randomNode(), 'generate 1') )
+        self.plan.append( cli(self.randomNode(), 'generate 1') )
 
     def warmupBlockGeneration(self):
         # one block for each node
@@ -202,12 +203,15 @@ class Nodes():
 
     def generateRandomInfo(self):
         # cli(self.randomNode, "getinfo")
-        plan.append(cli(self.randomNode(), "getchaintips"))
+        self.plan.append(cli(self.randomNode(), "getchaintips"))
+
+    def log_chaintips(self):
+        return self.every_node_p('getchaintips > /data/chaintips.json')
 
 # setup nodes
 
 with Network():
-    with Nodes() as nds:
+    with Nodes(plan) as nds:
         os.system("rm -rf ./datadirs/*")
 
         # for _ in range(130): # generate enough blocks to spend
@@ -221,7 +225,7 @@ with Network():
         s.addblocks(4, [nds.randomBlockCommand() for _ in range(130)])
         s.addtransactions(60, [nds.randomTransactionCommand() for _ in range(10)])
         plan.extend(s.bash_commands().split('\n'))
-        nds.generateRandomInfo()
+        plan.extend(nds.log_chaintips())
 
         # for _ in range(100):
         #     nds.generateRandomTransaction()
@@ -232,6 +236,10 @@ with Network():
         plan.append('docker run --rm --volume $PWD/datadirs:/data ' + image + ' chmod a+rwx --recursive /data') # fix permissions on datadirs
 
         # timestamp length = 26 -- str(len('2016-09-22 14:46:41.706605'))
+
+        def prefix_lines(prefix):
+            return 'sed -e \'s/^/' + prefix + ' /\' '
+
 
         def remove_empty_lines():
             return 'sed ":a;N;$!ba;s/^\n/ /g" file'
@@ -247,7 +255,9 @@ with Network():
 
         plan.append('rm -rf $PWD/log')
         plan.extend([' cat $PWD/datadirs/' + _id + '/regtest/debug.log | ' + sed_command(_id) + ' >> $PWD/log; ' for _id in nds.ids])
-        plan.append(' cat $PWD/log | sort > $PWD/logs ;')
+        plan.extend([' cat $PWD/datadirs/' + _id + '/chaintips.json | jq "length" | ' + prefix_lines(_id) + '  >> $PWD/forks; ' for _id in nds.ids])
+
+    plan.append(' cat $PWD/log | sort > $PWD/logs ;')
 
 
 
