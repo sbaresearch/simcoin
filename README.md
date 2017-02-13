@@ -2,7 +2,8 @@
 % Andreas Kern e0727972@student.tuwien.ac.at
 % July 2016
 
-# Introduction
+Introduction
+============
 
 Bitcoin Testing Netowrk (BTN)
 
@@ -16,7 +17,8 @@ technologies involved
 
 steps to run a standard simulation
 
-## setup on ubuntu 16.06 LTS
+setup on ubuntu 16.06 LTS
+-------------------------
 
 generate node image `docker build --tag btn/base:v1 - < docker/baseimage` build
 
@@ -26,15 +28,19 @@ run infrastructure
 4. run `docker build --tag btn/base:v2 - < docker/baseimage` to build the docker image 
 5. run `setup.py` to run the simulation
 
-## standard usage
+standard usage
+--------------
 
 bitcoind is the server that is run
 bitcoin-cli getblockcount for interaction
+script is src/setup.py
+dependencies are "https://github.com/petertodd/python-bitcoinlib/archive/9b768434a78fac7654c02e3a71d5d0518eda4f3e.zip"
 
+changing the standard simulation
+--------------------------------
 
-# changing the standard simulation
-
-## bitcoin sourcode
+bitcoin sourcode
+----------------
 
 `cd src/bitcoin; git pull`
 TODO github.com/kernoelpanic/bitcoinbuilder
@@ -288,3 +294,113 @@ Receiving headers, then requesting and receiving the block
 ## Missing log entries
 
 transactions
+
+## forks
+
+```
+  docker exec btn-1 /bin/sh -c '    bitcoin-cli -regtest -datadir=/data getchaintips '  
+[
+  {
+    "height": 82,
+    "hash": "7d980dc1dd83c242d71a3c95a19640b8d70bbbc8cb56c3181d257a6e0a5eebec",
+    "branchlen": 0,
+    "status": "active"
+  }, 
+  {
+    "height": 77,
+    "hash": "2fb0308b4763ff54787de32ac894b295fc7d17ff25d9b55c0033e27dab6eb2ee",
+    "branchlen": 1,
+    "status": "valid-fork"
+  }, 
+  {
+    "height": 75,
+    "hash": "37909b77241ccf0e0b8f57cd0dab56145a58c4c4ff6ea807f1e6e879f9ef3c75",
+    "branchlen": 3,
+    "status": "valid-fork"
+  }, 
+  {
+    "height": 70,
+    "hash": "724573387e8681025018a6b64199c1b32ce1272770a8db73c292cf0d090a7b7d",
+    "branchlen": 3,
+    "status": "valid-headers"
+  }, 
+  {
+    "height": 66,
+    "hash": "588a78750aae9a052f681c584630a2ed102b7ef2012c6f93de20dffd87eaa1fe",
+    "branchlen": 1,
+    "status": "headers-only"
+  }, 
+  {
+    "height": 64,
+    "hash": "160e95cd81ee55fa7bcba8c56861ad5c01a2d51bf75ed7a6486f3e76f9f8f933",
+    "branchlen": 5,
+    "status": "headers-only"
+  }, 
+  {
+    "height": 58,
+    "hash": "5d0e04c8c1e445c06e0ba9dcb04313a54bf10ffc7d485fe6364004f586e98fdf",
+    "branchlen": 1,
+    "status": "valid-fork"
+  }, 
+  {
+    "height": 56,
+    "hash": "1d8da849424e0dd8c2097c0c24406a362b05e5d2e0b3e8be662eefd9b311f185",
+    "branchlen": 2,
+    "status": "valid-fork"
+  }, 
+  {
+    "height": 53,
+    "hash": "1e32d8f400338a555c0d8c2812cd905214bf2a19875244c9c95471780fffa560",
+    "branchlen": 1,
+    "status": "valid-fork"
+  }, 
+  {
+    "height": 50,
+    "hash": "700e4fab6d41a75da82474f13ea5e371ba773dce30f446ff67a36082d1947796",
+    "branchlen": 1,
+    "status": "valid-fork"
+  }, 
+  {
+    "height": 45,
+    "hash": "494ff8a768cf8448e6293bc39171abd1b60cb00e9d13d016b4bd276a76ddefee",
+    "branchlen": 2,
+    "status": "valid-fork"
+  }, 
+  {
+    "height": 42,
+    "hash": "2703a28c1cdaf57c242b1ca27c865df58a67c92d98cebf537dc2550b7e30ff15",
+    "branchlen": 4,
+    "status": "valid-fork"
+  }, 
+  {
+    "height": 36,
+    "hash": "2830705024852564c85fa8636df91f6d3205149ccce4fe3f3cca9334add6a668",
+    "branchlen": 5,
+    "status": "valid-fork"
+  }, 
+  {
+    "height": 30,
+    "hash": "253d4b6690853e16da1eccadaa3a287beee84fbfab7312ca22d008378c134921",
+    "branchlen": 8,
+    "status": "headers-only"
+  }, 
+  {
+    "height": 21,
+    "hash": "08b007d90ef7086794ee49320d8f6e80c6a54065c7189ca33b0f172c075f91a7",
+    "branchlen": 1,
+    "status": "headers-only"
+  }, 
+  {
+    "height": 15,
+    "hash": "5074fad9f94ba4da740bbea834af89a90e9ddaa60160b9e2a2c37705d9e8b176",
+    "branchlen": 12,
+    "status": "valid-headers"
+  }, 
+  {
+    "height": 2,
+    "hash": "05c99869de65e0023d9ae12b7f0f2165237529e4a5c14185a0e28e9ad7ad32b2",
+    "branchlen": 2,
+    "status": "headers-only"
+  }
+]
+```
