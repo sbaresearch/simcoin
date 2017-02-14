@@ -123,7 +123,7 @@ class Network():
         self.plan.append('docker network rm isolated_network')
 
 class NodeManager():
-    def __init__(self,plan,number_of_conatiners):
+    def __init__(self,plan,number_of_containers):
         self.ids = [ container_prefix + str(element) for element in range(number_of_containers)]
         self.nodes = [ dockerNodeCmd(id,slow_network(bitcoindCmd('user'))) for id in self.ids ]
         self.plan = plan
@@ -193,7 +193,7 @@ def createPlan(nodes, number_of_blocks):
             s.addblocks(4, [nodeManager.randomBlockCommand() for _ in range(130)])
             s.addtransactions(60, [nodeManager.randomTransactionCommand() for _ in range(10)])
             plan.extend(s.bash_commands().split('\n'))
-            plan.extend(nds.log_chaintips())
+            plan.extend(nodeManager.log_chaintips())
 
             plan.append('sleep 10')  # wait for blocks to spread
 
