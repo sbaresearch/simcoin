@@ -14,7 +14,7 @@ def check_dependencies():
         # sudo gpasswd -a ${USER} docker; sudo service docker restart; newgrp docker
         exit("docker not found or not accessible")
 
-# IP range from RFC6890
+# IP range from RFC6890 - IP range for future use
 # it does not conflict with https://github.com/bitcoin/bitcoin/blob/master/src/netbase.h
 ip_range = "240.0.0.0/4"
 ip_bootstrap = "240.0.0.2"
