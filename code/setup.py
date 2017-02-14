@@ -20,7 +20,7 @@ ip_range = "240.0.0.0/4"
 ip_bootstrap = "240.0.0.2"
 
 image = 'btn/base:v2'
-conatiner_prefix = 'btn-'
+container_prefix = 'btn-'
 number_of_containers = 2
 number_of_blocks = '6'
 
@@ -64,7 +64,7 @@ def dockerBootstrapCmd (cmd):
             '   --detach=true '
             '   --net=isolated_nw '
             '   --ip=' + ip_bootstrap + ' '
-            '   --name=bootstrap'   # conatiner name
+            '   --name=bootstrap'   # container name
             '   ' + image + ' '      # image name # src: https://hub.docker.com/r/abrkn/bitcoind/
             '   ' + cmd + ' '
             ' '
@@ -77,7 +77,7 @@ def dockerNodeCmd (name,cmd):
             '   --cap-add=NET_ADMIN ' # for `tc`
             '   --detach=true '
             '   --net=isolated_nw '
-            '   --name=' + name + ' '   # conatiner name
+            '   --name=' + name + ' '   # container name
             '   --hostname=' + name + ' '
             '   --volume $PWD/datadirs/' + name + ':/data '
             '   ' + image + ' '      # image name # src: https://hub.docker.com/r/abrkn/bitcoind/
@@ -146,7 +146,7 @@ class Network():
 
 class Nodes():
     def __init__(self):
-        self.ids = [ conatiner_prefix + str(element) for element in range(number_of_containers)]
+        self.ids = [ container_prefix + str(element) for element in range(number_of_containers)]
         self.nodes = [ dockerNodeCmd(id,slow_network(bitcoindCmd('user'))) for id in self.ids ]
 
     def __enter__(self):
