@@ -195,8 +195,6 @@ class NodeManager():
         # cli(self.randomNode, "getinfo")
         plan.append(cli(self.randomNode(), "getchaintips"))
 
-# setup nodes
-
 with Network():
     with NodeManager() as nodeManager:
         os.system("rm -rf ./datadirs/*")
