@@ -9,15 +9,10 @@ if sys.version_info <= (3,0):
 
 # os.system("git clone https://github.com/bitcoin/bitcoin src/bitcoin")
 
-## check system for dependencies
-# git
-
 def check_dependencies():
     if (os.system('docker version') != 0):
         # sudo gpasswd -a ${USER} docker; sudo service docker restart; newgrp docker
         exit("docker not found or not accessible")
-# check_dependencies()
-# etc
 
 # IP range from RFC6890
 # it does not conflict with https://github.com/bitcoin/bitcoin/blob/master/src/netbase.h
@@ -28,10 +23,6 @@ image = 'btn/base:v2'
 conatiner_prefix = 'btn-'
 number_of_containers = 2
 number_of_blocks = '6'
-
-# python
-# import os
-
 
 def bitcoindCmd (strategy = 'default'):
     daemon = ' bitcoind '
