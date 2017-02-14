@@ -62,7 +62,7 @@ def dockerBootstrapCmd (cmd):
     return (' '
             ' docker run '
             '   --detach=true '
-            '   --net=isolated_nw '
+            '   --net=isolated_network '
             '   --ip=' + ip_bootstrap + ' '
             '   --name=bootstrap'   # container name
             '   ' + image + ' '      # image name # src: https://hub.docker.com/r/abrkn/bitcoind/
@@ -76,7 +76,7 @@ def dockerNodeCmd (name,cmd):
             ' docker run '
             '   --cap-add=NET_ADMIN ' # for `tc`
             '   --detach=true '
-            '   --net=isolated_nw '
+            '   --net=isolated_network '
             '   --name=' + name + ' '   # container name
             '   --hostname=' + name + ' '
             '   --volume $PWD/datadirs/' + name + ':/data '
@@ -138,13 +138,13 @@ plan = []
 
 class Network():
     def __enter__(self):
-        plan.append('docker network create --subnet=' + ip_range + ' --driver bridge isolated_nw ; sleep 1')
+        plan.append('docker network create --subnet=' + ip_range + ' --driver bridge isolated_network ; sleep 1')
         return self
 
     def __exit__(self, excpetion_type, exception_value, traceback):
-        plan.append('docker network rm isolated_nw')
+        plan.append('docker network rm isolated_network')
 
-class Nodes():
+class NodeManager():
     def __init__(self):
         self.ids = [ container_prefix + str(element) for element in range(number_of_containers)]
         self.nodes = [ dockerNodeCmd(id,slow_network(bitcoindCmd('user'))) for id in self.ids ]
@@ -198,26 +198,26 @@ class Nodes():
 # setup nodes
 
 with Network():
-    with Nodes() as nds:
+    with NodeManager() as nodeManager:
         os.system("rm -rf ./datadirs/*")
 
         # for _ in range(130): # generate enough blocks to spend
-        #    nds.generateRandomBlock()
-        plan.extend(nds.warmupBlockGeneration())
+        #    nodeManager.generateRandomBlock()
+        plan.extend(nodeManager.warmupBlockGeneration())
 
         import sys
         sys.path.append('./btn/src')
         from scheduler import Scheduler
         s = Scheduler()
-        s.addblocks(4, [nds.randomBlockCommand() for _ in range(130)])
-        s.addtransactions(60, [nds.randomTransactionCommand() for _ in range(10)])
+        s.addblocks(4, [nodeManager.randomBlockCommand() for _ in range(130)])
+        s.addtransactions(60, [nodeManager.randomTransactionCommand() for _ in range(10)])
         plan.extend(s.bash_commands().split('\n'))
-        nds.generateRandomInfo()
+        nodeManager.generateRandomInfo()
 
         # for _ in range(100):
-        #     nds.generateRandomTransaction()
+        #     nodeManager.generateRandomTransaction()
 
-        # plan.append(cli(nds.ids[1], 'generate ' + number_of_blocks))
+        # plan.append(cli(nodeManager.ids[1], 'generate ' + number_of_blocks))
         plan.append('sleep 10')  # wait for blocks to spread
 
         plan.append('docker run --rm --volume $PWD/datadirs:/data ' + image + ' chmod a+rwx --recursive /data') # fix permissions on datadirs
@@ -237,7 +237,7 @@ with Network():
             return 'sed "s/^.\{' + str(len('2016-09-22 14:46:41.706605')) + '\}/& ' + _id + '/g"'
 
         plan.append('rm -rf $PWD/log')
-        plan.extend([' cat $PWD/datadirs/' + _id + '/regtest/debug.log | ' + sed_command(_id) + ' >> $PWD/log; ' for _id in nds.ids])
+        plan.extend([' cat $PWD/datadirs/' + _id + '/regtest/debug.log | ' + sed_command(_id) + ' >> $PWD/log; ' for _id in nodeManager.ids])
         plan.append(' cat $PWD/log | sort > $PWD/logs ;')
 
 
