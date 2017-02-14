@@ -1,10 +1,10 @@
 FROM library/ubuntu:xenial-20160706
 RUN \
-     apt update &&\
-     apt install -y software-properties-common &&\
+     apt-get update &&\
+     apt-get install -y software-properties-common &&\
      add-apt-repository ppa:bitcoin/bitcoin && \
-     apt update && \
-     apt install -y bitcoind iproute2
+     apt-get update && \
+     apt-get install -y bitcoind iproute2
 RUN mkdir /data
 EXPOSE 8333
 
