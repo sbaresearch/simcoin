@@ -7,13 +7,14 @@ if sys.version_info <= (3, 0):
     print("Sorry, requires Python 3.x or above")
     sys.exit(1)
 
-# IP range from RFC6890
+# IP range from RFC6890 - IP range for future use
 # it does not conflict with https://github.com/bitcoin/bitcoin/blob/master/src/netbase.h
 ip_range = "240.0.0.0/4"
 ip_bootstrap = "240.0.0.2"
 
 image = 'btn/base:v3'
-conatiner_prefix = 'btn-'
+container_prefix = 'btn-'
+
 
 def bitcoindCmd (strategy = 'default'):
     daemon = ' bitcoind '
@@ -53,9 +54,9 @@ def dockerBootstrapCmd (cmd):
     return (' '
             ' docker run '
             '   --detach=true '
-            '   --net=isolated_nw '
+            '   --net=isolated_network '
             '   --ip=' + ip_bootstrap + ' '
-            '   --name=bootstrap'   # conatiner name
+            '   --name=bootstrap'   # container name
             '   ' + image + ' '      # image name # src: https://hub.docker.com/r/abrkn/bitcoind/
             '   ' + cmd + ' '
             ' '
@@ -67,8 +68,8 @@ def dockerNodeCmd (name,cmd):
             ' docker run '
             '   --cap-add=NET_ADMIN ' # for `tc`
             '   --detach=true '
-            '   --net=isolated_nw '
-            '   --name=' + name + ' '   # conatiner name
+            '   --net=isolated_network '
+            '   --name=' + name + ' '   # container name
             '   --hostname=' + name + ' '
             '   --volume $PWD/datadirs/' + name + ':/data '
             '   ' + image + ' '      # image name # src: https://hub.docker.com/r/abrkn/bitcoind/
@@ -115,15 +116,15 @@ class Network():
         self.plan = plan
 
     def __enter__(self):
-        self.plan.append('docker network create --subnet=' + ip_range + ' --driver bridge isolated_nw ; sleep 1')
+        self.plan.append('docker network create --subnet=' + ip_range + ' --driver bridge isolated_network ; sleep 1')
         return self
 
     def __exit__(self, excpetion_type, exception_value, traceback):
-        self.plan.append('docker network rm isolated_nw')
+        self.plan.append('docker network rm isolated_network')
 
-class Nodes():
+class NodeManager():
     def __init__(self,plan,number_of_conatiners):
-        self.ids = [ conatiner_prefix + str(element) for element in range(number_of_conatiners)]
+        self.ids = [ container_prefix + str(element) for element in range(number_of_containers)]
         self.nodes = [ dockerNodeCmd(id,slow_network(bitcoindCmd('user'))) for id in self.ids ]
         self.plan = plan
 
@@ -180,17 +181,17 @@ class Nodes():
 def createPlan(nodes, number_of_blocks):
     plan = []
     with Network(plan):
-        with Nodes(plan, nodes) as nds:
+        with NodeManager(plan, nodes) as nodeManager:
             os.system("rm -rf ./datadirs/*")
 
-            plan.extend(nds.warmupBlockGeneration())
+            plan.extend(nodeManager.warmupBlockGeneration())
 
             import sys
             sys.path.append('./btn/src')
             from scheduler import Scheduler
             s = Scheduler()
-            s.addblocks(4, [nds.randomBlockCommand() for _ in range(number_of_blocks)])
-            s.addtransactions(60, [nds.randomTransactionCommand() for _ in range(10)])
+            s.addblocks(4, [nodeManager.randomBlockCommand() for _ in range(130)])
+            s.addtransactions(60, [nodeManager.randomTransactionCommand() for _ in range(10)])
             plan.extend(s.bash_commands().split('\n'))
             plan.extend(nds.log_chaintips())
 
@@ -214,10 +215,10 @@ def createPlan(nodes, number_of_blocks):
                 return 'sed "s/^.\{' + str(len('2016-09-22 14:46:41.706605')) + '\}/& ' + _id + '/g"'
 
             plan.append('rm -rf $PWD/log')
-            plan.extend([' cat $PWD/datadirs/' + _id + '/regtest/debug.log | ' + sed_command(_id) + ' >> $PWD/log; ' for _id in nds.ids])
-            plan.extend([' cat $PWD/datadirs/' + _id + '/chaintips.json | jq "length" | ' + prefix_lines(_id) + '  >> $PWD/forks; ' for _id in nds.ids])
+            plan.extend([' cat $PWD/datadirs/' + _id + '/regtest/debug.log | ' + sed_command(_id) + ' >> $PWD/log; ' for _id in nodeManager.ids])
+            plan.extend([' cat $PWD/datadirs/' + _id + '/chaintips.json | jq "length" | ' + prefix_lines(_id) + '  >> $PWD/forks; ' for _id in nodeManager.ids])
 
-        plan.append(' cat $PWD/log | sort > $PWD/logs ;')
+            plan.append(' cat $PWD/log | sort > $PWD/logs ;')
     return plan
 
 
