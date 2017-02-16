@@ -50,6 +50,7 @@ def bitcoindCmd (strategy = 'default'):
     return daemon + (' '.join(default.values()))
 
 
+
 def dockerBootstrapCmd (cmd):
     return (' '
             ' docker run '
@@ -178,7 +179,7 @@ class NodeManager():
         return self.every_node_p('getchaintips > /data/chaintips.json')
 
 
-def createPlan(nodes, number_of_blocks):
+def executionPlan(nodes, number_of_blocks):
     plan = []
     with Network(plan):
         with NodeManager(plan, nodes) as nodeManager:
@@ -199,34 +200,33 @@ def createPlan(nodes, number_of_blocks):
 
             plan.append('docker run --rm --volume $PWD/datadirs:/data ' + image + ' chmod a+rwx --recursive /data') # fix permissions on datadirs
 
-            def prefix_lines(prefix):
-                return 'sed -e \'s/^/' + prefix + ' /\' '
+            plan.extend(aggregate_logs(nodeManager.ids))
 
-            def remove_empty_lines():
-                return 'sed ":a;N;$!ba;s/^\n/ /g" file'
-
-            def remove_lines_starting_with_whitspace():
-                return 'sed "s/^\s.*$//g"'
-
-            def remove_multiline_error_messages():
-                return 'sed "s/^.\{26\}  .*$//g"'
-
-            def sed_command(_id): # insert node id after timestamp
-                return 'sed "s/^.\{' + str(len('2016-09-22 14:46:41.706605')) + '\}/& ' + _id + '/g"'
-
-            plan.append('rm -rf $PWD/log')
-            plan.extend([' cat $PWD/datadirs/' + _id + '/regtest/debug.log | ' + sed_command(_id) + ' >> $PWD/log; ' for _id in nodeManager.ids])
-            plan.extend([' cat $PWD/datadirs/' + _id + '/chaintips.json | jq "length" | ' + prefix_lines(_id) + '  >> $PWD/forks; ' for _id in nodeManager.ids])
-
-            plan.append(' cat $PWD/log | sort > $PWD/logs ;')
     return plan
 
 
-def run(dryRunFlag, nodes, blocks):
-    plan = createPlan(nodes, blocks)
-    if dryRunFlag:
-        print('\n'.join(plan))
-    else:
-        for cmd in plan:
-            print(cmd)
-            os.system(cmd)
+def aggregate_logs(ids):
+    commands = []
+
+    def prefix_lines(prefix):
+        return 'sed -e \'s/^/' + prefix + ' /\' '
+
+    def remove_empty_lines():
+        return 'sed ":a;N;$!ba;s/^\n/ /g" file'
+
+    def remove_lines_starting_with_whitspace():
+        return 'sed "s/^\s.*$//g"'
+
+    def remove_multiline_error_messages():
+        return 'sed "s/^.\{26\}  .*$//g"'
+
+    def sed_command(_id): # insert node id after timestamp
+        return 'sed "s/^.\{' + str(len('2016-09-22 14:46:41.706605')) + '\}/& ' + _id + '/g"'
+
+    commands.append('rm -rf $PWD/log')
+    commands.extend([' cat $PWD/datadirs/' + _id + '/regtest/debug.log | ' + sed_command(_id) + ' >> $PWD/log; ' for _id in ids])
+    commands.extend([' cat $PWD/datadirs/' + _id + '/chaintips.json | jq "length" | ' + prefix_lines(_id) + '  >> $PWD/forks; ' for _id in ids])
+
+    commands.append(' cat $PWD/log | sort > $PWD/logs ;')
+
+    return commands
