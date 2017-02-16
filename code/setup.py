@@ -16,6 +16,21 @@ image = 'btn/base:v3'
 container_prefix = 'btn-'
 
 
+class DataDir:
+
+    @staticmethod
+    def rootDir():
+        return '$PWD/datadirs'
+
+    @staticmethod
+    def host(container_id):
+        return DataDir.rootDir() + '/' + container_id
+
+    @staticmethod
+    def guest():
+        return '/data'
+
+
 class Docker:
 
     def __init__(self,plan):
@@ -50,7 +65,7 @@ class Docker:
                 '   --net=isolated_network '
                 '   --name=' + name + ' '   # container name
                 '   --hostname=' + name + ' '
-                '   --volume $PWD/datadirs/' + name + ':/data '
+                '   --volume ' + DataDir.host(name) + ':' + DataDir.guest() + ' '
                 '   ' + image + ' '      # image name # src: https://hub.docker.com/r/abrkn/bitcoind/
                 '   bash -c "' + cmd + '" '
                 ' ')
@@ -67,7 +82,7 @@ class Docker:
                 ' docker exec '
                 + node +
                 ' /bin/sh -c \''
-                '    bitcoin-cli -regtest -datadir=/data ' # -printtoconsole -daemon
+                '    bitcoin-cli -regtest -datadir=' + DataDir.guest() + ' ' # -printtoconsole -daemon
                 +    command +
                 ' \' '
                 ' ')
@@ -76,7 +91,7 @@ def bitcoindCmd (strategy = 'default'):
     daemon = ' bitcoind '
     default = {
           'regtest': ' -regtest ',             # activate regtest mode
-          'datadir': ' -datadir=/data ',       # change the datadir
+          'datadir': ' -datadir=' + DataDir.guest() + ' ',       # change the datadir
           'debug': ' -debug ',                 # log all events
           # 'printblocktree': ' -printblocktree', # removed (would print tree on startup)
           # 'printtoconsole': ' -printtoconsole ', # print the log to stdout instead of a file
@@ -158,17 +173,17 @@ class NodeManager():
 
     def randomTransactionCommand(self):
         node = self.randomNode()
-        return Docker.cli(node, 'sendtoaddress $(bitcoin-cli -regtest -datadir=/data getnewaddress) 10.0')
+        return Docker.cli(node, 'sendtoaddress $(bitcoin-cli -regtest -datadir=' + DataDir.guest() + ' getnewaddress) 10.0')
 
     def log_chaintips(self):
-        return self.every_node_p('getchaintips > /data/chaintips.json')
+        return self.every_node_p('getchaintips > ' + DataDir.guest() + '/chaintips.json')
 
 
 def executionPlan(nodes, number_of_blocks):
     plan = []
     with Docker(plan):
         with NodeManager(plan, nodes) as nodeManager:
-            os.system("rm -rf ./datadirs/*")
+            os.system("rm -rf " + DataDir.host('*'))
 
             plan.extend(nodeManager.warmupBlockGeneration())
 
@@ -209,8 +224,8 @@ def aggregate_logs(ids):
         return 'sed "s/^.\{' + str(len('2016-09-22 14:46:41.706605')) + '\}/& ' + _id + '/g"'
 
     commands.append('rm -rf $PWD/log')
-    commands.extend([' cat $PWD/datadirs/' + _id + '/regtest/debug.log | ' + sed_command(_id) + ' >> $PWD/log; ' for _id in ids])
-    commands.extend([' cat $PWD/datadirs/' + _id + '/chaintips.json | jq "length" | ' + prefix_lines(_id) + '  >> $PWD/forks; ' for _id in ids])
+    commands.extend([' cat ' + DataDir.host(_id) + '/regtest/debug.log | ' + sed_command(_id) + ' >> $PWD/log; ' for _id in ids])
+    commands.extend([' cat ' + DataDir.host(_id) + '/chaintips.json | jq "length" | ' + prefix_lines(_id) + '  >> $PWD/forks; ' for _id in ids])
 
     commands.append(' cat $PWD/log | sort > $PWD/logs ;')
 
