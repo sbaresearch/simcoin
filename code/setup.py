@@ -17,6 +17,17 @@ container_prefix = 'btn-'
 
 
 class Docker:
+
+    def __init__(self,plan):
+        self.plan = plan
+
+    def __enter__(self):
+        self.plan.append('docker network create --subnet=' + ip_range + ' --driver bridge isolated_network ; sleep 1')
+        return self
+
+    def __exit__(self, excpetion_type, exception_value, traceback):
+        self.plan.append('docker network rm isolated_network')
+
     @staticmethod
     def dockerBootstrapCmd (cmd):
         return (' '
@@ -113,18 +124,6 @@ def slow_network(cmd):
     # --cap-add=NET_ADMIN
 
 
-class Network:
-    def __init__(self,plan):
-        self.plan = plan
-
-    def __enter__(self):
-        self.plan.append('docker network create --subnet=' + ip_range + ' --driver bridge isolated_network ; sleep 1')
-        return self
-
-    def __exit__(self, excpetion_type, exception_value, traceback):
-        self.plan.append('docker network rm isolated_network')
-
-
 class NodeManager():
     def __init__(self,plan,number_of_containers):
         self.ids = [ container_prefix + str(element) for element in range(number_of_containers)]
@@ -167,7 +166,7 @@ class NodeManager():
 
 def executionPlan(nodes, number_of_blocks):
     plan = []
-    with Network(plan):
+    with Docker(plan):
         with NodeManager(plan, nodes) as nodeManager:
             os.system("rm -rf ./datadirs/*")
 
