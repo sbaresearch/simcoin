@@ -147,22 +147,10 @@ class NodeManager():
     def every_node_p(self, cmd):
         return [cli(_id, cmd) for _id in self.ids]
 
-    def generateRandomTransaction(self):
-        node = self.randomNode()
-        self.plan.append( cli(node, 'getnewaddress > tmpaddress') )
-        self.plan.append( cli(node, 'sendtoaddress $(cat tmpaddress) 1') )
-
-    def generateRandomBlock(self):
-        self.plan.append( cli(self.randomNode(), 'generate 1') )
-
     def warmupBlockGeneration(self):
         # one block for each node
         # plus 100 blocks to enable spending
         return ['echo Begin of warmup'] + self.every_node_p('generate 1') + [self.randomBlockCommand(100)] + ['sleep 10']
-
-    def generateRandomFork(self):
-        self.generateRandomBlock()
-        self.generateRandomBlock()
 
     def randomBlockCommand(self, number=1):
         return cli(self.randomNode(), 'generate ' + str(number))
@@ -170,10 +158,6 @@ class NodeManager():
     def randomTransactionCommand(self):
         node = self.randomNode()
         return cli(node, 'sendtoaddress $(bitcoin-cli -regtest -datadir=/data getnewaddress) 10.0')
-
-    def generateRandomInfo(self):
-        # cli(self.randomNode, "getinfo")
-        self.plan.append(cli(self.randomNode(), "getchaintips"))
 
     def log_chaintips(self):
         return self.every_node_p('getchaintips > /data/chaintips.json')
