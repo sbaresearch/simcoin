@@ -16,6 +16,51 @@ image = 'btn/base:v3'
 container_prefix = 'btn-'
 
 
+class Docker:
+    @staticmethod
+    def dockerBootstrapCmd (cmd):
+        return (' '
+                ' docker run '
+                '   --detach=true '
+                '   --net=isolated_network '
+                '   --ip=' + ip_bootstrap + ' '
+                '   --name=bootstrap'   # container name
+                '   ' + image + ' '      # image name # src: https://hub.docker.com/r/abrkn/bitcoind/
+                '   ' + cmd + ' '
+                ' '
+                )
+
+    @staticmethod
+    def dockerNodeCmd (name,cmd):
+        return (' '
+                ' docker run '
+                '   --cap-add=NET_ADMIN ' # for `tc`
+                '   --detach=true '
+                '   --net=isolated_network '
+                '   --name=' + name + ' '   # container name
+                '   --hostname=' + name + ' '
+                '   --volume $PWD/datadirs/' + name + ':/data '
+                '   ' + image + ' '      # image name # src: https://hub.docker.com/r/abrkn/bitcoind/
+                '   bash -c "' + cmd + '" '
+                ' ')
+
+    @staticmethod
+    def dockerStp (name):
+        return (' '
+                ' docker rm --force ' + name + ' & '
+                ' ')
+
+    @staticmethod
+    def cli(node,command):
+        return (' '
+                ' docker exec '
+                + node +
+                ' /bin/sh -c \''
+                '    bitcoin-cli -regtest -datadir=/data ' # -printtoconsole -daemon
+                +    command +
+                ' \' '
+                ' ')
+
 def bitcoindCmd (strategy = 'default'):
     daemon = ' bitcoind '
     default = {
@@ -50,45 +95,6 @@ def bitcoindCmd (strategy = 'default'):
     return daemon + (' '.join(default.values()))
 
 
-
-def dockerBootstrapCmd (cmd):
-    return (' '
-            ' docker run '
-            '   --detach=true '
-            '   --net=isolated_network '
-            '   --ip=' + ip_bootstrap + ' '
-            '   --name=bootstrap'   # container name
-            '   ' + image + ' '      # image name # src: https://hub.docker.com/r/abrkn/bitcoind/
-            '   ' + cmd + ' '
-            ' '
-            )
-
-
-def dockerNodeCmd (name,cmd):
-    return (' '
-            ' docker run '
-            '   --cap-add=NET_ADMIN ' # for `tc`
-            '   --detach=true '
-            '   --net=isolated_network '
-            '   --name=' + name + ' '   # container name
-            '   --hostname=' + name + ' '
-            '   --volume $PWD/datadirs/' + name + ':/data '
-            '   ' + image + ' '      # image name # src: https://hub.docker.com/r/abrkn/bitcoind/
-            '   bash -c "' + cmd + '" '
-            ' ')
-
-
-def cli(node,command):
-    return (' '
-            ' docker exec '
-            + node +
-            ' /bin/sh -c \''
-            '    bitcoin-cli -regtest -datadir=/data ' # -printtoconsole -daemon
-            +    command +
-            ' \' '
-            ' ')
-
-
 def nodeInfo(node):
     commands = [
         #        'getconnectioncount',
@@ -97,13 +103,8 @@ def nodeInfo(node):
         #        'getmininginfo',
                 'getpeerinfo'
     ]
-    return ';'.join([cli(node, cmd) for cmd in commands])
+    return ';'.join([Docker.cli(node, cmd) for cmd in commands])
 
-
-def dockerStp (name):
-    return (' '
-            ' docker rm --force ' + name + ' & '
-            ' ')
 
 def slow_network(cmd):
     traffic_control = "tc qdisc replace dev eth0 root netem delay 100ms"
@@ -112,7 +113,7 @@ def slow_network(cmd):
     # --cap-add=NET_ADMIN
 
 
-class Network():
+class Network:
     def __init__(self,plan):
         self.plan = plan
 
@@ -123,21 +124,22 @@ class Network():
     def __exit__(self, excpetion_type, exception_value, traceback):
         self.plan.append('docker network rm isolated_network')
 
+
 class NodeManager():
     def __init__(self,plan,number_of_containers):
         self.ids = [ container_prefix + str(element) for element in range(number_of_containers)]
-        self.nodes = [ dockerNodeCmd(id,slow_network(bitcoindCmd('user'))) for id in self.ids ]
+        self.nodes = [ Docker.dockerNodeCmd(id,slow_network(bitcoindCmd('user'))) for id in self.ids ]
         self.plan = plan
 
     def __enter__(self):
-        self.plan.append( dockerBootstrapCmd(slow_network(bitcoindCmd('user'))) )
+        self.plan.append( Docker.dockerBootstrapCmd(slow_network(bitcoindCmd('user'))) )
         self.plan.extend( self.nodes )
         self.plan.append('sleep 2') # wait before generating otherwise "Error -28" (still warming up)
         return self
 
     def __exit__(self, excpetion_type, exception_value, traceback):
-        self.plan.extend( [ dockerStp(id) for id in self.ids] )
-        self.plan.append( dockerStp('bootstrap') )
+        self.plan.extend( [ Docker.dockerStp(id) for id in self.ids] )
+        self.plan.append( Docker.dockerStp('bootstrap') )
         self.plan.append( 'sleep 5')
 
     def randomNode(self):
@@ -145,7 +147,7 @@ class NodeManager():
         return random.choice(self.ids)
 
     def every_node_p(self, cmd):
-        return [cli(_id, cmd) for _id in self.ids]
+        return [Docker.cli(_id, cmd) for _id in self.ids]
 
     def warmupBlockGeneration(self):
         # one block for each node
@@ -153,11 +155,11 @@ class NodeManager():
         return ['echo Begin of warmup'] + self.every_node_p('generate 1') + [self.randomBlockCommand(100)] + ['sleep 10']
 
     def randomBlockCommand(self, number=1):
-        return cli(self.randomNode(), 'generate ' + str(number))
+        return Docker.cli(self.randomNode(), 'generate ' + str(number))
 
     def randomTransactionCommand(self):
         node = self.randomNode()
-        return cli(node, 'sendtoaddress $(bitcoin-cli -regtest -datadir=/data getnewaddress) 10.0')
+        return Docker.cli(node, 'sendtoaddress $(bitcoin-cli -regtest -datadir=/data getnewaddress) 10.0')
 
     def log_chaintips(self):
         return self.every_node_p('getchaintips > /data/chaintips.json')
