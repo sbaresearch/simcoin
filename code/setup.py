@@ -20,7 +20,7 @@ class DataDir:
 
     @staticmethod
     def rootDir():
-        return '$PWD/datadirs'
+        return '$PWD/../data'
 
     @staticmethod
     def host(container_id):
@@ -198,7 +198,7 @@ def executionPlan(nodes, number_of_blocks):
 
             plan.append('sleep 10')  # wait for blocks to spread
 
-            plan.append('docker run --rm --volume $PWD/datadirs:/data ' + image + ' chmod a+rwx --recursive /data') # fix permissions on datadirs
+            plan.append('docker run --rm --volume ' + DataDir.rootDir() + ':/mnt' + ' ' + image + ' chmod a+rwx --recursive /mnt') # fix permissions on datadirs
 
             plan.extend(aggregate_logs(nodeManager.ids))
 
@@ -223,10 +223,12 @@ def aggregate_logs(ids):
     def sed_command(_id): # insert node id after timestamp
         return 'sed "s/^.\{' + str(len('2016-09-22 14:46:41.706605')) + '\}/& ' + _id + '/g"'
 
+    "aggregate bitcoind logs"
     commands.append('rm -rf $PWD/log')
-    commands.extend([' cat ' + DataDir.host(_id) + '/regtest/debug.log | ' + sed_command(_id) + ' >> $PWD/log; ' for _id in ids])
-    commands.extend([' cat ' + DataDir.host(_id) + '/chaintips.json | jq "length" | ' + prefix_lines(_id) + '  >> $PWD/forks; ' for _id in ids])
-
+    commands.extend([' cat ' + DataDir.host(_id) + '/regtest/debug.log | ' + sed_command(_id) + ' >> $PWD/../log; ' for _id in ids])
     commands.append(' cat $PWD/log | sort > $PWD/logs ;')
+
+    "aggregate fork information"
+    commands.extend([' cat ' + DataDir.host(_id) + '/chaintips.json | jq "length" | ' + prefix_lines(_id) + '  >> $PWD/../forks; ' for _id in ids])
 
     return commands
