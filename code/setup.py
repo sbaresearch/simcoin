@@ -16,11 +16,82 @@ image = 'btn/base:v3'
 container_prefix = 'btn-'
 
 
+class DataDir:
+
+    @staticmethod
+    def rootDir():
+        return '$PWD/../data'
+
+    @staticmethod
+    def host(container_id):
+        return DataDir.rootDir() + '/' + container_id
+
+    @staticmethod
+    def guest():
+        return '/data'
+
+
+class Docker:
+
+    def __init__(self,plan):
+        self.plan = plan
+
+    def __enter__(self):
+        self.plan.append('docker network create --subnet=' + ip_range + ' --driver bridge isolated_network ; sleep 1')
+        return self
+
+    def __exit__(self, excpetion_type, exception_value, traceback):
+        self.plan.append('docker network rm isolated_network')
+
+    @staticmethod
+    def dockerBootstrapCmd (cmd):
+        return (' '
+                ' docker run '
+                '   --detach=true '
+                '   --net=isolated_network '
+                '   --ip=' + ip_bootstrap + ' '
+                '   --name=bootstrap'   # container name
+                '   ' + image + ' '      # image name # src: https://hub.docker.com/r/abrkn/bitcoind/
+                '   ' + cmd + ' '
+                ' '
+                )
+
+    @staticmethod
+    def dockerNodeCmd (name,cmd):
+        return (' '
+                ' docker run '
+                '   --cap-add=NET_ADMIN ' # for `tc`
+                '   --detach=true '
+                '   --net=isolated_network '
+                '   --name=' + name + ' '   # container name
+                '   --hostname=' + name + ' '
+                '   --volume ' + DataDir.host(name) + ':' + DataDir.guest() + ' '
+                '   ' + image + ' '      # image name # src: https://hub.docker.com/r/abrkn/bitcoind/
+                '   bash -c "' + cmd + '" '
+                ' ')
+
+    @staticmethod
+    def dockerStp (name):
+        return (' '
+                ' docker rm --force ' + name + ' & '
+                ' ')
+
+    @staticmethod
+    def cli(node,command):
+        return (' '
+                ' docker exec '
+                + node +
+                ' /bin/sh -c \''
+                '    bitcoin-cli -regtest -datadir=' + DataDir.guest() + ' ' # -printtoconsole -daemon
+                +    command +
+                ' \' '
+                ' ')
+
 def bitcoindCmd (strategy = 'default'):
     daemon = ' bitcoind '
     default = {
           'regtest': ' -regtest ',             # activate regtest mode
-          'datadir': ' -datadir=/data ',       # change the datadir
+          'datadir': ' -datadir=' + DataDir.guest() + ' ',       # change the datadir
           'debug': ' -debug ',                 # log all events
           # 'printblocktree': ' -printblocktree', # removed (would print tree on startup)
           # 'printtoconsole': ' -printtoconsole ', # print the log to stdout instead of a file
@@ -50,44 +121,6 @@ def bitcoindCmd (strategy = 'default'):
     return daemon + (' '.join(default.values()))
 
 
-def dockerBootstrapCmd (cmd):
-    return (' '
-            ' docker run '
-            '   --detach=true '
-            '   --net=isolated_network '
-            '   --ip=' + ip_bootstrap + ' '
-            '   --name=bootstrap'   # container name
-            '   ' + image + ' '      # image name # src: https://hub.docker.com/r/abrkn/bitcoind/
-            '   ' + cmd + ' '
-            ' '
-            )
-
-
-def dockerNodeCmd (name,cmd):
-    return (' '
-            ' docker run '
-            '   --cap-add=NET_ADMIN ' # for `tc`
-            '   --detach=true '
-            '   --net=isolated_network '
-            '   --name=' + name + ' '   # container name
-            '   --hostname=' + name + ' '
-            '   --volume $PWD/datadirs/' + name + ':/data '
-            '   ' + image + ' '      # image name # src: https://hub.docker.com/r/abrkn/bitcoind/
-            '   bash -c "' + cmd + '" '
-            ' ')
-
-
-def cli(node,command):
-    return (' '
-            ' docker exec '
-            + node +
-            ' /bin/sh -c \''
-            '    bitcoin-cli -regtest -datadir=/data ' # -printtoconsole -daemon
-            +    command +
-            ' \' '
-            ' ')
-
-
 def nodeInfo(node):
     commands = [
         #        'getconnectioncount',
@@ -96,13 +129,8 @@ def nodeInfo(node):
         #        'getmininginfo',
                 'getpeerinfo'
     ]
-    return ';'.join([cli(node, cmd) for cmd in commands])
+    return ';'.join([Docker.cli(node, cmd) for cmd in commands])
 
-
-def dockerStp (name):
-    return (' '
-            ' docker rm --force ' + name + ' & '
-            ' ')
 
 def slow_network(cmd):
     traffic_control = "tc qdisc replace dev eth0 root netem delay 100ms"
@@ -111,32 +139,21 @@ def slow_network(cmd):
     # --cap-add=NET_ADMIN
 
 
-class Network():
-    def __init__(self,plan):
-        self.plan = plan
-
-    def __enter__(self):
-        self.plan.append('docker network create --subnet=' + ip_range + ' --driver bridge isolated_network ; sleep 1')
-        return self
-
-    def __exit__(self, excpetion_type, exception_value, traceback):
-        self.plan.append('docker network rm isolated_network')
-
 class NodeManager():
     def __init__(self,plan,number_of_containers):
         self.ids = [ container_prefix + str(element) for element in range(number_of_containers)]
-        self.nodes = [ dockerNodeCmd(id,slow_network(bitcoindCmd('user'))) for id in self.ids ]
+        self.nodes = [ Docker.dockerNodeCmd(id,slow_network(bitcoindCmd('user'))) for id in self.ids ]
         self.plan = plan
 
     def __enter__(self):
-        self.plan.append( dockerBootstrapCmd(slow_network(bitcoindCmd('user'))) )
+        self.plan.append( Docker.dockerBootstrapCmd(slow_network(bitcoindCmd('user'))) )
         self.plan.extend( self.nodes )
         self.plan.append('sleep 2') # wait before generating otherwise "Error -28" (still warming up)
         return self
 
     def __exit__(self, excpetion_type, exception_value, traceback):
-        self.plan.extend( [ dockerStp(id) for id in self.ids] )
-        self.plan.append( dockerStp('bootstrap') )
+        self.plan.extend( [ Docker.dockerStp(id) for id in self.ids] )
+        self.plan.append( Docker.dockerStp('bootstrap') )
         self.plan.append( 'sleep 5')
 
     def randomNode(self):
@@ -144,45 +161,29 @@ class NodeManager():
         return random.choice(self.ids)
 
     def every_node_p(self, cmd):
-        return [cli(_id, cmd) for _id in self.ids]
-
-    def generateRandomTransaction(self):
-        node = self.randomNode()
-        self.plan.append( cli(node, 'getnewaddress > tmpaddress') )
-        self.plan.append( cli(node, 'sendtoaddress $(cat tmpaddress) 1') )
-
-    def generateRandomBlock(self):
-        self.plan.append( cli(self.randomNode(), 'generate 1') )
+        return [Docker.cli(_id, cmd) for _id in self.ids]
 
     def warmupBlockGeneration(self):
         # one block for each node
         # plus 100 blocks to enable spending
         return ['echo Begin of warmup'] + self.every_node_p('generate 1') + [self.randomBlockCommand(100)] + ['sleep 10']
 
-    def generateRandomFork(self):
-        self.generateRandomBlock()
-        self.generateRandomBlock()
-
     def randomBlockCommand(self, number=1):
-        return cli(self.randomNode(), 'generate ' + str(number))
+        return Docker.cli(self.randomNode(), 'generate ' + str(number))
 
     def randomTransactionCommand(self):
         node = self.randomNode()
-        return cli(node, 'sendtoaddress $(bitcoin-cli -regtest -datadir=/data getnewaddress) 10.0')
-
-    def generateRandomInfo(self):
-        # cli(self.randomNode, "getinfo")
-        self.plan.append(cli(self.randomNode(), "getchaintips"))
+        return Docker.cli(node, 'sendtoaddress $(bitcoin-cli -regtest -datadir=' + DataDir.guest() + ' getnewaddress) 10.0')
 
     def log_chaintips(self):
-        return self.every_node_p('getchaintips > /data/chaintips.json')
+        return self.every_node_p('getchaintips > ' + DataDir.guest() + '/chaintips.json')
 
 
-def createPlan(nodes, number_of_blocks):
+def executionPlan(nodes, number_of_blocks):
     plan = []
-    with Network(plan):
+    with Docker(plan):
         with NodeManager(plan, nodes) as nodeManager:
-            os.system("rm -rf ./datadirs/*")
+            os.system("rm -rf " + DataDir.host('*'))
 
             plan.extend(nodeManager.warmupBlockGeneration())
 
@@ -197,36 +198,37 @@ def createPlan(nodes, number_of_blocks):
 
             plan.append('sleep 10')  # wait for blocks to spread
 
-            plan.append('docker run --rm --volume $PWD/datadirs:/data ' + image + ' chmod a+rwx --recursive /data') # fix permissions on datadirs
+            plan.append('docker run --rm --volume ' + DataDir.rootDir() + ':/mnt' + ' ' + image + ' chmod a+rwx --recursive /mnt') # fix permissions on datadirs
 
-            def prefix_lines(prefix):
-                return 'sed -e \'s/^/' + prefix + ' /\' '
+            plan.extend(aggregate_logs(nodeManager.ids))
 
-            def remove_empty_lines():
-                return 'sed ":a;N;$!ba;s/^\n/ /g" file'
-
-            def remove_lines_starting_with_whitspace():
-                return 'sed "s/^\s.*$//g"'
-
-            def remove_multiline_error_messages():
-                return 'sed "s/^.\{26\}  .*$//g"'
-
-            def sed_command(_id): # insert node id after timestamp
-                return 'sed "s/^.\{' + str(len('2016-09-22 14:46:41.706605')) + '\}/& ' + _id + '/g"'
-
-            plan.append('rm -rf $PWD/log')
-            plan.extend([' cat $PWD/datadirs/' + _id + '/regtest/debug.log | ' + sed_command(_id) + ' >> $PWD/log; ' for _id in nodeManager.ids])
-            plan.extend([' cat $PWD/datadirs/' + _id + '/chaintips.json | jq "length" | ' + prefix_lines(_id) + '  >> $PWD/forks; ' for _id in nodeManager.ids])
-
-            plan.append(' cat $PWD/log | sort > $PWD/logs ;')
     return plan
 
 
-def run(dryRunFlag, nodes, blocks):
-    plan = createPlan(nodes, blocks)
-    if dryRunFlag:
-        print('\n'.join(plan))
-    else:
-        for cmd in plan:
-            print(cmd)
-            os.system(cmd)
+def aggregate_logs(ids):
+    commands = []
+
+    def prefix_lines(prefix):
+        return 'sed -e \'s/^/' + prefix + ' /\' '
+
+    def remove_empty_lines():
+        return 'sed ":a;N;$!ba;s/^\n/ /g" file'
+
+    def remove_lines_starting_with_whitspace():
+        return 'sed "s/^\s.*$//g"'
+
+    def remove_multiline_error_messages():
+        return 'sed "s/^.\{26\}  .*$//g"'
+
+    def sed_command(_id): # insert node id after timestamp
+        return 'sed "s/^.\{' + str(len('2016-09-22 14:46:41.706605')) + '\}/& ' + _id + '/g"'
+
+    "aggregate bitcoind logs"
+    commands.append('rm -rf $PWD/log')
+    commands.extend([' cat ' + DataDir.host(_id) + '/regtest/debug.log | ' + sed_command(_id) + ' >> $PWD/../log; ' for _id in ids])
+    commands.append(' cat $PWD/log | sort > $PWD/logs ;')
+
+    "aggregate fork information"
+    commands.extend([' cat ' + DataDir.host(_id) + '/chaintips.json | jq "length" | ' + prefix_lines(_id) + '  >> $PWD/../forks; ' for _id in ids])
+
+    return commands

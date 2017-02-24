@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import sys
+import os
 import argparse
 import setup
 
@@ -28,4 +29,14 @@ parser.add_argument('--dryRun'
 
 args = parser.parse_args()
 
-setup.run(args.dryRun, args.nodes, args.blocks)
+
+def run(dryRunFlag, nodes, blocks):
+    plan = setup.executionPlan(nodes, blocks)
+    if dryRunFlag:
+        print('\n'.join(plan))
+    else:
+        for cmd in plan:
+            print(cmd)
+            os.system(cmd)
+
+run(args.dryRun, args.nodes, args.blocks)
