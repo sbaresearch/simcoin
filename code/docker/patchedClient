@@ -17,3 +17,4 @@ RUN ./configure
 RUN make
 
 ENV PATH /bitcoin/src:$PATH
+RUN mkdir /data
