@@ -16,5 +16,4 @@ RUN ./autogen.sh
 RUN ./configure
 RUN make
 
-ENV PATH /bitcoin/src/bitcoind:$PATH
-ENV PATH /bitcoin/src/bitcoin-cli:$PATH
+ENV PATH /bitcoin/src:$PATH
