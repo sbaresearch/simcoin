@@ -30,6 +30,11 @@ class DataDir:
     def guest():
         return '/data'
 
+    @staticmethod
+    def log_file():
+        """return the path to the execution log"""
+        return '$PWD/../data/log'
+
 
 class Docker:
 
@@ -207,6 +212,7 @@ def executionPlan(nodes, number_of_blocks):
 
 def aggregate_logs(ids):
     commands = []
+    timestamp_length = str(len('2016-09-22 14:46:41.706605'))
 
     def prefix_lines(prefix):
         return 'sed -e \'s/^/' + prefix + ' /\' '
@@ -221,14 +227,14 @@ def aggregate_logs(ids):
         return 'sed "s/^.\{26\}  .*$//g"'
 
     def sed_command(_id): # insert node id after timestamp
-        return 'sed "s/^.\{' + str(len('2016-09-22 14:46:41.706605')) + '\}/& ' + _id + '/g"'
+        return 'sed "s/^.\{' + timestamp_length + '\}/& ' + _id + '/g"'
 
     "aggregate bitcoind logs"
-    commands.append('rm -rf $PWD/log')
-    commands.extend([' cat ' + DataDir.host(_id) + '/regtest/debug.log | ' + sed_command(_id) + ' >> $PWD/../log; ' for _id in ids])
-    commands.append(' cat $PWD/log | sort > $PWD/logs ;')
+    commands.append('rm -rf ' + DataDir.log_file())
+    commands.extend([' cat ' + DataDir.host(_id) + '/regtest/debug.log | ' + sed_command(_id) + ' >> ' + DataDir.log_file() + '; ' for _id in ids])
+    commands.append(' sort ' + DataDir.log_file())
 
     "aggregate fork information"
-    commands.extend([' cat ' + DataDir.host(_id) + '/chaintips.json | jq "length" | ' + prefix_lines(_id) + '  >> $PWD/../forks; ' for _id in ids])
+    commands.extend([' cat ' + DataDir.host(_id) + '/chaintips.json | jq "length" | ' + prefix_lines(_id) + '  >> ' + DataDir.rootDir() + '/forks; ' for _id in ids])
 
     return commands
