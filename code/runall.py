@@ -30,11 +30,18 @@ parser.add_argument('--dryRun'
 args = parser.parse_args()
 
 
-def run(dryRunFlag, nodes, blocks):
+def run(dryRun, nodes, blocks):
     plan = setup.executionPlan(nodes, blocks)
-    if dryRunFlag:
-        print('\n'.join(plan))
+
+    if dryRun:
+            print('\n'.join(plan))
     else:
+        """ write execution plan to a file beforehand """
+        with open("../data/execution-plan.sh", "w") as file:
+            for line in plan:
+                file.write(line)
+                file.write("\n")
+        """ execute plan line by line """
         for cmd in plan:
             print(cmd)
             os.system(cmd)
