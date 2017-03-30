@@ -57,7 +57,7 @@ class Docker:
                 '   --ip=' + ip_bootstrap + ' '
                 '   --name=bootstrap'   # container name
                 '   ' + image + ' '      # image name # src: https://hub.docker.com/r/abrkn/bitcoind/
-                '   ' + cmd + ' '
+                '   bash -c "' + cmd + '" '
                 ' '
                 )
 
