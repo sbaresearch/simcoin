@@ -28,7 +28,7 @@ run infrastructure
 4. run `docker build --tag btn/base:v3 - < code/docker/baseimage` to build the docker image 
 5. run `setup.py` to run the simulation
 
-standard usage
+usage
 --------------
 
 bitcoind is the server that is run
@@ -36,14 +36,11 @@ bitcoin-cli getblockcount for interaction
 script is src/setup.py
 dependencies are "https://github.com/petertodd/python-bitcoinlib/archive/9b768434a78fac7654c02e3a71d5d0518eda4f3e.zip"
 
-changing the standard simulation
---------------------------------
+# bitcoin sourcode
 
-bitcoin sourcode
-----------------
-
-`cd src/bitcoin; git pull`
-TODO github.com/kernoelpanic/bitcoinbuilder
+The (staoshi client) standard bitcoind from launchpad is used.
+To use a modified version build a different docker image.
+It's possible to use the [bitcoinbuilder](github.com/kernoelpanic/bitcoinbuilder) to do that.
 
 ## Stack
 
