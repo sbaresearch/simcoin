@@ -13,6 +13,9 @@ ip_range = "240.0.0.0/4"
 ip_bootstrap = "240.0.0.2"
 
 image = 'btn/base:v3'
+if os.system("docker inspect " + image) != 0:
+    print("Image " + image + " not found")
+    exit()
 container_prefix = 'btn-'
 
 
