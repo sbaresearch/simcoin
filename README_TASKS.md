@@ -3,7 +3,7 @@
 ## Andreas 
 
 * [ ] archive in- and outputs
-* [ ] check if docker image exists
+* [x] check if docker image exists
 
 
 ### CMD params
