@@ -45,6 +45,22 @@ bitcoin sourcode
 `cd src/bitcoin; git pull`
 TODO github.com/kernoelpanic/bitcoinbuilder
 
+## Stack
+
+   experiment
+-> simulation
+-> network
+-> nodes
+-> strategy
+-> daemon
+
+* An Expriment tries to validate some assumption (e.g. forkiness increase with bigger blocks).
+* Testing the assumptions means running a simluation with several times with fixed params (e.g. 32mb block size)
+* The simluations spawns a network for the nodes
+* The nodes are spawned and connected to the network
+* The behaviour of each node is determined by it's chosen strategy
+* The daemon runs the network code (e.g. relaying valid transactions) but also reacts to events triggered by it's strategy (e.g. spawning a transaction/block)
+
 ## node behavior
 
 strategy: miner, user, relay ,... ,byzantine, malicious // TODO rename to type
