@@ -2,7 +2,14 @@
 
 ## Andreas 
 
-*What u have written in your markdown* :)
+* [ ] archive in- and outputs
+* [ ] check if docker image exists
+
+
+### CMD params
+* [ ] select docker image
+* [ ] select what to log (e.g. forkiness)
+* [ ] name output file
 
 
 ## Aljosha
