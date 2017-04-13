@@ -6,6 +6,5 @@ RUN \
      apt-get update && \
      apt-get install -y bitcoind iproute2 jq
 RUN mkdir /data
-EXPOSE 8333
 
 # adapted from https://hub.docker.com/r/abrkn/bitcoind/~/dockerfile/
