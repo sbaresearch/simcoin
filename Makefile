@@ -5,4 +5,4 @@ smoke:
 	cd code; python3 ./runall.py --dryRun=True --nodes=1 --blocks=1
 
 install:
-    cd code; pip install -r requirements.txt
+	cd code; pip install -r requirements.txt
