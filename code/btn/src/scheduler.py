@@ -21,17 +21,17 @@ class Scheduler(list):
         self.extend(delay_queue)
         self.sort()
 
-    def addblocks(self,count,cmd):
+    def addblocks(self,count, blockTime, cmd):
         numpy.random.seed(0)
-        s = numpy.random.exponential(scale=15.0, size=count, ) # TODO set to 600
+        s = numpy.random.exponential(scale=blockTime, size=count, ) # TODO set to 600
         ss = itertools.accumulate(s)
         f = itertools.cycle( cmd )
         fs = zip(ss,f)
         self.merge(fs)
 
-    def addtransactions(self, count, cmd):
+    def addtransactions(self, count, cmd, transactionsPerSecond = 1):
         tps = 1  # transactions per second TODO set to 2.5
-        time = numpy.arange(1.0, count,1.0/tps)
+        time = numpy.arange(1.0, count,1.0/transactionsPerSecond)
         # times = itertools.accumulate(time)
         f = itertools.cycle(cmd)
         plan = zip(time, f)

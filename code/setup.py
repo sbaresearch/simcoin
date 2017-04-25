@@ -140,21 +140,22 @@ def nodeInfo(node):
     return ';'.join([Docker.cli(node, cmd) for cmd in commands])
 
 
-def slow_network(cmd):
-    traffic_control = "tc qdisc replace dev eth0 root netem delay 100ms"
+def slow_network(cmd, latency):
+    traffic_control = "tc qdisc replace dev eth0 root netem delay " + str(latency)+ "ms"
     return traffic_control + "; " + cmd
     # apt install iproute2
     # --cap-add=NET_ADMIN
 
 
 class NodeManager():
-    def __init__(self,plan,number_of_containers):
+    def __init__(self,plan,number_of_containers,latency):
         self.ids = [ container_prefix + str(element) for element in range(number_of_containers)]
-        self.nodes = [ Docker.dockerNodeCmd(id,slow_network(bitcoindCmd('user'))) for id in self.ids ]
+        self.nodes = [ Docker.dockerNodeCmd(id,slow_network(bitcoindCmd('user'),latency)) for id in self.ids ]
         self.plan = plan
+        self.latency= latency
 
     def __enter__(self):
-        self.plan.append( Docker.dockerBootstrapCmd(slow_network(bitcoindCmd('user'))) )
+        self.plan.append(Docker.dockerBootstrapCmd(slow_network(bitcoindCmd('user'), self.latency)))
         self.plan.extend( self.nodes )
         self.plan.append('sleep 2') # wait before generating otherwise "Error -28" (still warming up)
         return self
@@ -171,10 +172,10 @@ class NodeManager():
     def every_node_p(self, cmd):
         return [Docker.cli(_id, cmd) for _id in self.ids]
 
-    def warmupBlockGeneration(self):
-        # one block for each node
+    def warmup_block_generation(self):
+        # one block for each node ## This forks the chain from the beginning TODO remove
         # plus 100 blocks to enable spending
-        return ['echo Begin of warmup'] + self.every_node_p('generate 1') + [self.randomBlockCommand(100)] + ['sleep 10']
+        return ['echo Begin of warmup'] + self.every_node_p('generate 1') + [self.randomBlockCommand(100)] + ['sleep 5']
 
     def randomBlockCommand(self, number=1):
         return Docker.cli(self.randomNode(), 'generate ' + str(number))
@@ -187,24 +188,25 @@ class NodeManager():
         return self.every_node_p('getchaintips > ' + DataDir.guest() + '/chaintips.json')
 
 
-def executionPlan(nodes, number_of_blocks):
+def executionPlan(nodes, number_of_blocks, blockTime, latency):
     plan = []
     with Docker(plan):
-        with NodeManager(plan, nodes) as nodeManager:
+        with NodeManager(plan, nodes, latency) as nodeManager:
             os.system("rm -rf " + DataDir.host('*'))
 
-            plan.extend(nodeManager.warmupBlockGeneration())
+            plan.extend(nodeManager.warmup_block_generation())
 
             import sys
             sys.path.append('./btn/src')
             from scheduler import Scheduler
             s = Scheduler()
-            s.addblocks(4, [nodeManager.randomBlockCommand() for _ in range(130)])
-            s.addtransactions(60, [nodeManager.randomTransactionCommand() for _ in range(10)])
+            s.addblocks(number_of_blocks, blockTime, [nodeManager.randomBlockCommand() for _ in range(1000)])
+            s.addtransactions(10, [nodeManager.randomTransactionCommand() for _ in range(10)], transactionsPerSecond = 10)
             plan.extend(s.bash_commands().split('\n'))
-            plan.extend(nodeManager.log_chaintips())
 
-            plan.append('sleep 10')  # wait for blocks to spread
+            plan.append('sleep 3')  # wait for blocks to spread
+
+            plan.extend(nodeManager.log_chaintips())
 
             plan.append('docker run --rm --volume ' + DataDir.rootDir() + ':/mnt' + ' ' + image + ' chmod a+rwx --recursive /mnt') # fix permissions on datadirs
 
@@ -216,15 +218,19 @@ def executionPlan(nodes, number_of_blocks):
 def aggregate_logs(ids):
     commands = []
     timestamp_length = str(len('2016-09-22 14:46:41.706605'))
+    data_dir = DataDir.rootDir()
+    logfile = DataDir.log_file()
+    logfile_raw = logfile + '.raw'
+
 
     def prefix_lines(prefix):
-        return 'sed -e \'s/^/' + prefix + ' /\' '
+        return 'sed -e \'s/^/' + prefix + ' /\''
 
     def remove_empty_lines():
-        return 'sed ":a;N;$!ba;s/^\n/ /g" file'
+        return 'sed "s/^$//g"'
 
     def remove_lines_starting_with_whitspace():
-        return 'sed "s/^\s.*$//g"'
+        return 'sed "s/^[[:space:]].*$//g"'
 
     def remove_multiline_error_messages():
         return 'sed "s/^.\{26\}  .*$//g"'
@@ -232,12 +238,31 @@ def aggregate_logs(ids):
     def sed_command(_id): # insert node id after timestamp
         return 'sed "s/^.\{' + timestamp_length + '\}/& ' + _id + '/g"'
 
-    "aggregate bitcoind logs"
-    commands.append('rm -rf ' + DataDir.log_file())
-    commands.extend([' cat ' + DataDir.host(_id) + '/regtest/debug.log | ' + sed_command(_id) + ' >> ' + DataDir.log_file() + '; ' for _id in ids])
-    commands.append(' sort ' + DataDir.log_file())
+    "remove files from previous run"
+    commands.append('rm -rf ' + logfile)
+    commands.append('rm -rf ' + logfile_raw)
+
+    "consolidate logfiles from the nodes"
+    commands.extend([' cat ' + DataDir.host(_id) + '/regtest/debug.log '
+                     ' |   ' + sed_command(_id) +
+                     ' >>  ' + logfile_raw + '; '
+                    for _id in ids])
+
+    "clean the logfiles"
+    commands.append(' cat ' + logfile_raw +
+                    ' | ' + remove_empty_lines() +
+                    ' | ' + remove_lines_starting_with_whitspace() +
+                    ' | ' + remove_multiline_error_messages() +
+                    ' > ' + logfile
+                    )
+    "sort by timestamp"
+    commands.append(' sort ' + logfile)
 
     "aggregate fork information"
-    commands.extend([' cat ' + DataDir.host(_id) + '/chaintips.json | jq "length" | ' + prefix_lines(_id) + '  >> ' + DataDir.rootDir() + '/forks; ' for _id in ids])
+    commands.extend([' cat ' + DataDir.host(_id) + '/chaintips.json '
+                     ' | jq "length" '
+                     ' | ' + prefix_lines(_id) +
+                     ' >> ' + data_dir + '/forks; '
+                    for _id in ids])
 
     return commands
