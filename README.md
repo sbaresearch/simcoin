@@ -5,9 +5,9 @@
 Introduction
 ============
 
-Bitcoin Testing Netowrk (BTN)
+Bitcoin Testing Network (BTN)
 
-build for reproducability
+build for reproducibility
 others can build up on this framework and don't have to replicate complicated setups
 
 technologies involved
@@ -17,14 +17,14 @@ technologies involved
 
 steps to run a standard simulation
 
-setup on ubuntu 16.06 LTS
+setup on Ubuntu 16.06 LTS
 -------------------------
 
 generate node image `docker build --tag btn/base:v1 - < docker/baseimage` build
 
 run infrastructure
 
-1. checkout this projects sourcode from `github`
+1. checkout this projects source code from `github`
 4. run `docker build --tag btn/base:v3 - < code/docker/baseimage` to build the docker image 
 5. run `setup.py` to run the simulation
 
@@ -36,9 +36,9 @@ bitcoin-cli getblockcount for interaction
 script is src/setup.py
 dependencies are "https://github.com/petertodd/python-bitcoinlib/archive/9b768434a78fac7654c02e3a71d5d0518eda4f3e.zip"
 
-# bitcoin sourcode
+# bitcoin source code
 
-The (staoshi client) standard bitcoind from launchpad is used.
+The (satoshi client) standard bitcoind from launchpad is used.
 To use a modified version build a different docker image.
 It's possible to use the [bitcoinbuilder](github.com/kernoelpanic/bitcoinbuilder) to do that.
 
@@ -51,21 +51,21 @@ It's possible to use the [bitcoinbuilder](github.com/kernoelpanic/bitcoinbuilder
 -> strategy
 -> daemon
 
-* An Expriment tries to validate some assumption (e.g. forkiness increase with bigger blocks).
-* Testing the assumptions means running a simluation with several times with fixed params (e.g. 32mb block size)
-* The simluations spawns a network for the nodes
+* An Experiment tries to validate some assumption (e.g. forkiness increase with bigger blocks).
+* Testing the assumptions means running a simulation with several times with fixed parameters (e.g. 32mb block size)
+* The simulations spawns a network for the nodes
 * The nodes are spawned and connected to the network
-* The behaviour of each node is determined by it's chosen strategy
+* The behavior of each node is determined by it's chosen strategy
 * The daemon runs the network code (e.g. relaying valid transactions) but also reacts to events triggered by it's strategy (e.g. spawning a transaction/block)
 
 ## node behavior
 
 strategy: miner, user, relay ,... ,byzantine, malicious // TODO rename to type
-reachability: {always, mostly, seldom}, 
+reach ability: {always, mostly, seldom}, 
 
 ## physical network
 
-nat, latency, bandwith, tc
+nat, latency, bandwidth, tc
 TODO different subnets selection
 
 ## network composition
@@ -85,36 +85,36 @@ TODO which information how
 
 node = image + instance + connectivity + strategy
 
-assumptions: all have the same sourcecode and the same version
+assumptions: all have the same source code and the same version
 
 Primary nodes:
 
-* pooled mining (splits every blockreward to a lot addresses, payout threshold, very few nodes), always online
+* pooled mining (splits every block reward to a lot addresses, payout threshold, very few nodes), always online
 * common user (receives transactions from exchange and other common users, sends to payment providers and other common users, simple payment verification node, does not sync blockchain)
 
 Secondary nodes:
 
 * exchange, receives lots of (big) transactions, sends out a lot of small transactions, does not mine, always online
-* solo mining (sends every mined blockreward to exchange, very few nodes), always online
+* solo mining (sends every mined block reward to exchange, very few nodes), always online
 * hodler (only receives transactions, never spends them, sporadically online, syncs blockchain)
 * satoshi dice (game of chance, receives a lot of small transactions, returns a lot of them)
 * relay (no transactions, always online, syncs blockchain)
 * scanner (no transactions, connects to all nodes simultaneously)
 * scammer (double spends every transactions)
 
-# optimizations
+# optimization
 
-* deduplicating filesystem for blockchain
+* deduplicating file system for blockchain
 * single machine setups
 * docker ...
 
-## recomendations 
+## recommendations 
 
 source: https://bitcoin.org/en/full-node#minimum-requirements
 
 * 80 gigabytes of free disk space
 * 2 gigabytes of memory (RAM)
-* broadband Internet connection with upload speeds of at least 400 kilobits (50 kilobytes) per second
+* broadband Internet connection with upload speeds of at least 400 kilo bits (50 kilobytes) per second
 * 200 gigabytes upload or more a month. 
 * Download 20 gigabytes a month, plus around an additional 60 gigabytes the first time you start your node.
 * 6 hours a day that your full node can be left running. More hours would be better, and best of all would be if you can run your node continuously.
@@ -132,7 +132,7 @@ source: https://bitcoin.org/en/full-node#minimum-requirements
 
 * first difficulty change was in block #32256 (from 1.00 to 1.18) on 2009-12-30 06:11:04 (~1 year after launch)
   src: https://bitcoinchain.com/block_explorer/block/32256
-  blkhas: 000000004f2886a170adb7204cb0c7a824217dd24d11a74423d564c4e0904967/
+  blkhash: 000000004f2886a170adb7204cb0c7a824217dd24d11a74423d564c4e0904967/
 
 # Analyzing
 
@@ -153,10 +153,10 @@ docker pull kibana:4.5.4
 docker run --name elastic --detach elasticsearch:2.3.5
 docker run --name kibana --detach --link elastic:elasticsearch --publish 5601:5601 kibana:4.5.4
 docker run --name logstash --rm --link elastic:elastic -v "$PWD":/data logstash:2.3.4-1 logstash -f /data/docker/logstash.conf
-# ^^^^ will not terminate, wait for until the ouput stops and all entries are parsed and exit manually (ctrl+c)
+# ^^^^ will not terminate, wait for until the output stops and all entries are parsed and exit manually (ctrl+c)
 
 # open http://localhost:5601
-# beware of the timeframe (upper right corner) if no data is shown
+# beware of the time frame (upper right corner) if no data is shown
 
 docker rm --force elastic
 docker rm --force kibana
@@ -166,7 +166,7 @@ docker rm --force kibana
 
 This sections tries to account for all log messages that can be found in the debug.log
 
-Startup log entries
+Start up log entries
 
 ```
 2016-08-18 09:55:10 Bitcoin version v0.12.1.0-g9779e1e (Mon, 11 Apr 2016 13:01:43 +0200)
@@ -270,7 +270,7 @@ Connecting to an already seen node
 ```
 
 
-Here are the logentries that belong to a single interaction between two nodes.
+Here are the log entries that belong to a single interaction between two nodes.
 
 Receiving headers, then requesting and receiving the block 
 
