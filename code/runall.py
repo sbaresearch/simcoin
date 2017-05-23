@@ -33,7 +33,7 @@ parser.add_argument('--latency'
                     , help='Network latency on all connections.'
                    )
 parser.add_argument('--dry-run'
-                    , default=False
+                    , action='store_true'
                     , help='If true only prints the Bash script without execution'
                    )
 
