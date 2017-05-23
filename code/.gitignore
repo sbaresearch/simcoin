@@ -94,3 +94,6 @@ log
 logs
 forks
 datadirs
+
+# Intellij
+*.iml
