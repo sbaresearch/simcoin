@@ -5,7 +5,7 @@ import os
 import argparse
 import setup
 
-if sys.version_info <= (3,0):
+if sys.version_info <= (3, 0):
     print("Sorry, requires Python 3.x or above")
     sys.exit(1)
 
@@ -22,7 +22,7 @@ parser.add_argument('--blocks'
                     , type=int
                     , help='Number of Blocks to be generated.'
                    )
-parser.add_argument('--blockTime'
+parser.add_argument('--block-time'
                     , default=10
                     , type=int
                     , help='Targeted generation time in Seconds.'
@@ -32,7 +32,7 @@ parser.add_argument('--latency'
                     , type=int
                     , help='Network latency on all connections.'
                    )
-parser.add_argument('--dryRun'
+parser.add_argument('--dry-run'
                     , default=False
                     , help='If true only prints the Bash script without execution'
                    )
@@ -40,11 +40,11 @@ parser.add_argument('--dryRun'
 args = parser.parse_args()
 
 
-def run(dryRun, nodes, blocks, blockTime, latency):
-    print("input: ", dryRun, nodes, blocks, blockTime, latency)
-    plan = setup.executionPlan(nodes, blocks, blockTime, latency)
+def run(dry_run, nodes, blocks, block_time, latency):
+    print("input: ", dry_run, nodes, blocks, block_time, latency)
+    plan = setup.executionPlan(nodes, blocks, block_time, latency)
 
-    if dryRun:
+    if dry_run:
             print('\n'.join(plan))
     else:
         """ write execution plan to a file beforehand """
@@ -57,4 +57,4 @@ def run(dryRun, nodes, blocks, blockTime, latency):
             print(cmd)
             os.system(cmd)
 
-run( args.dryRun, args.nodes, args.blocks, args.blockTime, args.latency)
+run(args.dry_run, args.nodes, args.blocks, args.block_time, args.latency)
