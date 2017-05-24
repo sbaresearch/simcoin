@@ -51,6 +51,12 @@ class TestScheduler(TestCase):
         self.assertEqual(len(self.scheduler), 20)
 
     def test_bash_commands(self):
-        self.scheduler.add_blocks(10, 100, ["echo Hello", "generate block 1", "generate block 2"])
-        self.scheduler.add_tx(4, ["transact a -> b", "transact b -> c ", "transact c -> d"])
-        self.scheduler.bash_commands()
+        self.scheduler.add_blocks(10, 10, ["generate block 2", "generate block 1", "generate block 2"])
+        self.scheduler.add_tx(100, ["transact a -> b", "transact b -> c ", "transact c -> d"])
+
+        cmds = self.scheduler.bash_commands()
+        self.assertEqual(len(cmds), 110)
+
+        for cmd in cmds:
+            self.assertTrue('sleep' in cmd)
+            self.assertTrue('generate' in cmd or 'transact' in cmd)
