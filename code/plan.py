@@ -27,8 +27,6 @@ class Plan:
     def __init__(self, number_of_nodes):
         self.ids = [container_prefix + str(element) for element in range(number_of_nodes)]
 
-        self.plan = []
-
     def create(self, latency, number_of_blocks, block_time):
         plan = []
 
