@@ -88,8 +88,8 @@ class NodeManager:
         return self
 
     def __exit__(self, exception_type, exception_value, traceback):
-        self.plan.extend([dockercmd.docker_stp(_id) for _id in self.ids])
-        self.plan.append(dockercmd.docker_stp('bootstrap'))
+        self.plan.extend([dockercmd.docker_stop(_id) for _id in self.ids])
+        self.plan.append(dockercmd.docker_stop('bootstrap'))
         self.plan.append('sleep 5')
 
     def random_node(self):

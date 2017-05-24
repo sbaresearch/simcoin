@@ -28,7 +28,7 @@ def docker_node(name, cmd):
             ' ')
 
 
-def docker_stp(name):
+def docker_stop(name):
     return (' '
             ' docker rm --force ' + name + ' & '
             ' ')
