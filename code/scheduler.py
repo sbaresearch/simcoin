@@ -8,6 +8,8 @@ import itertools
     # scheduler.onFinish(lambda: print("hello world"))
     # schedule = scheduler.getSchedule()
 
+seed = 0
+
 
 class Scheduler(list):
 
@@ -22,7 +24,7 @@ class Scheduler(list):
         self.sort()
 
     def add_blocks(self, count, block_interval, cmd):
-        numpy.random.seed(0)
+        numpy.random.seed(seed)
         s = numpy.random.exponential(scale=block_interval, size=count, ) # TODO set to 600
         ss = itertools.accumulate(s)
         f = itertools.cycle(cmd)
