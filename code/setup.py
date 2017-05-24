@@ -3,6 +3,7 @@
 import random
 from scheduler import Scheduler
 import dockercmd
+import bitcoindcmd
 import logs
 
 # IP range from RFC6890 - IP range for future use
@@ -22,51 +23,6 @@ def host_dir(container_id):
     return root_dir + '/' + container_id
 
 
-def bitcoind_cmd(strategy='default'):
-    daemon = ' bitcoind '
-    default = {
-          'regtest': ' -regtest ',             # activate regtest mode
-          'datadir': ' -datadir=' + guest_dir + ' ',       # change the datadir
-          'debug': ' -debug ',                 # log all events
-          # 'printblocktree': ' -printblocktree', # removed (would print tree on startup)
-          # 'printtoconsole': ' -printtoconsole ', # print the log to stdout instead of a file
-          'logips': ' -logips ',               # enable ip loging
-          'logtimemicros': ' -logtimemicros',  # add microseconds to logging flag: DEFAULT_LOGTIMEMICROS
-          'listen' : ' -listen ',              # ensure listening even if 'connect' is given
-          'listenonion' : ' -listenonion=0 ',  # disable tor
-          'onlynet': ' -onlynet=ipv4 ',        # disable ipv6
-    }
-    configs = {
-        'default': {},
-        'bootstrap' : {
-            'disablewallet': ' -disablewallet=1 ' # disable wallet
-        },
-        'user': {
-            'dnsseed' : ' -dnsseed=0 ',  # disable dns seed lookups, otherwise this gets seeds even with docker --internal network
-            'addnode' : ' -addnode=' + ip_bootstrap + ' ', # only connect ourself introductionary node
-            'seednode': ' -seednode=240.0.0.3 ',
-            'keypool' : ' -keypool=1 '
-        },
-        'miner-solo' : {
-            'addnode' : ' -addnode=fst ', # only connect to ourself introductionary node
-            'keypool' : ' -keypool=1 '
-        }
-    }
-    default.update(configs[strategy])
-    return daemon + (' '.join(default.values()))
-
-
-def node_info(node):
-    commands = [
-        #        'getconnectioncount',
-        #        'getblockcount',
-        #        'getinfo',
-        #        'getmininginfo',
-                'getpeerinfo'
-    ]
-    return ';'.join([dockercmd.exec_bash(node, cmd) for cmd in commands])
-
-
 def slow_network(latency):
     # needed for this cmd: apt install iproute2 and --cap-add=NET_ADMIN
     return "tc qdisc replace dev eth0 root netem delay " + str(latency) + "ms; "
@@ -83,8 +39,8 @@ class Execution:
 
         try:
             plan.append(dockercmd.create_network(ip_range))
-            plan.append(dockercmd.run_bootstrap_node(slow_network(latency) + bitcoind_cmd('user')))
-            plan.extend([dockercmd.run_node(_id, slow_network(latency) + bitcoind_cmd('user')) for _id in self.ids])
+            plan.append(dockercmd.run_bootstrap_node(slow_network(latency) + bitcoindcmd.start('user')))
+            plan.extend([dockercmd.run_node(_id, slow_network(latency) + bitcoindcmd.start('user')) for _id in self.ids])
             plan.append('sleep 2') # wait before generating otherwise "Error -28" (still warming up)
 
             plan.extend(self.warmup_block_generation())
