@@ -30,8 +30,8 @@ class Scheduler(list):
         cmds_with_point_in_time = zip(points_in_time, cmds)
         self.merge(cmds_with_point_in_time)
 
-    def add_transactions(self, until, cmd, transactions_per_second=1):
-        tx_interval = 1.0 / transactions_per_second
+    def add_tx(self, until, cmd, tx_per_second=1):
+        tx_interval = 1.0 / tx_per_second
         points_in_time = numpy.arange(tx_interval, until + tx_interval, tx_interval)
         cmds = itertools.cycle(cmd)
         cmds_with_time = zip(points_in_time, cmds)
