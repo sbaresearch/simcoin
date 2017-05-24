@@ -20,13 +20,13 @@ parser = argparse.ArgumentParser(description='Running Simcoin. A Bitcoin Network
 
 parser.add_argument('--nodes'
                     , default=2
-                    , help='Number of Bitcoin Nodes spawned.'
                     , type=check_positive
+                    , help='Number of Bitcoin nodes spawned.'
                    )
 parser.add_argument('--blocks'
                     , default=100
-                    , help='Number of Blocks to be generated.'
                     , type=check_positive
+                    , help='Number of blocks to be generated.'
                    )
 parser.add_argument('--block-time'
                     , default=10
@@ -40,8 +40,8 @@ parser.add_argument('--latency'
                    )
 parser.add_argument('--dry-run'
                     , action='store_true'
-                    , help='If true only prints the Bash script without execution'
-                   )
+                    , help='If true only prints the bash script without execution'
+                    )
 
 args = parser.parse_args()
 
