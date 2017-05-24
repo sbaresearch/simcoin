@@ -7,7 +7,7 @@ import setup
 
 if sys.version_info <= (3, 0):
     print("Sorry, requires Python 3.x or above")
-    sys.exit(1)
+    exit()
 
 
 def check_percentage(value):
