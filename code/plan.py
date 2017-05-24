@@ -40,7 +40,7 @@ class Plan:
 
             scheduler = Scheduler(0)
             scheduler.add_blocks(number_of_blocks, block_interval, [self.random_block_command() for _ in range(1000)])
-            scheduler.add_tx(number_of_blocks * block_interval, [self.random_transaction_command() for _ in range(10)])
+            scheduler.add_tx(number_of_blocks * block_interval, [self.random_tx_command() for _ in range(10)])
             plan.extend(scheduler.bash_commands())
 
             plan.append('sleep 3')  # wait for blocks to spread
@@ -73,7 +73,7 @@ class Plan:
     def random_block_command(self, number=1):
         return dockercmd.exec_bash(self.random_node(), 'generate ' + str(number))
 
-    def random_transaction_command(self):
+    def random_tx_command(self):
         node = self.random_node()
         return dockercmd.exec_bash(node, 'sendtoaddress $(bitcoin-cli -regtest -datadir=' + guest_dir + ' getnewaddress) 10.0')
 
