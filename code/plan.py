@@ -23,7 +23,7 @@ def host_dir(container_id):
     return root_dir + '/' + container_id
 
 
-class Execution:
+class Plan:
     def __init__(self, number_of_nodes):
         self.ids = [container_prefix + str(element) for element in range(number_of_nodes)]
 

@@ -1,4 +1,4 @@
-import setup
+import plan
 
 
 def run_bootstrap_node(cmd):
@@ -6,9 +6,9 @@ def run_bootstrap_node(cmd):
             ' docker run '
             '   --detach=true '
             '   --net=isolated_network '
-            '   --ip=' + setup.ip_bootstrap + ' '
+            '   --ip=' + plan.ip_bootstrap + ' '
             '   --name=bootstrap'   # container name
-            '   ' + setup.image + ' '      # image name # src: https://hub.docker.com/r/abrkn/bitcoind/
+            '   ' + plan.image + ' '      # image name # src: https://hub.docker.com/r/abrkn/bitcoind/
             '   bash -c "' + cmd + '" '
             ' '
             )
@@ -22,8 +22,8 @@ def run_node(name, cmd):
             '   --net=isolated_network '
             '   --name=' + name + ' '   # container name
             '   --hostname=' + name + ' '
-            '   --volume ' + setup.host_dir(name) + ':' + setup.guest_dir + ' '
-            '   ' + setup.image + ' '      # image name # src: https://hub.docker.com/r/abrkn/bitcoind/
+            '   --volume ' + plan.host_dir(name) + ':' + plan.guest_dir + ' '
+            '   ' + plan.image + ' '      # image name # src: https://hub.docker.com/r/abrkn/bitcoind/
             '   bash -c "' + cmd + '" '
             ' ')
 
@@ -39,7 +39,7 @@ def exec_bash(node, command):
             ' docker exec '
             + node +
             ' /bin/sh -c \''
-            '    bitcoin-cli -regtest -datadir=' + setup.guest_dir + ' '  # -printtoconsole -daemon
+            '    bitcoin-cli -regtest -datadir=' + plan.guest_dir + ' '  # -printtoconsole -daemon
             + command +
             ' \' '
             ' ')
@@ -58,4 +58,4 @@ def rm_network():
 
 def fix_data_dirs_permissions():
         return (' docker run '
-                ' --rm --volume ' + setup.root_dir + ':/mnt' + ' ' + setup.image + ' chmod a+rwx --recursive /mnt')
+                ' --rm --volume ' + plan.root_dir + ':/mnt' + ' ' + plan.image + ' chmod a+rwx --recursive /mnt')

@@ -3,8 +3,8 @@
 import sys
 import os
 import argparse
-import setup
-from setup import Execution
+import plan
+from plan import Plan
 
 if sys.version_info <= (3, 0):
     print("Sorry, requires Python 3.x or above")
@@ -83,29 +83,29 @@ def run():
                         args.trail_stubborn is not None:
             parser.error('when selfish_nodes is 0 no selfish mining settings should be set')
 
-    if os.system("docker inspect " + setup.image + " > /dev/null") != 0:
-        print("Image " + setup.image + " not found")
+    if os.system("docker inspect " + plan.image + " > /dev/null") != 0:
+        print("Image " + plan.image + " not found")
         exit()
 
     print("arguments called with: {}".format(sys.argv))
     print("parsed arguments: {}".format(args))
 
-    os.system("rm -rf " + setup.host_dir('*'))
+    os.system("rm -rf " + plan.host_dir('*'))
 
-    execution = Execution(args.nodes)
-    plan = execution.create(args.latency, args.blocks, args.block_time)
+    p = Plan(args.nodes)
+    commands = p.create(args.latency, args.blocks, args.block_time)
 
     if args.dry_run:
-            print('\n'.join(plan))
+            print('\n'.join(commands))
     else:
         """ write execution plan to a file beforehand """
         with open("../data/execution-plan.sh", "w") as file:
-            for line in plan:
-                file.write(line)
+            for command in commands:
+                file.write(command)
                 file.write("\n")
         """ execute plan line by line """
-        for cmd in plan:
-            print(cmd)
-            os.system(cmd)
+        for command in commands:
+            print(command)
+            os.system(command)
 
 run()

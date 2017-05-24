@@ -1,11 +1,11 @@
-import setup
+import plan
 
 
 def start(strategy='default'):
     daemon = ' bitcoind '
     default = {
           'regtest': ' -regtest ',             # activate regtest mode
-          'datadir': ' -datadir=' + setup.guest_dir + ' ',       # change the datadir
+          'datadir': ' -datadir=' + plan.guest_dir + ' ',       # change the datadir
           'debug': ' -debug ',                 # log all events
           # 'printblocktree': ' -printblocktree', # removed (would print tree on startup)
           # 'printtoconsole': ' -printtoconsole ', # print the log to stdout instead of a file
@@ -22,7 +22,7 @@ def start(strategy='default'):
         },
         'user': {
             'dnsseed' : ' -dnsseed=0 ',  # disable dns seed lookups, otherwise this gets seeds even with docker --internal network
-            'addnode' : ' -addnode=' + setup.ip_bootstrap + ' ', # only connect ourself introductionary node
+            'addnode' : ' -addnode=' + plan.ip_bootstrap + ' ', # only connect ourself introductionary node
             'seednode': ' -seednode=240.0.0.3 ',
             'keypool' : ' -keypool=1 '
         },
