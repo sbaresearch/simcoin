@@ -76,11 +76,12 @@ parser.add_argument('--trail-stubborn'
 args = parser.parse_args()
 
 
-def run(dry_run, nodes, blocks, block_time, latency):
-    print("input: ", dry_run, nodes, blocks, block_time, latency)
-    plan = setup.executionPlan(nodes, blocks, block_time, latency)
+def run():
+    print("arguments called with: {}".format(sys.argv))
+    print("parsed arguments: {}".format(args))
+    plan = setup.executionPlan(args.nodes, args.blocks, args.block_time, args.latency)
 
-    if dry_run:
+    if args.dry_run:
             print('\n'.join(plan))
     else:
         """ write execution plan to a file beforehand """
@@ -93,4 +94,4 @@ def run(dry_run, nodes, blocks, block_time, latency):
             print(cmd)
             os.system(cmd)
 
-run(args.dry_run, args.nodes, args.blocks, args.block_time, args.latency)
+run()
