@@ -22,7 +22,7 @@ def docker_node(name, cmd):
             '   --net=isolated_network '
             '   --name=' + name + ' '   # container name
             '   --hostname=' + name + ' '
-            '   --volume ' + setup.host(name) + ':' + setup.guest_dir + ' '
+            '   --volume ' + setup.host_dir(name) + ':' + setup.guest_dir + ' '
             '   ' + setup.image + ' '      # image name # src: https://hub.docker.com/r/abrkn/bitcoind/
             '   bash -c "' + cmd + '" '
             ' ')

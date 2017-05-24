@@ -88,6 +88,9 @@ def run():
 
     print("arguments called with: {}".format(sys.argv))
     print("parsed arguments: {}".format(args))
+
+    os.system("rm -rf " + setup.host_dir('*'))
+
     plan = setup.execution_plan(args.nodes, args.blocks, args.block_time, args.latency)
 
     if args.dry_run:
