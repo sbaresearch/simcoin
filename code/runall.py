@@ -77,6 +77,11 @@ args = parser.parse_args()
 
 
 def run():
+    if args.selfish_nodes == 0:
+        if args.connectivity is not None or args.lead_stubborn is not None or args.equal_fork_stubborn is not None or \
+                        args.trail_stubborn is not None:
+            parser.error('when selfish_nodes is 0 no selfish mining settings should be set')
+
     print("arguments called with: {}".format(sys.argv))
     print("parsed arguments: {}".format(args))
     plan = setup.executionPlan(args.nodes, args.blocks, args.block_time, args.latency)
