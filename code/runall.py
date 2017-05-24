@@ -29,9 +29,9 @@ parser.add_argument('--blocks'
                     , type=check_positive
                    )
 parser.add_argument('--block-time'
-                    , default=check_positive
-                    , type=int
-                    , help='Targeted generation time in Seconds.'
+                    , default=10
+                    , type=check_positive
+                    , help='Targeted generation time in seconds.'
                    )
 parser.add_argument('--latency'
                     , default=100
