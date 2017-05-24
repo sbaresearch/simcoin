@@ -119,7 +119,6 @@ def execution_plan(nodes, number_of_blocks, block_time, latency):
     try:
         plan.append('docker network create --subnet=' + ip_range + ' --driver bridge isolated_network ; sleep 1')
         with NodeManager(plan, nodes, latency) as node_manager:
-
             plan.extend(node_manager.warmup_block_generation())
 
             sys.path.append('./btn/src')
