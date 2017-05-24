@@ -23,12 +23,12 @@ class Scheduler(list):
         self.sort()
 
     def add_blocks(self, count, block_interval, cmd):
-        numpy.random.seed(seed)
-        s = numpy.random.exponential(scale=block_interval, size=count)
-        ss = itertools.accumulate(s)
-        f = itertools.cycle(cmd)
-        fs = zip(ss, f)
-        self.merge(fs)
+        numpy.random.seed(self.seed)
+        random_numbers = numpy.random.exponential(scale=block_interval, size=count)
+        points_in_time = itertools.accumulate(random_numbers)
+        cmds = itertools.cycle(cmd)
+        cmds_with_point_in_time = zip(points_in_time, cmds)
+        self.merge(cmds_with_point_in_time)
 
     def add_transactions(self, count, cmd, transactions_per_second=1):
         time = numpy.arange(1.0, count, 1.0 / transactions_per_second)
