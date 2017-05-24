@@ -10,6 +10,13 @@ if sys.version_info <= (3, 0):
     sys.exit(1)
 
 
+def check_percentage(value):
+    float_value = float(value)
+    if float_value < 0 or float_value > 1:
+        raise argparse.ArgumentTypeError("%s is a percentage value and should be be in [0,1]" % value)
+    return float_value
+
+
 def check_positive(value):
     integer_value = int(value)
     if integer_value < 0:
@@ -41,6 +48,28 @@ parser.add_argument('--latency'
 parser.add_argument('--dry-run'
                     , action='store_true'
                     , help='If true only prints the bash script without execution'
+                    )
+parser.add_argument('--selfish-nodes'
+                    , default=0
+                    , type=check_positive
+                    , help='Number of selfish nodes spawned'
+                    )
+parser.add_argument('--connectivity'
+                    , type=check_percentage
+                    , help='Number of nodes the selfish nodes are connected to'
+                    )
+parser.add_argument('--lead-stubborn'
+                    , help='use lead-stubbornness in strategy'
+                    , action='store_true'
+                    )
+parser.add_argument('--equal-fork-stubborn'
+                    , help='use equal-fork-stubbornness in strategy'
+                    , action='store_true'
+                    )
+parser.add_argument('--trail-stubborn'
+                    , help='use N-trail-stubbornness in strategy'
+                    , type=check_positive
+                    , default=0
                     )
 
 args = parser.parse_args()
