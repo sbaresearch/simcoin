@@ -25,7 +25,7 @@ class Scheduler(list):
 
     def add_blocks(self, count, block_interval, cmd):
         numpy.random.seed(seed)
-        s = numpy.random.exponential(scale=block_interval, size=count, ) # TODO set to 600
+        s = numpy.random.exponential(scale=block_interval, size=count)
         ss = itertools.accumulate(s)
         f = itertools.cycle(cmd)
         fs = zip(ss, f)
