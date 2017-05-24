@@ -77,7 +77,7 @@ def slow_network(latency):
 class NodeManager:
     def __init__(self, plan, number_of_containers, latency):
         self.ids = [container_prefix + str(element) for element in range(number_of_containers)]
-        self.nodes = [dockercmd.docker_node(id, slow_network(latency) + bitcoind_cmd('user')) for id in self.ids]
+        self.nodes = [dockercmd.docker_node(_id, slow_network(latency) + bitcoind_cmd('user')) for _id in self.ids]
         self.plan = plan
         self.latency = latency
 
@@ -88,7 +88,7 @@ class NodeManager:
         return self
 
     def __exit__(self, exception_type, exception_value, traceback):
-        self.plan.extend([dockercmd.docker_stp(id) for id in self.ids])
+        self.plan.extend([dockercmd.docker_stp(_id) for _id in self.ids])
         self.plan.append(dockercmd.docker_stp('bootstrap'))
         self.plan.append('sleep 5')
 
