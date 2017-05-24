@@ -9,14 +9,14 @@ class TestScheduler(TestCase):
 
         self.scheduler = Scheduler(0)
 
-    def test_add_block(self):
+    def test_add_blocks_one_block(self):
         self.scheduler.add_blocks(1, 100, ['cmd'])
 
         self.assertEqual(len(self.scheduler), 1)
         self.assertEqual(self.scheduler[0][0], 79.587450816311005)
         self.assertEqual(self.scheduler[0][1], 'cmd')
 
-    def test_add_blocks(self):
+    def test_add_blocks_ten_blocks(self):
         self.scheduler.add_blocks(10, 1, ['cmd'])
 
         self.assertEqual(len(self.scheduler), 10)
