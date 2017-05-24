@@ -75,7 +75,7 @@ def slow_network(cmd, latency):
     # --cap-add=NET_ADMIN
 
 
-class NodeManager():
+class NodeManager:
     def __init__(self, plan, number_of_containers, latency):
         self.ids = [container_prefix + str(element) for element in range(number_of_containers)]
         self.nodes = [dockercmd.docker_node(id, slow_network(bitcoind_cmd('user'), latency)) for id in self.ids]
