@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import os
 import random
-import sys
 from scheduler import Scheduler
 import dockercmd
 import logs
