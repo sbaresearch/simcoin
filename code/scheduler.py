@@ -42,5 +42,5 @@ class Scheduler(list):
         prev_times = [0] + list(times)
         time_tuples = list(zip(prev_times, times))
         deltas = list(map(lambda x: x[1]-x[0], time_tuples))
-        cmds_with_delta = list(map((lambda t: " sleep {:5.5f}; {} \n".format(t[0], t[1])), zip(deltas, cmds)))
+        cmds_with_delta = list(map((lambda t: " sleep {:5.5f}; {}".format(t[0], t[1])), zip(deltas, cmds)))
         return cmds_with_delta
