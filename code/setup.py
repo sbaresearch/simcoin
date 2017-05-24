@@ -140,7 +140,7 @@ def node_info(node):
 
 
 def slow_network(cmd, latency):
-    traffic_control = "tc qdisc replace dev eth0 root netem delay " + str(latency)+ "ms"
+    traffic_control = "tc qdisc replace dev eth0 root netem delay " + str(latency) + "ms"
     return traffic_control + "; " + cmd
     # apt install iproute2
     # --cap-add=NET_ADMIN
@@ -155,7 +155,7 @@ class NodeManager():
 
     def __enter__(self):
         self.plan.append(Docker.docker_bootstrap_cmd(slow_network(bitcoind_cmd('user'), self.latency)))
-        self.plan.extend( self.nodes )
+        self.plan.extend(self.nodes)
         self.plan.append('sleep 2') # wait before generating otherwise "Error -28" (still warming up)
         return self
 
@@ -189,24 +189,24 @@ class NodeManager():
 def execution_plan(nodes, number_of_blocks, block_time, latency):
     plan = []
     with Docker(plan):
-        with NodeManager(plan, nodes, latency) as nodeManager:
+        with NodeManager(plan, nodes, latency) as node_manager:
             os.system("rm -rf " + DataDir.host('*'))
 
-            plan.extend(nodeManager.warmup_block_generation())
+            plan.extend(node_manager.warmup_block_generation())
 
             sys.path.append('./btn/src')
             s = Scheduler()
-            s.add_blocks(number_of_blocks, block_time, [nodeManager.random_block_command() for _ in range(1000)])
-            s.add_transactions(10, [nodeManager.random_transaction_command() for _ in range(10)], transactions_per_second=10)
+            s.add_blocks(number_of_blocks, block_time, [node_manager.random_block_command() for _ in range(1000)])
+            s.add_transactions(10, [node_manager.random_transaction_command() for _ in range(10)], transactions_per_second=10)
             plan.extend(s.bash_commands().split('\n'))
 
             plan.append('sleep 3')  # wait for blocks to spread
 
-            plan.extend(nodeManager.log_chain_tips())
+            plan.extend(node_manager.log_chain_tips())
 
             plan.append('docker run --rm --volume ' + DataDir.root_dir() + ':/mnt' + ' ' + image + ' chmod a+rwx --recursive /mnt') # fix permissions on datadirs
 
-            plan.extend(aggregate_logs(nodeManager.ids))
+            plan.extend(aggregate_logs(node_manager.ids))
 
     return plan
 
