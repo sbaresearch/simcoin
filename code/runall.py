@@ -60,16 +60,17 @@ parser.add_argument('--connectivity'
                     )
 parser.add_argument('--lead-stubborn'
                     , help='use lead-stubbornness in strategy'
-                    , action='store_true'
+                    , action='store_const'
+                    , const=True
                     )
 parser.add_argument('--equal-fork-stubborn'
                     , help='use equal-fork-stubbornness in strategy'
-                    , action='store_true'
+                    , action='store_const'
+                    , const=True
                     )
 parser.add_argument('--trail-stubborn'
                     , help='use N-trail-stubbornness in strategy'
                     , type=check_positive
-                    , default=0
                     )
 
 args = parser.parse_args()
