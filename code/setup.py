@@ -31,7 +31,7 @@ class Docker:
         self.plan.append('docker network create --subnet=' + ip_range + ' --driver bridge isolated_network ; sleep 1')
         return self
 
-    def __exit__(self, excpetion_type, exception_value, traceback):
+    def __exit__(self, exception_type, exception_value, traceback):
         self.plan.append('docker network rm isolated_network')
 
     @staticmethod
@@ -144,7 +144,7 @@ class NodeManager():
         self.plan.append('sleep 2') # wait before generating otherwise "Error -28" (still warming up)
         return self
 
-    def __exit__(self, excpetion_type, exception_value, traceback):
+    def __exit__(self, exception_type, exception_value, traceback):
         self.plan.extend([Docker.docker_stp(id) for id in self.ids])
         self.plan.append(Docker.docker_stp('bootstrap'))
         self.plan.append('sleep 5')
