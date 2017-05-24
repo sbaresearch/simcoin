@@ -8,13 +8,12 @@ import itertools
     # scheduler.onFinish(lambda: print("hello world"))
     # schedule = scheduler.getSchedule()
 
-seed = 0
-
 
 class Scheduler(list):
 
-    def __init__(self):
+    def __init__(self, seed):
         list.__init__(self)
+        self.seed = seed
 
     def append(self, item):
         self.append(item)
