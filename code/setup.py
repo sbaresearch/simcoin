@@ -9,6 +9,7 @@ from scheduler import Scheduler
 # it does not conflict with https://github.com/bitcoin/bitcoin/blob/master/src/netbase.h
 ip_range = "240.0.0.0/4"
 ip_bootstrap = "240.0.0.2"
+
 root_dir = '$PWD/../data'
 guest_dir = '/data'
 log_file = '$PWD/../data/log'
