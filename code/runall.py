@@ -10,26 +10,32 @@ if sys.version_info <= (3, 0):
     sys.exit(1)
 
 
+def check_positive(value):
+    integer_value = int(value)
+    if integer_value < 0:
+        raise argparse.ArgumentTypeError("%s is an invalid positive int value" % value)
+    return integer_value
+
 parser = argparse.ArgumentParser(description='Running Simcoin. A Bitcoin Network Simulator.')
 
 parser.add_argument('--nodes'
                     , default=2
-                    , type=int
                     , help='Number of Bitcoin Nodes spawned.'
+                    , type=check_positive
                    )
 parser.add_argument('--blocks'
                     , default=100
-                    , type=int
                     , help='Number of Blocks to be generated.'
+                    , type=check_positive
                    )
 parser.add_argument('--block-time'
-                    , default=10
+                    , default=check_positive
                     , type=int
                     , help='Targeted generation time in Seconds.'
                    )
 parser.add_argument('--latency'
                     , default=100
-                    , type=int
+                    , type=check_positive
                     , help='Network latency on all connections.'
                    )
 parser.add_argument('--dry-run'
