@@ -3,12 +3,16 @@ from scheduler import Scheduler
 
 
 class TestScheduler(TestCase):
+
+    def __init__(self, *args, **kwargs):
+        super(TestScheduler, self).__init__(*args, **kwargs)
+
+        self.scheduler = Scheduler()
+
     def test_add_blocks(self):
-        s = Scheduler()
-        s.add_blocks(10, 100, "echo Hello")
+        self.scheduler.add_blocks(10, 100, "echo Hello")
 
     def test_bash_commands(self):
-        s = Scheduler()
-        s.add_blocks(10, 100, ["echo Hello", "generate block 1", "generate block 2"])
-        s.add_transactions(4, ["transact a -> b", "transact b -> c ", "transact c -> d"])
-        x = s.bash_commands()
+        self.scheduler.add_blocks(10, 100, ["echo Hello", "generate block 1", "generate block 2"])
+        self.scheduler.add_transactions(4, ["transact a -> b", "transact b -> c ", "transact c -> d"])
+        self.scheduler.bash_commands()
