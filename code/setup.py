@@ -26,7 +26,7 @@ def host(container_id):
 
 class Docker:
 
-    def __init__(self,plan):
+    def __init__(self, plan):
         self.plan = plan
 
     def __enter__(self):
