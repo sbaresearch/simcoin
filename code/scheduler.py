@@ -27,8 +27,8 @@ class Scheduler(list):
         random_numbers = numpy.random.exponential(scale=block_interval, size=count)
         points_in_time = itertools.accumulate(random_numbers)
         cmds = itertools.cycle(cmd)
-        cmds_with_point_in_time = zip(points_in_time, cmds)
-        self.merge(cmds_with_point_in_time)
+        cmds_with_time = zip(points_in_time, cmds)
+        self.merge(cmds_with_time)
 
     def add_tx(self, until, cmd, tx_per_second=1):
         tx_interval = 1.0 / tx_per_second
