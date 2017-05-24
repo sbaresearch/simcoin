@@ -126,10 +126,10 @@ def execution_plan(nodes, number_of_blocks, block_time, latency):
             plan.extend(node_manager.warmup_block_generation())
 
             sys.path.append('./btn/src')
-            s = Scheduler()
-            s.add_blocks(number_of_blocks, block_time, [node_manager.random_block_command() for _ in range(1000)])
-            s.add_transactions(10, [node_manager.random_transaction_command() for _ in range(10)], transactions_per_second=10)
-            plan.extend(s.bash_commands().split('\n'))
+            scheduler = Scheduler()
+            scheduler.add_blocks(number_of_blocks, block_time, [node_manager.random_block_command() for _ in range(1000)])
+            scheduler.add_transactions(10, [node_manager.random_transaction_command() for _ in range(10)], transactions_per_second=10)
+            plan.extend(scheduler.bash_commands().split('\n'))
 
             plan.append('sleep 3')  # wait for blocks to spread
 
