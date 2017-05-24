@@ -1,12 +1,12 @@
 import numpy
 import itertools
-    #
-    # scheduler.add(interval_in_seconds=10*60,distribution="poisson",cmd="generateblock 1 true")
-    # scheduler.add("every ten 10 minutes on average Poisson distributed trigger block found")
-    # scheduler.add("every 30 minutes add 1 % of nodes")
-    # scheduler.add("every `1/2.5` seconds create transaction")
-    # scheduler.onFinish(lambda: print("hello world"))
-    # schedule = scheduler.getSchedule()
+
+# scheduler.add(interval_in_seconds=10*60,distribution="poisson",cmd="generateblock 1 true")
+# scheduler.add("every ten 10 minutes on average Poisson distributed trigger block found")
+# scheduler.add("every 30 minutes add 1 % of nodes")
+# scheduler.add("every `1/2.5` seconds create transaction")
+# scheduler.onFinish(lambda: print("hello world"))
+# schedule = scheduler.getSchedule()
 
 
 class Scheduler(list):

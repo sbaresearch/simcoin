@@ -34,7 +34,7 @@ class Plan:
             plan.append(dockercmd.create_network(ip_range))
             plan.append(dockercmd.run_bootstrap_node(slow_network(latency) + bitcoindcmd.start('user')))
             plan.extend([dockercmd.run_node(_id, slow_network(latency) + bitcoindcmd.start('user')) for _id in self.ids])
-            plan.append('sleep 2') # wait before generating otherwise "Error -28" (still warming up)
+            plan.append('sleep 2')  # wait before generating otherwise "Error -28" (still warming up)
 
             plan.extend(self.warmup_block_generation())
 
