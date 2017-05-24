@@ -70,9 +70,8 @@ def node_info(node):
 
 
 def slow_network(latency):
+    # needed for this cmd: apt install iproute2 and --cap-add=NET_ADMIN
     return "tc qdisc replace dev eth0 root netem delay " + str(latency) + "ms; "
-    # apt install iproute2
-    # --cap-add=NET_ADMIN
 
 
 class NodeManager:
