@@ -1,0 +1,7 @@
+before_script:
+  - python --version
+
+unittest:
+  script:
+    - cd code
+    - python -m unittest discover -s tests
