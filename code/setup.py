@@ -72,23 +72,43 @@ def slow_network(latency):
     return "tc qdisc replace dev eth0 root netem delay " + str(latency) + "ms; "
 
 
-class NodeManager:
-    def __init__(self, plan, number_of_containers, latency):
-        self.ids = [container_prefix + str(element) for element in range(number_of_containers)]
-        self.nodes = [dockercmd.run_node(_id, slow_network(latency) + bitcoind_cmd('user')) for _id in self.ids]
-        self.plan = plan
-        self.latency = latency
+class Execution:
+    def __init__(self, number_of_nodes):
+        self.ids = [container_prefix + str(element) for element in range(number_of_nodes)]
 
-    def __enter__(self):
-        self.plan.append(dockercmd.run_bootstrap_node(slow_network(self.latency) + bitcoind_cmd('user')))
-        self.plan.extend(self.nodes)
-        self.plan.append('sleep 2') # wait before generating otherwise "Error -28" (still warming up)
-        return self
+        self.plan = []
 
-    def __exit__(self, exception_type, exception_value, traceback):
-        self.plan.extend([dockercmd.rm_node(_id) for _id in self.ids])
-        self.plan.append(dockercmd.rm_node('bootstrap'))
-        self.plan.append('sleep 5')
+    def create(self, latency, number_of_blocks, block_time):
+        plan = []
+
+        try:
+            plan.append(dockercmd.create_network(ip_range))
+            plan.append(dockercmd.run_bootstrap_node(slow_network(latency) + bitcoind_cmd('user')))
+            plan.extend([dockercmd.run_node(_id, slow_network(latency) + bitcoind_cmd('user')) for _id in self.ids])
+            plan.append('sleep 2') # wait before generating otherwise "Error -28" (still warming up)
+
+            plan.extend(self.warmup_block_generation())
+
+            scheduler = Scheduler()
+            scheduler.add_blocks(number_of_blocks, block_time, [self.random_block_command() for _ in range(1000)])
+            scheduler.add_transactions(10, [self.random_transaction_command() for _ in range(10)], transactions_per_second=10)
+            plan.extend(scheduler.bash_commands().split('\n'))
+
+            plan.append('sleep 3')  # wait for blocks to spread
+
+            plan.extend(self.log_chain_tips())
+
+            plan.append(dockercmd.fix_data_dirs_permissions())
+
+            plan.extend(logs.aggregate_logs(self.ids))
+
+        finally:
+            plan.extend([dockercmd.rm_node(_id) for _id in self.ids])
+            plan.append(dockercmd.rm_node('bootstrap'))
+            plan.append('sleep 5')
+            plan.append(dockercmd.rm_network())
+
+        return plan
 
     def random_node(self):
         return random.choice(self.ids)
@@ -110,28 +130,3 @@ class NodeManager:
 
     def log_chain_tips(self):
         return self.every_node_p('getchaintips > ' + guest_dir + '/chaintips.json')
-
-
-def execution_plan(nodes, number_of_blocks, block_time, latency):
-    plan = []
-    try:
-        plan.append(dockercmd.create_network(ip_range))
-        with NodeManager(plan, nodes, latency) as node_manager:
-            plan.extend(node_manager.warmup_block_generation())
-
-            scheduler = Scheduler()
-            scheduler.add_blocks(number_of_blocks, block_time, [node_manager.random_block_command() for _ in range(1000)])
-            scheduler.add_transactions(10, [node_manager.random_transaction_command() for _ in range(10)], transactions_per_second=10)
-            plan.extend(scheduler.bash_commands().split('\n'))
-
-            plan.append('sleep 3')  # wait for blocks to spread
-
-            plan.extend(node_manager.log_chain_tips())
-
-            plan.append(dockercmd.fix_data_dirs_permissions())
-
-            plan.extend(logs.aggregate_logs(node_manager.ids))
-    finally:
-        plan.append(dockercmd.rm_network())
-
-    return plan

@@ -4,6 +4,7 @@ import sys
 import os
 import argparse
 import setup
+from setup import Execution
 
 if sys.version_info <= (3, 0):
     print("Sorry, requires Python 3.x or above")
@@ -91,7 +92,8 @@ def run():
 
     os.system("rm -rf " + setup.host_dir('*'))
 
-    plan = setup.execution_plan(args.nodes, args.blocks, args.block_time, args.latency)
+    execution = Execution(args.nodes)
+    plan = execution.create(args.latency, args.blocks, args.block_time)
 
     if args.dry_run:
             print('\n'.join(plan))
