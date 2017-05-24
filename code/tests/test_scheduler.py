@@ -17,7 +17,7 @@ class TestScheduler(TestCase):
         self.assertEqual(self.scheduler[0][1], 'cmd')
 
     def test_add_blocks_ten_blocks(self):
-        self.scheduler.add_blocks(10, 1, ['cmd'])
+        self.scheduler.add_blocks(10, 1, ['cmd', 'cmd', 'cmd'])
 
         self.assertEqual(len(self.scheduler), 10)
 
@@ -35,7 +35,7 @@ class TestScheduler(TestCase):
         self.assertEqual(self.scheduler[0][1], 'cmd')
 
     def test_add_tx_ten_seconds(self):
-        self.scheduler.add_tx(10, ['cmd'], 1)
+        self.scheduler.add_tx(10, ['cmd', 'cmd', 'cmd'], 1)
 
         self.assertEqual(len(self.scheduler), 10)
 
