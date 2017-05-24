@@ -38,7 +38,7 @@ class Plan:
 
             plan.extend(self.warmup_block_generation())
 
-            scheduler = Scheduler()
+            scheduler = Scheduler(0)
             scheduler.add_blocks(number_of_blocks, block_interval, [self.random_block_command() for _ in range(1000)])
             scheduler.add_tx(10, [self.random_transaction_command() for _ in range(10)], tx_per_second=10)
             plan.extend(scheduler.bash_commands().split('\n'))
