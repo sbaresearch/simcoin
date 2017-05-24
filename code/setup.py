@@ -23,11 +23,6 @@ def host_dir(container_id):
     return root_dir + '/' + container_id
 
 
-def slow_network(latency):
-    # needed for this cmd: apt install iproute2 and --cap-add=NET_ADMIN
-    return "tc qdisc replace dev eth0 root netem delay " + str(latency) + "ms; "
-
-
 class Execution:
     def __init__(self, number_of_nodes):
         self.ids = [container_prefix + str(element) for element in range(number_of_nodes)]
@@ -86,3 +81,8 @@ class Execution:
 
     def log_chain_tips(self):
         return self.every_node_p('getchaintips > ' + guest_dir + '/chaintips.json')
+
+
+def slow_network(latency):
+    # needed for this cmd: apt install iproute2 and --cap-add=NET_ADMIN
+    return "tc qdisc replace dev eth0 root netem delay " + str(latency) + "ms; "
