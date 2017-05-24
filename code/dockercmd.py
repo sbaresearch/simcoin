@@ -1,7 +1,7 @@
 import setup
 
 
-def docker_bootstrap(cmd):
+def run_bootstrap_node(cmd):
     return (' '
             ' docker run '
             '   --detach=true '
@@ -14,7 +14,7 @@ def docker_bootstrap(cmd):
             )
 
 
-def docker_node(name, cmd):
+def run_node(name, cmd):
     return (' '
             ' docker run '
             '   --cap-add=NET_ADMIN ' # for `tc`
@@ -28,13 +28,13 @@ def docker_node(name, cmd):
             ' ')
 
 
-def docker_stop(name):
+def rm_node(name):
     return (' '
             ' docker rm --force ' + name + ' & '
             ' ')
 
 
-def cli(node, command):
+def exec_bash(node, command):
     return (' '
             ' docker exec '
             + node +

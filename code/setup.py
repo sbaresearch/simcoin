@@ -64,7 +64,7 @@ def node_info(node):
         #        'getmininginfo',
                 'getpeerinfo'
     ]
-    return ';'.join([dockercmd.cli(node, cmd) for cmd in commands])
+    return ';'.join([dockercmd.exec_bash(node, cmd) for cmd in commands])
 
 
 def slow_network(latency):
@@ -75,26 +75,26 @@ def slow_network(latency):
 class NodeManager:
     def __init__(self, plan, number_of_containers, latency):
         self.ids = [container_prefix + str(element) for element in range(number_of_containers)]
-        self.nodes = [dockercmd.docker_node(_id, slow_network(latency) + bitcoind_cmd('user')) for _id in self.ids]
+        self.nodes = [dockercmd.run_node(_id, slow_network(latency) + bitcoind_cmd('user')) for _id in self.ids]
         self.plan = plan
         self.latency = latency
 
     def __enter__(self):
-        self.plan.append(dockercmd.docker_bootstrap(slow_network(self.latency) + bitcoind_cmd('user')))
+        self.plan.append(dockercmd.run_bootstrap_node(slow_network(self.latency) + bitcoind_cmd('user')))
         self.plan.extend(self.nodes)
         self.plan.append('sleep 2') # wait before generating otherwise "Error -28" (still warming up)
         return self
 
     def __exit__(self, exception_type, exception_value, traceback):
-        self.plan.extend([dockercmd.docker_stop(_id) for _id in self.ids])
-        self.plan.append(dockercmd.docker_stop('bootstrap'))
+        self.plan.extend([dockercmd.rm_node(_id) for _id in self.ids])
+        self.plan.append(dockercmd.rm_node('bootstrap'))
         self.plan.append('sleep 5')
 
     def random_node(self):
         return random.choice(self.ids)
 
     def every_node_p(self, cmd):
-        return [dockercmd.cli(_id, cmd) for _id in self.ids]
+        return [dockercmd.exec_bash(_id, cmd) for _id in self.ids]
 
     def warmup_block_generation(self):
         # one block for each node ## This forks the chain from the beginning TODO remove
@@ -102,11 +102,11 @@ class NodeManager:
         return ['echo Begin of warmup'] + self.every_node_p('generate 1') + [self.random_block_command(100)] + ['sleep 5']
 
     def random_block_command(self, number=1):
-        return dockercmd.cli(self.random_node(), 'generate ' + str(number))
+        return dockercmd.exec_bash(self.random_node(), 'generate ' + str(number))
 
     def random_transaction_command(self):
         node = self.random_node()
-        return dockercmd.cli(node, 'sendtoaddress $(bitcoin-cli -regtest -datadir=' + guest_dir + ' getnewaddress) 10.0')
+        return dockercmd.exec_bash(node, 'sendtoaddress $(bitcoin-cli -regtest -datadir=' + guest_dir + ' getnewaddress) 10.0')
 
     def log_chain_tips(self):
         return self.every_node_p('getchaintips > ' + guest_dir + '/chaintips.json')
