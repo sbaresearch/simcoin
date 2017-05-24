@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import sys
 import os
+import random
+import sys
+from scheduler import Scheduler
 
 if sys.version_info <= (3, 0):
     print("Sorry, requires Python 3.x or above")
@@ -167,7 +169,6 @@ class NodeManager():
         self.plan.append('sleep 5')
 
     def random_node(self):
-        import random
         return random.choice(self.ids)
 
     def every_node_p(self, cmd):
@@ -197,9 +198,7 @@ def execution_plan(nodes, number_of_blocks, block_time, latency):
 
             plan.extend(nodeManager.warmup_block_generation())
 
-            import sys
             sys.path.append('./btn/src')
-            from scheduler import Scheduler
             s = Scheduler()
             s.add_blocks(number_of_blocks, block_time, [nodeManager.random_block_command() for _ in range(1000)])
             s.add_transactions(10, [nodeManager.random_transaction_command() for _ in range(10)], transactions_per_second=10)
