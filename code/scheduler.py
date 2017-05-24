@@ -32,7 +32,6 @@ class Scheduler(list):
         self.merge(fs)
 
     def add_transactions(self, count, cmd, transactions_per_second=1):
-        tps = 1  # transactions per second TODO set to 2.5
         time = numpy.arange(1.0, count, 1.0 / transactions_per_second)
         # times = itertools.accumulate(time)
         f = itertools.cycle(cmd)
