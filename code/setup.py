@@ -9,6 +9,9 @@ from scheduler import Scheduler
 # it does not conflict with https://github.com/bitcoin/bitcoin/blob/master/src/netbase.h
 ip_range = "240.0.0.0/4"
 ip_bootstrap = "240.0.0.2"
+root_dir = '$PWD/../data'
+guest_dir = '/data'
+log_file = '$PWD/../data/log'
 
 image = 'btn/base:v3'
 if os.system("docker inspect " + image + " > /dev/null") != 0:
@@ -17,24 +20,8 @@ if os.system("docker inspect " + image + " > /dev/null") != 0:
 container_prefix = 'btn-'
 
 
-class DataDir:
-
-    @staticmethod
-    def root_dir():
-        return '$PWD/../data'
-
-    @staticmethod
-    def host(container_id):
-        return DataDir.root_dir() + '/' + container_id
-
-    @staticmethod
-    def guest():
-        return '/data'
-
-    @staticmethod
-    def log_file():
-        """return the path to the execution log"""
-        return '$PWD/../data/log'
+def host(container_id):
+    return root_dir + '/' + container_id
 
 
 class Docker:
@@ -71,7 +58,7 @@ class Docker:
                 '   --net=isolated_network '
                 '   --name=' + name + ' '   # container name
                 '   --hostname=' + name + ' '
-                '   --volume ' + DataDir.host(name) + ':' + DataDir.guest() + ' '
+                '   --volume ' + host(name) + ':' + guest_dir + ' '
                 '   ' + image + ' '      # image name # src: https://hub.docker.com/r/abrkn/bitcoind/
                 '   bash -c "' + cmd + '" '
                 ' ')
@@ -88,8 +75,8 @@ class Docker:
                 ' docker exec '
                 + node +
                 ' /bin/sh -c \''
-                '    bitcoin-cli -regtest -datadir=' + DataDir.guest() + ' ' # -printtoconsole -daemon
-                +    command +
+                '    bitcoin-cli -regtest -datadir=' + guest_dir + ' '  # -printtoconsole -daemon
+                + command +
                 ' \' '
                 ' ')
 
@@ -98,7 +85,7 @@ def bitcoind_cmd(strategy='default'):
     daemon = ' bitcoind '
     default = {
           'regtest': ' -regtest ',             # activate regtest mode
-          'datadir': ' -datadir=' + DataDir.guest() + ' ',       # change the datadir
+          'datadir': ' -datadir=' + guest_dir + ' ',       # change the datadir
           'debug': ' -debug ',                 # log all events
           # 'printblocktree': ' -printblocktree', # removed (would print tree on startup)
           # 'printtoconsole': ' -printtoconsole ', # print the log to stdout instead of a file
@@ -180,17 +167,17 @@ class NodeManager():
 
     def random_transaction_command(self):
         node = self.random_node()
-        return Docker.cli(node, 'sendtoaddress $(bitcoin-cli -regtest -datadir=' + DataDir.guest() + ' getnewaddress) 10.0')
+        return Docker.cli(node, 'sendtoaddress $(bitcoin-cli -regtest -datadir=' + guest_dir + ' getnewaddress) 10.0')
 
     def log_chain_tips(self):
-        return self.every_node_p('getchaintips > ' + DataDir.guest() + '/chaintips.json')
+        return self.every_node_p('getchaintips > ' + guest_dir + '/chaintips.json')
 
 
 def execution_plan(nodes, number_of_blocks, block_time, latency):
     plan = []
     with Docker(plan):
         with NodeManager(plan, nodes, latency) as node_manager:
-            os.system("rm -rf " + DataDir.host('*'))
+            os.system("rm -rf " + host('*'))
 
             plan.extend(node_manager.warmup_block_generation())
 
@@ -204,7 +191,7 @@ def execution_plan(nodes, number_of_blocks, block_time, latency):
 
             plan.extend(node_manager.log_chain_tips())
 
-            plan.append('docker run --rm --volume ' + DataDir.root_dir() + ':/mnt' + ' ' + image + ' chmod a+rwx --recursive /mnt') # fix permissions on datadirs
+            plan.append('docker run --rm --volume ' + root_dir + ':/mnt' + ' ' + image + ' chmod a+rwx --recursive /mnt') # fix permissions on datadirs
 
             plan.extend(aggregate_logs(node_manager.ids))
 
@@ -214,9 +201,7 @@ def execution_plan(nodes, number_of_blocks, block_time, latency):
 def aggregate_logs(ids):
     commands = []
     timestamp_length = str(len('2016-09-22 14:46:41.706605'))
-    data_dir = DataDir.root_dir()
-    logfile = DataDir.log_file()
-    logfile_raw = logfile + '.raw'
+    logfile_raw = log_file + '.raw'
 
     def prefix_lines(prefix):
         return 'sed -e \'s/^/' + prefix + ' /\''
@@ -234,11 +219,11 @@ def aggregate_logs(ids):
         return 'sed "s/^.\{' + timestamp_length + '\}/& ' + _id + '/g"'
 
     "remove files from previous run"
-    commands.append('rm -rf ' + logfile)
+    commands.append('rm -rf ' + log_file)
     commands.append('rm -rf ' + logfile_raw)
 
     "consolidate logfiles from the nodes"
-    commands.extend([' cat ' + DataDir.host(_id) + '/regtest/debug.log '
+    commands.extend([' cat ' + host(_id) + '/regtest/debug.log '
                      ' |   ' + sed_command(_id) +
                      ' >>  ' + logfile_raw + '; '
                     for _id in ids])
@@ -248,16 +233,16 @@ def aggregate_logs(ids):
                     ' | ' + remove_empty_lines() +
                     ' | ' + remove_lines_starting_with_whitspace() +
                     ' | ' + remove_multiline_error_messages() +
-                    ' > ' + logfile
+                    ' > ' + log_file
                     )
     "sort by timestamp"
-    commands.append(' sort ' + logfile)
+    commands.append(' sort ' + log_file)
 
     "aggregate fork information"
-    commands.extend([' cat ' + DataDir.host(_id) + '/chaintips.json '
+    commands.extend([' cat ' + host(_id) + '/chaintips.json '
                      ' | jq "length" '
                      ' | ' + prefix_lines(_id) +
-                     ' >> ' + data_dir + '/forks; '
+                     ' >> ' + root_dir + '/forks; '
                     for _id in ids])
 
     return commands
