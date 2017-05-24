@@ -43,3 +43,19 @@ def exec_bash(node, command):
             + command +
             ' \' '
             ' ')
+
+
+def create_network(ip_range):
+        return (' docker network create'
+                ' --subnet=' + ip_range +
+                ' --driver bridge isolated_network;'
+                ' sleep 1 ')
+
+
+def rm_network():
+        return 'docker network rm isolated_network'
+
+
+def fix_data_dirs_permissions():
+        return (' docker run '
+                ' --rm --volume ' + setup.root_dir + ':/mnt' + ' ' + setup.image + ' chmod a+rwx --recursive /mnt')

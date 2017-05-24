@@ -115,7 +115,7 @@ class NodeManager:
 def execution_plan(nodes, number_of_blocks, block_time, latency):
     plan = []
     try:
-        plan.append('docker network create --subnet=' + ip_range + ' --driver bridge isolated_network ; sleep 1')
+        plan.append(dockercmd.create_network(ip_range))
         with NodeManager(plan, nodes, latency) as node_manager:
             plan.extend(node_manager.warmup_block_generation())
 
@@ -128,10 +128,10 @@ def execution_plan(nodes, number_of_blocks, block_time, latency):
 
             plan.extend(node_manager.log_chain_tips())
 
-            plan.append('docker run --rm --volume ' + root_dir + ':/mnt' + ' ' + image + ' chmod a+rwx --recursive /mnt') # fix permissions on datadirs
+            plan.append(dockercmd.fix_data_dirs_permissions())
 
             plan.extend(logs.aggregate_logs(node_manager.ids))
     finally:
-        plan.append('docker network rm isolated_network')
+        plan.append(dockercmd.rm_network())
 
     return plan
