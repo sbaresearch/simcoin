@@ -4,6 +4,7 @@ import os
 import random
 import sys
 from scheduler import Scheduler
+import dockercmd
 
 # IP range from RFC6890 - IP range for future use
 # it does not conflict with https://github.com/bitcoin/bitcoin/blob/master/src/netbase.h
@@ -20,63 +21,6 @@ container_prefix = 'btn-'
 
 def host(container_id):
     return root_dir + '/' + container_id
-
-
-class Docker:
-
-    def __init__(self, plan):
-        self.plan = plan
-
-    def __enter__(self):
-        self.plan.append('docker network create --subnet=' + ip_range + ' --driver bridge isolated_network ; sleep 1')
-        return self
-
-    def __exit__(self, exception_type, exception_value, traceback):
-        self.plan.append('docker network rm isolated_network')
-
-    @staticmethod
-    def docker_bootstrap_cmd(cmd):
-        return (' '
-                ' docker run '
-                '   --detach=true '
-                '   --net=isolated_network '
-                '   --ip=' + ip_bootstrap + ' '
-                '   --name=bootstrap'   # container name
-                '   ' + image + ' '      # image name # src: https://hub.docker.com/r/abrkn/bitcoind/
-                '   bash -c "' + cmd + '" '
-                ' '
-                )
-
-    @staticmethod
-    def docker_node_cmd(name, cmd):
-        return (' '
-                ' docker run '
-                '   --cap-add=NET_ADMIN ' # for `tc`
-                '   --detach=true '
-                '   --net=isolated_network '
-                '   --name=' + name + ' '   # container name
-                '   --hostname=' + name + ' '
-                '   --volume ' + host(name) + ':' + guest_dir + ' '
-                '   ' + image + ' '      # image name # src: https://hub.docker.com/r/abrkn/bitcoind/
-                '   bash -c "' + cmd + '" '
-                ' ')
-
-    @staticmethod
-    def docker_stp(name):
-        return (' '
-                ' docker rm --force ' + name + ' & '
-                ' ')
-
-    @staticmethod
-    def cli(node, command):
-        return (' '
-                ' docker exec '
-                + node +
-                ' /bin/sh -c \''
-                '    bitcoin-cli -regtest -datadir=' + guest_dir + ' '  # -printtoconsole -daemon
-                + command +
-                ' \' '
-                ' ')
 
 
 def bitcoind_cmd(strategy='default'):
@@ -121,7 +65,7 @@ def node_info(node):
         #        'getmininginfo',
                 'getpeerinfo'
     ]
-    return ';'.join([Docker.cli(node, cmd) for cmd in commands])
+    return ';'.join([dockercmd.cli(node, cmd) for cmd in commands])
 
 
 def slow_network(cmd, latency):
@@ -134,26 +78,26 @@ def slow_network(cmd, latency):
 class NodeManager():
     def __init__(self, plan, number_of_containers, latency):
         self.ids = [container_prefix + str(element) for element in range(number_of_containers)]
-        self.nodes = [Docker.docker_node_cmd(id, slow_network(bitcoind_cmd('user'), latency)) for id in self.ids ]
+        self.nodes = [dockercmd.docker_node(id, slow_network(bitcoind_cmd('user'), latency)) for id in self.ids]
         self.plan = plan
         self.latency = latency
 
     def __enter__(self):
-        self.plan.append(Docker.docker_bootstrap_cmd(slow_network(bitcoind_cmd('user'), self.latency)))
+        self.plan.append(dockercmd.docker_bootstrap(slow_network(bitcoind_cmd('user'), self.latency)))
         self.plan.extend(self.nodes)
         self.plan.append('sleep 2') # wait before generating otherwise "Error -28" (still warming up)
         return self
 
     def __exit__(self, exception_type, exception_value, traceback):
-        self.plan.extend([Docker.docker_stp(id) for id in self.ids])
-        self.plan.append(Docker.docker_stp('bootstrap'))
+        self.plan.extend([dockercmd.docker_stp(id) for id in self.ids])
+        self.plan.append(dockercmd.docker_stp('bootstrap'))
         self.plan.append('sleep 5')
 
     def random_node(self):
         return random.choice(self.ids)
 
     def every_node_p(self, cmd):
-        return [Docker.cli(_id, cmd) for _id in self.ids]
+        return [dockercmd.cli(_id, cmd) for _id in self.ids]
 
     def warmup_block_generation(self):
         # one block for each node ## This forks the chain from the beginning TODO remove
@@ -161,11 +105,11 @@ class NodeManager():
         return ['echo Begin of warmup'] + self.every_node_p('generate 1') + [self.random_block_command(100)] + ['sleep 5']
 
     def random_block_command(self, number=1):
-        return Docker.cli(self.random_node(), 'generate ' + str(number))
+        return dockercmd.cli(self.random_node(), 'generate ' + str(number))
 
     def random_transaction_command(self):
         node = self.random_node()
-        return Docker.cli(node, 'sendtoaddress $(bitcoin-cli -regtest -datadir=' + guest_dir + ' getnewaddress) 10.0')
+        return dockercmd.cli(node, 'sendtoaddress $(bitcoin-cli -regtest -datadir=' + guest_dir + ' getnewaddress) 10.0')
 
     def log_chain_tips(self):
         return self.every_node_p('getchaintips > ' + guest_dir + '/chaintips.json')
@@ -173,7 +117,8 @@ class NodeManager():
 
 def execution_plan(nodes, number_of_blocks, block_time, latency):
     plan = []
-    with Docker(plan):
+    try:
+        plan.append('docker network create --subnet=' + ip_range + ' --driver bridge isolated_network ; sleep 1')
         with NodeManager(plan, nodes, latency) as node_manager:
             os.system("rm -rf " + host('*'))
 
@@ -192,6 +137,8 @@ def execution_plan(nodes, number_of_blocks, block_time, latency):
             plan.append('docker run --rm --volume ' + root_dir + ':/mnt' + ' ' + image + ' chmod a+rwx --recursive /mnt') # fix permissions on datadirs
 
             plan.extend(aggregate_logs(node_manager.ids))
+    finally:
+        plan.append('docker network rm isolated_network')
 
     return plan
 
