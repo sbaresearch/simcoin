@@ -82,6 +82,10 @@ def run():
                         args.trail_stubborn is not None:
             parser.error('when selfish_nodes is 0 no selfish mining settings should be set')
 
+    if os.system("docker inspect " + setup.image + " > /dev/null") != 0:
+        print("Image " + setup.image + " not found")
+        exit()
+
     print("arguments called with: {}".format(sys.argv))
     print("parsed arguments: {}".format(args))
     plan = setup.execution_plan(args.nodes, args.blocks, args.block_time, args.latency)

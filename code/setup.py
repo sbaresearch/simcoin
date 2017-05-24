@@ -14,9 +14,6 @@ guest_dir = '/data'
 log_file = '$PWD/../data/log'
 
 image = 'btn/base:v3'
-if os.system("docker inspect " + image + " > /dev/null") != 0:
-    print("Image " + image + " not found")
-    exit()
 container_prefix = 'btn-'
 
 
