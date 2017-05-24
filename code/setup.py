@@ -121,7 +121,6 @@ def execution_plan(nodes, number_of_blocks, block_time, latency):
         with NodeManager(plan, nodes, latency) as node_manager:
             plan.extend(node_manager.warmup_block_generation())
 
-            sys.path.append('./btn/src')
             scheduler = Scheduler()
             scheduler.add_blocks(number_of_blocks, block_time, [node_manager.random_block_command() for _ in range(1000)])
             scheduler.add_transactions(10, [node_manager.random_transaction_command() for _ in range(10)], transactions_per_second=10)
