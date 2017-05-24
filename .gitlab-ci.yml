@@ -1,6 +1,6 @@
 before_script:
   - python --version
-  - pip install -r requirements.txt
+  - pip install -r code/requirements.txt
 
 unittest:
   script:
