@@ -69,9 +69,8 @@ def node_info(node):
     return ';'.join([dockercmd.cli(node, cmd) for cmd in commands])
 
 
-def slow_network(cmd, latency):
-    traffic_control = "tc qdisc replace dev eth0 root netem delay " + str(latency) + "ms"
-    return traffic_control + "; " + cmd
+def slow_network(latency):
+    return "tc qdisc replace dev eth0 root netem delay " + str(latency) + "ms; "
     # apt install iproute2
     # --cap-add=NET_ADMIN
 
@@ -79,12 +78,12 @@ def slow_network(cmd, latency):
 class NodeManager:
     def __init__(self, plan, number_of_containers, latency):
         self.ids = [container_prefix + str(element) for element in range(number_of_containers)]
-        self.nodes = [dockercmd.docker_node(id, slow_network(bitcoind_cmd('user'), latency)) for id in self.ids]
+        self.nodes = [dockercmd.docker_node(id, slow_network(latency) + bitcoind_cmd('user')) for id in self.ids]
         self.plan = plan
         self.latency = latency
 
     def __enter__(self):
-        self.plan.append(dockercmd.docker_bootstrap(slow_network(bitcoind_cmd('user'), self.latency)))
+        self.plan.append(dockercmd.docker_bootstrap(slow_network(self.latency) + bitcoind_cmd('user')))
         self.plan.extend(self.nodes)
         self.plan.append('sleep 2') # wait before generating otherwise "Error -28" (still warming up)
         return self
