@@ -5,10 +5,6 @@ import random
 import sys
 from scheduler import Scheduler
 
-if sys.version_info <= (3, 0):
-    print("Sorry, requires Python 3.x or above")
-    sys.exit(1)
-
 # IP range from RFC6890 - IP range for future use
 # it does not conflict with https://github.com/bitcoin/bitcoin/blob/master/src/netbase.h
 ip_range = "240.0.0.0/4"
