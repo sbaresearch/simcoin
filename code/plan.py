@@ -27,7 +27,7 @@ class Plan:
     def __init__(self, number_of_nodes):
         self.ids = [container_prefix + str(element) for element in range(number_of_nodes)]
 
-    def create(self, latency, number_of_blocks, block_time):
+    def create(self, latency, number_of_blocks, block_interval):
         plan = []
 
         try:
@@ -39,7 +39,7 @@ class Plan:
             plan.extend(self.warmup_block_generation())
 
             scheduler = Scheduler()
-            scheduler.add_blocks(number_of_blocks, block_time, [self.random_block_command() for _ in range(1000)])
+            scheduler.add_blocks(number_of_blocks, block_interval, [self.random_block_command() for _ in range(1000)])
             scheduler.add_transactions(10, [self.random_transaction_command() for _ in range(10)], transactions_per_second=10)
             plan.extend(scheduler.bash_commands().split('\n'))
 

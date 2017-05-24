@@ -21,9 +21,9 @@ class Scheduler(list):
         self.extend(delay_queue)
         self.sort()
 
-    def add_blocks(self, count, block_time, cmd):
+    def add_blocks(self, count, block_interval, cmd):
         numpy.random.seed(0)
-        s = numpy.random.exponential(scale=block_time, size=count, ) # TODO set to 600
+        s = numpy.random.exponential(scale=block_interval, size=count, ) # TODO set to 600
         ss = itertools.accumulate(s)
         f = itertools.cycle(cmd)
         fs = zip(ss, f)

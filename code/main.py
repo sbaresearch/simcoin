@@ -36,10 +36,10 @@ parser.add_argument('--blocks'
                     , type=check_positive
                     , help='Number of blocks to be generated.'
                     )
-parser.add_argument('--block-time'
+parser.add_argument('--block-interval'
                     , default=10
                     , type=check_positive
-                    , help='Targeted generation time in seconds.'
+                    , help='Targeted block interval time in seconds.'
                     )
 parser.add_argument('--latency'
                     , default=100
@@ -93,7 +93,7 @@ def run():
     os.system("rm -rf " + plan.host_dir('*'))
 
     p = Plan(args.nodes)
-    commands = p.create(args.latency, args.blocks, args.block_time)
+    commands = p.create(args.latency, args.blocks, args.block_interval)
 
     if args.dry_run:
             print('\n'.join(commands))
