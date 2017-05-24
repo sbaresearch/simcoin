@@ -40,7 +40,7 @@ class Plan:
 
             scheduler = Scheduler(0)
             scheduler.add_blocks(number_of_blocks, block_interval, [self.random_block_command() for _ in range(1000)])
-            scheduler.add_tx(10, [self.random_transaction_command() for _ in range(10)], tx_per_second=10)
+            scheduler.add_tx(number_of_blocks * block_interval, [self.random_transaction_command() for _ in range(10)])
             plan.extend(scheduler.bash_commands())
 
             plan.append('sleep 3')  # wait for blocks to spread
