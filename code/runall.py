@@ -84,7 +84,7 @@ def run():
 
     print("arguments called with: {}".format(sys.argv))
     print("parsed arguments: {}".format(args))
-    plan = setup.executionPlan(args.nodes, args.blocks, args.block_time, args.latency)
+    plan = setup.execution_plan(args.nodes, args.blocks, args.block_time, args.latency)
 
     if args.dry_run:
             print('\n'.join(plan))

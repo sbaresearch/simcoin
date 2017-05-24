@@ -22,12 +22,12 @@ container_prefix = 'btn-'
 class DataDir:
 
     @staticmethod
-    def rootDir():
+    def root_dir():
         return '$PWD/../data'
 
     @staticmethod
     def host(container_id):
-        return DataDir.rootDir() + '/' + container_id
+        return DataDir.root_dir() + '/' + container_id
 
     @staticmethod
     def guest():
@@ -52,7 +52,7 @@ class Docker:
         self.plan.append('docker network rm isolated_network')
 
     @staticmethod
-    def dockerBootstrapCmd (cmd):
+    def docker_bootstrap_cmd(cmd):
         return (' '
                 ' docker run '
                 '   --detach=true '
@@ -65,7 +65,7 @@ class Docker:
                 )
 
     @staticmethod
-    def dockerNodeCmd (name,cmd):
+    def docker_node_cmd(name, cmd):
         return (' '
                 ' docker run '
                 '   --cap-add=NET_ADMIN ' # for `tc`
@@ -79,13 +79,13 @@ class Docker:
                 ' ')
 
     @staticmethod
-    def dockerStp (name):
+    def docker_stp(name):
         return (' '
                 ' docker rm --force ' + name + ' & '
                 ' ')
 
     @staticmethod
-    def cli(node,command):
+    def cli(node, command):
         return (' '
                 ' docker exec '
                 + node +
@@ -95,7 +95,8 @@ class Docker:
                 ' \' '
                 ' ')
 
-def bitcoindCmd (strategy = 'default'):
+
+def bitcoind_cmd(strategy='default'):
     daemon = ' bitcoind '
     default = {
           'regtest': ' -regtest ',             # activate regtest mode
@@ -129,7 +130,7 @@ def bitcoindCmd (strategy = 'default'):
     return daemon + (' '.join(default.values()))
 
 
-def nodeInfo(node):
+def node_info(node):
     commands = [
         #        'getconnectioncount',
         #        'getblockcount',
@@ -148,24 +149,24 @@ def slow_network(cmd, latency):
 
 
 class NodeManager():
-    def __init__(self,plan,number_of_containers,latency):
-        self.ids = [ container_prefix + str(element) for element in range(number_of_containers)]
-        self.nodes = [ Docker.dockerNodeCmd(id,slow_network(bitcoindCmd('user'),latency)) for id in self.ids ]
+    def __init__(self, plan, number_of_containers, latency):
+        self.ids = [container_prefix + str(element) for element in range(number_of_containers)]
+        self.nodes = [Docker.docker_node_cmd(id, slow_network(bitcoind_cmd('user'), latency)) for id in self.ids ]
         self.plan = plan
-        self.latency= latency
+        self.latency = latency
 
     def __enter__(self):
-        self.plan.append(Docker.dockerBootstrapCmd(slow_network(bitcoindCmd('user'), self.latency)))
+        self.plan.append(Docker.docker_bootstrap_cmd(slow_network(bitcoind_cmd('user'), self.latency)))
         self.plan.extend( self.nodes )
         self.plan.append('sleep 2') # wait before generating otherwise "Error -28" (still warming up)
         return self
 
     def __exit__(self, excpetion_type, exception_value, traceback):
-        self.plan.extend( [ Docker.dockerStp(id) for id in self.ids] )
-        self.plan.append( Docker.dockerStp('bootstrap') )
-        self.plan.append( 'sleep 5')
+        self.plan.extend([Docker.docker_stp(id) for id in self.ids])
+        self.plan.append(Docker.docker_stp('bootstrap'))
+        self.plan.append('sleep 5')
 
-    def randomNode(self):
+    def random_node(self):
         import random
         return random.choice(self.ids)
 
@@ -175,20 +176,20 @@ class NodeManager():
     def warmup_block_generation(self):
         # one block for each node ## This forks the chain from the beginning TODO remove
         # plus 100 blocks to enable spending
-        return ['echo Begin of warmup'] + self.every_node_p('generate 1') + [self.randomBlockCommand(100)] + ['sleep 5']
+        return ['echo Begin of warmup'] + self.every_node_p('generate 1') + [self.random_block_command(100)] + ['sleep 5']
 
-    def randomBlockCommand(self, number=1):
-        return Docker.cli(self.randomNode(), 'generate ' + str(number))
+    def random_block_command(self, number=1):
+        return Docker.cli(self.random_node(), 'generate ' + str(number))
 
-    def randomTransactionCommand(self):
-        node = self.randomNode()
+    def random_transaction_command(self):
+        node = self.random_node()
         return Docker.cli(node, 'sendtoaddress $(bitcoin-cli -regtest -datadir=' + DataDir.guest() + ' getnewaddress) 10.0')
 
-    def log_chaintips(self):
+    def log_chain_tips(self):
         return self.every_node_p('getchaintips > ' + DataDir.guest() + '/chaintips.json')
 
 
-def executionPlan(nodes, number_of_blocks, blockTime, latency):
+def execution_plan(nodes, number_of_blocks, block_time, latency):
     plan = []
     with Docker(plan):
         with NodeManager(plan, nodes, latency) as nodeManager:
@@ -200,15 +201,15 @@ def executionPlan(nodes, number_of_blocks, blockTime, latency):
             sys.path.append('./btn/src')
             from scheduler import Scheduler
             s = Scheduler()
-            s.addblocks(number_of_blocks, blockTime, [nodeManager.randomBlockCommand() for _ in range(1000)])
-            s.addtransactions(10, [nodeManager.randomTransactionCommand() for _ in range(10)], transactionsPerSecond = 10)
+            s.add_blocks(number_of_blocks, block_time, [nodeManager.random_block_command() for _ in range(1000)])
+            s.add_transactions(10, [nodeManager.random_transaction_command() for _ in range(10)], transactions_per_second=10)
             plan.extend(s.bash_commands().split('\n'))
 
             plan.append('sleep 3')  # wait for blocks to spread
 
-            plan.extend(nodeManager.log_chaintips())
+            plan.extend(nodeManager.log_chain_tips())
 
-            plan.append('docker run --rm --volume ' + DataDir.rootDir() + ':/mnt' + ' ' + image + ' chmod a+rwx --recursive /mnt') # fix permissions on datadirs
+            plan.append('docker run --rm --volume ' + DataDir.root_dir() + ':/mnt' + ' ' + image + ' chmod a+rwx --recursive /mnt') # fix permissions on datadirs
 
             plan.extend(aggregate_logs(nodeManager.ids))
 
@@ -218,10 +219,9 @@ def executionPlan(nodes, number_of_blocks, blockTime, latency):
 def aggregate_logs(ids):
     commands = []
     timestamp_length = str(len('2016-09-22 14:46:41.706605'))
-    data_dir = DataDir.rootDir()
+    data_dir = DataDir.root_dir()
     logfile = DataDir.log_file()
     logfile_raw = logfile + '.raw'
-
 
     def prefix_lines(prefix):
         return 'sed -e \'s/^/' + prefix + ' /\''
