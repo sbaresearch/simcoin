@@ -35,7 +35,6 @@ def start_user():
     specific_args = {
         'dnsseed':          '-dnsseed=0',  # disable dns seed lookups, otherwise this gets seeds even with docker --internal network
         'addnode':          '-addnode=' + plan.ip_bootstrap,  # only connect ourself introductionary node
-        'seednode':         '-seednode=240.0.0.3',
         'keypool':          '-keypool=1'
     }
     args.update(specific_args)
