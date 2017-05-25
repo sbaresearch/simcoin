@@ -23,6 +23,24 @@ def run_node(name, cmd):
             ' bash -c "' + cmd + '" ')
 
 
+def run_selfish_node(private_ip, public_ip, name, public_ips, cmd):
+    return (' docker run'
+            ' --detach=true'
+            ' --net=isolated_network'
+            ' --ip=' + public_ip +
+            ' --name=' + name + '_proxy'
+            ' --hostname=' + name +
+            ' ' + plan.selfish_node_image +
+            ' --ips-public ' + ' '.join(public_ips) + ';'
+            ' docker run'
+            ' --detach=true'
+            ' --net=isolated_network'
+            ' --ip=' + private_ip +
+            ' --name=' + name + '_private'
+            ' ' + plan.image +
+            ' bash -c "' + cmd + '"')
+
+
 def rm_node(name):
     return ' docker rm --force ' + name
 

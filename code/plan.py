@@ -16,6 +16,7 @@ guest_dir = '/data'
 log_file = '$PWD/../data/log'
 
 image = 'btn/base:v3'
+selfish_node_image = 'proxy'
 container_prefix = 'btn-'
 
 
