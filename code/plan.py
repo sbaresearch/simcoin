@@ -26,7 +26,7 @@ def host_dir(container_id):
 class Plan:
     def __init__(self, config):
         self.config = config
-        self.ids = [container_prefix + str(element) for element in range(config.nodes)]
+        self.node_ids = [container_prefix + str(_id) for _id in range(config.nodes)]
 
     def create(self):
         config = self.config
@@ -38,7 +38,7 @@ class Plan:
 
             plan.append(dockercmd.run_bootstrap_node(slow_network(config.latency) + bitcoindcmd.start_user()))
             plan.extend([dockercmd.run_node(_id, slow_network(config.latency)
-                                            + bitcoindcmd.start_user()) for _id in self.ids])
+                                            + bitcoindcmd.start_user()) for _id in self.node_ids])
             plan.append('sleep 2')  # wait before generating otherwise "Error -28" (still warming up)
 
             plan.extend(self.warmup_block_generation())
@@ -53,10 +53,10 @@ class Plan:
 
             plan.append(dockercmd.fix_data_dirs_permissions())
 
-            plan.extend(logs.aggregate_logs(self.ids))
+            plan.extend(logs.aggregate_logs(self.node_ids))
 
         finally:
-            plan.extend([dockercmd.rm_node(_id) for _id in self.ids])
+            plan.extend([dockercmd.rm_node(_id) for _id in self.node_ids])
             plan.append(dockercmd.rm_node('bootstrap'))
             plan.append('sleep 5')
             plan.append(dockercmd.rm_network())
@@ -64,10 +64,10 @@ class Plan:
         return plan
 
     def random_node(self):
-        return random.choice(self.ids)
+        return random.choice(self.node_ids)
 
     def every_node_p(self, cmd):
-        return [dockercmd.exec_bash(_id, cmd) for _id in self.ids]
+        return [dockercmd.exec_bash(_id, cmd) for _id in self.node_ids]
 
     def warmup_block_generation(self):
         # one block for each node ## This forks the chain from the beginning TODO remove
