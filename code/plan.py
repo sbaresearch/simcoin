@@ -5,18 +5,20 @@ from scheduler import Scheduler
 import dockercmd
 import bitcoindcmd
 import logs
+import ipaddress
 
 # IP range from RFC6890 - IP range for future use
 # it does not conflict with https://github.com/bitcoin/bitcoin/blob/master/src/netbase.h
 ip_range = "240.0.0.0/4"
-ip_bootstrap = "240.0.0.2"
+ip_bootstrap = "240.0.0.1"
 
 root_dir = '$PWD/../data'
 log_file = '$PWD/../data/log'
 
 image = 'btn/base:v3'
 selfish_node_image = 'proxy'
-container_prefix = 'btn-'
+node_prefix = 'node-'
+selfish_node_prefix = 'selfish-node-'
 
 
 def host_dir(container_id):
@@ -25,8 +27,12 @@ def host_dir(container_id):
 
 class Plan:
     def __init__(self, config):
+        ip_addresses = ipaddress.ip_network(ip_range).hosts()
+        next(ip_addresses)
+
         self.config = config
-        self.node_ids = [container_prefix + str(_id) for _id in range(config.nodes)]
+        self.nodes = [Node(node_prefix + str(_id), next(ip_addresses)) for _id in range(config.nodes)]
+        self.selfish_node_ids = [Node(selfish_node_prefix + str(_id), next(ip_addresses)) for _id in range(config.selfish_nodes)]
 
     def create(self):
         config = self.config
@@ -37,8 +43,8 @@ class Plan:
             plan.append('sleep 1')
 
             plan.append(dockercmd.run_bootstrap_node(slow_network(config.latency) + bitcoindcmd.start_user()))
-            plan.extend([dockercmd.run_node(_id, slow_network(config.latency)
-                                            + bitcoindcmd.start_user()) for _id in self.node_ids])
+            plan.extend([dockercmd.run_node(node.ip, node.id, slow_network(config.latency)
+                                            + bitcoindcmd.start_user()) for node in self.nodes])
             plan.append('sleep 2')  # wait before generating otherwise "Error -28" (still warming up)
 
             plan.extend(self.warmup_block_generation())
@@ -53,10 +59,10 @@ class Plan:
 
             plan.append(dockercmd.fix_data_dirs_permissions())
 
-            plan.extend(logs.aggregate_logs(self.node_ids))
+            plan.extend(logs.aggregate_logs(self.nodes))
 
         finally:
-            plan.extend([dockercmd.rm_node(_id) for _id in self.node_ids])
+            plan.extend([dockercmd.rm_node(node.id) for node in self.nodes])
             plan.append(dockercmd.rm_node('bootstrap'))
             plan.append('sleep 5')
             plan.append(dockercmd.rm_network())
@@ -64,10 +70,10 @@ class Plan:
         return plan
 
     def random_node(self):
-        return random.choice(self.node_ids)
+        return random.choice(self.nodes)
 
     def every_node_p(self, cmd):
-        return [dockercmd.exec_bash(_id, cmd) for _id in self.node_ids]
+        return [dockercmd.exec_bash(node.id, cmd) for node in self.nodes]
 
     def warmup_block_generation(self):
         # one block for each node ## This forks the chain from the beginning TODO remove
@@ -75,16 +81,27 @@ class Plan:
         return ['echo Begin of warmup'] + self.every_node_p('generate 1') + [self.random_block_command(100)] + ['sleep 5']
 
     def random_block_command(self, number=1):
-        return dockercmd.exec_bash(self.random_node(), 'generate ' + str(number))
+        return dockercmd.exec_bash(self.random_node().id, 'generate ' + str(number))
 
     def random_tx_command(self):
         node = self.random_node()
-        return dockercmd.exec_bash(node, 'sendtoaddress $(bitcoin-cli -regtest -datadir=' + bitcoindcmd.guest_dir + ' getnewaddress) 10.0')
+        return dockercmd.exec_bash(node.id, 'sendtoaddress $(bitcoin-cli -regtest -datadir=' + bitcoindcmd.guest_dir + ' getnewaddress) 10.0')
 
     def log_chain_tips(self):
         return self.every_node_p('getchaintips > ' + bitcoindcmd.guest_dir + '/chaintips.json')
+
+    def random_sample_of_nodes(self):
+        amount = int(self.config.nodes * self.config.connectivity)
+        nodes = random.sample(self.nodes, amount)
+        return nodes
 
 
 def slow_network(latency):
     # needed for this cmd: apt install iproute2 and --cap-add=NET_ADMIN
     return "tc qdisc replace dev eth0 root netem delay " + str(latency) + "ms; "
+
+
+class Node:
+    def __init__(self, _id, ip):
+        self.id = _id
+        self.ip = ip

@@ -1,7 +1,7 @@
 import plan
 
 
-def aggregate_logs(ids):
+def aggregate_logs(nodes):
     commands = []
     timestamp_length = str(len('2016-09-22 14:46:41.706605'))
     logfile_raw = plan.log_file + '.raw'
@@ -26,10 +26,10 @@ def aggregate_logs(ids):
     commands.append('rm -rf ' + logfile_raw)
 
     "consolidate logfiles from the nodes"
-    commands.extend([' cat ' + plan.host_dir(_id) + '/regtest/debug.log '
-                     ' |   ' + sed_command(_id) +
+    commands.extend([' cat ' + plan.host_dir(node.id) + '/regtest/debug.log '
+                     ' |   ' + sed_command(node.id) +
                      ' >>  ' + logfile_raw + '; '
-                     for _id in ids])
+                     for node in nodes])
 
     "clean the logfiles"
     commands.append(' cat ' + logfile_raw +
@@ -42,10 +42,10 @@ def aggregate_logs(ids):
     commands.append(' sort ' + plan.log_file)
 
     "aggregate fork information"
-    commands.extend([' cat ' + plan.host_dir(_id) + '/chaintips.json '
+    commands.extend([' cat ' + plan.host_dir(node.id) + '/chaintips.json '
                      ' | jq "length" '
-                     ' | ' + prefix_lines(_id) +
+                     ' | ' + prefix_lines(node.id) +
                      ' >> ' + plan.root_dir + '/forks; '
-                     for _id in ids])
+                     for node in nodes])
 
     return commands

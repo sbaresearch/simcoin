@@ -12,11 +12,12 @@ def run_bootstrap_node(cmd):
             '   bash -c "' + cmd + '" ')
 
 
-def run_node(name, cmd):
+def run_node(ip, name, cmd):
     return (' docker run '
             ' --cap-add=NET_ADMIN '  # for `tc`
             ' --detach=true '
             ' --net=isolated_network '
+            ' --ip=' + str(ip) +
             ' --name=' + name + ' '   # container name
             ' --hostname=' + name + ' '
             ' --volume ' + plan.host_dir(name) + ':' + bitcoindcmd.guest_dir + ' '
