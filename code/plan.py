@@ -12,7 +12,6 @@ ip_range = "240.0.0.0/4"
 ip_bootstrap = "240.0.0.2"
 
 root_dir = '$PWD/../data'
-guest_dir = '/data'
 log_file = '$PWD/../data/log'
 
 image = 'btn/base:v3'
@@ -37,9 +36,9 @@ class Plan:
             plan.append(dockercmd.create_network(ip_range))
             plan.append('sleep 1')
 
-            plan.append(dockercmd.run_bootstrap_node(slow_network(config.latency) + bitcoindcmd.start('user')))
+            plan.append(dockercmd.run_bootstrap_node(slow_network(config.latency) + bitcoindcmd.start_user()))
             plan.extend([dockercmd.run_node(_id, slow_network(config.latency)
-                                            + bitcoindcmd.start('user')) for _id in self.ids])
+                                            + bitcoindcmd.start_user()) for _id in self.ids])
             plan.append('sleep 2')  # wait before generating otherwise "Error -28" (still warming up)
 
             plan.extend(self.warmup_block_generation())
@@ -80,10 +79,10 @@ class Plan:
 
     def random_tx_command(self):
         node = self.random_node()
-        return dockercmd.exec_bash(node, 'sendtoaddress $(bitcoin-cli -regtest -datadir=' + guest_dir + ' getnewaddress) 10.0')
+        return dockercmd.exec_bash(node, 'sendtoaddress $(bitcoin-cli -regtest -datadir=' + bitcoindcmd.guest_dir + ' getnewaddress) 10.0')
 
     def log_chain_tips(self):
-        return self.every_node_p('getchaintips > ' + guest_dir + '/chaintips.json')
+        return self.every_node_p('getchaintips > ' + bitcoindcmd.guest_dir + '/chaintips.json')
 
 
 def slow_network(latency):

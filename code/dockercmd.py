@@ -1,4 +1,5 @@
 import plan
+import bitcoindcmd
 
 
 def run_bootstrap_node(cmd):
@@ -18,7 +19,7 @@ def run_node(name, cmd):
             ' --net=isolated_network '
             ' --name=' + name + ' '   # container name
             ' --hostname=' + name + ' '
-            ' --volume ' + plan.host_dir(name) + ':' + plan.guest_dir + ' '
+            ' --volume ' + plan.host_dir(name) + ':' + bitcoindcmd.guest_dir + ' '
             ' ' + plan.image + ' '      # image name # src: https://hub.docker.com/r/abrkn/bitcoind/
             ' bash -c "' + cmd + '" ')
 
@@ -49,7 +50,7 @@ def exec_bash(node, command):
     return (' docker exec '
             + node +
             ' /bin/sh -c \''
-            '    bitcoin-cli -regtest -datadir=' + plan.guest_dir + ' '  # -printtoconsole -daemon
+            '    bitcoin-cli -regtest -datadir=' + bitcoindcmd.guest_dir + ' '  # -printtoconsole -daemon
             + command +
             ' \' '
             ' ')
