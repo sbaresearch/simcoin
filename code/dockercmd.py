@@ -47,8 +47,7 @@ def exec_bash(node, command):
 def create_network(ip_range):
         return (' docker network create'
                 ' --subnet=' + ip_range +
-                ' --driver bridge isolated_network;'
-                ' sleep 1 ')
+                ' --driver bridge isolated_network')
 
 
 def rm_network():
