@@ -24,25 +24,28 @@ def host_dir(container_id):
 
 
 class Plan:
-    def __init__(self, number_of_nodes):
-        self.ids = [container_prefix + str(element) for element in range(number_of_nodes)]
+    def __init__(self, config):
+        self.config = config
+        self.ids = [container_prefix + str(element) for element in range(config.nodes)]
 
-    def create(self, latency, number_of_blocks, block_interval):
+    def create(self):
+        config = self.config
         plan = []
 
         try:
             plan.append(dockercmd.create_network(ip_range))
             plan.append('sleep 1')
 
-            plan.append(dockercmd.run_bootstrap_node(slow_network(latency) + bitcoindcmd.start('user')))
-            plan.extend([dockercmd.run_node(_id, slow_network(latency) + bitcoindcmd.start('user')) for _id in self.ids])
+            plan.append(dockercmd.run_bootstrap_node(slow_network(config.latency) + bitcoindcmd.start('user')))
+            plan.extend([dockercmd.run_node(_id, slow_network(config.latency)
+                                            + bitcoindcmd.start('user')) for _id in self.ids])
             plan.append('sleep 2')  # wait before generating otherwise "Error -28" (still warming up)
 
             plan.extend(self.warmup_block_generation())
 
             scheduler = Scheduler(0)
-            scheduler.add_blocks(number_of_blocks, block_interval, [self.random_block_command() for _ in range(1000)])
-            scheduler.add_tx(number_of_blocks * block_interval, [self.random_tx_command() for _ in range(10)])
+            scheduler.add_blocks(config.blocks, config.block_interval, [self.random_block_command() for _ in range(1000)])
+            scheduler.add_tx(config.blocks * config.block_interval, [self.random_tx_command() for _ in range(10)])
             plan.extend(scheduler.bash_commands())
 
             plan.append('sleep 3')  # wait for blocks to spread

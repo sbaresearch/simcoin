@@ -92,8 +92,8 @@ def run():
 
     os.system("rm -rf " + plan.host_dir('*'))
 
-    p = Plan(args.nodes)
-    commands = p.create(args.latency, args.blocks, args.block_interval)
+    p = Plan(args)
+    commands = p.create()
 
     if args.dry_run:
             print('\n'.join(commands))
