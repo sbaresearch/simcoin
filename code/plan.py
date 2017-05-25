@@ -47,7 +47,6 @@ class Plan:
             scheduler.add_blocks(config.blocks, config.block_interval, [self.random_block_command() for _ in range(1000)])
             scheduler.add_tx(config.blocks * config.block_interval, [self.random_tx_command() for _ in range(10)])
             plan.extend(scheduler.bash_commands())
-
             plan.append('sleep 3')  # wait for blocks to spread
 
             plan.extend(self.log_chain_tips())
