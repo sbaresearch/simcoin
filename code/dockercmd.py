@@ -47,9 +47,9 @@ def rm_node(name):
     return ' docker rm --force ' + name
 
 
-def exec_bash(node, command):
+def exec_bash(name, command):
     return (' docker exec '
-            + node +
+            + name +
             ' /bin/sh -c \''
             '    bitcoin-cli -regtest -datadir=' + bitcoindcmd.guest_dir + ' '  # -printtoconsole -daemon
             + command +
