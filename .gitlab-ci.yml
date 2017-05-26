@@ -1,0 +1,8 @@
+before_script:
+  - python --version
+  - pip install -r code/requirements.txt
+
+unittest:
+  script:
+    - cd code
+    - python -m unittest discover -s tests

@@ -26,14 +26,14 @@ run infrastructure
 
 1. checkout this projects source code from `github`
 4. run `docker build --tag btn/base:v3 - < code/docker/baseimage` to build the docker image 
-5. run `setup.py` to run the simulation
+5. run `main.py` to run the simulation
 
 usage
 --------------
 
 bitcoind is the server that is run
 bitcoin-cli getblockcount for interaction
-script is src/setup.py
+script is src/main.py
 dependencies are "https://github.com/petertodd/python-bitcoinlib/archive/9b768434a78fac7654c02e3a71d5d0518eda4f3e.zip"
 
 # bitcoin source code

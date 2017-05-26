@@ -21,17 +21,17 @@ class Scheduler(list):
         self.extend(delay_queue)
         self.sort()
 
-    def addblocks(self,count, blockTime, cmd):
+    def add_blocks(self, count, block_time, cmd):
         numpy.random.seed(0)
-        s = numpy.random.exponential(scale=blockTime, size=count, ) # TODO set to 600
+        s = numpy.random.exponential(scale=block_time, size=count, ) # TODO set to 600
         ss = itertools.accumulate(s)
-        f = itertools.cycle( cmd )
-        fs = zip(ss,f)
+        f = itertools.cycle(cmd)
+        fs = zip(ss, f)
         self.merge(fs)
 
-    def addtransactions(self, count, cmd, transactionsPerSecond = 1):
+    def add_transactions(self, count, cmd, transactions_per_second=1):
         tps = 1  # transactions per second TODO set to 2.5
-        time = numpy.arange(1.0, count,1.0/transactionsPerSecond)
+        time = numpy.arange(1.0, count, 1.0 / transactions_per_second)
         # times = itertools.accumulate(time)
         f = itertools.cycle(cmd)
         plan = zip(time, f)
@@ -42,6 +42,6 @@ class Scheduler(list):
         prev_times = [0] + list(times)
         time_tuples = list(zip(prev_times, times))
         deltas = list(map(lambda x: x[1]-x[0], time_tuples))
-        sleeps = list(map((lambda t : " sleep {:5.5f} ; {} \n".format(t[0],t[1])),zip(deltas,cmds)))
+        sleeps = list(map((lambda t: " sleep {:5.5f} ; {} \n".format(t[0], t[1])), zip(deltas, cmds)))
         plan = "echo Begin of Scheduled commands\n {}".format(" ".join(sleeps))
         return plan
