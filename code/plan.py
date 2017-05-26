@@ -12,10 +12,10 @@ ip_range = "240.0.0.0/4"
 ip_bootstrap = "240.0.0.2"
 
 root_dir = '$PWD/../data'
-guest_dir = '/data'
 log_file = '$PWD/../data/log'
 
 image = 'btn/base:v3'
+selfish_node_image = 'proxy'
 container_prefix = 'btn-'
 
 
@@ -24,25 +24,29 @@ def host_dir(container_id):
 
 
 class Plan:
-    def __init__(self, number_of_nodes):
-        self.ids = [container_prefix + str(element) for element in range(number_of_nodes)]
+    def __init__(self, config):
+        self.config = config
+        self.ids = [container_prefix + str(element) for element in range(config.nodes)]
 
-    def create(self, latency, number_of_blocks, block_time):
+    def create(self):
+        config = self.config
         plan = []
 
         try:
             plan.append(dockercmd.create_network(ip_range))
-            plan.append(dockercmd.run_bootstrap_node(slow_network(latency) + bitcoindcmd.start('user')))
-            plan.extend([dockercmd.run_node(_id, slow_network(latency) + bitcoindcmd.start('user')) for _id in self.ids])
-            plan.append('sleep 2') # wait before generating otherwise "Error -28" (still warming up)
+            plan.append('sleep 1')
+
+            plan.append(dockercmd.run_bootstrap_node(slow_network(config.latency) + bitcoindcmd.start_user()))
+            plan.extend([dockercmd.run_node(_id, slow_network(config.latency)
+                                            + bitcoindcmd.start_user()) for _id in self.ids])
+            plan.append('sleep 2')  # wait before generating otherwise "Error -28" (still warming up)
 
             plan.extend(self.warmup_block_generation())
 
-            scheduler = Scheduler()
-            scheduler.add_blocks(number_of_blocks, block_time, [self.random_block_command() for _ in range(1000)])
-            scheduler.add_transactions(10, [self.random_transaction_command() for _ in range(10)], transactions_per_second=10)
-            plan.extend(scheduler.bash_commands().split('\n'))
-
+            scheduler = Scheduler(0)
+            scheduler.add_blocks(config.blocks, config.block_interval, [self.random_block_command() for _ in range(1000)])
+            scheduler.add_tx(config.blocks * config.block_interval, [self.random_tx_command() for _ in range(10)])
+            plan.extend(scheduler.bash_commands())
             plan.append('sleep 3')  # wait for blocks to spread
 
             plan.extend(self.log_chain_tips())
@@ -73,12 +77,12 @@ class Plan:
     def random_block_command(self, number=1):
         return dockercmd.exec_bash(self.random_node(), 'generate ' + str(number))
 
-    def random_transaction_command(self):
+    def random_tx_command(self):
         node = self.random_node()
-        return dockercmd.exec_bash(node, 'sendtoaddress $(bitcoin-cli -regtest -datadir=' + guest_dir + ' getnewaddress) 10.0')
+        return dockercmd.exec_bash(node, 'sendtoaddress $(bitcoin-cli -regtest -datadir=' + bitcoindcmd.guest_dir + ' getnewaddress) 10.0')
 
     def log_chain_tips(self):
-        return self.every_node_p('getchaintips > ' + guest_dir + '/chaintips.json')
+        return self.every_node_p('getchaintips > ' + bitcoindcmd.guest_dir + '/chaintips.json')
 
 
 def slow_network(latency):

@@ -30,22 +30,22 @@ parser.add_argument('--nodes'
                     , default=2
                     , type=check_positive
                     , help='Number of Bitcoin nodes spawned.'
-                   )
+                    )
 parser.add_argument('--blocks'
                     , default=100
                     , type=check_positive
                     , help='Number of blocks to be generated.'
-                   )
-parser.add_argument('--block-time'
+                    )
+parser.add_argument('--block-interval'
                     , default=10
                     , type=check_positive
-                    , help='Targeted generation time in seconds.'
-                   )
+                    , help='Targeted block interval time in seconds.'
+                    )
 parser.add_argument('--latency'
                     , default=100
                     , type=check_positive
                     , help='Network latency on all connections.'
-                   )
+                    )
 parser.add_argument('--dry-run'
                     , action='store_true'
                     , help='If true only prints the bash script without execution'
@@ -92,8 +92,8 @@ def run():
 
     os.system("rm -rf " + plan.host_dir('*'))
 
-    p = Plan(args.nodes)
-    commands = p.create(args.latency, args.blocks, args.block_time)
+    p = Plan(args)
+    commands = p.create()
 
     if args.dry_run:
             print('\n'.join(commands))
