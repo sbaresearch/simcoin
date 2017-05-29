@@ -83,7 +83,7 @@ class Plan:
     def random_node(self):
         return random.choice(self.nodes)
 
-    def every_node_p(self, cmd):
+    def exec_bash_every_node(self, cmd):
         return [dockercmd.exec_bash(node.name, cmd) for node in self.nodes]
 
     def warmup_block_generation(self):
@@ -99,7 +99,7 @@ class Plan:
         return dockercmd.exec_bash(node.name, 'sendtoaddress $(bitcoin-cli -regtest -datadir=' + bitcoindcmd.guest_dir + ' getnewaddress) 10.0')
 
     def log_chain_tips(self):
-        return self.every_node_p('getchaintips > ' + bitcoindcmd.guest_dir + '/chaintips.json')
+        return self.exec_bash_every_node('getchaintips > ' + bitcoindcmd.guest_dir + '/chaintips.json')
 
     def set_public_ips(self):
         all_nodes = self.nodes + self.selfish_nodes
