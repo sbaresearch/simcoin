@@ -26,8 +26,8 @@ def aggregate_logs(nodes):
     commands.append('rm -rf ' + logfile_raw)
 
     "consolidate logfiles from the nodes"
-    commands.extend([' cat ' + plan.host_dir(node.id) + '/regtest/debug.log '
-                     ' |   ' + sed_command(node.id) +
+    commands.extend([' cat ' + plan.host_dir(node.name) + '/regtest/debug.log '
+                     ' |   ' + sed_command(node.name) +
                      ' >>  ' + logfile_raw + '; '
                      for node in nodes])
 
@@ -42,9 +42,9 @@ def aggregate_logs(nodes):
     commands.append(' sort ' + plan.log_file)
 
     "aggregate fork information"
-    commands.extend([' cat ' + plan.host_dir(node.id) + '/chaintips.json '
+    commands.extend([' cat ' + plan.host_dir(node.name) + '/chaintips.json '
                      ' | jq "length" '
-                     ' | ' + prefix_lines(node.id) +
+                     ' | ' + prefix_lines(node.name) +
                      ' >> ' + plan.root_dir + '/forks; '
                      for node in nodes])
 

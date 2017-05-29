@@ -12,15 +12,15 @@ def run_bootstrap_node(cmd):
             '   bash -c "' + cmd + '" ')
 
 
-def run_node(ip, name, cmd):
+def run_node(node, cmd):
     return (' docker run '
             ' --cap-add=NET_ADMIN '  # for `tc`
             ' --detach=true '
             ' --net=isolated_network '
-            ' --ip=' + str(ip) +
-            ' --name=' + name + ' '   # container name
-            ' --hostname=' + name + ' '
-            ' --volume ' + plan.host_dir(name) + ':' + bitcoindcmd.guest_dir + ' '
+            ' --ip=' + str(node.ip) +
+            ' --name=' + node.name + ' '   # container name
+            ' --hostname=' + node.name + ' '
+            ' --volume ' + plan.host_dir(node.name) + ':' + bitcoindcmd.guest_dir + ' '
             ' ' + plan.image + ' '      # image name # src: https://hub.docker.com/r/abrkn/bitcoind/
             ' bash -c "' + cmd + '" ')
 
@@ -31,15 +31,15 @@ def run_selfish_node(node, cmd):
             ' --detach=true'
             ' --net=isolated_network'
             ' --ip=' + str(node.ip) +
-            ' --name=' + node.id + '_proxy'
-            ' --hostname=' + node.id +
+            ' --name=' + node.name + '_proxy'
+            ' --hostname=' + node.name +
             ' ' + plan.selfish_node_image +
             ' --ips-public ' + ' '.join(public_ips) + ';'
             ' docker run'
             ' --detach=true'
             ' --net=isolated_network'
             ' --ip=' + str(node.private_ip) +
-            ' --name=' + node.id + '_private'
+            ' --name=' + node.name + '_private'
             ' ' + plan.image +
             ' bash -c "' + cmd + '"')
 

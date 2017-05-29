@@ -46,7 +46,7 @@ class Plan:
             plan.append('sleep 1')
 
             plan.append(dockercmd.run_bootstrap_node(slow_network(config.latency) + bitcoindcmd.start_user()))
-            plan.extend([dockercmd.run_node(node.ip, node.id, slow_network(config.latency)
+            plan.extend([dockercmd.run_node(node, slow_network(config.latency)
                                             + bitcoindcmd.start_user()) for node in self.nodes])
             plan.extend([dockercmd.run_selfish_node(
                 node, slow_network(config.latency) + bitcoindcmd.start_selfish_mining(node))
@@ -69,7 +69,7 @@ class Plan:
             plan.extend(logs.aggregate_logs(self.nodes))
 
         finally:
-            plan.extend([dockercmd.rm_node(node.id) for node in self.nodes])
+            plan.extend([dockercmd.rm_node(node.name) for node in self.nodes])
             plan.append(dockercmd.rm_node('bootstrap'))
             plan.append('sleep 5')
             plan.append(dockercmd.rm_network())
@@ -80,7 +80,7 @@ class Plan:
         return random.choice(self.nodes)
 
     def every_node_p(self, cmd):
-        return [dockercmd.exec_bash(node.id, cmd) for node in self.nodes]
+        return [dockercmd.exec_bash(node.name, cmd) for node in self.nodes]
 
     def warmup_block_generation(self):
         # one block for each node ## This forks the chain from the beginning TODO remove
@@ -88,11 +88,11 @@ class Plan:
         return ['echo Begin of warmup'] + self.every_node_p('generate 1') + [self.random_block_command(100)] + ['sleep 5']
 
     def random_block_command(self, number=1):
-        return dockercmd.exec_bash(self.random_node().id, 'generate ' + str(number))
+        return dockercmd.exec_bash(self.random_node().name, 'generate ' + str(number))
 
     def random_tx_command(self):
         node = self.random_node()
-        return dockercmd.exec_bash(node.id, 'sendtoaddress $(bitcoin-cli -regtest -datadir=' + bitcoindcmd.guest_dir + ' getnewaddress) 10.0')
+        return dockercmd.exec_bash(node.name, 'sendtoaddress $(bitcoin-cli -regtest -datadir=' + bitcoindcmd.guest_dir + ' getnewaddress) 10.0')
 
     def log_chain_tips(self):
         return self.every_node_p('getchaintips > ' + bitcoindcmd.guest_dir + '/chaintips.json')
@@ -115,13 +115,13 @@ def slow_network(latency):
 
 
 class Node:
-    def __init__(self, _id, ip):
-        self.id = _id
+    def __init__(self, name, ip):
+        self.name = name
         self.ip = ip
 
 
 class SelfishNode(Node):
-    def __init__(self, _id, public_ip, private_ip):
-        super().__init__(_id, public_ip)
+    def __init__(self, name, public_ip, private_ip):
+        super().__init__(name, public_ip)
 
         self.private_ip = private_ip
