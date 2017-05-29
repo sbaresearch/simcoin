@@ -44,6 +44,8 @@ class Plan:
             self.set_public_ips()
 
         try:
+            plan.append("rm -rf " + host_dir('*'))
+
             plan.append(dockercmd.create_network(ip_range))
             plan.append('sleep 1')
 

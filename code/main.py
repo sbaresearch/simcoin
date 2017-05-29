@@ -85,8 +85,6 @@ def run():
     print("arguments called with: {}".format(sys.argv))
     print("parsed arguments: {}".format(args))
 
-    os.system("rm -rf " + plan.host_dir('*'))
-
     p = Plan(args)
     commands = p.create()
 
