@@ -3,7 +3,7 @@ import bitcoindcmd
 
 
 def run_bootstrap_node(cmd):
-    return (' docker run '
+    return ('docker run '
             ' --detach=true '
             ' --net=isolated_network '
             ' --ip=' + plan.ip_bootstrap + ' '
@@ -13,7 +13,7 @@ def run_bootstrap_node(cmd):
 
 
 def run_node(node, cmd):
-    return (' docker run '
+    return ('docker run '
             ' --cap-add=NET_ADMIN '  # for `tc`
             ' --detach=true '
             ' --net=isolated_network '
@@ -31,7 +31,7 @@ def run_selfish_node(node, cmd):
     return (
             #
             # public node
-            ' docker run'
+            'docker run'
             ' --detach=true'
             ' --net=isolated_network'
             ' --ip=' + str(node.ip) +
@@ -42,7 +42,7 @@ def run_selfish_node(node, cmd):
             ' --ips-public ' + ' '.join(public_ips) + ';'
             #
             # private node
-            ' docker run'
+            'docker run'
             ' --detach=true'
             ' --net=isolated_network'
             ' --ip=' + str(node.private_ip) +
@@ -52,11 +52,11 @@ def run_selfish_node(node, cmd):
 
 
 def rm_node(name):
-    return ' docker rm --force ' + name
+    return 'docker rm --force ' + name
 
 
 def exec_bash(name, command):
-    return (' docker exec '
+    return ('docker exec '
             + name +
             ' /bin/sh -c \''
             '    bitcoin-cli -regtest -datadir=' + bitcoindcmd.guest_dir + ' '  # -printtoconsole -daemon
@@ -66,7 +66,7 @@ def exec_bash(name, command):
 
 
 def create_network(ip_range):
-        return (' docker network create'
+        return ('docker network create'
                 ' --subnet=' + ip_range +
                 ' --driver bridge isolated_network')
 
@@ -76,5 +76,5 @@ def rm_network():
 
 
 def fix_data_dirs_permissions():
-        return (' docker run '
+        return ('docker run '
                 ' --rm --volume ' + plan.root_dir + ':/mnt' + ' ' + plan.node_image + ' chmod a+rwx --recursive /mnt')
