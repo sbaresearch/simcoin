@@ -20,10 +20,10 @@ def start():
     return transform_to_cmd(args)
 
 
-def start_selfish_mining(add_node):
+def start_selfish_mining(node):
     specific_args = {
         'keypool':          '-keypool=1',
-        'addnode':          '-addnode=' + add_node,
+        'addnode':          '-addnode=' + str(node.ip),
         'dnsseed':          '-dnsseed=0',
     }
     args.update(specific_args)
