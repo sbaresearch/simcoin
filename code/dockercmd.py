@@ -8,7 +8,7 @@ def run_bootstrap_node(cmd):
             ' --net=isolated_network '
             ' --ip=' + plan.ip_bootstrap + ' '
             ' --name=bootstrap'   # container name
-            ' ' + plan.image + ' '      # image name # src: https://hub.docker.com/r/abrkn/bitcoind/
+            ' ' + plan.node_image + ' '      # image name # src: https://hub.docker.com/r/abrkn/bitcoind/
             '   bash -c "' + cmd + '" ')
 
 
@@ -21,7 +21,7 @@ def run_node(node, cmd):
             ' --name=' + node.name + ' '   # container name
             ' --hostname=' + node.name + ' '
             ' --volume ' + plan.host_dir(node.name) + ':' + bitcoindcmd.guest_dir + ' '
-            ' ' + plan.image + ' '      # image name # src: https://hub.docker.com/r/abrkn/bitcoind/
+            ' ' + plan.node_image + ' '      # image name # src: https://hub.docker.com/r/abrkn/bitcoind/
             ' bash -c "' + cmd + '" ')
 
 
@@ -40,7 +40,7 @@ def run_selfish_node(node, cmd):
             ' --net=isolated_network'
             ' --ip=' + str(node.private_ip) +
             ' --name=' + node.name + '_private'
-            ' ' + plan.image +
+            ' ' + plan.node_image +
             ' bash -c "' + cmd + '"')
 
 
@@ -70,4 +70,4 @@ def rm_network():
 
 def fix_data_dirs_permissions():
         return (' docker run '
-                ' --rm --volume ' + plan.root_dir + ':/mnt' + ' ' + plan.image + ' chmod a+rwx --recursive /mnt')
+                ' --rm --volume ' + plan.root_dir + ':/mnt' + ' ' + plan.node_image + ' chmod a+rwx --recursive /mnt')

@@ -83,8 +83,8 @@ def run():
                         args.trail_stubborn is not None:
             parser.error('when selfish_nodes is 0 no selfish mining settings should be set')
 
-    if os.system("docker inspect " + plan.image + " > /dev/null") != 0:
-        print("Image " + plan.image + " not found")
+    if os.system("docker inspect " + plan.node_image + " > /dev/null") != 0:
+        print("Image " + plan.node_image + " not found")
         exit()
 
     if os.system("docker inspect " + plan.selfish_node_image + " > /dev/null") != 0:

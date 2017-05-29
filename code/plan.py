@@ -15,7 +15,7 @@ ip_bootstrap = "240.0.0.1"
 root_dir = '$PWD/../data'
 log_file = '$PWD/../data/log'
 
-image = 'btn/base:v3'
+node_image = 'btn/base:v3'
 selfish_node_image = 'proxy'
 node_prefix = 'node-'
 selfish_node_prefix = 'selfish-node-'

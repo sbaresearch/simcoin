@@ -14,5 +14,5 @@ class TestDockercmd(TestCase):
 
         self.assertTrue('--ips-public 192.168.0.1 192.168.0.2' in cmd)
         self.assertTrue(plan.selfish_node_image in cmd)
-        self.assertTrue(plan.image in cmd)
+        self.assertTrue(plan.node_image in cmd)
         self.assertTrue('  ' not in cmd)
