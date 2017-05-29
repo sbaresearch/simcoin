@@ -35,6 +35,7 @@ class Plan:
         self.nodes = [Node(node_prefix + str(i), next(ip_addresses)) for i in range(config.nodes)]
         self.selfish_nodes = [SelfishNode(selfish_node_prefix + str(i), next(ip_addresses), next(ip_addresses),
                                           config.selfish_nodes_args) for i in range(config.selfish_nodes)]
+        self.all_nodes = self.nodes + self.selfish_nodes
 
     def create(self):
         config = self.config
@@ -84,7 +85,7 @@ class Plan:
         return random.choice(self.nodes)
 
     def exec_bash_every_node(self, cmd):
-        return [dockercmd.exec_bash(node.name, cmd) for node in self.nodes]
+        return [dockercmd.exec_bash(node.name, cmd) for node in self.all_nodes]
 
     def warmup_block_generation(self):
         # one block for each node ## This forks the chain from the beginning TODO remove
