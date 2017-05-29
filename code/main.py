@@ -87,6 +87,10 @@ def run():
         print("Image " + plan.image + " not found")
         exit()
 
+    if os.system("docker inspect " + plan.selfish_node_image + " > /dev/null") != 0:
+        print("Image " + plan.selfish_node_image + " not found")
+        exit()
+
     print("arguments called with: {}".format(sys.argv))
     print("parsed arguments: {}".format(args))
 
