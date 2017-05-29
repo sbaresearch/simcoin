@@ -19,6 +19,7 @@ node_image = 'btn/base:v3'
 selfish_node_image = 'proxy'
 node_prefix = 'node-'
 selfish_node_prefix = 'selfish-node-'
+bootstrap_node_name = 'bootstrap'
 
 
 def host_dir(container_id):
@@ -70,7 +71,7 @@ class Plan:
 
         finally:
             plan.extend([dockercmd.rm_node(node.name) for node in self.nodes])
-            plan.append(dockercmd.rm_node('bootstrap'))
+            plan.append(dockercmd.rm_node(bootstrap_node_name))
             plan.append('sleep 5')
             plan.append(dockercmd.rm_network())
 

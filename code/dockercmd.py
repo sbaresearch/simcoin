@@ -7,7 +7,7 @@ def run_bootstrap_node(cmd):
             ' --detach=true '
             ' --net=isolated_network '
             ' --ip=' + plan.ip_bootstrap + ' '
-            ' --name=bootstrap'   # container name
+            ' --name=' + plan.bootstrap_node_name +   # container name
             ' ' + plan.node_image + ' '      # image name # src: https://hub.docker.com/r/abrkn/bitcoind/
             '   bash -c "' + cmd + '" ')
 
