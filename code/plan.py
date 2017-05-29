@@ -32,11 +32,14 @@ class Plan:
 
         self.config = config
         self.nodes = [Node(node_prefix + str(_id), next(ip_addresses)) for _id in range(config.nodes)]
-        self.selfish_node_ids = [Node(selfish_node_prefix + str(_id), next(ip_addresses)) for _id in range(config.selfish_nodes)]
+        self.selfish_nodes = [SelfishNode(selfish_node_prefix + str(_id), next(ip_addresses), next(ip_addresses)) for _id in range(config.selfish_nodes)]
 
     def create(self):
         config = self.config
         plan = []
+
+        if len(self.selfish_nodes) > 0:
+            self.set_public_ips()
 
         try:
             plan.append(dockercmd.create_network(ip_range))
@@ -45,6 +48,10 @@ class Plan:
             plan.append(dockercmd.run_bootstrap_node(slow_network(config.latency) + bitcoindcmd.start_user()))
             plan.extend([dockercmd.run_node(node.ip, node.id, slow_network(config.latency)
                                             + bitcoindcmd.start_user()) for node in self.nodes])
+            plan.extend([dockercmd.run_selfish_node(
+                node, slow_network(config.latency) + bitcoindcmd.start_selfish_mining(node))
+                for node in self.selfish_nodes])
+
             plan.append('sleep 2')  # wait before generating otherwise "Error -28" (still warming up)
 
             plan.extend(self.warmup_block_generation())
@@ -90,10 +97,16 @@ class Plan:
     def log_chain_tips(self):
         return self.every_node_p('getchaintips > ' + bitcoindcmd.guest_dir + '/chaintips.json')
 
-    def random_sample_of_nodes(self):
-        amount = int(self.config.nodes * self.config.connectivity)
-        nodes = random.sample(self.nodes, amount)
-        return nodes
+    def set_public_ips(self):
+        all_nodes = self.nodes + self.selfish_nodes
+        all_ips = [node.ip for node in all_nodes]
+        amount = int((len(all_ips) - 1) * self.config.connectivity)
+
+        for node in self.selfish_nodes:
+            all_ips.remove(node.ip)
+            ips = random.sample(all_ips, amount)
+            node.public_ips = ips
+            all_ips.append(node.ip)
 
 
 def slow_network(latency):
@@ -105,3 +118,10 @@ class Node:
     def __init__(self, _id, ip):
         self.id = _id
         self.ip = ip
+
+
+class SelfishNode(Node):
+    def __init__(self, _id, public_ip, private_ip):
+        super().__init__(_id, public_ip)
+
+        self.private_ip = private_ip
