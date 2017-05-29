@@ -46,7 +46,7 @@ def run_selfish_node(node, cmd):
             ' --detach=true'
             ' --net=isolated_network'
             ' --ip=' + str(node.private_ip) +
-            ' --name=' + node.name + '_private'
+            ' --name=' + node.name +
             ' ' + plan.node_image +
             ' bash -c "' + cmd + '"')
 
