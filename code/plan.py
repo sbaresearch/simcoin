@@ -32,8 +32,8 @@ class Plan:
         next(ip_addresses)  # omit first ip address used by bootstrap node
 
         self.config = config
-        self.nodes = [Node(node_prefix + str(_id), next(ip_addresses)) for _id in range(config.nodes)]
-        self.selfish_nodes = [SelfishNode(selfish_node_prefix + str(_id), next(ip_addresses), next(ip_addresses)) for _id in range(config.selfish_nodes)]
+        self.nodes = [Node(node_prefix + str(i), next(ip_addresses)) for i in range(config.nodes)]
+        self.selfish_nodes = [SelfishNode(selfish_node_prefix + str(i), next(ip_addresses), next(ip_addresses)) for i in range(config.selfish_nodes)]
 
     def create(self):
         config = self.config
