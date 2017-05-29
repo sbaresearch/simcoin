@@ -27,7 +27,7 @@ def check_positive(value):
 parser = argparse.ArgumentParser(description='Running Simcoin. A Bitcoin Network Simulator.')
 
 parser.add_argument('--nodes'
-                    , default=2
+                    , default=10
                     , type=check_positive
                     , help='Number of Bitcoin nodes spawned.'
                     )
