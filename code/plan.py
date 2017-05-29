@@ -28,7 +28,7 @@ def host_dir(container_id):
 class Plan:
     def __init__(self, config):
         ip_addresses = ipaddress.ip_network(ip_range).hosts()
-        next(ip_addresses)
+        next(ip_addresses)  # omit first ip address used by bootstrap node
 
         self.config = config
         self.nodes = [Node(node_prefix + str(_id), next(ip_addresses)) for _id in range(config.nodes)]
