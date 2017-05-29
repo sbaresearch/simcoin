@@ -33,7 +33,8 @@ class Plan:
 
         self.config = config
         self.nodes = [Node(node_prefix + str(i), next(ip_addresses)) for i in range(config.nodes)]
-        self.selfish_nodes = [SelfishNode(selfish_node_prefix + str(i), next(ip_addresses), next(ip_addresses)) for i in range(config.selfish_nodes)]
+        self.selfish_nodes = [SelfishNode(selfish_node_prefix + str(i), next(ip_addresses), next(ip_addresses),
+                                          config.selfish_nodes_args) for i in range(config.selfish_nodes)]
 
     def create(self):
         config = self.config
@@ -122,7 +123,8 @@ class Node:
 
 
 class SelfishNode(Node):
-    def __init__(self, name, public_ip, private_ip):
+    def __init__(self, name, public_ip, private_ip, selfish_nodes_args):
         super().__init__(name, public_ip)
 
         self.private_ip = private_ip
+        self.args = selfish_nodes_args

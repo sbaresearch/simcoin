@@ -59,29 +59,20 @@ parser.add_argument('--connectivity'
                     , type=check_percentage
                     , help='Number of nodes the selfish nodes are connected to'
                     )
-parser.add_argument('--lead-stubborn'
-                    , help='use lead-stubbornness in strategy'
-                    , action='store_const'
-                    , const=True
-                    )
-parser.add_argument('--equal-fork-stubborn'
-                    , help='use equal-fork-stubbornness in strategy'
-                    , action='store_const'
-                    , const=True
-                    )
-parser.add_argument('--trail-stubborn'
-                    , help='use N-trail-stubbornness in strategy'
-                    , type=check_positive
+parser.add_argument('--selfish-nodes-args'
+                    , help='Set args for selfish nodes'
+                    , default=''
                     )
 
 args = parser.parse_args()
 
 
 def run():
-    if args.selfish_nodes == 0:
-        if args.connectivity is not None or args.lead_stubborn is not None or args.equal_fork_stubborn is not None or \
-                        args.trail_stubborn is not None:
-            parser.error('when selfish_nodes is 0 no selfish mining settings should be set')
+    if args.selfish_nodes == 0 and args.connectivity is not None:
+            parser.error('when selfish_nodes is 0 connectivity should not be set')
+
+    if args.selfish_nodes > 0 and args.connectivity is None:
+        parser.error('when selfish_nodes is > 0 then connectivity should be set')
 
     if os.system("docker inspect " + plan.node_image + " > /dev/null") != 0:
         print("Image " + plan.node_image + " not found")

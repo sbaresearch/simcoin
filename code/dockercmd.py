@@ -27,6 +27,7 @@ def run_node(node, cmd):
 
 def run_selfish_node(node, cmd):
     public_ips = [str(ip) for ip in node.public_ips]
+    args = ' {}'.format(node.args) if node.args else ''
     return (
             #
             # public node
@@ -37,6 +38,7 @@ def run_selfish_node(node, cmd):
             ' --name=' + node.name + '_proxy'
             ' --hostname=' + node.name +
             ' ' + plan.selfish_node_image +
+            args +
             ' --ips-public ' + ' '.join(public_ips) + ';'
             #
             # private node
