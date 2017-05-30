@@ -93,12 +93,13 @@ def run():
     else:
         """ write execution plan to a file beforehand """
         with open("../data/execution-plan.sh", "w") as file:
+            file.write("#!/usr/bin/env bash\n")
             for command in commands:
                 file.write(command)
                 file.write("\n")
         """ execute plan line by line """
         for command in commands:
             print(command)
-            os.system(command)
+            os.system("/bin/bash -c '{}'".format(command))
 
 run()
