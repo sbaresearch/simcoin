@@ -10,7 +10,7 @@ import ipaddress
 # IP range from RFC6890 - IP range for future use
 # it does not conflict with https://github.com/bitcoin/bitcoin/blob/master/src/netbase.h
 ip_range = "240.0.0.0/4"
-ip_bootstrap = "240.0.0.1"
+ip_bootstrap = "240.0.0.2"
 
 root_dir = '$PWD/../data'
 log_file = '$PWD/../data/log'
@@ -29,6 +29,7 @@ def host_dir(container_id):
 class Plan:
     def __init__(self, config):
         ip_addresses = ipaddress.ip_network(ip_range).hosts()
+        next(ip_addresses)  # skipping first ip address (docker fails with error "is in use")
         next(ip_addresses)  # omit first ip address used by bootstrap node
 
         self.config = config
