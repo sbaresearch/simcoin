@@ -58,11 +58,9 @@ def rm_node(name):
 def exec_bash(name, command):
     return ('docker exec '
             + name +
-            ' /bin/sh -c \''
-            '    bitcoin-cli -regtest -datadir=' + bitcoindcmd.guest_dir + ' '  # -printtoconsole -daemon
-            + command +
-            ' \' '
-            ' ')
+            ' /bin/sh -c "'
+            'bitcoin-cli -regtest -datadir=' + bitcoindcmd.guest_dir + ' '  # -printtoconsole -daemon
+            + command + '"')
 
 
 def create_network(ip_range):
