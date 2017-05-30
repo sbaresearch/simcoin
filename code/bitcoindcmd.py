@@ -1,4 +1,5 @@
 import plan
+import dockercmd
 
 daemon = ' bitcoind '
 guest_dir = '/data'
@@ -61,3 +62,11 @@ def info():
         # 'getmininginfo',
         'getpeerinfo'
     ]
+
+
+def get_best_block_hash(node):
+    return dockercmd.exec_bash(node.name, 'getbestblockhash')
+
+
+def generate_block(node, amount=1):
+    return dockercmd.exec_bash(node.name, 'generate {}'.format(amount))
