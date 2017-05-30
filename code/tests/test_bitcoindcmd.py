@@ -9,6 +9,5 @@ class TestBitcoindcmd(TestCase):
         node = SelfishNode('name', '192.168.0.1', 'ip2s', 'args')
         cmd = bitcoindcmd.start_selfish_mining(node)
 
-        print(cmd)
         self.assertTrue('-addnode=192.168.0.1' in cmd)
         self.assertTrue('  ' not in cmd)
