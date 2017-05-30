@@ -89,9 +89,27 @@ class Plan:
         return [dockercmd.exec_bash(node.name, cmd) for node in self.all_nodes]
 
     def warmup_block_generation(self):
-        # one block for each node ## This forks the chain from the beginning TODO remove
-        # plus 100 blocks to enable spending
-        return ['echo Begin of warmup'] + self.every_node_p('generate 1') + [self.random_block_command(100)] + ['sleep 5']
+        cmds = ['echo Begin of warmup']
+        iter_nodes = iter(self.all_nodes)
+        prev_node = next(iter_nodes)
+        for node in iter_nodes:
+            bitcoindcmd.generate_block(prev_node)
+            self.wait_until_nodes_have_same_tip(cmds, prev_node, [node])
+            prev_node = node
+
+        leading_node = self.all_nodes[0]
+        cmds.append(bitcoindcmd.generate_block(leading_node, 101))
+        self.wait_until_nodes_have_same_tip(cmds, leading_node, self.all_nodes)
+
+        cmds.append('echo End of warmup')
+        return cmds
+
+    def wait_until_nodes_have_same_tip(self, cmds, leading_node, nodes):
+        highest_tip = bitcoindcmd.get_best_block_hash(leading_node)
+        for node in nodes:
+            node_tip = bitcoindcmd.get_best_block_hash(node)
+            cmds.append('while [[ $(' + highest_tip + ') != $(' + node_tip + ') ]]; ' +
+                        'do echo Waiting for blocks to spread; sleep 0.2; done')
 
     def random_block_command(self, number=1):
         return dockercmd.exec_bash(self.random_node().name, 'generate ' + str(number))
