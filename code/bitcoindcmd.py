@@ -79,6 +79,7 @@ def get_new_address(node):
 def send_to_address(node, address, amount):
     return exec_bitcoin_cli(node.name, 'sendtoaddress ' + address + ' ' + str(amount))
 
+
 def exec_bitcoin_cli(name, command):
     return dockercmd.exec_bash(name,
                                'bitcoin-cli'
