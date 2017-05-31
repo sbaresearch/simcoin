@@ -37,6 +37,7 @@ def run_selfish_node(node, cmd):
             ' --ip=' + str(node.ip) +
             ' --name=' + node.name + '_proxy'
             ' --hostname=' + node.name + '_proxy'
+            ' --rm'
             ' ' + plan.selfish_node_image +
             args +
             ' --ips-public ' + ' '.join(public_ips) + '; '
