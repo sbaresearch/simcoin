@@ -111,8 +111,8 @@ class Plan:
             cmds.append('while [[ $(' + highest_tip + ') != $(' + node_tip + ') ]]; ' +
                         'do echo Waiting for blocks to spread; sleep 0.2; done')
 
-    def random_block_command(self, number=1):
-        return dockercmd.exec_bash(self.random_node().name, 'generate ' + str(number))
+    def random_block_command(self, amount=1):
+        return bitcoindcmd.generate_block(self.random_node(), amount)
 
     def random_tx_command(self):
         node = self.random_node()
