@@ -68,7 +68,7 @@ class Plan:
             scheduler.add_blocks(config.blocks, config.block_interval, [self.random_block_command() for _ in range(1000)])
             scheduler.add_tx(config.blocks * config.block_interval, [self.random_tx_command() for _ in range(10)])
             plan.extend(scheduler.bash_commands())
-            plan.append('sleep 3')  # wait for blocks to spread
+            plan.append(self.wait_for_all_blocks_to_spread())
 
             plan.extend([bitcoindcmd.get_chain_tips(node) for node in self.all_nodes])
 
@@ -108,6 +108,14 @@ class Plan:
             node_tip = bitcoindcmd.get_best_block_hash(node)
             cmds.append('while [[ $(' + highest_tip + ') != $(' + node_tip + ') ]]; ' +
                         'do echo Waiting for blocks to spread; sleep 0.2; done')
+
+    def wait_for_all_blocks_to_spread(self):
+        block_counts = ['$(' + bitcoindcmd.get_block_count(node) + ')' for node in self.all_nodes]
+        return 'while : ; do block_counts=(' + ' '.join(block_counts) + '); '\
+               + 'prev=${block_counts[0]}; wait=false; echo Current block_counts=${block_counts[@]}; ' \
+                 'for i in "${block_counts[@]}"; do if [ $prev != $i ]; then wait=true; fi; done; ' \
+                 'if [ $wait == false ]; then break; fi; ' \
+                 'echo Waiting for blocks to spread...; sleep 0.2; done'
 
     def random_block_command(self, amount=1):
         return bitcoindcmd.generate_block(self.random_node(), amount)
