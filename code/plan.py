@@ -86,7 +86,7 @@ class Plan:
         return random.choice(self.nodes)
 
     def exec_bash_every_node(self, cmd):
-        return [dockercmd.exec_bash(node.name, cmd) for node in self.all_nodes]
+        return [bitcoindcmd.exec_bitcoin_cli(node.name, cmd) for node in self.all_nodes]
 
     def warmup_block_generation(self):
         cmds = ['echo Begin of warmup']

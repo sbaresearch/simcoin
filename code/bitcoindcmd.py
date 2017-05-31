@@ -65,8 +65,17 @@ def info():
 
 
 def get_best_block_hash(node):
-    return dockercmd.exec_bash(node.name, 'getbestblockhash')
+    return exec_bitcoin_cli(node.name, 'getbestblockhash')
 
 
 def generate_block(node, amount=1):
-    return dockercmd.exec_bash(node.name, 'generate {}'.format(amount))
+    return exec_bitcoin_cli(node.name, 'generate {}'.format(amount))
+
+
+def exec_bitcoin_cli(name, command):
+    return dockercmd.exec_bash(name,
+                               'bitcoin-cli'
+                               ' -regtest'
+                               ' -datadir=' + guest_dir +
+                               ' ' + command
+                               )
