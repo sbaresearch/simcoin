@@ -97,9 +97,8 @@ class Plan:
             self.wait_until_nodes_have_same_tip(cmds, prev_node, [node])
             prev_node = node
 
-        leading_node = self.all_nodes[0]
-        cmds.append(bitcoindcmd.generate_block(leading_node, 101))
-        self.wait_until_nodes_have_same_tip(cmds, leading_node, self.all_nodes)
+        cmds.append(bitcoindcmd.generate_block(prev_node, 101))
+        self.wait_until_nodes_have_same_tip(cmds, prev_node, self.all_nodes)
 
         cmds.append('echo End of warmup')
         return cmds
