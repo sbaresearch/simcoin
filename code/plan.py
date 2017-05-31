@@ -56,7 +56,7 @@ class Plan:
             plan.append(dockercmd.run_bootstrap_node(self.bootstrap_node, bitcoindcmd.start_user(), config.latency))
             plan.extend([dockercmd.run_node(node, bitcoindcmd.start_user(), config.latency) for node in self.nodes])
 
-            # add latency to all connections
+            # TODO: add latency to all connections
             plan.extend([dockercmd.run_selfish_node(node, bitcoindcmd.start_selfish_mining(node))
                          for node in self.selfish_nodes])
 
