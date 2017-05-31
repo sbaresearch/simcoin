@@ -36,7 +36,7 @@ def run_selfish_node(node, cmd):
             ' --net=isolated_network'
             ' --ip=' + str(node.ip) +
             ' --name=' + node.name + '_proxy'
-            ' --hostname=' + node.name +
+            ' --hostname=' + node.name + '_proxy'
             ' ' + plan.selfish_node_image +
             args +
             ' --ips-public ' + ' '.join(public_ips) + '; '
