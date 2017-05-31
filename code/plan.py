@@ -70,10 +70,9 @@ class Plan:
             plan.extend(scheduler.bash_commands())
             plan.append(self.wait_for_all_blocks_to_spread())
 
-            plan.extend([bitcoindcmd.get_chain_tips(node) for node in self.all_nodes])
-
             plan.append(dockercmd.fix_data_dirs_permissions())
 
+            plan.extend([bitcoindcmd.get_chain_tips(node) for node in self.all_nodes])
             plan.extend(logs.aggregate_logs(self.nodes))
 
         finally:
