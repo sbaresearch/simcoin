@@ -115,7 +115,9 @@ class Plan:
 
     def random_tx_command(self):
         node = self.random_node()
-        return dockercmd.exec_bash(node.name, 'sendtoaddress $(bitcoin-cli -regtest -datadir=' + bitcoindcmd.guest_dir + ' getnewaddress) 10.0')
+        first_cmd = bitcoindcmd.get_new_address(node)
+        second_cmd = bitcoindcmd.send_to_address(node, '$fresh_address', 0.1)
+        return 'fresh_address=$(' + first_cmd + '); ' + second_cmd
 
     def log_chain_tips(self):
         return self.exec_bash_every_node('getchaintips > ' + bitcoindcmd.guest_dir + '/chaintips.json')
