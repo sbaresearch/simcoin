@@ -122,9 +122,9 @@ class Plan:
 
     def random_tx_command(self):
         node = self.random_node()
-        first_cmd = bitcoindcmd.get_new_address(node)
-        second_cmd = bitcoindcmd.send_to_address(node, '$fresh_address', 0.1)
-        return 'fresh_address=$(' + first_cmd + '); ' + second_cmd
+        create_address_cmd = bitcoindcmd.get_new_address(node)
+        create_tx_cmd = bitcoindcmd.send_to_address(node, '$fresh_address', 0.1)
+        return 'fresh_address=$(' + create_address_cmd + '); ' + create_tx_cmd
 
     def set_public_ips(self):
         all_nodes = self.nodes + self.selfish_nodes
