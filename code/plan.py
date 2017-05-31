@@ -107,7 +107,7 @@ class Plan:
         for node in nodes:
             node_tip = bitcoindcmd.get_best_block_hash(node)
             cmds.append('while [[ $(' + highest_tip + ') != $(' + node_tip + ') ]]; ' +
-                        'do echo Waiting for blocks to spread; sleep 0.2; done')
+                        'do echo Waiting for blocks to spread...; sleep 0.2; done')
 
     def wait_for_all_blocks_to_spread(self):
         block_counts = ['$(' + bitcoindcmd.get_block_count(node) + ')' for node in self.all_nodes]
