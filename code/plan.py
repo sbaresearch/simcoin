@@ -68,7 +68,7 @@ class Plan:
             plan.extend(scheduler.bash_commands())
             plan.append('sleep 3')  # wait for blocks to spread
 
-            plan.extend(self.log_chain_tips())
+            plan.extend([bitcoindcmd.get_chain_tips(node) for node in self.all_nodes])
 
             plan.append(dockercmd.fix_data_dirs_permissions())
 
@@ -84,9 +84,6 @@ class Plan:
 
     def random_node(self):
         return random.choice(self.nodes)
-
-    def exec_bash_every_node(self, cmd):
-        return [bitcoindcmd.exec_bitcoin_cli(node.name, cmd) for node in self.all_nodes]
 
     def warmup_block_generation(self):
         cmds = ['echo Begin of warmup']
@@ -118,9 +115,6 @@ class Plan:
         first_cmd = bitcoindcmd.get_new_address(node)
         second_cmd = bitcoindcmd.send_to_address(node, '$fresh_address', 0.1)
         return 'fresh_address=$(' + first_cmd + '); ' + second_cmd
-
-    def log_chain_tips(self):
-        return self.exec_bash_every_node('getchaintips > ' + bitcoindcmd.guest_dir + '/chaintips.json')
 
     def set_public_ips(self):
         all_nodes = self.nodes + self.selfish_nodes
