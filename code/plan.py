@@ -129,6 +129,7 @@ class Plan:
             node.public_ips = ips
             all_ips.append(node.ip)
 
+
 class Node:
     def __init__(self, name, ip):
         self.name = name
