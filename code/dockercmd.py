@@ -2,12 +2,12 @@ import plan
 import bitcoindcmd
 
 
-def run_bootstrap_node(cmd):
+def run_bootstrap_node(node, cmd):
     return ('docker run '
             ' --detach=true '
             ' --net=isolated_network '
-            ' --ip=' + plan.ip_bootstrap + ' '
-            ' --name=' + plan.bootstrap_node_name +   # container name
+            ' --ip=' + node.ip + ' '
+            ' --name=' + node.name +   # container name
             ' ' + plan.node_image + ' '      # image name # src: https://hub.docker.com/r/abrkn/bitcoind/
             '   bash -c "' + cmd + '" ')
 
@@ -51,13 +51,13 @@ def run_selfish_node(node, cmd):
             ' bash -c "' + cmd + '"')
 
 
-def rm_node(name):
-    return 'docker rm --force ' + name
+def rm_node(node):
+    return 'docker rm --force ' + node.name
 
 
-def exec_bash(name, command):
+def exec_bash(node, command):
         return ('docker exec '
-                + name +
+                + node.name +
                 ' /bin/sh -c "'
                 + command + '"')
 

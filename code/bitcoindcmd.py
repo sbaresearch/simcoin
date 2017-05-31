@@ -65,27 +65,27 @@ def info():
 
 
 def get_best_block_hash(node):
-    return exec_bitcoin_cli(node.name, 'getbestblockhash')
+    return exec_bitcoin_cli(node, 'getbestblockhash')
 
 
 def generate_block(node, amount=1):
-    return exec_bitcoin_cli(node.name, 'generate {}'.format(amount))
+    return exec_bitcoin_cli(node, 'generate {}'.format(amount))
 
 
 def get_new_address(node):
-    return exec_bitcoin_cli(node.name, 'getnewaddress')
+    return exec_bitcoin_cli(node, 'getnewaddress')
 
 
 def send_to_address(node, address, amount):
-    return exec_bitcoin_cli(node.name, 'sendtoaddress ' + address + ' ' + str(amount))
+    return exec_bitcoin_cli(node, 'sendtoaddress ' + address + ' ' + str(amount))
 
 
 def get_chain_tips(node):
-    return exec_bitcoin_cli(node.name, 'getchaintips > ' + guest_dir + '/chaintips.json')
+    return exec_bitcoin_cli(node, 'getchaintips > ' + guest_dir + '/chaintips.json')
 
 
-def exec_bitcoin_cli(name, command):
-    return dockercmd.exec_bash(name,
+def exec_bitcoin_cli(node, command):
+    return dockercmd.exec_bash(node,
                                'bitcoin-cli'
                                ' -regtest'
                                ' -datadir=' + guest_dir +

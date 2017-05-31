@@ -38,6 +38,8 @@ class Plan:
                                           config.selfish_nodes_args) for i in range(config.selfish_nodes)]
         self.all_nodes = self.nodes + self.selfish_nodes
 
+        self.bootstrap_node = Node(bootstrap_node_name, ip_bootstrap)
+
     def create(self):
         config = self.config
         plan = []
@@ -51,7 +53,7 @@ class Plan:
             plan.append(dockercmd.create_network(ip_range))
             plan.append('sleep 1')
 
-            plan.append(dockercmd.run_bootstrap_node(slow_network(config.latency) + bitcoindcmd.start_user()))
+            plan.append(dockercmd.run_bootstrap_node(self.bootstrap_node, slow_network(config.latency) + bitcoindcmd.start_user()))
             plan.extend([dockercmd.run_node(node, slow_network(config.latency)
                                             + bitcoindcmd.start_user()) for node in self.nodes])
             plan.extend([dockercmd.run_selfish_node(
@@ -75,8 +77,8 @@ class Plan:
             plan.extend(logs.aggregate_logs(self.nodes))
 
         finally:
-            plan.extend([dockercmd.rm_node(node.name) for node in self.nodes])
-            plan.append(dockercmd.rm_node(bootstrap_node_name))
+            plan.extend([dockercmd.rm_node(node) for node in self.nodes])
+            plan.append(dockercmd.rm_node(self.bootstrap_node))
             plan.append('sleep 5')
             plan.append(dockercmd.rm_network())
 
