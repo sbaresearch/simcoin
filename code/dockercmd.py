@@ -39,7 +39,7 @@ def run_selfish_node(node, cmd):
             ' --hostname=' + node.name +
             ' ' + plan.selfish_node_image +
             args +
-            ' --ips-public ' + ' '.join(public_ips) + ';'
+            ' --ips-public ' + ' '.join(public_ips) + '; '
             #
             # private node
             'docker run'
