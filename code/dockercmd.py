@@ -2,17 +2,17 @@ import plan
 import bitcoindcmd
 
 
-def run_bootstrap_node(node, cmd):
+def run_bootstrap_node(node, cmd, latency):
     return ('docker run '
             ' --detach=true '
             ' --net=isolated_network '
             ' --ip=' + node.ip + ' '
             ' --name=' + node.name +   # container name
             ' ' + plan.node_image + ' '      # image name # src: https://hub.docker.com/r/abrkn/bitcoind/
-            '   bash -c "' + cmd + '" ')
+            '   bash -c "' + slow_network(latency) + cmd + '" ')
 
 
-def run_node(node, cmd):
+def run_node(node, cmd, latency):
     return ('docker run '
             ' --cap-add=NET_ADMIN '  # for `tc`
             ' --detach=true '
@@ -22,7 +22,7 @@ def run_node(node, cmd):
             ' --hostname=' + node.name + ' '
             ' --volume ' + plan.host_dir(node.name) + ':' + bitcoindcmd.guest_dir + ' '
             ' ' + plan.node_image + ' '      # image name # src: https://hub.docker.com/r/abrkn/bitcoind/
-            ' bash -c "' + cmd + '" ')
+            ' bash -c "' + slow_network(latency) + cmd + '" ')
 
 
 def run_selfish_node(node, cmd):
@@ -75,3 +75,8 @@ def rm_network():
 def fix_data_dirs_permissions():
         return ('docker run '
                 ' --rm --volume ' + plan.root_dir + ':/mnt' + ' ' + plan.node_image + ' chmod a+rwx --recursive /mnt')
+
+
+def slow_network(latency):
+        # needed for this cmd: apt install iproute2 and --cap-add=NET_ADMIN
+        return "tc qdisc replace dev eth0 root netem delay " + str(latency) + "ms; "

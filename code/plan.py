@@ -53,12 +53,12 @@ class Plan:
             plan.append(dockercmd.create_network(ip_range))
             plan.append('sleep 1')
 
-            plan.append(dockercmd.run_bootstrap_node(self.bootstrap_node, slow_network(config.latency) + bitcoindcmd.start_user()))
-            plan.extend([dockercmd.run_node(node, slow_network(config.latency)
-                                            + bitcoindcmd.start_user()) for node in self.nodes])
-            plan.extend([dockercmd.run_selfish_node(
-                node, slow_network(config.latency) + bitcoindcmd.start_selfish_mining(node))
-                for node in self.selfish_nodes])
+            plan.append(dockercmd.run_bootstrap_node(self.bootstrap_node, bitcoindcmd.start_user(), config.latency))
+            plan.extend([dockercmd.run_node(node, bitcoindcmd.start_user(), config.latency) for node in self.nodes])
+
+            # add latency to all connections
+            plan.extend([dockercmd.run_selfish_node(node, bitcoindcmd.start_selfish_mining(node))
+                         for node in self.selfish_nodes])
 
             plan.append('sleep 2')  # wait before generating otherwise "Error -28" (still warming up)
 
@@ -128,12 +128,6 @@ class Plan:
             ips = random.sample(all_ips, amount)
             node.public_ips = ips
             all_ips.append(node.ip)
-
-
-def slow_network(latency):
-    # needed for this cmd: apt install iproute2 and --cap-add=NET_ADMIN
-    return "tc qdisc replace dev eth0 root netem delay " + str(latency) + "ms; "
-
 
 class Node:
     def __init__(self, name, ip):
