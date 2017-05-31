@@ -93,7 +93,7 @@ class Plan:
         iter_nodes = iter(self.all_nodes)
         prev_node = next(iter_nodes)
         for node in iter_nodes:
-            bitcoindcmd.generate_block(prev_node)
+            cmds.append(bitcoindcmd.generate_block(prev_node))
             self.wait_until_nodes_have_same_tip(cmds, prev_node, [node])
             prev_node = node
 
