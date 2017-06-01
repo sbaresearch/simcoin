@@ -9,7 +9,7 @@ def run_bootstrap_node(node, cmd, latency):
             ' --ip=' + node.ip + ' '
             ' --name=' + node.name +   # container name
             ' ' + plan.node_image + ' '      # image name # src: https://hub.docker.com/r/abrkn/bitcoind/
-            '   bash -c "' + slow_network(latency) + cmd + '" ')
+            '   bash -c "' + '; '.join([slow_network(latency), cmd]) + '" ')
 
 
 def run_node(node, cmd, latency):
