@@ -22,7 +22,7 @@ def run_node(node, cmd, latency):
             ' --hostname=' + node.name + ' '
             ' --volume ' + plan.host_dir(node.name) + ':' + bitcoindcmd.guest_dir + ' '
             ' ' + plan.node_image + ' '      # image name # src: https://hub.docker.com/r/abrkn/bitcoind/
-            ' bash -c "' + slow_network(latency) + cmd + '" ')
+            ' bash -c "' + '; '.join([slow_network(latency), cmd]) + '" ')
 
 
 def run_selfish_node(node, cmd):
@@ -76,4 +76,4 @@ def fix_data_dirs_permissions():
 
 def slow_network(latency):
         # needed for this cmd: apt install iproute2 and --cap-add=NET_ADMIN
-        return "tc qdisc replace dev eth0 root netem delay " + str(latency) + "ms; "
+        return 'tc qdisc replace dev eth0 root netem delay ' + str(latency) + 'ms'

@@ -1,7 +1,7 @@
 import plan
 import dockercmd
 
-daemon = ' bitcoind '
+daemon = 'bitcoind '
 guest_dir = '/data'
 args = {
     'regtest':            '-regtest',  # activate regtest mode
