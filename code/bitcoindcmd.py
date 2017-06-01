@@ -26,6 +26,7 @@ def start_selfish_mining(node):
         'keypool':          '-keypool=1',
         'addnode':          '-addnode=' + str(node.ip),
         'dnsseed':          '-dnsseed=0',
+        'reindex':          '-reindex',
     }
     args.update(specific_args)
     args.pop('listen', None)
