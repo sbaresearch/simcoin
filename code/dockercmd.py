@@ -1,5 +1,6 @@
 import plan
 import bitcoindcmd
+import tccmd
 
 
 def run_bootstrap_node(node, cmd, latency):
@@ -9,7 +10,7 @@ def run_bootstrap_node(node, cmd, latency):
             ' --ip=' + node.ip + ' '
             ' --name=' + node.name +   # container name
             ' ' + plan.node_image + ' '      # image name # src: https://hub.docker.com/r/abrkn/bitcoind/
-            '   bash -c "' + '; '.join([slow_network(latency), cmd]) + '" ')
+            '   bash -c "' + '; '.join([tccmd.slow_network(latency), cmd]) + '" ')
 
 
 def run_node(node, cmd, latency):
@@ -22,10 +23,10 @@ def run_node(node, cmd, latency):
             ' --hostname=' + node.name + ' '
             ' --volume ' + plan.host_dir(node.name) + ':' + bitcoindcmd.guest_dir + ' '
             ' ' + plan.node_image + ' '      # image name # src: https://hub.docker.com/r/abrkn/bitcoind/
-            ' bash -c "' + '; '.join([slow_network(latency), cmd]) + '" ')
+            ' bash -c "' + '; '.join([tccmd.slow_network(latency), cmd]) + '" ')
 
 
-def run_selfish_node(node, selfish_cmd, cmd):
+def run_selfish_node(node, selfish_cmd, cmd, latency):
     return (
             #
             # public node
@@ -37,7 +38,7 @@ def run_selfish_node(node, selfish_cmd, cmd):
             ' --hostname=' + node.name + '-proxy'
             ' --rm'
             ' ' + plan.selfish_node_image +
-            ' bash -c "' + selfish_cmd + '"; '
+            ' bash -c "' + '; '.join([tccmd.slow_network_proxy(latency, node.private_ip), selfish_cmd]) + '"; '
             #
             # private node
             'docker run'
@@ -70,19 +71,3 @@ def rm_network():
 def fix_data_dirs_permissions():
         return ('docker run '
                 ' --rm --volume ' + plan.root_dir + ':/mnt' + ' ' + plan.node_image + ' chmod a+rwx --recursive /mnt')
-
-
-def slow_network(latency):
-        # needed for this cmd: apt install iproute2 and --cap-add=NET_ADMIN
-        return 'tc qdisc replace dev eth0 root netem delay ' + str(latency) + 'ms'
-
-
-def slow_network_proxy(latency, private_ip):
-        # needed for this cmd: apt install iproute2 and --cap-add=NET_ADMIN
-        return ('tc qdisc add dev eth0 root handle 1: prio; '
-                'tc filter add dev eth0 parent 1: protocol ip prio 1 u32 '
-                'match ip dst ' + str(private_ip) + ' flowid 1:1; '
-                'tc filter add dev eth0 parent 1: protocol ip prio 1 u32 '
-                'match ip dst ' + plan.ip_range + ' flowid 1:2; '
-                'tc qdisc add dev eth0 parent 1:1 handle 10: netem delay 0ms; '
-                'tc qdisc add dev eth0 parent 1:2 handle 20: netem delay ' + str(latency) + 'ms')
