@@ -54,14 +54,14 @@ class Plan:
             plan.append('sleep 1')
 
             plan.append(dockercmd.run_bootstrap_node(self.bootstrap_node, bitcoindcmd.start_user(), config.latency))
-            plan.extend([dockercmd.run_node(node, bitcoindcmd.start_user(), config.latency) for node in self.nodes])
-
-            plan.extend([dockercmd.run_selfish_node(node, bitcoindcmd.start_selfish_mining(node), config.latency)
-                         for node in self.selfish_nodes])
+            plan.extend([dockercmd.run_node(node, bitcoindcmd.start_user(), config.latency) for node in self.all_nodes])
 
             plan.append('sleep 2')  # wait before generating otherwise "Error -28" (still warming up)
-
             plan.extend(self.warmup_block_generation())
+
+            plan.extend([node.rm_private_node() for node in self.selfish_nodes])
+            plan.extend([dockercmd.run_selfish_node(node, bitcoindcmd.start_selfish_mining(node), config.latency)
+                         for node in self.selfish_nodes])
 
             scheduler = Scheduler(0)
             scheduler.add_blocks(config.blocks, config.block_interval, [self.random_block_command() for _ in range(1000)])
@@ -156,3 +156,6 @@ class SelfishNode(Node):
 
     def rm(self):
         return super(SelfishNode, self).rm() + '; docker rm --force ' + self.name + '_proxy'
+
+    def rm_private_node(self):
+        return super(SelfishNode, self).rm()
