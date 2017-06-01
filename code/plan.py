@@ -4,6 +4,7 @@ import random
 from scheduler import Scheduler
 import dockercmd
 import bitcoindcmd
+import proxycmd
 import logs
 import ipaddress
 
@@ -60,8 +61,7 @@ class Plan:
             plan.extend(self.warmup_block_generation())
 
             plan.extend([node.rm_private_node() for node in self.selfish_nodes])
-            plan.extend([dockercmd.run_selfish_node(node, bitcoindcmd.start_selfish_mining(node), config.latency)
-                         for node in self.selfish_nodes])
+            plan.extend([self.run_selfish_node(node, config.latency) for node in self.selfish_nodes])
 
             scheduler = Scheduler(0)
             scheduler.add_blocks(config.blocks, config.block_interval, [self.random_block_command() for _ in range(1000)])
@@ -136,6 +136,11 @@ class Plan:
             ips = random.sample(all_ips, amount)
             node.public_ips = ips
             all_ips.append(node.ip)
+
+    def run_selfish_node(self, node, latency):
+        current_best_block_hash_cmd = '$block_hash=(' + bitcoindcmd.get_best_block_hash(self.nodes[0]) + ')'
+        run_cmd = dockercmd.run_selfish_node(node, proxycmd.run_proxy(node, latency), bitcoindcmd.start_selfish_mining(node))
+        return '; '.join([current_best_block_hash_cmd, run_cmd])
 
 
 class Node:

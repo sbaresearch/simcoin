@@ -25,12 +25,7 @@ def run_node(node, cmd, latency):
             ' bash -c "' + '; '.join([slow_network(latency), cmd]) + '" ')
 
 
-def run_selfish_node(node, cmd, latency):
-    public_ips = [str(ip) for ip in node.public_ips]
-    args = '{} '.format(node.args) if node.args else ''
-    selfish_cmd = '; ' .join([slow_network_proxy(latency, node.private_ip),
-                              'python main.py ' + args +
-                              '--ips-public ' + ' '.join(public_ips)])
+def run_selfish_node(node, selfish_cmd, cmd):
     return (
             #
             # public node
