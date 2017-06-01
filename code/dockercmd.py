@@ -38,8 +38,8 @@ def run_selfish_node(node, cmd, latency):
             ' --detach=true'
             ' --net=isolated_network'
             ' --ip=' + str(node.ip) +
-            ' --name=' + node.name + '_proxy'
-            ' --hostname=' + node.name + '_proxy'
+            ' --name=' + node.name + '-proxy'
+            ' --hostname=' + node.name + '-proxy'
             ' --rm'
             ' ' + plan.selfish_node_image +
             ' bash -c "' + selfish_cmd + '"; '
