@@ -60,7 +60,8 @@ parser.add_argument('--connectivity'
                     , help='Number of nodes the selfish nodes are connected to'
                     )
 parser.add_argument('--selfish-nodes-args'
-                    , help='Set args for selfish nodes'
+                    , help='Set args for selfish nodes. '
+                           'Set them as string and if you use just one add a space at the end. Eg.: "--arg "'
                     , default=''
                     )
 
