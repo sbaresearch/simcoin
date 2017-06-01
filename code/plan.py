@@ -83,7 +83,7 @@ class Plan:
         return plan
 
     def random_node(self):
-        return random.choice(self.nodes)
+        return random.choice(self.all_nodes)
 
     def warmup_block_generation(self):
         cmds = ['echo Begin of warmup']
