@@ -76,8 +76,8 @@ class Plan:
             plan.extend(logs.aggregate_logs(self.nodes))
 
         finally:
-            plan.extend([dockercmd.rm_node(node) for node in self.nodes])
-            plan.append(dockercmd.rm_node(self.bootstrap_node))
+            plan.extend([node.rm() for node in self.all_nodes])
+            plan.append(self.bootstrap_node.rm())
             plan.append('sleep 5')
             plan.append(dockercmd.rm_network())
 
@@ -142,6 +142,9 @@ class Node:
         self.name = name
         self.ip = ip
 
+    def rm(self):
+        return 'docker rm --force ' + self.name
+
 
 class SelfishNode(Node):
     def __init__(self, name, public_ip, private_ip, selfish_nodes_args):
@@ -149,3 +152,6 @@ class SelfishNode(Node):
 
         self.private_ip = private_ip
         self.args = selfish_nodes_args
+
+    def rm(self):
+        return super(SelfishNode, self).rm() + '; docker rm --force ' + self.name + '_proxy'

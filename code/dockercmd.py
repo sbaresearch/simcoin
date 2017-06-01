@@ -52,10 +52,6 @@ def run_selfish_node(node, cmd):
             ' bash -c "' + cmd + '"')
 
 
-def rm_node(node):
-    return 'docker rm --force ' + node.name
-
-
 def exec_bash(node, command):
         return ('docker exec '
                 + node.name +
