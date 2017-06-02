@@ -138,8 +138,8 @@ class Plan:
             all_ips.append(node.ip)
 
     def run_selfish_node(self, node, latency):
-        current_best_block_hash_cmd = '$block_hash=(' + bitcoindcmd.get_best_block_hash(self.nodes[0]) + ')'
-        run_cmd = dockercmd.run_selfish_node(node, proxycmd.run_proxy(node),
+        current_best_block_hash_cmd = 'block_hash=$(' + bitcoindcmd.get_best_block_hash(self.nodes[0]) + ')'
+        run_cmd = dockercmd.run_selfish_node(node, proxycmd.run_proxy(node, '$block_hash'),
                                              bitcoindcmd.start_selfish_mining(node), latency)
         return '; '.join([current_best_block_hash_cmd, run_cmd])
 
