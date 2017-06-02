@@ -46,7 +46,7 @@ def run_selfish_node(node, selfish_cmd, cmd, latency):
             ' --net=isolated_network'
             ' --ip=' + str(node.private_ip) +
             ' --name=' + node.name +
-            ' --volume ' + plan.host_dir(node.name) + ':' + bitcoindcmd.guest_dir + ' '
+            ' --volume ' + plan.host_dir(node.name) + ':' + bitcoindcmd.guest_dir +
             ' ' + plan.node_image +
             ' bash -c "' + cmd + '"')
 
