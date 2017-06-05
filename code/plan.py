@@ -117,9 +117,9 @@ class Plan:
                         'do echo Waiting for blocks to spread...; sleep 0.2; done')
 
     def wait_until_selfish_node_caught_up(self, node):
-        current_best_block_hash_cmd = 'current_best=$(' + bitcoindcmd.get_best_block_hash(self.all_nodes[0]) + ')'
-        wait_for_selfish_node_cmd = 'while [[ $current_best != $(' + proxycmd.get_best_public_block_hash(node) + \
-                                    ') ]] do echo Waiting for blocks to spread...; sleep 0.2; done'
+        current_best_block_hash_cmd = 'current_best=$(' + bitcoindcmd.get_best_block_hash(self.nodes[0]) + ')'
+        wait_for_selfish_node_cmd = 'while [[ $current_best != $(' + proxycmd.get_best_public_block_hash(node.proxy) + \
+                                    ') ]]; do echo Waiting for blocks to spread...; sleep 0.2; ' + proxycmd.get_best_public_block_hash(node.proxy) + '; done'
         return '; '.join([current_best_block_hash_cmd, wait_for_selfish_node_cmd])
 
     def wait_for_all_blocks_to_spread(self):
