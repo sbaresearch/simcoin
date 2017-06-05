@@ -21,7 +21,7 @@ def run_node(node, cmd, latency):
             ' --ip=' + str(node.ip) +
             ' --name=' + node.name + ' '   # container name
             ' --hostname=' + node.name + ' '
-            ' --volume ' + plan.host_dir(node.name) + ':' + bitcoindcmd.guest_dir + ' '
+            ' --volume ' + plan.host_dir(node) + ':' + bitcoindcmd.guest_dir + ' '
             ' ' + plan.node_image + ' '      # image name # src: https://hub.docker.com/r/abrkn/bitcoind/
             ' bash -c "' + '; '.join([tccmd.slow_network(latency), cmd]) + '" ')
 
@@ -46,7 +46,7 @@ def run_selfish_node(node, selfish_cmd, cmd, latency):
             ' --net=isolated_network'
             ' --ip=' + str(node.private_node.ip) +
             ' --name=' + node.private_node.name +
-            ' --volume ' + plan.host_dir(node.private_node.name) + ':' + bitcoindcmd.guest_dir +
+            ' --volume ' + plan.host_dir(node.private_node) + ':' + bitcoindcmd.guest_dir +
             ' ' + plan.node_image +
             ' bash -c "' + cmd + '"')
 

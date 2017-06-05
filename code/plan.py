@@ -24,8 +24,8 @@ selfish_node_proxy_postfix = '-proxy'
 bootstrap_node_name = 'bootstrap'
 
 
-def host_dir(container_id):
-    return root_dir + '/' + container_id
+def host_dir(node):
+    return root_dir + '/' + node.name
 
 
 class Plan:
@@ -55,7 +55,7 @@ class Plan:
             self.set_public_ips()
 
         try:
-            plan.append("rm -rf " + host_dir('*'))
+            plan.append("rm -rf " + root_dir + '/*')
 
             plan.append(dockercmd.create_network(ip_range))
             plan.append('sleep 1')
