@@ -33,20 +33,20 @@ def run_selfish_node(node, selfish_cmd, cmd, latency):
             'docker run'
             ' --detach=true'
             ' --net=isolated_network'
-            ' --ip=' + str(node.ip) +
-            ' --name=' + node.name + '-proxy'
-            ' --hostname=' + node.name + '-proxy'
+            ' --ip=' + str(node.proxy.ip) +
+            ' --name=' + node.proxy.name +
+            ' --hostname=' + node.proxy.name +
             ' --rm'
             ' ' + plan.selfish_node_image +
-            ' bash -c "' + '; '.join([tccmd.slow_network_proxy(latency, node.private_ip), selfish_cmd]) + '"; '
+            ' bash -c "' + '; '.join([tccmd.slow_network_proxy(latency, node.private_node.ip), selfish_cmd]) + '"; '
             #
             # private node
             'docker run'
             ' --detach=true'
             ' --net=isolated_network'
-            ' --ip=' + str(node.private_ip) +
-            ' --name=' + node.name +
-            ' --volume ' + plan.host_dir(node.name) + ':' + bitcoindcmd.guest_dir +
+            ' --ip=' + str(node.private_node.ip) +
+            ' --name=' + node.private_node.name +
+            ' --volume ' + plan.host_dir(node.private_node.name) + ':' + bitcoindcmd.guest_dir +
             ' ' + plan.node_image +
             ' bash -c "' + cmd + '"')
 
