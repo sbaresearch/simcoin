@@ -27,9 +27,10 @@ def start_selfish_mining():
         'dnsseed':          '-dnsseed=0',
         'reindex':          '-reindex',
     }
-    args.update(specific_args)
-    args.pop('listen', None)
-    return transform_to_cmd(args)
+    return_args = args.copy()
+    return_args.update(specific_args)
+    return_args.pop('listen', None)
+    return transform_to_cmd(return_args)
 
 
 def start_user():
@@ -38,16 +39,18 @@ def start_user():
         'addnode':          '-addnode=' + plan.ip_bootstrap,  # only connect ourself introductionary node
         'keypool':          '-keypool=1'
     }
-    args.update(specific_args)
-    return transform_to_cmd(args)
+    return_args = args.copy()
+    return_args.update(specific_args)
+    return transform_to_cmd(return_args)
 
 
 def start_bootstrap():
     specific_args = {
         'disablewallet':    '-disablewallet=1'  # disable wallet
     }
-    args.update(specific_args)
-    return transform_to_cmd(args)
+    return_args = args.copy()
+    return_args.update(specific_args)
+    return transform_to_cmd(return_args)
 
 
 def transform_to_cmd(args_to_transform):
