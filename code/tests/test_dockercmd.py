@@ -28,6 +28,7 @@ class TestDockercmd(TestCase):
 
         cmd = dockercmd.run_node(node, 'cmd', 100)
 
+        self.assertTrue(plan.node_image in cmd)
         self.assertTrue('  ' not in cmd)
 
     def test_run_bootstrap_node(self):
@@ -35,4 +36,5 @@ class TestDockercmd(TestCase):
 
         cmd = dockercmd.run_bootstrap_node(node, 'cmd', 100)
 
+        self.assertTrue(plan.node_image in cmd)
         self.assertTrue('  ' not in cmd)
