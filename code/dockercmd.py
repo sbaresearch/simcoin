@@ -51,11 +51,10 @@ def run_selfish_proxy(node, cmd, latency):
                 ' bash -c "' + '; '.join([tccmd.slow_network_proxy(latency, node.ip), cmd]) + '"; ')
 
 
-def exec_bash(node, command):
+def exec_cmd(node, command):
         return ('docker exec '
-                + node.name +
-                ' /bin/sh -c "'
-                + command + '"')
+                + node.name + ' '
+                + command)
 
 
 def create_network(ip_range):
