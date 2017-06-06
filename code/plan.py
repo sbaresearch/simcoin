@@ -69,8 +69,9 @@ class Plan:
 
             plan.extend([node.rm() for node in self.selfish_node_private_nodes])
 
-            plan.extend([dockercmd.run_selfish_private_node(node, bitcoindcmd.start_selfish_mining())
-                         for node in self.selfish_node_private_nodes])
+            plan.extend([dockercmd.run_selfish_private_node(node.private_node,
+                                                            bitcoindcmd.start_selfish_mining(node.proxy.ip))
+                         for node in self.selfish_nodes])
             plan.extend(self.wait_until_nodes_have_same_tip(self.nodes[0], self.selfish_node_private_nodes))
             plan.extend([self.run_selfish_node(node, config.latency) for node in self.selfish_nodes])
             plan.extend([self.wait_until_selfish_node_caught_up(node) for node in self.selfish_nodes])

@@ -21,11 +21,13 @@ def start():
     return transform_to_cmd(args)
 
 
-def start_selfish_mining():
+def start_selfish_mining(proxy_ip):
     specific_args = {
         'keypool':          '-keypool=1',
         'dnsseed':          '-dnsseed=0',
         'reindex':          '-reindex',
+        'connect':          '-connect=' + str(proxy_ip),
+        'maxconnections':   '-maxconnections=1',
     }
     return_args = args.copy()
     return_args.update(specific_args)
