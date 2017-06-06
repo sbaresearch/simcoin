@@ -100,21 +100,23 @@ class Plan:
         prev_node = next(iter_nodes)
         for node in iter_nodes:
             cmds.append(bitcoindcmd.generate_block(prev_node))
-            self.wait_until_nodes_have_same_tip(cmds, prev_node, [node])
+            cmds.extend(self.wait_until_nodes_have_same_tip(prev_node, [node]))
             prev_node = node
 
         cmds.append(bitcoindcmd.generate_block(prev_node, 101))
-        self.wait_until_nodes_have_same_tip(cmds, prev_node, self.all_bitcoind_nodes)
+        cmds.extend(self.wait_until_nodes_have_same_tip(prev_node, self.all_bitcoind_nodes))
 
         cmds.append('echo End of warmup')
         return cmds
 
-    def wait_until_nodes_have_same_tip(self, cmds, leading_node, nodes):
+    def wait_until_nodes_have_same_tip(self, leading_node, nodes):
+        cmds = []
         highest_tip = bitcoindcmd.get_best_block_hash(leading_node)
         for node in nodes:
             node_tip = bitcoindcmd.get_best_block_hash(node)
             cmds.append('while [[ $(' + highest_tip + ') != $(' + node_tip + ') ]]; ' +
                         'do echo Waiting for blocks to spread...; sleep 0.2; done')
+        return cmds
 
     def wait_until_selfish_node_caught_up(self, node):
         current_best_block_hash_cmd = 'current_best=$(' + bitcoindcmd.get_best_block_hash(self.nodes[0]) + ')'
