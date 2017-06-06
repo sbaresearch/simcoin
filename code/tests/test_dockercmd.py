@@ -22,3 +22,10 @@ class TestDockercmd(TestCase):
         cmd = dockercmd.run_node(node, 'cmd', 100)
 
         self.assertTrue('  ' not in cmd)
+
+    def test_run_bootstrap_node(self):
+        node = Node('name', 'ip')
+
+        cmd = dockercmd.run_bootstrap_node(node, 'cmd', 100)
+
+        self.assertTrue('  ' not in cmd)

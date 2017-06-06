@@ -4,13 +4,13 @@ import tccmd
 
 
 def run_bootstrap_node(node, cmd, latency):
-    return ('docker run '
-            ' --detach=true '
-            ' --net=isolated_network '
-            ' --ip=' + node.ip + ' '
-            ' --name=' + node.name +   # container name
-            ' ' + plan.node_image + ' '      # image name # src: https://hub.docker.com/r/abrkn/bitcoind/
-            '   bash -c "' + '; '.join([tccmd.slow_network(latency), cmd]) + '" ')
+    return ('docker run'
+            ' --detach=true'
+            ' --net=isolated_network'
+            ' --ip=' + node.ip +
+            ' --name=' + node.name +  # container name
+            ' ' + plan.node_image +  # image name # src: https://hub.docker.com/r/abrkn/bitcoind/
+            ' bash -c "' + '; '.join([tccmd.slow_network(latency), cmd]) + '" ')
 
 
 def run_node(node, cmd, latency):
