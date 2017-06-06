@@ -87,8 +87,8 @@ class Plan:
             # plan.extend(logs.aggregate_logs(self.nodes))
 
         finally:
-            # plan.extend([node.rm() for node in self.all_nodes])
-            # plan.append(self.bootstrap_node.rm())
+            plan.extend([node.rm() for node in self.all_nodes])
+            plan.append(self.bootstrap_node.rm())
             plan.append('sleep 5')
             plan.append(dockercmd.rm_network())
 
