@@ -31,7 +31,7 @@ def run_selfish_node(node, selfish_cmd, cmd, latency):
             #
             # public node
             'docker run'
-            ' --cap-add=NET_ADMIN '  # for `tc`
+            ' --cap-add=NET_ADMIN'  # for `tc`
             ' --detach=true'
             ' --net=isolated_network'
             ' --ip=' + str(node.proxy.ip) +
