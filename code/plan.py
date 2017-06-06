@@ -5,6 +5,7 @@ import dockercmd
 import bitcoindcmd
 import proxycmd
 import ipaddress
+from scheduler import Scheduler
 
 # IP range from RFC6890 - IP range for future use
 # it does not conflict with https://github.com/bitcoin/bitcoin/blob/master/src/netbase.h
