@@ -74,8 +74,8 @@ class Plan:
                          for node in self.selfish_nodes])
             plan.extend(self.wait_until_nodes_have_same_tip(self.nodes[0], self.selfish_node_private_nodes))
 
-            plan.extend([self.run_selfish_node(node, config.latency) for node in self.selfish_nodes])
-            plan.extend([self.wait_until_selfish_node_caught_up(node) for node in self.selfish_nodes])
+            plan.extend([self.run_selfish_node_proxy(node, config.latency) for node in self.selfish_nodes])
+            plan.extend([self.wait_until_selfish_node_proxy_caught_up(node) for node in self.selfish_nodes])
 
             scheduler = Scheduler(0)
             scheduler.add_blocks(config.blocks, config.block_interval, [self.random_block_command() for _ in range(1000)])
@@ -123,7 +123,7 @@ class Plan:
                         'do echo Waiting for blocks to spread...; sleep 0.2; done')
         return cmds
 
-    def wait_until_selfish_node_caught_up(self, node):
+    def wait_until_selfish_node_proxy_caught_up(self, node):
         current_best_block_hash_cmd = 'current_best=$(' + bitcoindcmd.get_best_block_hash(self.nodes[0]) + ')'
         wait_for_selfish_node_cmd = 'while [[ $current_best != $(' + proxycmd.get_best_public_block_hash(node.proxy) + \
                                     ') ]]; do echo Waiting for blocks to spread...; sleep 0.2; done'
@@ -158,7 +158,7 @@ class Plan:
             node.public_ips = ips
             all_ips.append(node.ip)
 
-    def run_selfish_node(self, node, latency):
+    def run_selfish_node_proxy(self, node, latency):
         current_best_block_hash_cmd = 'start_hash=$(' + bitcoindcmd.get_best_block_hash(self.nodes[0]) + ')'
         run_cmd = dockercmd.run_selfish_proxy(node.proxy, proxycmd.run_proxy(node.proxy, node.private_node.ip,
                                                                              '$start_hash'), latency)
