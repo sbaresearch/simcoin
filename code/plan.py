@@ -1,11 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import random
-from scheduler import Scheduler
 import dockercmd
 import bitcoindcmd
 import proxycmd
-import logs
 import ipaddress
 
 # IP range from RFC6890 - IP range for future use
