@@ -57,15 +57,6 @@ def transform_to_cmd(args_to_transform):
     return daemon + ' '.join(args_to_transform.values())
 
 
-def info():
-    return [
-        # 'getconnectioncount',
-        # 'getblockcount',
-        # 'getinfo',
-        # 'getmininginfo',
-    ]
-
-
 def rm_peers(node):
     return dockercmd.exec_bash(node, 'rm -f /data/regtest/peers.dat')
 
