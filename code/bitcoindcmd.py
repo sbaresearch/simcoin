@@ -66,7 +66,10 @@ def get_best_block_hash(node):
 
 
 def generate_block(node, amount=1):
-    return exec_bitcoin_cli(node, 'generate {}'.format(amount))
+    cmd = exec_bitcoin_cli(node, 'generate {}'.format(amount))
+    return (cmd + r' | jq -r "to_entries[] | \"'
+            + node.name + r'; \(.value)\"" >> '
+            + plan.root_dir + '/blocks.csv')
 
 
 def get_new_address(node):
