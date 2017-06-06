@@ -68,7 +68,7 @@ class Plan:
             plan.append('sleep 2')  # wait before generating otherwise "Error -28" (still warming up)
             plan.extend(self.warmup_block_generation())
 
-            plan.extend([node.rm_private_node() for node in self.selfish_nodes])
+            plan.extend([node.private_node.rm() for node in self.selfish_nodes])
             plan.extend([self.run_selfish_node(node, config.latency) for node in self.selfish_nodes])
             plan.extend([self.wait_until_selfish_node_caught_up(node) for node in self.selfish_nodes])
 
@@ -176,6 +176,3 @@ class SelfishNode:
 
     def rm(self):
         return self.proxy.rm() + '; ' + self.private_node.rm()
-
-    def rm_private_node(self):
-        return self.private_node.rm()
