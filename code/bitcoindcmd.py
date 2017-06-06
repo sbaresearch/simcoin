@@ -21,13 +21,11 @@ def start():
     return transform_to_cmd(args)
 
 
-def start_selfish_mining(proxy_ip):
+def start_selfish_mining():
     specific_args = {
         'keypool':          '-keypool=1',
         'dnsseed':          '-dnsseed=0',
         'reindex':          '-reindex',
-        'connect':          '-connect=' + str(proxy_ip),
-        'maxconnections':   '-maxconnections=1',
     }
     return_args = args.copy()
     return_args.update(specific_args)
@@ -66,6 +64,10 @@ def info():
         # 'getinfo',
         # 'getmininginfo',
     ]
+
+
+def rm_peers(node):
+    return dockercmd.exec_bash(node, 'rm -f /data/regtest/peers.dat')
 
 
 def get_best_block_hash(node):

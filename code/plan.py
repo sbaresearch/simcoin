@@ -67,10 +67,10 @@ class Plan:
             plan.append('sleep 2')  # wait before generating otherwise "Error -28" (still warming up)
             plan.extend(self.warmup_block_generation())
 
+            plan.extend([bitcoindcmd.rm_peers(node) for node in self.selfish_node_private_nodes])
             plan.extend([node.rm() for node in self.selfish_node_private_nodes])
 
-            plan.extend([dockercmd.run_selfish_private_node(node.private_node,
-                                                            bitcoindcmd.start_selfish_mining(node.proxy.ip))
+            plan.extend([dockercmd.run_selfish_private_node(node.private_node, bitcoindcmd.start_selfish_mining())
                          for node in self.selfish_nodes])
             plan.extend(self.wait_until_nodes_have_same_tip(self.nodes[0], self.selfish_node_private_nodes))
             plan.extend([self.run_selfish_node(node, config.latency) for node in self.selfish_nodes])
