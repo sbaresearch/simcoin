@@ -170,14 +170,14 @@ class Plan:
         mock_node = Node('$node', None)
 
         file = root_dir + '/consensus_chain.csv'
-        csv_header_cmd = r'echo "height; block_hash" | tee -a ' + file
+        csv_header_cmd = r'echo "height;block_hash" | tee -a ' + file
         iter_cmd = ('for height in `seq ' + str(self.first_block_height()) +
                     ' $(' + bitcoindcmd.get_block_count(self.all_bitcoind_nodes[0]) + ')`; do'
                     ' hash=$(' + bitcoindcmd.get_block_hash(self.all_bitcoind_nodes[0], '$height') + ');'
                     ' all_same=true; for node in "${nodes[@]}"; do' +
                     ' if [[ $hash != $(' + bitcoindcmd.get_block_hash(mock_node, '$height') + ')'
                     ' ]]; then all_same=false; fi; done;'
-                    ' if [ "$all_same" = true ]; then echo $height\; $hash '
+                    ' if [ "$all_same" = true ]; then echo "$height;$hash" '
                     '| tee -a ' + file + '; fi; done')
 
         return '; '.join([csv_header_cmd, self.bitcoind_nodes_array(), iter_cmd])
@@ -186,11 +186,11 @@ class Plan:
         mock_node = Node('$node', None)
 
         file = root_dir + '/chains.csv'
-        csv_header_cmd = r'echo "node; block_hashes" | tee -a ' + file
+        csv_header_cmd = r'echo "node;block_hashes" | tee -a ' + file
         iter_cmd = ('for node in ${nodes[@]}; do'
                     ' line=$node; for height in `seq ' + str(self.first_block_height()) +
                     ' $(' + bitcoindcmd.get_block_count(mock_node) + ')`; do'
-                    ' line="$line; $(' + bitcoindcmd.get_block_hash(mock_node, '$height') + ')";'
+                    ' line=$line;$(' + bitcoindcmd.get_block_hash(mock_node, '$height') + ');'
                     ' done; echo $line | tee -a ' + file + '; done')
 
         return '; '.join([csv_header_cmd, self.bitcoind_nodes_array(), iter_cmd])
