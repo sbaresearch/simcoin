@@ -168,17 +168,22 @@ class Plan:
         # idea iterate over chain and check if at some height all hashes are the same.
         mock_node = Node('$node', None)
 
-        save_nodes_cmd = 'nodes=(' + ' '.join(node.name for node in self.all_bitcoind_nodes) + ')'
-        iter_cmd = 'for height in `seq ' + str(len(self.all_bitcoind_nodes) + 100 + 1) + \
-                   ' $(' + bitcoindcmd.get_block_count(self.all_bitcoind_nodes[0]) + \
-                   ')`; do hash=$(' + bitcoindcmd.get_block_hash(self.all_bitcoind_nodes[0], '$height') + ');' \
-                   ' all_same=true; for node in "${nodes[@]}"; do' + \
-                   ' if [[ $hash != $(' + bitcoindcmd.get_block_hash(mock_node, '$height') + ')'\
-                   ' ]]; then all_same=false; fi; done;'\
-                   r' if [ "$all_same" = true ]; then echo $height\; $hash '\
-                   '| tee -a ' + root_dir + '/consensus_chain.csv; fi; done'
+        iter_cmd = ('for height in `seq ' + str(self.first_block_height()) +
+                    ' $(' + bitcoindcmd.get_block_count(self.all_bitcoind_nodes[0]) + ')`; do'
+                    ' hash=$(' + bitcoindcmd.get_block_hash(self.all_bitcoind_nodes[0], '$height') + ');'
+                    ' all_same=true; for node in "${nodes[@]}"; do' +
+                    ' if [[ $hash != $(' + bitcoindcmd.get_block_hash(mock_node, '$height') + ')'
+                    ' ]]; then all_same=false; fi; done;'
+                    r' if [ "$all_same" = true ]; then echo $height\; $hash '
+                    '| tee -a ' + root_dir + '/consensus_chain.csv; fi; done')
 
-        return '; '.join([save_nodes_cmd, iter_cmd])
+        return '; '.join([self.bitcoind_nodes_array(), iter_cmd])
+
+    def bitcoind_nodes_array(self):
+        return 'nodes=(' + ' '.join(node.name for node in self.all_bitcoind_nodes) + ')'
+
+    def first_block_height(self):
+        return len(self.all_bitcoind_nodes) + 100 + 1
 
 
 class Node:
