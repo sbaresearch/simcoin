@@ -136,11 +136,11 @@ class Plan:
 
         # only use regular nodes since selfish nodes can trail back
         block_counts = ['$(' + bitcoindcmd.get_block_count(node) + ')' for node in self.nodes]
-        return 'while : ; do block_counts=(' + ' '.join(block_counts) + '); '\
-               + 'prev=${block_counts[0]}; wait=false; echo Current block_counts=${block_counts[@]}; ' \
-                 'for i in "${block_counts[@]}"; do if [ $prev != $i ]; then wait=true; fi; done; ' \
-                 'if [ $wait == false ]; then break; fi; ' \
-                 'echo Waiting for blocks to spread...; sleep 0.2; done'
+        return ('while : ; do block_counts=(' + ' '.join(block_counts) + '); '
+                'prev=${block_counts[0]}; wait=false; echo Current block_counts=${block_counts[@]}; '
+                'for i in "${block_counts[@]}"; do if [ $prev != $i ]; then wait=true; fi; done; '
+                'if [ $wait == false ]; then break; fi; '
+                'echo Waiting for blocks to spread...; sleep 0.2; done')
 
     def random_tx_command(self):
         node = self.random_node()
