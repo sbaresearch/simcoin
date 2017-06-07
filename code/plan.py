@@ -86,6 +86,8 @@ class Plan:
 
             plan.append(dockercmd.fix_data_dirs_permissions())
 
+            plan.append(self.save_consensus_chain())
+
             # plan.extend([bitcoindcmd.get_chain_tips(node) for node in self.all_bitcoind_nodes])
             # plan.extend(logs.aggregate_logs(self.nodes))
 
@@ -161,6 +163,22 @@ class Plan:
         run_cmd = dockercmd.run_selfish_proxy(node.proxy, proxycmd.run_proxy(node.proxy, node.private_node.ip,
                                                                              '$start_hash'), latency)
         return '; '.join([current_best_block_hash_cmd, run_cmd])
+
+    def save_consensus_chain(self):
+        # idea iterate over chain and check if at some height all hashes are the same.
+        mock_node = Node('$node', None)
+
+        save_nodes_cmd = 'nodes=(' + ' '.join(node.name for node in self.all_bitcoind_nodes) + ')'
+        iter_cmd = 'for height in `seq ' + str(len(self.all_bitcoind_nodes) + 100 + 1) + \
+                   ' $(' + bitcoindcmd.get_block_count(self.all_bitcoind_nodes[0]) + \
+                   ')`; do hash=$(' + bitcoindcmd.get_block_hash(self.all_bitcoind_nodes[0], '$height') + ');' \
+                   ' all_same=true; for node in "${nodes[@]}"; do' + \
+                   ' if [[ $hash != $(' + bitcoindcmd.get_block_hash(mock_node, '$height') + ')'\
+                   ' ]]; then all_same=false; fi; done;'\
+                   r' if [ "$all_same" = true ]; then echo $height\; $hash '\
+                   '| tee -a ' + root_dir + '/consensus_chain.csv; fi; done'
+
+        return '; '.join([save_nodes_cmd, iter_cmd])
 
 
 class Node:
