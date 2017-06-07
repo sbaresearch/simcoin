@@ -87,6 +87,7 @@ class Plan:
             plan.append(dockercmd.fix_data_dirs_permissions())
 
             plan.append(self.save_consensus_chain())
+            plan.append(self.save_chains())
 
             # plan.extend([bitcoindcmd.get_chain_tips(node) for node in self.all_bitcoind_nodes])
             # plan.extend(logs.aggregate_logs(self.nodes))
@@ -178,6 +179,19 @@ class Plan:
                     ' ]]; then all_same=false; fi; done;'
                     ' if [ "$all_same" = true ]; then echo $height\; $hash '
                     '| tee -a ' + file + '; fi; done')
+
+        return '; '.join([csv_header_cmd, self.bitcoind_nodes_array(), iter_cmd])
+
+    def save_chains(self):
+        mock_node = Node('$node', None)
+
+        file = root_dir + '/chains.csv'
+        csv_header_cmd = r'echo "node; block_hashes" | tee -a ' + file
+        iter_cmd = ('for node in ${nodes[@]}; do'
+                    ' line=$node; for height in `seq ' + str(self.first_block_height()) +
+                    ' $(' + bitcoindcmd.get_block_count(mock_node) + ')`; do'
+                    ' line="$line; $(' + bitcoindcmd.get_block_hash(mock_node, '$height') + ')";'
+                    ' done; echo $line | tee -a ' + file + '; done')
 
         return '; '.join([csv_header_cmd, self.bitcoind_nodes_array(), iter_cmd])
 
