@@ -78,7 +78,8 @@ class Plan:
             plan.extend([self.wait_until_selfish_node_proxy_caught_up(node) for node in self.selfish_nodes])
 
             scheduler = Scheduler(0)
-            scheduler.add_blocks(config.blocks, config.block_interval, [self.random_block_command() for _ in range(1000)])
+            scheduler.add_blocks(config.blocks, config.block_interval,
+                                 [bitcoindcmd.generate_block(self.random_node()) for _ in range(1000)])
             scheduler.add_tx(config.blocks * config.block_interval, [self.random_tx_command() for _ in range(10)])
             plan.extend(scheduler.bash_commands())
             plan.append(self.wait_for_all_blocks_to_spread())
@@ -138,9 +139,6 @@ class Plan:
                  'for i in "${block_counts[@]}"; do if [ $prev != $i ]; then wait=true; fi; done; ' \
                  'if [ $wait == false ]; then break; fi; ' \
                  'echo Waiting for blocks to spread...; sleep 0.2; done'
-
-    def random_block_command(self, amount=1):
-        return bitcoindcmd.generate_block(self.random_node(), amount)
 
     def random_tx_command(self):
         node = self.random_node()
