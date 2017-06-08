@@ -53,12 +53,11 @@ class Plan:
             plan.append(dockercmd.create_network(ip_range))
             plan.append('sleep 1')
 
-            plan.append(dockercmd.run_bootstrap_node(self.bootstrap_node, slow_network(config.latency) + bitcoindcmd.start_user()))
-            plan.extend([dockercmd.run_node(node, slow_network(config.latency)
-                                            + bitcoindcmd.start_user()) for node in self.nodes])
-            plan.extend([dockercmd.run_selfish_node(
-                node, slow_network(config.latency) + bitcoindcmd.start_selfish_mining(node))
-                for node in self.selfish_nodes])
+            plan.append(dockercmd.run_bootstrap_node(self.bootstrap_node, bitcoindcmd.start_user(), config.latency))
+            plan.extend([dockercmd.run_node(node, bitcoindcmd.start_user(), config.latency) for node in self.nodes])
+
+            plan.extend([dockercmd.run_selfish_node(node, bitcoindcmd.start_selfish_mining(node), config.latency)
+                         for node in self.selfish_nodes])
 
             plan.append('sleep 2')  # wait before generating otherwise "Error -28" (still warming up)
 
@@ -68,17 +67,16 @@ class Plan:
             scheduler.add_blocks(config.blocks, config.block_interval, [self.random_block_command() for _ in range(1000)])
             scheduler.add_tx(config.blocks * config.block_interval, [self.random_tx_command() for _ in range(10)])
             plan.extend(scheduler.bash_commands())
-            plan.append('sleep 3')  # wait for blocks to spread
-
-            plan.extend([bitcoindcmd.get_chain_tips(node) for node in self.all_nodes])
+            plan.append(self.wait_for_all_blocks_to_spread())
 
             plan.append(dockercmd.fix_data_dirs_permissions())
 
+            plan.extend([bitcoindcmd.get_chain_tips(node) for node in self.all_nodes])
             plan.extend(logs.aggregate_logs(self.nodes))
 
         finally:
-            plan.extend([dockercmd.rm_node(node) for node in self.nodes])
-            plan.append(dockercmd.rm_node(self.bootstrap_node))
+            plan.extend([node.rm() for node in self.all_nodes])
+            plan.append(self.bootstrap_node.rm())
             plan.append('sleep 5')
             plan.append(dockercmd.rm_network())
 
@@ -107,16 +105,24 @@ class Plan:
         for node in nodes:
             node_tip = bitcoindcmd.get_best_block_hash(node)
             cmds.append('while [[ $(' + highest_tip + ') != $(' + node_tip + ') ]]; ' +
-                        'do echo Waiting for blocks to spread; sleep 0.2; done')
+                        'do echo Waiting for blocks to spread...; sleep 0.2; done')
+
+    def wait_for_all_blocks_to_spread(self):
+        block_counts = ['$(' + bitcoindcmd.get_block_count(node) + ')' for node in self.all_nodes]
+        return 'while : ; do block_counts=(' + ' '.join(block_counts) + '); '\
+               + 'prev=${block_counts[0]}; wait=false; echo Current block_counts=${block_counts[@]}; ' \
+                 'for i in "${block_counts[@]}"; do if [ $prev != $i ]; then wait=true; fi; done; ' \
+                 'if [ $wait == false ]; then break; fi; ' \
+                 'echo Waiting for blocks to spread...; sleep 0.2; done'
 
     def random_block_command(self, amount=1):
         return bitcoindcmd.generate_block(self.random_node(), amount)
 
     def random_tx_command(self):
         node = self.random_node()
-        first_cmd = bitcoindcmd.get_new_address(node)
-        second_cmd = bitcoindcmd.send_to_address(node, '$fresh_address', 0.1)
-        return 'fresh_address=$(' + first_cmd + '); ' + second_cmd
+        create_address_cmd = bitcoindcmd.get_new_address(node)
+        create_tx_cmd = bitcoindcmd.send_to_address(node, '$fresh_address', 0.1)
+        return 'fresh_address=$(' + create_address_cmd + '); ' + create_tx_cmd
 
     def set_public_ips(self):
         all_nodes = self.nodes + self.selfish_nodes
@@ -130,15 +136,13 @@ class Plan:
             all_ips.append(node.ip)
 
 
-def slow_network(latency):
-    # needed for this cmd: apt install iproute2 and --cap-add=NET_ADMIN
-    return "tc qdisc replace dev eth0 root netem delay " + str(latency) + "ms; "
-
-
 class Node:
     def __init__(self, name, ip):
         self.name = name
         self.ip = ip
+
+    def rm(self):
+        return 'docker rm --force ' + self.name
 
 
 class SelfishNode(Node):
@@ -147,3 +151,6 @@ class SelfishNode(Node):
 
         self.private_ip = private_ip
         self.args = selfish_nodes_args
+
+    def rm(self):
+        return super(SelfishNode, self).rm() + '; docker rm --force ' + self.name + '_proxy'

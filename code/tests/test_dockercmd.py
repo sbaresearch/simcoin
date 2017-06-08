@@ -10,7 +10,7 @@ class TestDockercmd(TestCase):
         node = SelfishNode('name', 'ip1', 'ip2', 'args')
         node.public_ips = ['192.168.0.1', '192.168.0.2']
 
-        cmd = dockercmd.run_selfish_node(node, 'cmd')
+        cmd = dockercmd.run_selfish_node(node, 'cmd', 10)
 
         self.assertTrue('--ips-public 192.168.0.1 192.168.0.2' in cmd)
         self.assertTrue(plan.selfish_node_image in cmd)

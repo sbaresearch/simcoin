@@ -1,7 +1,7 @@
 import plan
 import dockercmd
 
-daemon = ' bitcoind '
+daemon = 'bitcoind '
 guest_dir = '/data'
 args = {
     'regtest':            '-regtest',  # activate regtest mode
@@ -82,6 +82,10 @@ def send_to_address(node, address, amount):
 
 def get_chain_tips(node):
     return exec_bitcoin_cli(node, 'getchaintips > ' + guest_dir + '/chaintips.json')
+
+
+def get_block_count(node):
+    return exec_bitcoin_cli(node, 'getblockcount')
 
 
 def exec_bitcoin_cli(node, command):
