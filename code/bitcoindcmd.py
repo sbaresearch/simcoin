@@ -21,16 +21,16 @@ def start():
     return transform_to_cmd(args)
 
 
-def start_selfish_mining(node):
+def start_selfish_mining():
     specific_args = {
         'keypool':          '-keypool=1',
-        'addnode':          '-addnode=' + str(node.ip),
         'dnsseed':          '-dnsseed=0',
         'reindex':          '-reindex',
     }
-    args.update(specific_args)
-    args.pop('listen', None)
-    return transform_to_cmd(args)
+    return_args = args.copy()
+    return_args.update(specific_args)
+    return_args.pop('listen', None)
+    return transform_to_cmd(return_args)
 
 
 def start_user():
@@ -39,29 +39,26 @@ def start_user():
         'addnode':          '-addnode=' + plan.ip_bootstrap,  # only connect ourself introductionary node
         'keypool':          '-keypool=1'
     }
-    args.update(specific_args)
-    return transform_to_cmd(args)
+    return_args = args.copy()
+    return_args.update(specific_args)
+    return transform_to_cmd(return_args)
 
 
 def start_bootstrap():
     specific_args = {
         'disablewallet':    '-disablewallet=1'  # disable wallet
     }
-    args.update(specific_args)
-    return transform_to_cmd(args)
+    return_args = args.copy()
+    return_args.update(specific_args)
+    return transform_to_cmd(return_args)
 
 
 def transform_to_cmd(args_to_transform):
     return daemon + ' '.join(args_to_transform.values())
 
 
-def info():
-    return [
-        # 'getconnectioncount',
-        # 'getblockcount',
-        # 'getinfo',
-        # 'getmininginfo',
-    ]
+def rm_peers(node):
+    return dockercmd.exec_bash(node, 'rm -f /data/regtest/peers.dat')
 
 
 def get_best_block_hash(node):

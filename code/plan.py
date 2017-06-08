@@ -1,12 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import random
-from scheduler import Scheduler
 import dockercmd
 import bitcoindcmd
 import proxycmd
-import logs
 import ipaddress
+from scheduler import Scheduler
 
 # IP range from RFC6890 - IP range for future use
 # it does not conflict with https://github.com/bitcoin/bitcoin/blob/master/src/netbase.h
@@ -24,8 +23,8 @@ selfish_node_proxy_postfix = '-proxy'
 bootstrap_node_name = 'bootstrap'
 
 
-def host_dir(container_id):
-    return root_dir + '/' + container_id
+def host_dir(node):
+    return root_dir + '/' + node.name
 
 
 class Plan:
@@ -55,7 +54,7 @@ class Plan:
             self.set_public_ips()
 
         try:
-            plan.append("rm -rf " + host_dir('*'))
+            plan.append("rm -rf " + root_dir + '/*')
 
             plan.append(dockercmd.create_network(ip_range))
             plan.append('sleep 1')
@@ -68,7 +67,13 @@ class Plan:
             plan.append('sleep 2')  # wait before generating otherwise "Error -28" (still warming up)
             plan.extend(self.warmup_block_generation())
 
-            plan.extend([node.rm_private_node() for node in self.selfish_nodes])
+            plan.extend([bitcoindcmd.rm_peers(node) for node in self.selfish_node_private_nodes])
+            plan.extend([node.rm() for node in self.selfish_node_private_nodes])
+
+            plan.extend([dockercmd.run_selfish_private_node(node.private_node, bitcoindcmd.start_selfish_mining())
+                         for node in self.selfish_nodes])
+            plan.extend(self.wait_until_nodes_have_same_tip(self.nodes[0], self.selfish_node_private_nodes))
+
             plan.extend([self.run_selfish_node(node, config.latency) for node in self.selfish_nodes])
             plan.extend([self.wait_until_selfish_node_caught_up(node) for node in self.selfish_nodes])
 
@@ -84,8 +89,8 @@ class Plan:
             # plan.extend(logs.aggregate_logs(self.nodes))
 
         finally:
-            # plan.extend([node.rm() for node in self.all_nodes])
-            # plan.append(self.bootstrap_node.rm())
+            plan.extend([node.rm() for node in self.all_nodes])
+            plan.append(self.bootstrap_node.rm())
             plan.append('sleep 5')
             plan.append(dockercmd.rm_network())
 
@@ -100,26 +105,28 @@ class Plan:
         prev_node = next(iter_nodes)
         for node in iter_nodes:
             cmds.append(bitcoindcmd.generate_block(prev_node))
-            self.wait_until_nodes_have_same_tip(cmds, prev_node, [node])
+            cmds.extend(self.wait_until_nodes_have_same_tip(prev_node, [node]))
             prev_node = node
 
         cmds.append(bitcoindcmd.generate_block(prev_node, 101))
-        self.wait_until_nodes_have_same_tip(cmds, prev_node, self.all_bitcoind_nodes)
+        cmds.extend(self.wait_until_nodes_have_same_tip(prev_node, self.all_bitcoind_nodes))
 
         cmds.append('echo End of warmup')
         return cmds
 
-    def wait_until_nodes_have_same_tip(self, cmds, leading_node, nodes):
+    def wait_until_nodes_have_same_tip(self, leading_node, nodes):
+        cmds = []
         highest_tip = bitcoindcmd.get_best_block_hash(leading_node)
         for node in nodes:
             node_tip = bitcoindcmd.get_best_block_hash(node)
             cmds.append('while [[ $(' + highest_tip + ') != $(' + node_tip + ') ]]; ' +
                         'do echo Waiting for blocks to spread...; sleep 0.2; done')
+        return cmds
 
     def wait_until_selfish_node_caught_up(self, node):
         current_best_block_hash_cmd = 'current_best=$(' + bitcoindcmd.get_best_block_hash(self.nodes[0]) + ')'
         wait_for_selfish_node_cmd = 'while [[ $current_best != $(' + proxycmd.get_best_public_block_hash(node.proxy) + \
-                                    ') ]]; do echo Waiting for blocks to spread...; sleep 0.2; ' + proxycmd.get_best_public_block_hash(node.proxy) + '; done'
+                                    ') ]]; do echo Waiting for blocks to spread...; sleep 0.2; done'
         return '; '.join(['sleep 2', current_best_block_hash_cmd, wait_for_selfish_node_cmd])
 
     def wait_for_all_blocks_to_spread(self):
@@ -153,8 +160,8 @@ class Plan:
 
     def run_selfish_node(self, node, latency):
         current_best_block_hash_cmd = 'start_hash=$(' + bitcoindcmd.get_best_block_hash(self.nodes[0]) + ')'
-        run_cmd = dockercmd.run_selfish_node(node, proxycmd.run_proxy(node.proxy, node.private_node.ip, '$start_hash'),
-                                             bitcoindcmd.start_selfish_mining(node.private_node), latency)
+        run_cmd = dockercmd.run_selfish_proxy(node.proxy, proxycmd.run_proxy(node.proxy, node.private_node.ip,
+                                                                             '$start_hash'), latency)
         return '; '.join([current_best_block_hash_cmd, run_cmd])
 
 
@@ -176,6 +183,3 @@ class SelfishNode:
 
     def rm(self):
         return self.proxy.rm() + '; ' + self.private_node.rm()
-
-    def rm_private_node(self):
-        return self.private_node.rm()
