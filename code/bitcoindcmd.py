@@ -1,4 +1,5 @@
 import plan
+import dockercmd
 
 daemon = ' bitcoind '
 guest_dir = '/data'
@@ -20,10 +21,10 @@ def start():
     return transform_to_cmd(args)
 
 
-def start_selfish_mining(add_node):
+def start_selfish_mining(node):
     specific_args = {
         'keypool':          '-keypool=1',
-        'addnode':          '-addnode=' + add_node,
+        'addnode':          '-addnode=' + str(node.ip),
         'dnsseed':          '-dnsseed=0',
     }
     args.update(specific_args)
@@ -35,7 +36,6 @@ def start_user():
     specific_args = {
         'dnsseed':          '-dnsseed=0',  # disable dns seed lookups, otherwise this gets seeds even with docker --internal network
         'addnode':          '-addnode=' + plan.ip_bootstrap,  # only connect ourself introductionary node
-        'seednode':         '-seednode=240.0.0.3',
         'keypool':          '-keypool=1'
     }
     args.update(specific_args)
@@ -62,3 +62,32 @@ def info():
         # 'getmininginfo',
         'getpeerinfo'
     ]
+
+
+def get_best_block_hash(node):
+    return exec_bitcoin_cli(node, 'getbestblockhash')
+
+
+def generate_block(node, amount=1):
+    return exec_bitcoin_cli(node, 'generate {}'.format(amount))
+
+
+def get_new_address(node):
+    return exec_bitcoin_cli(node, 'getnewaddress')
+
+
+def send_to_address(node, address, amount):
+    return exec_bitcoin_cli(node, 'sendtoaddress ' + address + ' ' + str(amount))
+
+
+def get_chain_tips(node):
+    return exec_bitcoin_cli(node, 'getchaintips > ' + guest_dir + '/chaintips.json')
+
+
+def exec_bitcoin_cli(node, command):
+    return dockercmd.exec_bash(node,
+                               'bitcoin-cli'
+                               ' -regtest'
+                               ' -datadir=' + guest_dir +
+                               ' ' + command
+                               )
