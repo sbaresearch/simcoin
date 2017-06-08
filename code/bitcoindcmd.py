@@ -26,6 +26,7 @@ def start_selfish_mining(node):
         'keypool':          '-keypool=1',
         'addnode':          '-addnode=' + str(node.ip),
         'dnsseed':          '-dnsseed=0',
+        'reindex':          '-reindex',
     }
     args.update(specific_args)
     args.pop('listen', None)
@@ -60,7 +61,6 @@ def info():
         # 'getblockcount',
         # 'getinfo',
         # 'getmininginfo',
-        'getpeerinfo'
     ]
 
 
@@ -86,6 +86,10 @@ def get_chain_tips(node):
 
 def get_block_count(node):
     return exec_bitcoin_cli(node, 'getblockcount')
+
+
+def get_peer_info(node):
+    return exec_bitcoin_cli(node, 'getpeerinfo')
 
 
 def exec_bitcoin_cli(node, command):
