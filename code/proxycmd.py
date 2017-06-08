@@ -11,4 +11,12 @@ def run_proxy(node, private_ip, start_hash):
 
 
 def get_best_public_block_hash(node):
-        return dockercmd.exec_bash(node, 'python cli.py get_best_public_block_hash')
+        return exec_cli(node, 'get_best_public_block_hash')
+
+
+def start_hash(node):
+        return exec_cli(node, 'start_hash')
+
+
+def exec_cli(node, cmd):
+        return dockercmd.exec_cmd(node, 'python cli.py ' + cmd)

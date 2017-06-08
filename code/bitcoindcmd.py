@@ -58,41 +58,58 @@ def transform_to_cmd(args_to_transform):
 
 
 def rm_peers(node):
-    return dockercmd.exec_bash(node, 'rm -f /data/regtest/peers.dat')
+    return dockercmd.exec_cmd(node, 'rm -f /data/regtest/peers.dat')
 
 
 def get_best_block_hash(node):
-    return exec_bitcoin_cli(node, 'getbestblockhash')
+    return exec_cli(node, 'getbestblockhash')
 
 
 def generate_block(node, amount=1):
-    return exec_bitcoin_cli(node, 'generate {}'.format(amount))
+    cmd = exec_cli(node, 'generate {}'.format(amount))
+    return (cmd + r' | jq -r "to_entries[] | \"'
+            + node.name + r'; \(.value)\"" | tee -a '
+            + plan.root_dir + '/blocks.csv')
 
 
 def get_new_address(node):
-    return exec_bitcoin_cli(node, 'getnewaddress')
+    return exec_cli(node, 'getnewaddress')
 
 
 def send_to_address(node, address, amount):
-    return exec_bitcoin_cli(node, 'sendtoaddress ' + address + ' ' + str(amount))
+    return exec_cli(node, 'sendtoaddress ' + address + ' ' + str(amount))
 
 
 def get_chain_tips(node):
-    return exec_bitcoin_cli(node, 'getchaintips > ' + guest_dir + '/chaintips.json')
+    return exec_cli(node, 'getchaintips > ' + guest_dir + '/chaintips.json')
 
 
 def get_block_count(node):
-    return exec_bitcoin_cli(node, 'getblockcount')
+    return exec_cli(node, 'getblockcount')
 
 
 def get_peer_info(node):
-    return exec_bitcoin_cli(node, 'getpeerinfo')
+    return exec_cli(node, 'getpeerinfo')
 
 
-def exec_bitcoin_cli(node, command):
-    return dockercmd.exec_bash(node,
-                               'bitcoin-cli'
-                               ' -regtest'
-                               ' -datadir=' + guest_dir +
-                               ' ' + command
-                               )
+def get_block_hash(node, height):
+    return exec_cli(node, 'getblockhash ' + str(height))
+
+
+def get_block(node, block_hash):
+    return exec_cli(node, 'getblock ' + block_hash)
+
+
+def get_block_with_height(node, height):
+    get_hash_cmd = 'hash=$(' + get_block_hash(node, height) + ')'
+    get_block_cmd = get_block(node, '$hash')
+
+    return '; '.join([get_hash_cmd, get_block_cmd])
+
+
+def exec_cli(node, command):
+    return dockercmd.exec_cmd(node,
+                              'bitcoin-cli'
+                              ' -regtest'
+                              ' -datadir=' + guest_dir +
+                              ' ' + command)
