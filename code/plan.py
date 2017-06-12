@@ -190,7 +190,7 @@ class Plan:
         iter_cmd = ('for node in ${nodes[@]}; do'
                     ' line=$node; for height in `seq ' + str(self.first_block_height()) +
                     ' $(' + bitcoindcmd.get_block_count(mock_node) + ')`; do'
-                    ' line=$line;$(' + bitcoindcmd.get_block_hash(mock_node, '$height') + ');'
+                    ' line="$line;$(' + bitcoindcmd.get_block_hash(mock_node, '$height') + ')";'
                     ' done; echo $line | tee -a ' + file + '; done')
 
         return '; '.join([csv_header_cmd, self.bitcoind_nodes_array(), iter_cmd])
