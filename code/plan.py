@@ -208,7 +208,7 @@ class Node:
         self.ip = ip
 
     def rm(self):
-        return 'docker rm --force ' + self.name
+        return dockercmd.rm_container(self.name)
 
 
 class SelfishNode:

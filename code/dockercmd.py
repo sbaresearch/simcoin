@@ -70,3 +70,7 @@ def rm_network():
 def fix_data_dirs_permissions():
         return ('docker run '
                 ' --rm --volume ' + plan.root_dir + ':/mnt' + ' ' + plan.node_image + ' chmod a+rwx --recursive /mnt')
+
+
+def rm_container(name):
+        return 'docker rm --force ' + name
