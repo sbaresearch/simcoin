@@ -77,6 +77,6 @@ for i in range(1, size_matrix):
 
 print(pandas.DataFrame(matrix))
 
-with open("network.config", "w") as file:
+with open(config.network_config, "w") as file:
     writer = csv.writer(file, delimiter=';')
     writer.writerows(matrix)

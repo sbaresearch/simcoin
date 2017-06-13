@@ -106,6 +106,6 @@ for index, tick in enumerate(ticks):
 
 print(pandas.DataFrame(ticks))
 
-with open("ticks.csv", "w") as file:
+with open(config.tick_csv, "w") as file:
     writer = csv.writer(file, delimiter=';')
     writer.writerows(ticks)

@@ -13,6 +13,9 @@ selfish_node_prefix = 'selfish-node-'
 selfish_node_proxy_postfix = '-proxy'
 bootstrap_node_name = 'bootstrap'
 
+network_config = 'network.config'
+tick_csv = 'tick.csv'
+
 
 def host_dir(node):
     return root_dir + node.name
