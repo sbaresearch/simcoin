@@ -15,7 +15,6 @@ class Plan:
         next(ip_addresses)  # skipping first ip address (docker fails with error "is in use")
         next(ip_addresses)  # omit first ip address used by bootstrap node
 
-        self.config = config
         self.nodes = [Node(config.node_prefix + str(i), next(ip_addresses)) for i in range(args.nodes)]
         self.selfish_nodes = [SelfishNode(config.selfish_node_prefix + str(i), next(ip_addresses), next(ip_addresses),
                                           args.selfish_nodes_args) for i in range(args.selfish_nodes)]
