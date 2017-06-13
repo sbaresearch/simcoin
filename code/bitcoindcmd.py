@@ -1,4 +1,4 @@
-import plan
+import config
 import dockercmd
 
 daemon = 'bitcoind '
@@ -36,7 +36,7 @@ def start_selfish_mining():
 def start_user():
     specific_args = {
         'dnsseed':          '-dnsseed=0',  # disable dns seed lookups, otherwise this gets seeds even with docker --internal network
-        'addnode':          '-addnode=' + plan.ip_bootstrap,  # only connect ourself introductionary node
+        'addnode':          '-addnode=' + config.ip_bootstrap,  # only connect ourself introductionary node
         'keypool':          '-keypool=1'
     }
     return_args = args.copy()
@@ -69,7 +69,7 @@ def generate_block(node, amount=1):
     cmd = exec_cli(node, 'generate {}'.format(amount))
     return (cmd + r' | jq -r "to_entries[] | \"'
             + node.name + r'; \(.value)\"" | tee -a '
-            + plan.root_dir + '/blocks.csv')
+            + config.root_dir + '/blocks.csv')
 
 
 def get_new_address(node):

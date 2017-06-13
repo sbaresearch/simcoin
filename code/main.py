@@ -3,7 +3,7 @@
 import sys
 import os
 import argparse
-import plan
+import config
 from plan import Plan
 
 if sys.version_info <= (3, 0):
@@ -75,12 +75,12 @@ def run():
     if args.selfish_nodes > 0 and args.connectivity is None:
         parser.error('when selfish_nodes is > 0 then connectivity should be set')
 
-    if os.system("docker inspect " + plan.node_image + " > /dev/null") != 0:
-        print("Image " + plan.node_image + " not found")
+    if os.system("docker inspect " + config.node_image + " > /dev/null") != 0:
+        print("Image " + config.node_image + " not found")
         exit()
 
-    if os.system("docker inspect " + plan.selfish_node_image + " > /dev/null") != 0:
-        print("Image " + plan.selfish_node_image + " not found")
+    if os.system("docker inspect " + config.selfish_node_image + " > /dev/null") != 0:
+        print("Image " + config.selfish_node_image + " not found")
         exit()
 
     print("arguments called with: {}".format(sys.argv))
