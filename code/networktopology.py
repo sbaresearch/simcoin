@@ -2,6 +2,7 @@ import argparse
 import csv
 import random
 import pandas
+import sys
 
 node_prefix = 'node-'
 selfish_node_prefix = 'selfish-node-'
@@ -49,6 +50,9 @@ parser.add_argument('--connectivity'
 
 
 args = parser.parse_args()
+
+print("arguments called with: {}".format(sys.argv))
+print("parsed arguments: {}".format(args))
 
 total_nodes = args.nodes + args.selfish_nodes
 size_matrix = total_nodes + 1
