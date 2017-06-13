@@ -100,3 +100,4 @@ datadirs
 
 # project specific
 network.config
+ticks.csv
