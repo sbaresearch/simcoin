@@ -31,9 +31,6 @@ class Plan:
         args = self.args
         plan = []
 
-        if len(self.selfish_nodes) > 0:
-            self.set_public_ips()
-
         try:
             plan.append("rm -rf " + config.root_dir + '/*')
 
@@ -129,16 +126,6 @@ class Plan:
         create_address_cmd = 'fresh_address=$(' + bitcoindcmd.get_new_address(node) + ')'
         create_tx_cmd = bitcoindcmd.send_to_address(node, '$fresh_address', 0.1)
         return '; '.join([create_address_cmd, create_tx_cmd])
-
-    def set_public_ips(self):
-        all_ips = [node.ip for node in self.all_public_nodes]
-        amount = int((len(all_ips) - 1) * self.args.connectivity)
-
-        for node in self.selfish_node_proxies:
-            all_ips.remove(node.ip)
-            ips = random.sample(all_ips, amount)
-            node.public_ips = ips
-            all_ips.append(node.ip)
 
     def run_selfish_node_proxy(self, node, latency):
         current_best_block_hash_cmd = 'start_hash=$(' + bitcoindcmd.get_best_block_hash(self.nodes[0]) + ')'
