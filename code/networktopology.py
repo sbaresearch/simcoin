@@ -26,13 +26,13 @@ parser = argparse.ArgumentParser(description='Create a simple network.config for
 parser.add_argument('--nodes'
                     , default=4
                     , type=check_positive
-                    , help='Number of Bitcoin nodes spawned.'
+                    , help='Number of Bitcoin nodes.'
                     )
 
 parser.add_argument('--selfish-nodes'
                     , default=1
                     , type=check_positive
-                    , help='Number of selfish Bitcoin nodes spawned.'
+                    , help='Number of selfish Bitcoin nodes.'
                     )
 
 parser.add_argument('--latency'
