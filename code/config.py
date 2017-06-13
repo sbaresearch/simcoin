@@ -14,7 +14,7 @@ selfish_node_proxy_postfix = '-proxy'
 bootstrap_node_name = 'bootstrap'
 
 network_config = 'network.config'
-tick_csv = 'tick.csv'
+tick_csv = 'ticks.csv'
 
 
 def host_dir(node):
