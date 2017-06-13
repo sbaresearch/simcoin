@@ -56,11 +56,11 @@ print("parsed arguments: {}".format(args))
 total_nodes = args.nodes + args.selfish_nodes
 size_matrix = total_nodes + 1
 nodes = args.nodes
-selfish_node = args.selfish_nodes
+selfish_nodes = args.selfish_nodes
 
 header = ['']
 header.extend([config.node_prefix + str(i) for i in range(nodes)])
-header.extend([config.selfish_node_prefix + str(i) for i in range(selfish_node)])
+header.extend([config.selfish_node_prefix + str(i) for i in range(selfish_nodes)])
 matrix = [[] for i in range(size_matrix)]
 
 for i in range(1, size_matrix):
