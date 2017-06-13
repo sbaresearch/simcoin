@@ -30,6 +30,13 @@ def check_positive(value):
     return value
 
 
+def check_if_only_block_per_node(nodes):
+    most_common = Counter(nodes).most_common(1)
+    if len(most_common) > 0 and most_common[0][1] > 1:
+        raise Exception("Block interval={} is too low. "
+                        "Only one block per node per tick is allowed.".format(args.block_interval))
+
+
 parser = argparse.ArgumentParser(description='Create a simple tick.config for Bitcoin Network Simulator.')
 
 
@@ -91,10 +98,7 @@ for index, tick in enumerate(ticks):
         tick.append('block ' + node)
         index_block += 1
 
-    most_common = Counter(chosen_nodes).most_common(1)
-    if len(most_common) > 0 and most_common[0][1] > 1:
-        raise Exception("Block interval={} is too low. "
-                        "Only one block per node per tick is allowed.".format(args.block_interval))
+    check_if_only_block_per_node(chosen_nodes)
 
     while tx_point_in_time[index_tx] < index + 1:
         tick.append('tx ' + random.choice(all_nodes))
