@@ -30,7 +30,7 @@ parser.add_argument('--nodes'
                     )
 
 parser.add_argument('--selfish-nodes'
-                    , default=4
+                    , default=1
                     , type=check_positive
                     , help='Number of selfish Bitcoin nodes spawned.'
                     )
