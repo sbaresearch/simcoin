@@ -12,8 +12,8 @@ from scheduler import Scheduler
 ip_range = "240.0.0.0/4"
 ip_bootstrap = "240.0.0.2"
 
-root_dir = '$PWD/../data'
-log_file = '$PWD/../data/log'
+root_dir = '$PWD/../data/'
+log_file = root_dir + 'log'
 
 node_image = 'btn/base:v3'
 selfish_node_image = 'proxy'
