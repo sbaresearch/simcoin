@@ -97,3 +97,7 @@ datadirs
 
 # Intellij
 *.iml
+
+# project specific
+network.config
+ticks.csv

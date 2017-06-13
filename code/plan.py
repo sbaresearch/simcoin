@@ -1,42 +1,24 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
 import random
 import dockercmd
 import bitcoindcmd
 import proxycmd
 import ipaddress
 from scheduler import Scheduler
-
-# IP range from RFC6890 - IP range for future use
-# it does not conflict with https://github.com/bitcoin/bitcoin/blob/master/src/netbase.h
-ip_range = "240.0.0.0/4"
-ip_bootstrap = "240.0.0.2"
-
-root_dir = '$PWD/../data'
-log_file = '$PWD/../data/log'
-
-node_image = 'btn/base:v3'
-selfish_node_image = 'proxy'
-node_prefix = 'node-'
-selfish_node_prefix = 'selfish-node-'
-selfish_node_proxy_postfix = '-proxy'
-bootstrap_node_name = 'bootstrap'
-
-
-def host_dir(node):
-    return root_dir + '/' + node.name
+import config
 
 
 class Plan:
-    def __init__(self, config):
-        ip_addresses = ipaddress.ip_network(ip_range).hosts()
+    def __init__(self, args):
+        self.args = args
+
+        ip_addresses = ipaddress.ip_network(config.ip_range).hosts()
         next(ip_addresses)  # skipping first ip address (docker fails with error "is in use")
         next(ip_addresses)  # omit first ip address used by bootstrap node
 
         self.config = config
-        self.nodes = [Node(node_prefix + str(i), next(ip_addresses)) for i in range(config.nodes)]
-        self.selfish_nodes = [SelfishNode(selfish_node_prefix + str(i), next(ip_addresses), next(ip_addresses),
-                                          config.selfish_nodes_args) for i in range(config.selfish_nodes)]
+        self.nodes = [Node(config.node_prefix + str(i), next(ip_addresses)) for i in range(args.nodes)]
+        self.selfish_nodes = [SelfishNode(config.selfish_node_prefix + str(i), next(ip_addresses), next(ip_addresses),
+                                          args.selfish_nodes_args) for i in range(args.selfish_nodes)]
 
         self.selfish_node_private_nodes = [node.private_node for node in self.selfish_nodes]
         self.selfish_node_proxies = [node.proxy for node in self.selfish_nodes]
@@ -44,24 +26,24 @@ class Plan:
         self.all_public_nodes = self.nodes + self.selfish_node_proxies
         self.all_nodes = self.nodes + self.selfish_node_private_nodes + self.selfish_node_proxies
 
-        self.bootstrap_node = Node(bootstrap_node_name, ip_bootstrap)
+        self.bootstrap_node = Node(config.bootstrap_node_name, config.ip_bootstrap)
 
     def create(self):
-        config = self.config
+        args = self.args
         plan = []
 
         if len(self.selfish_nodes) > 0:
             self.set_public_ips()
 
         try:
-            plan.append("rm -rf " + root_dir + '/*')
+            plan.append("rm -rf " + config.root_dir + '/*')
 
-            plan.append(dockercmd.create_network(ip_range))
+            plan.append(dockercmd.create_network(config.ip_range))
             plan.append('sleep 1')
 
-            plan.append(dockercmd.run_bootstrap_node(self.bootstrap_node, bitcoindcmd.start_user(), config.latency))
-            plan.extend([dockercmd.run_node(node, bitcoindcmd.start_user(), config.latency) for node in self.nodes])
-            plan.extend([dockercmd.run_node(node, bitcoindcmd.start_user(), config.latency)
+            plan.append(dockercmd.run_bootstrap_node(self.bootstrap_node, bitcoindcmd.start_user(), args.latency))
+            plan.extend([dockercmd.run_node(node, bitcoindcmd.start_user(), args.latency) for node in self.nodes])
+            plan.extend([dockercmd.run_node(node, bitcoindcmd.start_user(), args.latency)
                          for node in self.selfish_node_private_nodes])
 
             plan.append('sleep 2')  # wait before generating otherwise "Error -28" (still warming up)
@@ -74,13 +56,13 @@ class Plan:
                          for node in self.selfish_nodes])
             plan.extend(self.wait_until_nodes_have_same_tip(self.nodes[0], self.selfish_node_private_nodes))
 
-            plan.extend([self.run_selfish_node_proxy(node, config.latency) for node in self.selfish_nodes])
+            plan.extend([self.run_selfish_node_proxy(node, args.latency) for node in self.selfish_nodes])
             plan.extend([self.wait_until_selfish_node_proxy_caught_up(node) for node in self.selfish_nodes])
 
             scheduler = Scheduler(0)
-            scheduler.add_blocks(config.blocks, config.block_interval,
+            scheduler.add_blocks(args.blocks, args.block_interval,
                                  [bitcoindcmd.generate_block(self.random_node()) for _ in range(1000)])
-            scheduler.add_tx(config.blocks * config.block_interval, [self.random_tx_command() for _ in range(10)])
+            scheduler.add_tx(args.blocks * args.block_interval, [self.random_tx_command() for _ in range(10)])
             plan.extend(scheduler.bash_commands())
             plan.append(self.wait_for_all_blocks_to_spread())
 
@@ -151,7 +133,7 @@ class Plan:
 
     def set_public_ips(self):
         all_ips = [node.ip for node in self.all_public_nodes]
-        amount = int((len(all_ips) - 1) * self.config.connectivity)
+        amount = int((len(all_ips) - 1) * self.args.connectivity)
 
         for node in self.selfish_node_proxies:
             all_ips.remove(node.ip)
@@ -169,15 +151,15 @@ class Plan:
         # idea iterate over chain and check if at some height all hashes are the same.
         mock_node = Node('$node', None)
 
-        file = root_dir + '/consensus_chain.csv'
-        csv_header_cmd = r'echo "height; block_hash" | tee -a ' + file
+        file = config.root_dir + '/consensus_chain.csv'
+        csv_header_cmd = r'echo "height;block_hash" | tee -a ' + file
         iter_cmd = ('for height in `seq ' + str(self.first_block_height()) +
                     ' $(' + bitcoindcmd.get_block_count(self.all_bitcoind_nodes[0]) + ')`; do'
                     ' hash=$(' + bitcoindcmd.get_block_hash(self.all_bitcoind_nodes[0], '$height') + ');'
                     ' all_same=true; for node in "${nodes[@]}"; do' +
                     ' if [[ $hash != $(' + bitcoindcmd.get_block_hash(mock_node, '$height') + ')'
                     ' ]]; then all_same=false; fi; done;'
-                    ' if [ "$all_same" = true ]; then echo $height\; $hash '
+                    ' if [ "$all_same" = true ]; then echo "$height;$hash" '
                     '| tee -a ' + file + '; fi; done')
 
         return '; '.join([csv_header_cmd, self.bitcoind_nodes_array(), iter_cmd])
@@ -185,12 +167,12 @@ class Plan:
     def save_chains(self):
         mock_node = Node('$node', None)
 
-        file = root_dir + '/chains.csv'
-        csv_header_cmd = r'echo "node; block_hashes" | tee -a ' + file
+        file = config.root_dir + '/chains.csv'
+        csv_header_cmd = r'echo "node;block_hashes" | tee -a ' + file
         iter_cmd = ('for node in ${nodes[@]}; do'
                     ' line=$node; for height in `seq ' + str(self.first_block_height()) +
                     ' $(' + bitcoindcmd.get_block_count(mock_node) + ')`; do'
-                    ' line="$line; $(' + bitcoindcmd.get_block_hash(mock_node, '$height') + ')";'
+                    ' line="$line;$(' + bitcoindcmd.get_block_hash(mock_node, '$height') + ')";'
                     ' done; echo $line | tee -a ' + file + '; done')
 
         return '; '.join([csv_header_cmd, self.bitcoind_nodes_array(), iter_cmd])
@@ -208,12 +190,12 @@ class Node:
         self.ip = ip
 
     def rm(self):
-        return 'docker rm --force ' + self.name
+        return dockercmd.rm_container(self.name)
 
 
 class SelfishNode:
     def __init__(self, name, public_ip, private_ip, selfish_nodes_args):
-        self.proxy = Node(name + selfish_node_proxy_postfix, public_ip)
+        self.proxy = Node(name + config.selfish_node_proxy_postfix, public_ip)
         self.proxy.args = selfish_nodes_args
 
         self.private_node = Node(name, private_ip)

@@ -1,4 +1,4 @@
-import plan
+import config
 import bitcoindcmd
 import tccmd
 
@@ -9,7 +9,7 @@ def run_bootstrap_node(node, cmd, latency):
             ' --net=isolated_network'
             ' --ip=' + node.ip +
             ' --name=' + node.name +  # container name
-            ' ' + plan.node_image +  # image name # src: https://hub.docker.com/r/abrkn/bitcoind/
+            ' ' + config.node_image +  # image name # src: https://hub.docker.com/r/abrkn/bitcoind/
             ' bash -c "' + '; '.join([tccmd.slow_network(latency), cmd]) + '" ')
 
 
@@ -21,8 +21,8 @@ def run_node(node, cmd, latency):
             ' --ip=' + str(node.ip) +
             ' --name=' + node.name +  # container name
             ' --hostname=' + node.name +
-            ' --volume ' + plan.host_dir(node) + ':' + bitcoindcmd.guest_dir +
-            ' ' + plan.node_image +  # image name # src: https://hub.docker.com/r/abrkn/bitcoind/
+            ' --volume ' + config.host_dir(node) + ':' + bitcoindcmd.guest_dir +
+            ' ' + config.node_image +  # image name # src: https://hub.docker.com/r/abrkn/bitcoind/
             ' bash -c "' + '; '.join([tccmd.slow_network(latency), cmd]) + '" ')
 
 
@@ -32,8 +32,8 @@ def run_selfish_private_node(node, cmd):
             ' --net=isolated_network'
             ' --ip=' + str(node.ip) +
             ' --name=' + node.name +
-            ' --volume ' + plan.host_dir(node) + ':' + bitcoindcmd.guest_dir +
-            ' ' + plan.node_image +
+            ' --volume ' + config.host_dir(node) + ':' + bitcoindcmd.guest_dir +
+            ' ' + config.node_image +
             ' bash -c "' + cmd + '"')
 
 
@@ -47,7 +47,7 @@ def run_selfish_proxy(node, cmd, latency):
                 ' --name=' + node.name +
                 ' --hostname=' + node.name +
                 ' --rm'
-                ' ' + plan.selfish_node_image +
+                ' ' + config.selfish_node_image +
                 ' bash -c "' + '; '.join([tccmd.slow_network_proxy(latency, node.ip), cmd]) + '"; ')
 
 
@@ -69,4 +69,8 @@ def rm_network():
 
 def fix_data_dirs_permissions():
         return ('docker run '
-                ' --rm --volume ' + plan.root_dir + ':/mnt' + ' ' + plan.node_image + ' chmod a+rwx --recursive /mnt')
+                ' --rm --volume ' + config.root_dir + ':/mnt' + ' ' + config.node_image + ' chmod a+rwx --recursive /mnt')
+
+
+def rm_container(name):
+        return 'docker rm --force ' + name
