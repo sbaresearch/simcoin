@@ -4,7 +4,7 @@ import plan
 def aggregate_logs(nodes):
     commands = []
     timestamp_length = str(len('2016-09-22 14:46:41.706605'))
-    logfile_raw = plan.log_file + '.raw'
+    logfile_raw = plan.aggregated_log_file + '.raw'
 
     def prefix_lines(prefix):
         return 'sed -e \'s/^/' + prefix + ' /\''
@@ -22,7 +22,7 @@ def aggregate_logs(nodes):
         return 'sed "s/^.\{' + timestamp_length + '\}/& ' + _id + '/g"'
 
     "remove files from previous run"
-    commands.append('rm -rf ' + plan.log_file)
+    commands.append('rm -rf ' + plan.aggregated_log_file)
     commands.append('rm -rf ' + logfile_raw)
 
     "consolidate logfiles from the nodes"
@@ -36,10 +36,10 @@ def aggregate_logs(nodes):
                     ' | ' + remove_empty_lines() +
                     ' | ' + remove_lines_starting_with_whitspace() +
                     ' | ' + remove_multiline_error_messages() +
-                    ' > ' + plan.log_file
+                    ' > ' + plan.aggregated_log_file
                     )
     "sort by timestamp"
-    commands.append(' sort ' + plan.log_file)
+    commands.append(' sort ' + plan.aggregated_log_file)
 
     "aggregate fork information"
     commands.extend([' cat ' + plan.host_dir(node) + '/chaintips.json '
