@@ -79,4 +79,5 @@ print(pandas.DataFrame(matrix))
 
 with open(config.network_config, "w") as file:
     writer = csv.writer(file, delimiter=';')
+    writer.writerows([['nodes', args.nodes], ['selfish-nodes', args.selfish_nodes]])
     writer.writerows(matrix)
