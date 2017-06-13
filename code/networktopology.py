@@ -3,9 +3,8 @@ import csv
 import random
 import pandas
 import sys
+import config
 
-node_prefix = 'node-'
-selfish_node_prefix = 'selfish-node-'
 random.seed(1)
 
 
@@ -60,8 +59,8 @@ nodes = args.nodes
 selfish_node = args.selfish_nodes
 
 header = ['']
-header.extend([node_prefix + str(i) for i in range(nodes)])
-header.extend([selfish_node_prefix + str(i) for i in range(selfish_node)])
+header.extend([config.node_prefix + str(i) for i in range(nodes)])
+header.extend([config.selfish_node_prefix + str(i) for i in range(selfish_node)])
 matrix = [[] for i in range(size_matrix)]
 
 for i in range(1, size_matrix):
