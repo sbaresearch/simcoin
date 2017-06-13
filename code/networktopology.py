@@ -39,7 +39,7 @@ parser.add_argument('--selfish-nodes'
 parser.add_argument('--latency'
                     , default=200
                     , type=check_positive
-                    , help='Latency between nodes.'
+                    , help='Latency between nodes in milliseconds.'
                     )
 
 parser.add_argument('--connectivity'
