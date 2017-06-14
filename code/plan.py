@@ -30,7 +30,7 @@ class Plan:
 
         self.nodes = {config.node_name + str(i):
                       PublicBitcoindNode(config.node_name.format(str(i)), next(ip_addresses),
-                                         args.latency, connections[config.node_name.format(str(i))])
+                                         args.latency)
                       for i in range(nodes)}
 
         self.selfish_node_private_nodes = {}
@@ -43,8 +43,7 @@ class Plan:
 
             self.selfish_node_proxies[config.selfish_node_name + str(i) + config.selfish_node_proxy_name] = \
                 ProxyNode(config.selfish_node_proxy_name.format(str(i)),
-                          ip_proxy, ip_private_node, args.latency,
-                          connections[config.selfish_node_proxy_name.format(str(i))])
+                          ip_proxy, ip_private_node, args.latency, args.selfish_nodes_args)
 
         self.all_bitcoind_nodes = dict(self.nodes, **self.selfish_node_private_nodes)
         self.all_public_nodes = dict(self.nodes, **self.selfish_node_proxies)
@@ -182,8 +181,8 @@ class Node:
 
 
 class PublicNode:
-    def __init__(self, outgoing_ips):
-        self.outgoing_ips = outgoing_ips
+    def __init__(self):
+        self.outgoing_ips = []
 
 
 class BitcoindNode(Node):
@@ -215,9 +214,8 @@ class BitcoindNode(Node):
 
 
 class PublicBitcoindNode(BitcoindNode, PublicNode):
-    def __init__(self, name, ip, latency, outgoing_ips):
+    def __init__(self, name, ip, latency):
         BitcoindNode.__init__(self, name, ip, latency)
-        PublicNode.__init__(self, outgoing_ips)
 
 
 class SelfishPrivateNode(BitcoindNode):
@@ -226,10 +224,10 @@ class SelfishPrivateNode(BitcoindNode):
 
 
 class ProxyNode(Node, PublicNode):
-    def __init__(self, name, ip, private_ip, latency, outgoing_ips):
+    def __init__(self, name, ip, private_ip, latency, args):
         Node.__init__(self, name, ip, latency)
-        PublicNode.__init__(self, outgoing_ips)
         self.private_ip = private_ip
+        self.args = args
 
     def run(self, ):
         mock_node = Node('node-0', None, None)
