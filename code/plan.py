@@ -23,7 +23,7 @@ class Plan:
             ip_private_node = next(ip_addresses)
             ip_proxy = next(ip_addresses)
             self.selfish_node_private_nodes[config.selfish_node_prefix + str(i)] = \
-                Node(config.node_prefix + str(i), ip_private_node)
+                SelfishPrivateNode(config.node_prefix + str(i), ip_private_node)
 
             self.selfish_node_proxies[config.selfish_node_prefix + str(i) + config.selfish_node_proxy_postfix] = \
                 ProxyNode(config.selfish_node_prefix + str(i) + config.selfish_node_proxy_postfix,
@@ -182,6 +182,11 @@ class Node:
 
     def rm(self):
         return dockercmd.rm_container(self.name)
+
+
+class SelfishPrivateNode(Node):
+    def __init__(self, name, ip):
+        super().__init__(name, ip)
 
 
 class ProxyNode(Node):
