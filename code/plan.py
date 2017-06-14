@@ -54,10 +54,10 @@ class Plan:
             plan.extend([node.rm() for node in self.selfish_node_private_nodes.values()])
 
             plan.extend([node.run() for node in self.selfish_node_private_nodes.values()])
-            plan.extend(self.wait_until_nodes_have_same_tip(self.one_normal_node, self.selfish_node_private_nodes.values()))
+            plan.extend([node.wait_for_highest_tip_of_node(self.one_normal_node) for node in self.selfish_node_private_nodes.values()])
 
             plan.extend([node.run() for node in self.selfish_node_proxies.values()])
-            plan.extend([self.wait_until_selfish_node_proxy_caught_up(node) for node in self.selfish_node_proxies.values()])
+            plan.extend([node.wait_for_highest_tip_of_node(self.one_normal_node) for node in self.selfish_node_proxies.values()])
 
             scheduler = Scheduler(0)
             scheduler.add_blocks(args.blocks, args.block_interval,
@@ -90,29 +90,14 @@ class Plan:
         prev_node = next(iter_nodes)
         for node in iter_nodes:
             cmds.append(bitcoindcmd.generate_block(prev_node))
-            cmds.extend(self.wait_until_nodes_have_same_tip(prev_node, [node]))
+            cmds.extend(node.wait_for_highest_tip_of_node(prev_node))
             prev_node = node
 
         cmds.append(bitcoindcmd.generate_block(prev_node, 101))
-        cmds.extend(self.wait_until_nodes_have_same_tip(prev_node, self.all_bitcoind_nodes.values()))
+        cmds.extend([node.wait_for_highest_tip_of_node(prev_node) for node in self.all_bitcoind_nodes.values()])
 
         cmds.append('echo End of warmup')
         return cmds
-
-    def wait_until_nodes_have_same_tip(self, leading_node, nodes):
-        cmds = []
-        highest_tip = bitcoindcmd.get_best_block_hash(leading_node)
-        for node in nodes:
-            node_tip = bitcoindcmd.get_best_block_hash(node)
-            cmds.append('while [[ $(' + highest_tip + ') != $(' + node_tip + ') ]]; ' +
-                        'do echo Waiting for blocks to spread...; sleep 0.2; done')
-        return cmds
-
-    def wait_until_selfish_node_proxy_caught_up(self, node):
-        current_best_block_hash_cmd = 'current_best=$(' + bitcoindcmd.get_best_block_hash(self.nodes[0]) + ')'
-        wait_for_selfish_node_cmd = 'while [[ $current_best != $(' + proxycmd.get_best_public_block_hash(node.proxy) + \
-                                    ') ]]; do echo Waiting for blocks to spread...; sleep 0.2; done'
-        return '; '.join(['sleep 2', current_best_block_hash_cmd, wait_for_selfish_node_cmd])
 
     def wait_for_all_blocks_to_spread(self):
 
@@ -190,6 +175,12 @@ class NormalNode(Node):
     def delete_peers_file(self):
         return bitcoindcmd.rm_peers(self)
 
+    def wait_for_highest_tip_of_node(self, node):
+        node_tip = bitcoindcmd.get_best_block_hash(node)
+        highest_tip = bitcoindcmd.get_best_block_hash(self)
+        return 'while [[ $(' + highest_tip + ') != $(' + node_tip + ') ]]; ' \
+               'do echo Waiting for blocks to spread...; sleep 0.2; done'
+
 
 class SelfishPrivateNode(NormalNode):
     def __init__(self, name, ip):
@@ -206,3 +197,9 @@ class ProxyNode(Node):
         current_best_block_hash_cmd = 'start_hash=$(' + bitcoindcmd.get_best_block_hash(mock_node) + ')'
         run_cmd = dockercmd.run_selfish_proxy(self, proxycmd.run_proxy(self, '$start_hash'), self.latency)
         return '; '.join([current_best_block_hash_cmd, run_cmd])
+
+    def wait_for_highest_tip_of_node(self, node):
+        current_best_block_hash_cmd = 'current_best=$(' + bitcoindcmd.get_best_block_hash(node) + ')'
+        wait_for_selfish_node_cmd = 'while [[ $current_best != $(' + proxycmd.get_best_public_block_hash(self) + \
+                                    ') ]]; do echo Waiting for blocks to spread...; sleep 0.2; done'
+        return '; '.join(['sleep 2', current_best_block_hash_cmd, wait_for_selfish_node_cmd])
