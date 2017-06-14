@@ -13,7 +13,6 @@ class Plan:
 
         ip_addresses = ipaddress.ip_network(config.ip_range).hosts()
         next(ip_addresses)  # skipping first ip address (docker fails with error "is in use")
-        next(ip_addresses)  # omit first ip address used by bootstrap node
 
         self.nodes = {config.node_prefix + str(i):
                       Node(config.node_prefix + str(i), next(ip_addresses)) for i in range(args.nodes)}
@@ -34,7 +33,6 @@ class Plan:
         self.all_public_nodes = dict(self.nodes, **self.selfish_node_proxies)
         self.all_nodes = dict(self.nodes, **self.selfish_node_private_nodes, **self.selfish_node_proxies)
 
-        self.bootstrap_node = Node(config.bootstrap_node_name, config.ip_bootstrap)
         self.one_normal_node = next(iter(self.nodes.values()))
 
     def create(self):
@@ -47,7 +45,6 @@ class Plan:
             plan.append(dockercmd.create_network(config.ip_range))
             plan.append('sleep 1')
 
-            plan.append(dockercmd.run_bootstrap_node(self.bootstrap_node, bitcoindcmd.start_user(), args.latency))
             plan.extend([dockercmd.run_node(node, bitcoindcmd.start_user(), args.latency) for node in self.nodes.values()])
             plan.extend([dockercmd.run_node(node, bitcoindcmd.start_user(), args.latency)
                          for node in self.selfish_node_private_nodes.values()])
@@ -82,7 +79,6 @@ class Plan:
 
         finally:
             plan.extend([node.rm() for node in self.all_nodes.values()])
-            plan.append(self.bootstrap_node.rm())
             plan.append('sleep 5')
             plan.append(dockercmd.rm_network())
 

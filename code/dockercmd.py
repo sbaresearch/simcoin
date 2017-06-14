@@ -3,16 +3,6 @@ import bitcoindcmd
 import tccmd
 
 
-def run_bootstrap_node(node, cmd, latency):
-    return ('docker run'
-            ' --detach=true'
-            ' --net=isolated_network'
-            ' --ip=' + node.ip +
-            ' --name=' + node.name +  # container name
-            ' ' + config.node_image +  # image name # src: https://hub.docker.com/r/abrkn/bitcoind/
-            ' bash -c "' + '; '.join([tccmd.slow_network(latency), cmd]) + '" ')
-
-
 def run_node(node, cmd, latency):
     return ('docker run'
             ' --cap-add=NET_ADMIN'  # for `tc`
