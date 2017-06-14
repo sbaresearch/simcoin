@@ -91,7 +91,16 @@ def run():
     print("arguments called with: {}".format(sys.argv))
     print("parsed arguments: {}".format(args))
 
-    p = Plan(args)
+    nodes = selfish_nodes = 0
+    for index, row in enumerate(csv.reader(open(config.network_config), delimiter=';')):
+        if index >= 2:
+            break
+        if index == 0:
+            nodes = int(row[1])
+        elif index == 1:
+            selfish_nodes = int(row[1])
+
+    p = Plan(args, nodes, selfish_nodes)
     commands = p.create()
 
     if args.dry_run:

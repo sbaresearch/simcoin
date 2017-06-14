@@ -8,18 +8,18 @@ import config
 
 
 class Plan:
-    def __init__(self, args):
+    def __init__(self, args, nodes, selfish_nodes):
         self.args = args
 
         ip_addresses = ipaddress.ip_network(config.ip_range).hosts()
         next(ip_addresses)  # skipping first ip address (docker fails with error "is in use")
 
         self.nodes = {config.node_prefix + str(i):
-                      NormalNode(config.node_prefix + str(i), next(ip_addresses), args.latency) for i in range(args.nodes)}
+                      NormalNode(config.node_prefix + str(i), next(ip_addresses), args.latency) for i in range(nodes)}
 
         self.selfish_node_private_nodes = {}
         self.selfish_node_proxies = {}
-        for i in range(args.selfish_nodes):
+        for i in range(selfish_nodes):
             ip_private_node = next(ip_addresses)
             ip_proxy = next(ip_addresses)
             self.selfish_node_private_nodes[config.selfish_node_prefix + str(i)] = \
