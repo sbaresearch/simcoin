@@ -182,12 +182,12 @@ class Node:
 
 
 class PublicNode:
-    def __init__(self, outgoing_ips, **kw):
+    def __init__(self, outgoing_ips):
         self.outgoing_ips = outgoing_ips
 
 
 class BitcoindNode(Node):
-    def __init__(self, name, ip, latency, **kw):
+    def __init__(self, name, ip, latency):
         super().__init__(name, ip, latency)
         self.name = name
         self.ip = ip
