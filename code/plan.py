@@ -15,19 +15,6 @@ class Plan:
         ip_addresses = ipaddress.ip_network(config.ip_range).hosts()
         next(ip_addresses)  # skipping first ip address (docker fails with error "is in use")
 
-        network_config = pandas.read_csv(open(config.network_config), skiprows=2, delimiter=';', index_col=0)
-        connections = {}
-        for node_row, row in network_config.iterrows():
-            if node_row.startswith(config.selfish_node_prefix):
-                node_row += config.selfish_node_proxy_postfix
-            connections[node_row] = []
-            for node_column, latency in row.iteritems():
-                # exact latency is so far omitted
-                if node_column.startswith(config.selfish_node_prefix):
-                    node_column += config.selfish_node_proxy_postfix
-                if latency >= 0:
-                    connections[node_row].append(node_column)
-
         self.nodes = {config.node_name + str(i):
                       PublicBitcoindNode(config.node_name.format(str(i)), next(ip_addresses),
                                          args.latency)
@@ -50,6 +37,22 @@ class Plan:
         self.all_nodes = dict(self.nodes, **self.selfish_node_private_nodes, **self.selfish_node_proxies)
 
         self.one_normal_node = next(iter(self.nodes.values()))
+
+        network_config = pandas.read_csv(open(config.network_config), skiprows=2, delimiter=';', index_col=0)
+        connections = {}
+        for node_row, row in network_config.iterrows():
+            if node_row.startswith(config.selfish_node_prefix):
+                node_row += config.selfish_node_proxy_postfix
+            connections[node_row] = []
+            for node_column, latency in row.iteritems():
+                # exact latency is so far omitted
+                if node_column.startswith(config.selfish_node_prefix):
+                    node_column += config.selfish_node_proxy_postfix
+                if latency >= 0:
+                    connections[node_row].append(node_column)
+
+        for node in self.all_public_nodes.values():
+            node.outgoing_ips = [str(self.all_public_nodes[connection].ip) for connection in connections[node.name]]
 
     def create(self):
         args = self.args
