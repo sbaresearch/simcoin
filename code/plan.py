@@ -77,6 +77,9 @@ class Plan:
             plan.extend([node.run() for node in self.selfish_node_proxies.values()])
             plan.extend([node.wait_for_highest_tip_of_node(self.one_normal_node) for node in self.selfish_node_proxies.values()])
 
+            for node in self.nodes.values():
+                plan.extend(node.connect(node.outgoing_ips))
+
             reader = csv.reader(open(config.tick_csv, "r"), delimiter=";")
             for i, line in enumerate(reader):
                 for cmd in line:
