@@ -14,6 +14,7 @@ args = {
     'listen':             '-listen',  # ensure listening even if 'connect' is given
     'listenonion':        '-listenonion=0',  # disable tor
     'onlynet':            '-onlynet=ipv4',  # disable ipv6
+    'reindex':          '-reindex',
 }
 
 
@@ -25,7 +26,6 @@ def start_selfish_mining():
     specific_args = {
         'keypool':          '-keypool=1',
         'dnsseed':          '-dnsseed=0',
-        'reindex':          '-reindex',
     }
     return_args = args.copy()
     return_args.update(specific_args)
