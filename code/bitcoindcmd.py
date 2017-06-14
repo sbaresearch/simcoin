@@ -58,7 +58,7 @@ def get_best_block_hash(node):
 def generate_block(node, amount=1):
     cmd = exec_cli(node, 'generate {}'.format(amount))
     return (cmd + r' | jq -r "to_entries[] | \"'
-            + node.name + r'; \(.value)\"" | tee -a '
+            + node + r'; \(.value)\"" | tee -a '
             + config.root_dir + '/blocks.csv')
 
 

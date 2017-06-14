@@ -16,6 +16,8 @@ selfish_node_proxy_name = selfish_node_name + selfish_node_proxy_postfix
 network_config = 'network.config'
 tick_csv = 'ticks.csv'
 
+reference_node = 'node-0'
+
 warmup_blocks = 100
 
 

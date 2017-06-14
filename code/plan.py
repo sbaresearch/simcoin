@@ -77,13 +77,11 @@ class Plan:
             plan.extend([node.wait_for_highest_tip_of_node(self.one_normal_node) for node in self.selfish_node_proxies.values()])
 
             reader = csv.reader(open(config.tick_csv, "r"), delimiter=";")
-            mock_node = Node('node-0', None, None)
             for i, line in enumerate(reader):
                 for cmd in line:
                     cmd_parts = cmd.split(' ')
                     if cmd_parts[0] == 'block':
-                        mock_node.name = cmd_parts[1]
-                        plan.append(bitcoindcmd.generate_block(mock_node, 1))
+                        plan.append(bitcoindcmd.generate_block(cmd_parts[1], 1))
                     elif cmd_parts[0] == 'tx':
                         node = self.all_bitcoind_nodes[cmd_parts[1]]
                         plan.append(node.generate_tx())
@@ -112,11 +110,11 @@ class Plan:
         iter_nodes = iter(self.all_bitcoind_nodes.values())
         prev_node = next(iter_nodes)
         for node in iter_nodes:
-            cmds.append(bitcoindcmd.generate_block(prev_node))
+            cmds.append(bitcoindcmd.generate_block(prev_node.name))
             cmds.append(node.wait_for_highest_tip_of_node(prev_node))
             prev_node = node
 
-        cmds.append(bitcoindcmd.generate_block(prev_node, config.warmup_blocks + 1))
+        cmds.append(bitcoindcmd.generate_block(prev_node.name, config.warmup_blocks + 1))
         cmds.extend([node.wait_for_highest_tip_of_node(prev_node) for node in self.all_bitcoind_nodes.values()])
 
         cmds.append('echo End of warmup')
@@ -125,7 +123,7 @@ class Plan:
     def wait_for_all_blocks_to_spread(self):
 
         # only use regular nodes since selfish nodes can trail back
-        block_counts = ['$(' + bitcoindcmd.get_block_count(node) + ')' for node in self.nodes.values()]
+        block_counts = ['$(' + bitcoindcmd.get_block_count(node.name) + ')' for node in self.nodes.values()]
         return ('while : ; do block_counts=(' + ' '.join(block_counts) + '); '
                 'prev=${block_counts[0]}; wait=false; echo Current block_counts=${block_counts[@]}; '
                 'for i in "${block_counts[@]}"; do if [ $prev != $i ]; then wait=true; fi; done; '
@@ -134,15 +132,14 @@ class Plan:
 
     def save_consensus_chain(self):
         # idea iterate over chain and check if at some height all hashes are the same.
-        mock_node = Node('$node', None, None)
 
         file = config.root_dir + '/consensus_chain.csv'
         csv_header_cmd = r'echo "height;block_hash" | tee -a ' + file
         iter_cmd = ('for height in `seq ' + str(self.first_block_height()) +
-                    ' $(' + bitcoindcmd.get_block_count(self.one_normal_node) + ')`; do'
-                    ' hash=$(' + bitcoindcmd.get_block_hash(self.one_normal_node, '$height') + ');'
+                    ' $(' + bitcoindcmd.get_block_count(config.reference_node) + ')`; do'
+                    ' hash=$(' + bitcoindcmd.get_block_hash(config.reference_node, '$height') + ');'
                     ' all_same=true; for node in "${nodes[@]}"; do' +
-                    ' if [[ $hash != $(' + bitcoindcmd.get_block_hash(mock_node, '$height') + ')'
+                    ' if [[ $hash != $(' + bitcoindcmd.get_block_hash('$node', '$height') + ')'
                     ' ]]; then all_same=false; fi; done;'
                     ' if [ "$all_same" = true ]; then echo "$height;$hash" '
                     '| tee -a ' + file + '; fi; done')
@@ -150,14 +147,12 @@ class Plan:
         return '; '.join([csv_header_cmd, self.bitcoind_nodes_array(), iter_cmd])
 
     def save_chains(self):
-        mock_node = Node('$node', None, None)
-
         file = config.root_dir + '/chains.csv'
         csv_header_cmd = r'echo "node;block_hashes" | tee -a ' + file
         iter_cmd = ('for node in ${nodes[@]}; do'
                     ' line=$node; for height in `seq ' + str(self.first_block_height()) +
-                    ' $(' + bitcoindcmd.get_block_count(mock_node) + ')`; do'
-                    ' line="$line;$(' + bitcoindcmd.get_block_hash(mock_node, '$height') + ')";'
+                    ' $(' + bitcoindcmd.get_block_count('$node') + ')`; do'
+                    ' line="$line;$(' + bitcoindcmd.get_block_hash(config.reference_node, '$height') + ')";'
                     ' done; echo $line | tee -a ' + file + '; done')
 
         return '; '.join([csv_header_cmd, self.bitcoind_nodes_array(), iter_cmd])
@@ -195,25 +190,25 @@ class BitcoindNode(Node):
         return dockercmd.run_node(self, bitcoindcmd.start_user(), self.latency)
 
     def delete_peers_file(self):
-        return bitcoindcmd.rm_peers(self)
+        return bitcoindcmd.rm_peers(self.name)
 
     def wait_for_highest_tip_of_node(self, node):
-        node_tip = bitcoindcmd.get_best_block_hash(node)
-        highest_tip = bitcoindcmd.get_best_block_hash(self)
+        node_tip = bitcoindcmd.get_best_block_hash(node.name)
+        highest_tip = bitcoindcmd.get_best_block_hash(self.name)
         return 'while [[ $(' + highest_tip + ') != $(' + node_tip + ') ]]; ' \
                'do echo Waiting for blocks to spread...; sleep 0.2; done'
 
     def connect(self, nodes):
-        return bitcoindcmd.connect(self, nodes)
+        return bitcoindcmd.connect(self.name, nodes)
 
     def wait_until_height_reached(self, height):
-        height_cmd = bitcoindcmd.get_block_count(self)
+        height_cmd = bitcoindcmd.get_block_count(self.name)
         return 'while [[ $(' + height_cmd + ') < ' + str(height) + ' ]]; ' \
                'do echo Waiting until height=' + str(height) + ' is reached...; sleep 0.2; done'
 
     def generate_tx(self):
-        create_address_cmd = 'fresh_address=$(' + bitcoindcmd.get_new_address(self) + ')'
-        create_tx_cmd = bitcoindcmd.send_to_address(self, '$fresh_address', 0.1)
+        create_address_cmd = 'fresh_address=$(' + bitcoindcmd.get_new_address(self.name) + ')'
+        create_tx_cmd = bitcoindcmd.send_to_address(self.name, '$fresh_address', 0.1)
         return '; '.join([create_address_cmd, create_tx_cmd])
 
 
@@ -234,13 +229,12 @@ class ProxyNode(Node, PublicNode):
         self.args = args
 
     def run(self):
-        mock_node = Node('node-0', None, None)
-        current_best_block_hash_cmd = 'start_hash=$(' + bitcoindcmd.get_best_block_hash(mock_node) + ')'
+        current_best_block_hash_cmd = 'start_hash=$(' + bitcoindcmd.get_best_block_hash(config.reference_node) + ')'
         run_cmd = dockercmd.run_selfish_proxy(self, proxycmd.run_proxy(self, '$start_hash'), self.latency)
         return '; '.join([current_best_block_hash_cmd, run_cmd])
 
     def wait_for_highest_tip_of_node(self, node):
-        current_best_block_hash_cmd = 'current_best=$(' + bitcoindcmd.get_best_block_hash(node) + ')'
-        wait_for_selfish_node_cmd = 'while [[ $current_best != $(' + proxycmd.get_best_public_block_hash(self) + \
+        current_best_block_hash_cmd = 'current_best=$(' + bitcoindcmd.get_best_block_hash(node.name) + ')'
+        wait_for_selfish_node_cmd = 'while [[ $current_best != $(' + proxycmd.get_best_public_block_hash(self.name) + \
                                     ') ]]; do echo Waiting for blocks to spread...; sleep 0.2; done'
         return '; '.join(['sleep 2', current_best_block_hash_cmd, wait_for_selfish_node_cmd])

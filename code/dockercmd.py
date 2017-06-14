@@ -32,7 +32,7 @@ def run_selfish_proxy(node, cmd, latency):
 
 def exec_cmd(node, command):
         return ('docker exec '
-                + node.name + ' '
+                + node + ' '
                 + command)
 
 
