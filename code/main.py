@@ -83,6 +83,11 @@ def run():
         print("Image " + config.selfish_node_image + " not found")
         exit()
 
+    for file in [config.network_config]:
+        if not os.path.isfile(file):
+            print(file + " file not found. Please generate file before starting Simcoin.")
+            exit()
+
     print("arguments called with: {}".format(sys.argv))
     print("parsed arguments: {}".format(args))
 
