@@ -5,10 +5,9 @@ import config
 
 
 class Node:
-    def __init__(self, name, ip, latency):
+    def __init__(self, name, ip):
         self.name = name
         self.ip = ip
-        self.latency = latency
 
     def rm(self):
         return dockercmd.rm_container(self.name)
@@ -20,14 +19,13 @@ class PublicNode:
 
 
 class BitcoindNode(Node):
-    def __init__(self, name, ip, latency):
-        super().__init__(name, ip, latency)
+    def __init__(self, name, ip):
+        super().__init__(name, ip)
         self.name = name
         self.ip = ip
-        self.latency = latency
 
     def run(self):
-        return dockercmd.run_node(self, bitcoindcmd.start_user(), self.latency)
+        return dockercmd.run_node(self, bitcoindcmd.start_user())
 
     def delete_peers_file(self):
         return bitcoindcmd.rm_peers(self.name)
@@ -53,24 +51,24 @@ class BitcoindNode(Node):
 
 
 class PublicBitcoindNode(BitcoindNode, PublicNode):
-    def __init__(self, name, ip, latency):
-        BitcoindNode.__init__(self, name, ip, latency)
+    def __init__(self, name, ip):
+        BitcoindNode.__init__(self, name, ip)
 
 
 class SelfishPrivateNode(BitcoindNode):
     def __init__(self, name, ip):
-        super().__init__(name, ip, 0)
+        super().__init__(name, ip)
 
 
 class ProxyNode(Node, PublicNode):
-    def __init__(self, name, ip, private_ip, latency, args):
-        Node.__init__(self, name, ip, latency)
+    def __init__(self, name, ip, private_ip, args):
+        Node.__init__(self, name, ip)
         self.private_ip = private_ip
         self.args = args
 
     def run(self):
         current_best_block_hash_cmd = 'start_hash=$(' + bitcoindcmd.get_best_block_hash(config.reference_node) + ')'
-        run_cmd = dockercmd.run_selfish_proxy(self, proxycmd.run_proxy(self, '$start_hash'), self.latency)
+        run_cmd = dockercmd.run_selfish_proxy(self, proxycmd.run_proxy(self, '$start_hash'))
         return '; '.join([current_best_block_hash_cmd, run_cmd])
 
     def wait_for_highest_tip_of_node(self, node):

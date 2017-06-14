@@ -15,8 +15,7 @@ class Plan:
         next(ip_addresses)  # skipping first ip address (docker fails with error "is in use")
 
         self.nodes = {config.node_name.format(str(i)):
-                      PublicBitcoindNode(config.node_name.format(str(i)), next(ip_addresses),
-                                         args.latency)
+                      PublicBitcoindNode(config.node_name.format(str(i)), next(ip_addresses))
                       for i in range(nodes)}
 
         self.selfish_node_private_nodes = {}
@@ -29,7 +28,7 @@ class Plan:
 
             self.selfish_node_proxies[config.selfish_node_proxy_name.format(str(i))] = \
                 ProxyNode(config.selfish_node_proxy_name.format(str(i)),
-                          ip_proxy, ip_private_node, args.latency, args.selfish_nodes_args)
+                          ip_proxy, ip_private_node, args.selfish_nodes_args)
 
         self.all_bitcoind_nodes = dict(self.nodes, **self.selfish_node_private_nodes)
         self.all_public_nodes = dict(self.nodes, **self.selfish_node_proxies)
