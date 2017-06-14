@@ -74,8 +74,8 @@ args = parser.parse_args()
 print("arguments called with: {}".format(sys.argv))
 print("parsed arguments: {}".format(args))
 
-all_nodes = [config.node_prefix + str(i) for i in range(args.nodes)]
-all_nodes.extend([config.selfish_node_prefix + str(i) for i in range(args.selfish_nodes)])
+all_nodes = [config.node_name.format(str(i)) for i in range(args.nodes)]
+all_nodes.extend([config.selfish_node_name.format(str(i)) for i in range(args.selfish_nodes)])
 
 # generate 20% extra to have enough intervals
 expected_blocks = int(int(args.amount_of_ticks * (1.0 / args.block_interval)) * 1.2)

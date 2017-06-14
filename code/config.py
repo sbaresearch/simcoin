@@ -7,9 +7,11 @@ aggregated_log_file = root_dir + 'log'
 
 node_image = 'btn/base:v3'
 selfish_node_image = 'proxy'
-node_prefix = 'node-'
+node_name = 'node-{}'
 selfish_node_prefix = 'selfish-node-'
 selfish_node_proxy_postfix = '-proxy'
+selfish_node_name = selfish_node_prefix + '{}'
+selfish_node_proxy_name = selfish_node_name + selfish_node_proxy_postfix
 
 network_config = 'network.config'
 tick_csv = 'ticks.csv'

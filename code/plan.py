@@ -28,9 +28,9 @@ class Plan:
                 if latency >= 0:
                     connections[node_row].append(node_column)
 
-        self.nodes = {config.node_prefix + str(i):
-                      PublicBitcoindNode(config.node_prefix + str(i), next(ip_addresses),
-                                         args.latency, connections[config.node_prefix + str(i)])
+        self.nodes = {config.node_name + str(i):
+                      PublicBitcoindNode(config.node_name.format(str(i)), next(ip_addresses),
+                                         args.latency, connections[config.node_name.format(str(i))])
                       for i in range(nodes)}
 
         self.selfish_node_private_nodes = {}
@@ -38,13 +38,13 @@ class Plan:
         for i in range(selfish_nodes):
             ip_private_node = next(ip_addresses)
             ip_proxy = next(ip_addresses)
-            self.selfish_node_private_nodes[config.selfish_node_prefix + str(i)] = \
-                SelfishPrivateNode(config.node_prefix + str(i), ip_private_node)
+            self.selfish_node_private_nodes[config.selfish_node_name.format(str(i))] = \
+                SelfishPrivateNode(config.selfish_node_name.format(str(i)), ip_private_node)
 
-            self.selfish_node_proxies[config.selfish_node_prefix + str(i) + config.selfish_node_proxy_postfix] = \
-                ProxyNode(config.selfish_node_prefix + str(i) + config.selfish_node_proxy_postfix,
+            self.selfish_node_proxies[config.selfish_node_name + str(i) + config.selfish_node_proxy_name] = \
+                ProxyNode(config.selfish_node_proxy_name.format(str(i)),
                           ip_proxy, ip_private_node, args.latency,
-                          connections[config.selfish_node_prefix + str(i) + config.selfish_node_proxy_postfix])
+                          connections[config.selfish_node_proxy_name.format(str(i))])
 
         self.all_bitcoind_nodes = dict(self.nodes, **self.selfish_node_private_nodes)
         self.all_public_nodes = dict(self.nodes, **self.selfish_node_proxies)
