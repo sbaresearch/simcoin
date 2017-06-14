@@ -56,7 +56,7 @@ class Plan:
         plan = []
 
         try:
-            plan.append("rm -rf " + config.root_dir + '/*')
+            plan.append("rm -rf " + config.root_dir + '*')
 
             plan.append(dockercmd.create_network(config.ip_range))
             plan.append('sleep 1')
