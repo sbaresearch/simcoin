@@ -15,7 +15,7 @@ class Plan:
         next(ip_addresses)  # skipping first ip address (docker fails with error "is in use")
 
         self.nodes = {config.node_prefix + str(i):
-                      Node(config.node_prefix + str(i), next(ip_addresses), args.latency) for i in range(args.nodes)}
+                      NormalNode(config.node_prefix + str(i), next(ip_addresses), args.latency) for i in range(args.nodes)}
 
         self.selfish_node_private_nodes = {}
         self.selfish_node_proxies = {}
@@ -176,11 +176,19 @@ class Node:
     def rm(self):
         return dockercmd.rm_container(self.name)
 
+
+class NormalNode(Node):
+    def __init__(self, name, ip, latency):
+        super().__init__(name, ip, latency)
+        self.name = name
+        self.ip = ip
+        self.latency = latency
+
     def run(self):
         return dockercmd.run_node(self, bitcoindcmd.start_user(), self.latency)
 
 
-class SelfishPrivateNode(Node):
+class SelfishPrivateNode(NormalNode):
     def __init__(self, name, ip):
         super().__init__(name, ip, 0)
 
