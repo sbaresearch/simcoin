@@ -14,7 +14,7 @@ selfish_node_proxy_postfix = '-proxy'
 network_config = 'network.config'
 tick_csv = 'ticks.csv'
 
-blocks_to_make_coinbase_spendable = 100
+warmup_blocks = 100
 
 
 def host_dir(node):
