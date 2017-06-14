@@ -54,8 +54,9 @@ class Plan:
 
             plan.extend(['; '.join([node.delete_peers_file(), node.rm()]) for node in self.all_bitcoind_nodes.values()])
 
-            plan.extend([node.run() for node in self.selfish_node_private_nodes.values()])
-            plan.extend([node.wait_for_highest_tip_of_node(self.one_normal_node) for node in self.selfish_node_private_nodes.values()])
+            plan.extend([node.run() for node in self.all_bitcoind_nodes.values()])
+            plan.extend([node.wait_until_height_reached(config.warmup_blocks + len(self.all_bitcoind_nodes))
+                         for node in self.all_bitcoind_nodes.values()])
 
             plan.extend([node.run() for node in self.selfish_node_proxies.values()])
             plan.extend([node.wait_for_highest_tip_of_node(self.one_normal_node) for node in self.selfish_node_proxies.values()])
@@ -184,6 +185,11 @@ class NormalNode(Node):
 
     def connect(self, nodes):
         return bitcoindcmd.connect(self, nodes)
+
+    def wait_until_height_reached(self, height):
+        height_cmd = bitcoindcmd.get_block_count(self)
+        return 'while [[ $(' + height_cmd + ') < ' + str(height) + ' ]]; ' \
+               'do echo Waiting until height=' + str(height) + ' is reached...; sleep 0.2; done'
 
 
 class SelfishPrivateNode(NormalNode):
