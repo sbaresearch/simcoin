@@ -76,13 +76,10 @@ def run():
     if args.selfish_nodes > 0 and args.connectivity is None:
         parser.error('when selfish_nodes is > 0 then connectivity should be set')
 
-    if os.system("docker inspect " + config.node_image + " > /dev/null") != 0:
-        print("Image " + config.node_image + " not found")
-        exit()
-
-    if os.system("docker inspect " + config.selfish_node_image + " > /dev/null") != 0:
-        print("Image " + config.selfish_node_image + " not found")
-        exit()
+    for image in [config.node_image, config.selfish_node_image]:
+        if os.system("docker inspect " + image + " > /dev/null") != 0:
+            print("Image " + image + " not found")
+            exit()
 
     for file in [config.network_config]:
         if not os.path.isfile(file):
