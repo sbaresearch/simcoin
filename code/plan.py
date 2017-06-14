@@ -1,11 +1,10 @@
-import random
 import dockercmd
 import bitcoindcmd
 import proxycmd
 import ipaddress
-from scheduler import Scheduler
 import config
 import pandas
+import csv
 
 
 class Plan:
@@ -80,11 +79,20 @@ class Plan:
             plan.extend([node.run() for node in self.selfish_node_proxies.values()])
             plan.extend([node.wait_for_highest_tip_of_node(self.one_normal_node) for node in self.selfish_node_proxies.values()])
 
-            scheduler = Scheduler(0)
-            scheduler.add_blocks(args.blocks, args.block_interval,
-                                 [bitcoindcmd.generate_block(self.random_node()) for _ in range(1000)])
-            scheduler.add_tx(args.blocks * args.block_interval, [self.random_tx_command() for _ in range(10)])
-            plan.extend(scheduler.bash_commands())
+            reader = csv.reader(open(config.tick_csv, "r"), delimiter=";")
+            mock_node = Node('node-0', None, None)
+            for i, line in enumerate(reader):
+                for cmd in line:
+                    cmd_parts = cmd.split(' ')
+                    if cmd_parts[0] == 'block':
+                        mock_node.name = cmd_parts[1]
+                        plan.append(bitcoindcmd.generate_block(mock_node, 1))
+                    elif cmd_parts[0] == 'tx':
+                        node = self.all_bitcoind_nodes[cmd_parts[1]]
+                        plan.append(node.generate_tx())
+                    else:
+                        raise Exception("Unknown cmd={} in {}-file".format(cmd_parts[0], config.tick_csv))
+
             plan.append(self.wait_for_all_blocks_to_spread())
 
             plan.append(dockercmd.fix_data_dirs_permissions())
@@ -101,9 +109,6 @@ class Plan:
             plan.append(dockercmd.rm_network())
 
         return plan
-
-    def random_node(self):
-        return random.choice(list(self.all_bitcoind_nodes.values()))
 
     def warmup_block_generation(self):
         cmds = ['echo Begin of warmup']
@@ -129,12 +134,6 @@ class Plan:
                 'for i in "${block_counts[@]}"; do if [ $prev != $i ]; then wait=true; fi; done; '
                 'if [ $wait == false ]; then break; fi; '
                 'echo Waiting for blocks to spread...; sleep 0.2; done')
-
-    def random_tx_command(self):
-        node = self.random_node()
-        create_address_cmd = 'fresh_address=$(' + bitcoindcmd.get_new_address(node) + ')'
-        create_tx_cmd = bitcoindcmd.send_to_address(node, '$fresh_address', 0.1)
-        return '; '.join([create_address_cmd, create_tx_cmd])
 
     def save_consensus_chain(self):
         # idea iterate over chain and check if at some height all hashes are the same.
@@ -214,6 +213,11 @@ class BitcoindNode(Node):
         height_cmd = bitcoindcmd.get_block_count(self)
         return 'while [[ $(' + height_cmd + ') < ' + str(height) + ' ]]; ' \
                'do echo Waiting until height=' + str(height) + ' is reached...; sleep 0.2; done'
+
+    def generate_tx(self):
+        create_address_cmd = 'fresh_address=$(' + bitcoindcmd.get_new_address(self) + ')'
+        create_tx_cmd = bitcoindcmd.send_to_address(self, '$fresh_address', 0.1)
+        return '; '.join([create_address_cmd, create_tx_cmd])
 
 
 class PublicBitcoindNode(BitcoindNode, PublicNode):

@@ -61,7 +61,7 @@ def run():
             print("Image " + image + " not found")
             exit()
 
-    for file in [config.network_config]:
+    for file in [config.network_config, config.tick_csv]:
         if not os.path.isfile(file):
             print(file + " file not found. Please generate file before starting Simcoin.")
             exit()
