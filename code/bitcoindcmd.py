@@ -90,8 +90,8 @@ def get_block(node, block_hash):
     return exec_cli(node, 'getblock ' + block_hash)
 
 
-def connect(node, nodes):
-    return [exec_cli(node, 'addnode ' + str(n.ip)) + ' add' for n in nodes]
+def connect(node, outgoing_ips):
+    return [exec_cli(node, 'addnode ' + ip + ' add') for ip in outgoing_ips]
 
 
 def get_block_with_height(node, height):
