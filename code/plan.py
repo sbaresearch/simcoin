@@ -95,7 +95,7 @@ class Plan:
             cmds.append(node.wait_for_highest_tip_of_node(prev_node))
             prev_node = node
 
-        cmds.append(bitcoindcmd.generate_block(prev_node, 101))
+        cmds.append(bitcoindcmd.generate_block(prev_node, config.blocks_to_make_coinbase_spendable + 1))
         cmds.extend([node.wait_for_highest_tip_of_node(prev_node) for node in self.all_bitcoind_nodes.values()])
 
         cmds.append('echo End of warmup')
