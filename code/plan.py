@@ -9,8 +9,6 @@ import csv
 
 class Plan:
     def __init__(self, args, nodes, selfish_nodes):
-        self.args = args
-
         ip_addresses = ipaddress.ip_network(config.ip_range).hosts()
         next(ip_addresses)  # skipping first ip address (docker fails with error "is in use")
 
@@ -54,7 +52,6 @@ class Plan:
             node.outgoing_ips = [str(self.all_public_nodes[connection].ip) for connection in connections[node.name]]
 
     def create(self):
-        args = self.args
         plan = []
 
         try:
