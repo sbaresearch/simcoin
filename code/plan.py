@@ -65,7 +65,7 @@ class Plan:
             for index, node in enumerate(self.all_bitcoind_nodes.values()):
                 plan.extend(node.connect(list(self.all_bitcoind_nodes.values())[index:index+5]))
 
-            plan.append('sleep 2')  # wait before generating otherwise "Error -28" (still warming up)
+            plan.append('sleep 5')  # wait before generating otherwise "Error -28" (still warming up)
             plan.extend(self.warmup_block_generation())
 
             plan.extend(['; '.join([node.delete_peers_file(), node.rm()]) for node in self.all_bitcoind_nodes.values()])
