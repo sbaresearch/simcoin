@@ -90,7 +90,7 @@ class Plan:
         prev_node = next(iter_nodes)
         for node in iter_nodes:
             cmds.append(bitcoindcmd.generate_block(prev_node))
-            cmds.extend(node.wait_for_highest_tip_of_node(prev_node))
+            cmds.append(node.wait_for_highest_tip_of_node(prev_node))
             prev_node = node
 
         cmds.append(bitcoindcmd.generate_block(prev_node, 101))
