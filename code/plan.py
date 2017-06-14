@@ -46,6 +46,8 @@ class Plan:
             plan.append('sleep 1')
 
             plan.extend([node.run() for node in self.all_bitcoind_nodes.values()])
+            for index, node in enumerate(self.all_bitcoind_nodes.values()):
+                plan.extend(node.connect(list(self.all_bitcoind_nodes.values())[index:index+5]))
 
             plan.append('sleep 2')  # wait before generating otherwise "Error -28" (still warming up)
             plan.extend(self.warmup_block_generation())
@@ -180,6 +182,9 @@ class NormalNode(Node):
         highest_tip = bitcoindcmd.get_best_block_hash(self)
         return 'while [[ $(' + highest_tip + ') != $(' + node_tip + ') ]]; ' \
                'do echo Waiting for blocks to spread...; sleep 0.2; done'
+
+    def connect(self, nodes):
+        return bitcoindcmd.connect(self, nodes)
 
 
 class SelfishPrivateNode(NormalNode):
