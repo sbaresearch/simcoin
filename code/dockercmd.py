@@ -16,17 +16,6 @@ def run_node(node, cmd, latency):
             ' bash -c "' + '; '.join([tccmd.slow_network(latency), cmd]) + '" ')
 
 
-def run_selfish_private_node(node, cmd):
-    return ('docker run'
-            ' --detach=true'
-            ' --net=isolated_network'
-            ' --ip=' + str(node.ip) +
-            ' --name=' + node.name +
-            ' --volume ' + config.host_dir(node) + ':' + bitcoindcmd.guest_dir +
-            ' ' + config.node_image +
-            ' bash -c "' + cmd + '"')
-
-
 def run_selfish_proxy(node, cmd, latency):
         return (
                 'docker run'
