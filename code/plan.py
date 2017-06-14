@@ -5,6 +5,7 @@ import proxycmd
 import ipaddress
 from scheduler import Scheduler
 import config
+import pandas
 
 
 class Plan:
@@ -14,8 +15,23 @@ class Plan:
         ip_addresses = ipaddress.ip_network(config.ip_range).hosts()
         next(ip_addresses)  # skipping first ip address (docker fails with error "is in use")
 
+        network_config = pandas.read_csv(open(config.network_config), skiprows=2, delimiter=';', index_col=0)
+        connections = {}
+        for node_row, row in network_config.iterrows():
+            if node_row.startswith(config.selfish_node_prefix):
+                node_row += config.selfish_node_proxy_postfix
+            connections[node_row] = []
+            for node_column, latency in row.iteritems():
+                # exact latency is so far omitted
+                if node_column.startswith(config.selfish_node_prefix):
+                    node_column += config.selfish_node_proxy_postfix
+                if latency >= 0:
+                    connections[node_row].append(node_column)
+
         self.nodes = {config.node_prefix + str(i):
-                      NormalNode(config.node_prefix + str(i), next(ip_addresses), args.latency) for i in range(nodes)}
+                      PublicBitcoindNode(config.node_prefix + str(i), next(ip_addresses),
+                                         args.latency, connections[config.node_prefix + str(i)])
+                      for i in range(nodes)}
 
         self.selfish_node_private_nodes = {}
         self.selfish_node_proxies = {}
@@ -27,7 +43,8 @@ class Plan:
 
             self.selfish_node_proxies[config.selfish_node_prefix + str(i) + config.selfish_node_proxy_postfix] = \
                 ProxyNode(config.selfish_node_prefix + str(i) + config.selfish_node_proxy_postfix,
-                          ip_proxy, ip_private_node, args.latency)
+                          ip_proxy, ip_private_node, args.latency,
+                          connections[config.selfish_node_prefix + str(i) + config.selfish_node_proxy_postfix])
 
         self.all_bitcoind_nodes = dict(self.nodes, **self.selfish_node_private_nodes)
         self.all_public_nodes = dict(self.nodes, **self.selfish_node_proxies)
@@ -164,8 +181,13 @@ class Node:
         return dockercmd.rm_container(self.name)
 
 
-class NormalNode(Node):
-    def __init__(self, name, ip, latency):
+class PublicNode:
+    def __init__(self, outgoing_ips, **kw):
+        self.outgoing_ips = outgoing_ips
+
+
+class BitcoindNode(Node):
+    def __init__(self, name, ip, latency, **kw):
         super().__init__(name, ip, latency)
         self.name = name
         self.ip = ip
@@ -192,14 +214,21 @@ class NormalNode(Node):
                'do echo Waiting until height=' + str(height) + ' is reached...; sleep 0.2; done'
 
 
-class SelfishPrivateNode(NormalNode):
+class PublicBitcoindNode(BitcoindNode, PublicNode):
+    def __init__(self, name, ip, latency, outgoing_ips):
+        BitcoindNode.__init__(self, name, ip, latency)
+        PublicNode.__init__(self, outgoing_ips)
+
+
+class SelfishPrivateNode(BitcoindNode):
     def __init__(self, name, ip):
         super().__init__(name, ip, 0)
 
 
-class ProxyNode(Node):
-    def __init__(self, name, ip, private_ip, latency):
-        super().__init__(name, ip, latency)
+class ProxyNode(Node, PublicNode):
+    def __init__(self, name, ip, private_ip, latency, outgoing_ips):
+        Node.__init__(self, name, ip, latency)
+        PublicNode.__init__(self, outgoing_ips)
         self.private_ip = private_ip
 
     def run(self, ):
