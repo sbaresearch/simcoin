@@ -233,7 +233,7 @@ class ProxyNode(Node, PublicNode):
         self.private_ip = private_ip
         self.args = args
 
-    def run(self, ):
+    def run(self):
         mock_node = Node('node-0', None, None)
         current_best_block_hash_cmd = 'start_hash=$(' + bitcoindcmd.get_best_block_hash(mock_node) + ')'
         run_cmd = dockercmd.run_selfish_proxy(self, proxycmd.run_proxy(self, '$start_hash'), self.latency)
