@@ -52,8 +52,7 @@ class Plan:
             plan.append('sleep 2')  # wait before generating otherwise "Error -28" (still warming up)
             plan.extend(self.warmup_block_generation())
 
-            plan.extend([node.delete_peers_file() for node in self.selfish_node_private_nodes.values()])
-            plan.extend([node.rm() for node in self.selfish_node_private_nodes.values()])
+            plan.extend(['; '.join([node.delete_peers_file(), node.rm()]) for node in self.all_bitcoind_nodes.values()])
 
             plan.extend([node.run() for node in self.selfish_node_private_nodes.values()])
             plan.extend([node.wait_for_highest_tip_of_node(self.one_normal_node) for node in self.selfish_node_private_nodes.values()])
