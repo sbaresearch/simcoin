@@ -50,7 +50,7 @@ class Plan:
             plan.append('sleep 2')  # wait before generating otherwise "Error -28" (still warming up)
             plan.extend(self.warmup_block_generation())
 
-            plan.extend([bitcoindcmd.rm_peers(node) for node in self.selfish_node_private_nodes.values()])
+            plan.extend([node.delete_peers_file() for node in self.selfish_node_private_nodes.values()])
             plan.extend([node.rm() for node in self.selfish_node_private_nodes.values()])
 
             plan.extend([node.run() for node in self.selfish_node_private_nodes.values()])
@@ -186,6 +186,9 @@ class NormalNode(Node):
 
     def run(self):
         return dockercmd.run_node(self, bitcoindcmd.start_user(), self.latency)
+
+    def delete_peers_file(self):
+        return bitcoindcmd.rm_peers(self)
 
 
 class SelfishPrivateNode(NormalNode):
