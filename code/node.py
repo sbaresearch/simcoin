@@ -31,8 +31,8 @@ class BitcoindNode(Node):
         return bitcoindcmd.rm_peers(self.name)
 
     def wait_for_highest_tip_of_node(self, node):
-        node_tip = bitcoindcmd.get_best_block_hash(node.name)
-        highest_tip = bitcoindcmd.get_best_block_hash(self.name)
+        highest_tip = bitcoindcmd.get_best_block_hash(node.name)
+        node_tip = bitcoindcmd.get_best_block_hash(self.name)
         return 'while [[ $(' + highest_tip + ') != $(' + node_tip + ') ]]; ' \
                'do echo Waiting for blocks to spread...; sleep 0.2; done'
 
