@@ -114,11 +114,11 @@ class Plan:
         iter_nodes = iter(self.all_bitcoind_nodes.values())
         prev_node = next(iter_nodes)
         for node in iter_nodes:
-            cmds.append(bitcoindcmd.generate_block(prev_node.name))
+            cmds.append(node.generate_block())
             cmds.append(node.wait_for_highest_tip_of_node(prev_node))
             prev_node = node
 
-        cmds.append(bitcoindcmd.generate_block(prev_node.name, config.warmup_blocks + 1))
+        cmds.append(prev_node.generate_block(config.warmup_blocks + 1))
         cmds.extend([node.wait_for_highest_tip_of_node(prev_node) for node in self.all_bitcoind_nodes.values()])
 
         cmds.append('echo End of warmup')

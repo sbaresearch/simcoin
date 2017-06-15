@@ -49,6 +49,9 @@ class BitcoindNode(Node):
         create_tx_cmd = bitcoindcmd.send_to_address(self.name, '$fresh_address', 0.1)
         return '; '.join([create_address_cmd, create_tx_cmd])
 
+    def generate_block(self, amount=1):
+        return bitcoindcmd.generate_block(self.name, amount)
+
 
 class PublicBitcoindNode(BitcoindNode, PublicNode):
     def __init__(self, name, ip):
