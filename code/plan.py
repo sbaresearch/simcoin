@@ -111,15 +111,16 @@ class Plan:
 
     def warmup_block_generation(self):
         cmds = ['echo Begin of warmup']
-        iter_nodes = iter(self.all_bitcoind_nodes.values())
-        prev_node = next(iter_nodes)
-        for node in iter_nodes:
-            cmds.append(node.generate_block())
-            cmds.append(node.wait_for_highest_tip_of_node(prev_node))
-            prev_node = node
 
-        cmds.append(prev_node.generate_block(config.warmup_blocks + 1))
-        cmds.extend([node.wait_for_highest_tip_of_node(prev_node) for node in self.all_bitcoind_nodes.values()])
+        for index, node in enumerate(self.all_bitcoind_nodes.values()):
+            cmds.append(node.wait_until_height_reached(index))
+            cmds.append(node.generate_block())
+
+        node = self.all_bitcoind_nodes[config.reference_node]
+        cmds.append(node.wait_until_height_reached(len(self.all_bitcoind_nodes)))
+        cmds.append(node.generate_block(config.warmup_blocks))
+        cmds.extend([node.wait_until_height_reached(config.warmup_blocks + len(self.all_bitcoind_nodes))
+                     for node in self.all_bitcoind_nodes.values()])
 
         cmds.append('echo End of warmup')
         return cmds
