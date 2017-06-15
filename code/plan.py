@@ -63,7 +63,7 @@ class Plan:
 
             plan.extend([node.run() for node in self.all_bitcoind_nodes.values()])
             for index, node in enumerate(self.all_bitcoind_nodes.values()):
-                plan.extend(node.connect([str(node.ip) for node in list(self.all_bitcoind_nodes.values())[index:index+5]]))
+                plan.extend(node.connect([str(node.ip) for node in list(self.all_bitcoind_nodes.values())[index+1:index+5]]))
 
             plan.append('sleep 5')  # wait before generating otherwise "Error -28" (still warming up)
             plan.extend(self.warmup_block_generation())
