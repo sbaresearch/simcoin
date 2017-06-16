@@ -114,10 +114,6 @@ class Executor:
             self.exec_print(self.save_chains())
 
             self.consolidate_logs()
-
-            # [self.exec_print()(bitcoindcmd.get_chain_tips(node)) for node in self.all_bitcoind_nodes]
-            # [for self.exec_print()(cmd) for cmd in logs.aggregate_logs(self.nodes))]
-
         finally:
             # remove proxies first. if not proxies could be already stopped when trying to remove
             [self.call(node.rm()) for node in self.selfish_node_proxies.values()]
