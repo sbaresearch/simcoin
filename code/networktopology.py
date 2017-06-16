@@ -4,46 +4,34 @@ import random
 import pandas
 import sys
 import config
+import checkargs
 
 random.seed(1)
 
-
-def check_positive(value):
-    integer_value = int(value)
-    if integer_value < 0:
-        raise argparse.ArgumentTypeError("%s is an invalid positive int value" % value)
-    return integer_value
-
-
-def check_percentage(value):
-    float_value = float(value)
-    if float_value < 0 or float_value > 1:
-        raise argparse.ArgumentTypeError("%s is a percentage value and should be be in [0,1]" % value)
-    return float_value
 
 parser = argparse.ArgumentParser(description='Create a simple network.config for Bitcoin Network Simulator.')
 
 parser.add_argument('--nodes'
                     , default=4
-                    , type=check_positive
+                    , type=checkargs.check_positive_int
                     , help='Number of Bitcoin nodes.'
                     )
 
 parser.add_argument('--selfish-nodes'
                     , default=1
-                    , type=check_positive
+                    , type=checkargs.check_positive_int
                     , help='Number of selfish Bitcoin nodes.'
                     )
 
 parser.add_argument('--latency'
                     , default=200
-                    , type=check_positive
+                    , type=checkargs.check_positive_int
                     , help='Latency between nodes in milliseconds.'
                     )
 
 parser.add_argument('--connectivity'
                     , default=.5
-                    , type=check_percentage
+                    , type=checkargs.check_percentage
                     , help='Connectivity between nodes.'
                     )
 

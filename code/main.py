@@ -7,24 +7,11 @@ import config
 from executor import Executor
 import csv
 import logging
+import checkargs
 
 if sys.version_info <= (3, 0):
     print("Sorry, requires Python 3.x or above")
     exit()
-
-
-def check_percentage(value):
-    float_value = float(value)
-    if float_value < 0 or float_value > 1:
-        raise argparse.ArgumentTypeError("%s is a percentage value and should be be in [0,1]" % value)
-    return float_value
-
-
-def check_positive(value):
-    integer_value = int(value)
-    if integer_value < 0:
-        raise argparse.ArgumentTypeError("%s is an invalid positive int value" % value)
-    return integer_value
 
 parser = argparse.ArgumentParser(description='Running Simcoin. A Bitcoin Network Simulator.')
 

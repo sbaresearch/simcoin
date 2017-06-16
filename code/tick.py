@@ -6,28 +6,11 @@ import sys
 import numpy as np
 import config
 from collections import Counter
+import checkargs
 
 random.seed(1)
 np.random.seed(1)
 np.set_printoptions(precision=2, suppress=True)
-
-
-def check_positive_float(value):
-    float_value = float(value)
-    check_positive(float_value)
-    return float_value
-
-
-def check_positive_int(value):
-    int_value = int(value)
-    check_positive(int_value)
-    return int_value
-
-
-def check_positive(value):
-    if value < 0:
-        raise argparse.ArgumentTypeError("%s is an invalid positive value" % value)
-    return value
 
 
 def check_if_only_block_per_node(nodes):
@@ -42,30 +25,30 @@ parser = argparse.ArgumentParser(description='Create a simple tick.config for Bi
 
 parser.add_argument('--nodes'
                     , default=4
-                    , type=check_positive_int
+                    , type=checkargs.check_positive_int
                     , help='Number of Bitcoin nodes which generate blocks and tx.'
                     )
 
 parser.add_argument('--selfish-nodes'
                     , default=1
-                    , type=check_positive_int
+                    , type=checkargs.check_positive_int
                     , help='Number of selfish Bitcoin nodes which generate blocks and tx.'
                     )
 
 parser.add_argument('--amount-of-ticks'
                     , default=60
-                    , type=check_positive_int
+                    , type=checkargs.check_positive_int
                     , help='Amount of ticks.')
 
 parser.add_argument('--block-interval'
                     , default=10
-                    , type=check_positive_float
+                    , type=checkargs.check_positive_float
                     , help='Block interval in ticks.'
                     )
 
 parser.add_argument('--tx-interval'
                     , default=1
-                    , type=check_positive_float
+                    , type=checkargs.check_positive_float
                     , help='Tx interval in ticks.'
                     )
 
