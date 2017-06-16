@@ -7,10 +7,17 @@ import csv
 from node import PublicBitcoindNode
 from node import SelfishPrivateNode
 from node import ProxyNode
+import subprocess
 
 
-class Plan:
+class Executor:
     def __init__(self, args, nodes, selfish_nodes):
+        self.count = 0
+        if args.dry_run:
+            self.execution_function = execute_dry_run
+        else:
+            self.execution_function = execute_print
+
         ip_addresses = ipaddress.ip_network(config.ip_range).hosts()
         next(ip_addresses)  # skipping first ip address (docker fails with error "is in use")
 
@@ -52,78 +59,75 @@ class Plan:
         for node in self.all_public_nodes.values():
             node.outgoing_ips = [str(self.all_public_nodes[connection].ip) for connection in connections[node.name]]
 
-    def create(self):
-        plan = []
-
+    def execute(self):
         try:
-            plan.append("rm -rf " + config.root_dir + '*')
+            self.exec('rm -rf ' + config.root_dir + '*')
 
-            plan.append(dockercmd.create_network(config.ip_range))
-            plan.append('sleep 1')
+            self.exec(dockercmd.create_network(config.ip_range))
+            self.exec('sleep 1')
 
-            plan.extend([node.run() for node in self.all_bitcoind_nodes.values()])
+            [self.exec(node.run()) for node in self.all_bitcoind_nodes.values()]
             for index, node in enumerate(self.all_bitcoind_nodes.values()):
-                plan.extend(node.connect([str(node.ip) for node in list(self.all_bitcoind_nodes.values())[index+1:index+5]]))
+                [self.exec(cmd) for cmd
+                 in node.connect([str(node.ip) for node in list(self.all_bitcoind_nodes.values())[index+1:index+5]])]
 
-            plan.append('sleep 5')  # wait before generating otherwise "Error -28" (still warming up)
-            plan.extend(self.warmup_block_generation())
+            self.exec('sleep 5')  # wait before generating otherwise "Error -28" (still warming up)
+            self.warmup_block_generation()
 
-            plan.extend(['; '.join([node.delete_peers_file(), node.rm()]) for node in self.all_bitcoind_nodes.values()])
+            [self.exec('; '.join([node.delete_peers_file(), node.rm()])) for node in self.all_bitcoind_nodes.values()]
 
-            plan.extend([node.run() for node in self.all_bitcoind_nodes.values()])
-            plan.extend([node.wait_until_height_reached(config.warmup_blocks + len(self.all_bitcoind_nodes))
-                         for node in self.all_bitcoind_nodes.values()])
+            [self.exec(node.run()) for node in self.all_bitcoind_nodes.values()]
+            [self.exec(node.wait_until_height_reached(config.warmup_blocks + len(self.all_bitcoind_nodes)))
+             for node in self.all_bitcoind_nodes.values()]
 
-            plan.extend([node.run() for node in self.selfish_node_proxies.values()])
-            plan.extend([node.wait_for_highest_tip_of_node(self.one_normal_node) for node in self.selfish_node_proxies.values()])
+            [self.exec(node.run()) for node in self.selfish_node_proxies.values()]
+            [self.exec(node.wait_for_highest_tip_of_node(self.one_normal_node))
+             for node in self.selfish_node_proxies.values()]
 
             for node in self.nodes.values():
-                plan.extend(node.connect(node.outgoing_ips))
+                [self.exec(cmd) for cmd in node.connect(node.outgoing_ips)]
 
             reader = csv.reader(open(config.tick_csv, "r"), delimiter=";")
             for i, line in enumerate(reader):
                 for cmd in line:
                     cmd_parts = cmd.split(' ')
                     if cmd_parts[0] == 'block':
-                        plan.append(bitcoindcmd.generate_block(cmd_parts[1], 1))
+                        self.exec(bitcoindcmd.generate_block(cmd_parts[1], 1))
                     elif cmd_parts[0] == 'tx':
                         node = self.all_bitcoind_nodes[cmd_parts[1]]
-                        plan.append(node.generate_tx())
+                        self.exec(node.generate_tx())
                     else:
                         raise Exception("Unknown cmd={} in {}-file".format(cmd_parts[0], config.tick_csv))
 
-            plan.append(self.wait_for_all_blocks_to_spread())
+            self.exec(self.wait_for_all_blocks_to_spread())
 
-            plan.append(dockercmd.fix_data_dirs_permissions())
+            self.exec(dockercmd.fix_data_dirs_permissions())
 
-            plan.append(self.save_consensus_chain())
-            plan.append(self.save_chains())
+            self.exec(self.save_consensus_chain())
+            self.exec(self.save_chains())
 
-            # plan.extend([bitcoindcmd.get_chain_tips(node) for node in self.all_bitcoind_nodes])
-            # plan.extend(logs.aggregate_logs(self.nodes))
+            # [self.exec(bitcoindcmd.get_chain_tips(node)) for node in self.all_bitcoind_nodes]
+            # [for self.exec(cmd) for cmd in logs.aggregate_logs(self.nodes))]
 
         finally:
-            plan.extend([node.rm() for node in self.all_nodes.values()])
-            plan.append('sleep 5')
-            plan.append(dockercmd.rm_network())
-
-        return plan
+            [self.exec(node.rm()) for node in self.all_nodes.values()]
+            self.exec('sleep 5')
+            self.exec(dockercmd.rm_network())
 
     def warmup_block_generation(self):
-        cmds = ['echo Begin of warmup']
+        self.exec('echo Begin of warmup')
 
         for index, node in enumerate(self.all_bitcoind_nodes.values()):
-            cmds.append(node.wait_until_height_reached(index))
-            cmds.append(node.generate_block())
+            self.exec(node.wait_until_height_reached(index))
+            self.exec(node.generate_block())
 
         node = self.all_bitcoind_nodes[config.reference_node]
-        cmds.append(node.wait_until_height_reached(len(self.all_bitcoind_nodes)))
-        cmds.append(node.generate_block(config.warmup_blocks))
-        cmds.extend([node.wait_until_height_reached(config.warmup_blocks + len(self.all_bitcoind_nodes))
-                     for node in self.all_bitcoind_nodes.values()])
+        self.exec(node.wait_until_height_reached(len(self.all_bitcoind_nodes)))
+        self.exec(node.generate_block(config.warmup_blocks))
+        [self.exec(node.wait_until_height_reached(config.warmup_blocks + len(self.all_bitcoind_nodes)))
+         for node in self.all_bitcoind_nodes.values()]
 
-        cmds.append('echo End of warmup')
-        return cmds
+        self.exec('echo End of warmup')
 
     def wait_for_all_blocks_to_spread(self):
 
@@ -167,3 +171,22 @@ class Plan:
 
     def first_block_height(self):
         return len(self.all_bitcoind_nodes) + 100 + 1
+
+    def exec(self, cmd):
+        self.count += 1
+        self.execution_function(cmd, self.count)
+
+
+def execute_dry_run(cmd, count):
+    print('{}: {}'.format(count, cmd))
+    return 'ret-{}'.format(count)
+
+
+def execute_print(cmd, count):
+    output = execute(cmd, count).decode("utf-8")
+    print(output, end='')
+
+
+def execute(cmd, count):
+    print('{}: {}'.format(count, cmd))
+    return subprocess.check_output(cmd, shell=True, executable='/bin/bash')
