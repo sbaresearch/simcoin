@@ -63,15 +63,16 @@ class Executor:
             self.exec_print('rm -rf ' + config.root_dir + '*')
 
             self.exec_print(dockercmd.create_network(config.ip_range))
-            self.exec_print('sleep 1')
+            time.sleep(1)
 
             [self.exec_print(node.run()) for node in self.all_bitcoind_nodes.values()]
-            self.exec_print('sleep 5')
+            time.sleep(3 + len(self.all_bitcoind_nodes) * 0.2)
+
             for i, node in enumerate(self.all_bitcoind_nodes.values()):
                 [self.exec_print(cmd) for cmd
                  in node.connect([str(node.ip) for node in list(self.all_bitcoind_nodes.values())[i+1:i+5]])]
+            time.sleep(3 + len(self.all_bitcoind_nodes) * 0.2)
 
-            self.exec_print('sleep 5')  # wait before generating otherwise "Error -28" (still warming up)
             self.warmup_block_generation()
 
             [self.exec_print('; '.join([node.delete_peers_file(), node.rm()])) for node in self.all_bitcoind_nodes.values()]
@@ -86,8 +87,7 @@ class Executor:
 
             for node in self.nodes.values():
                 [self.exec_print(cmd) for cmd in node.connect(node.outgoing_ips)]
-
-            self.exec_print('sleep 5')
+            time.sleep(3 + len(self.all_nodes) * 0.2)
 
             reader = csv.reader(open(config.tick_csv, "r"), delimiter=";")
             for i, line in enumerate(reader):
@@ -118,7 +118,8 @@ class Executor:
             # remove proxies first. if not proxies could be already stopped when trying to remove
             [self.call(node.rm()) for node in self.selfish_node_proxies.values()]
             [self.call(node.rm()) for node in self.all_bitcoind_nodes.values()]
-            self.call('sleep 5')
+            time.sleep(3 + len(self.all_nodes) * 0.2)
+
             self.call(dockercmd.rm_network())
 
     def warmup_block_generation(self):
