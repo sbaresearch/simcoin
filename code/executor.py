@@ -100,7 +100,12 @@ class Executor:
                     else:
                         raise Exception("Unknown cmd={} in {}-file".format(cmd_parts[0], config.tick_csv))
 
-            self.exec_print(self.wait_for_all_blocks_to_spread())
+            # only use regular nodes since selfish nodes can trail back
+            array = [int(self.exec(node.get_block_count())) for node in self.nodes.values()]
+            logging.info(array)
+            while check_equal(array) is False:
+                logging.debug('Waiting for blocks to spread...')
+                time.sleep(0.2)
 
             self.exec_print(dockercmd.fix_data_dirs_permissions())
 
@@ -134,16 +139,6 @@ class Executor:
         while int(self.exec(node.get_block_count())) < height:
             logging.info('Waiting until height={} is reached...'.format(str(height)))
             time.sleep(0.2)
-
-    def wait_for_all_blocks_to_spread(self):
-
-        # only use regular nodes since selfish nodes can trail back
-        block_counts = ['$(' + bitcoindcmd.get_block_count(node.name) + ')' for node in self.nodes.values()]
-        return ('while : ; do block_counts=(' + ' '.join(block_counts) + '); '
-                'prev=${block_counts[0]}; wait=false; echo Current block_counts=${block_counts[@]}; '
-                'for i in "${block_counts[@]}"; do if [ $prev != $i ]; then wait=true; fi; done; '
-                'if [ $wait == false ]; then break; fi; '
-                'echo Waiting for blocks to spread...; sleep 0.2; done')
 
     def save_consensus_chain(self):
         # idea iterate over chain and check if at some height all hashes are the same.
@@ -186,4 +181,8 @@ class Executor:
     def exec_print(self, cmd):
         output = self.exec(cmd).decode("utf-8")
         [logging.info(output.strip()) for output in output.splitlines()]
+
+
+def check_equal(lst):
+    return not lst or lst.count(lst[0]) == len(lst)
 
