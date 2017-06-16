@@ -137,7 +137,7 @@ class Executor:
 
     def wait_until_height_reached(self, node, height):
         while int(self.exec(node.get_block_count())) < height:
-            logging.info('Waiting until height={} is reached...'.format(str(height)))
+            logging.debug('Waiting until height={} is reached...'.format(str(height)))
             time.sleep(0.2)
 
     def save_consensus_chain(self):
