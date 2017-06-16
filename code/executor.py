@@ -66,9 +66,9 @@ class Executor:
 
             [self.exec_print(node.run()) for node in self.all_bitcoind_nodes.values()]
             self.exec_print('sleep 5')
-            for index, node in enumerate(self.all_bitcoind_nodes.values()):
+            for i, node in enumerate(self.all_bitcoind_nodes.values()):
                 [self.exec_print(cmd) for cmd
-                 in node.connect([str(node.ip) for node in list(self.all_bitcoind_nodes.values())[index+1:index+5]])]
+                 in node.connect([str(node.ip) for node in list(self.all_bitcoind_nodes.values())[i+1:i+5]])]
 
             self.exec_print('sleep 5')  # wait before generating otherwise "Error -28" (still warming up)
             self.warmup_block_generation()
@@ -125,8 +125,8 @@ class Executor:
     def warmup_block_generation(self):
         self.exec_print('echo Begin of warmup')
 
-        for index, node in enumerate(self.all_bitcoind_nodes.values()):
-            self.wait_until_height_reached(node, index)
+        for i, node in enumerate(self.all_bitcoind_nodes.values()):
+            self.wait_until_height_reached(node, i)
             self.exec_print(node.generate_block())
 
         node = self.all_bitcoind_nodes[config.reference_node]
