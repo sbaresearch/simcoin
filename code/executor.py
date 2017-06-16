@@ -67,12 +67,12 @@ class Executor:
             time.sleep(1)
 
             [self.exec_print(node.run()) for node in self.all_bitcoind_nodes.values()]
-            time.sleep(3 + len(self.all_bitcoind_nodes) * 0.2)
+            time.sleep(4 + len(self.all_bitcoind_nodes) * 0.2)
 
             for i, node in enumerate(self.all_bitcoind_nodes.values()):
                 [self.exec_print(cmd) for cmd
                  in node.connect([str(node.ip) for node in list(self.all_bitcoind_nodes.values())[i+1:i+5]])]
-            time.sleep(3 + len(self.all_bitcoind_nodes) * 0.2)
+            time.sleep(4 + len(self.all_bitcoind_nodes) * 0.2)
 
             self.warmup_block_generation()
 
