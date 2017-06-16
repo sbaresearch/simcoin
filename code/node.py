@@ -39,11 +39,6 @@ class BitcoindNode(Node):
     def connect(self, nodes):
         return bitcoindcmd.connect(self.name, nodes)
 
-    def wait_until_height_reached(self, height):
-        height_cmd = bitcoindcmd.get_block_count(self.name)
-        return 'while [[ $(' + height_cmd + ') < ' + str(height) + ' ]]; ' \
-               'do echo Waiting until height=' + str(height) + ' is reached...; sleep 0.2; done'
-
     def generate_tx(self):
         create_address_cmd = 'fresh_address=$(' + bitcoindcmd.get_new_address(self.name) + ')'
         create_tx_cmd = bitcoindcmd.send_to_address(self.name, '$fresh_address', 0.1)
@@ -51,6 +46,9 @@ class BitcoindNode(Node):
 
     def generate_block(self, amount=1):
         return bitcoindcmd.generate_block(self.name, amount)
+
+    def get_block_count(self):
+        return bitcoindcmd.get_block_count(self.name)
 
 
 class PublicBitcoindNode(BitcoindNode, PublicNode):

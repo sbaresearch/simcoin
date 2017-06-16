@@ -9,6 +9,7 @@ from node import SelfishPrivateNode
 from node import ProxyNode
 import subprocess
 import logging
+import time
 
 
 class Executor:
@@ -74,7 +75,7 @@ class Executor:
             [self.exec_print('; '.join([node.delete_peers_file(), node.rm()])) for node in self.all_bitcoind_nodes.values()]
 
             [self.exec_print(node.run()) for node in self.all_bitcoind_nodes.values()]
-            [self.exec_print(self.wait_until_height_reached(node, config.warmup_blocks + len(self.all_bitcoind_nodes)))
+            [self.wait_until_height_reached(node, config.warmup_blocks + len(self.all_bitcoind_nodes))
              for node in self.all_bitcoind_nodes.values()]
 
             [self.exec_print(node.run()) for node in self.selfish_node_proxies.values()]
@@ -115,16 +116,21 @@ class Executor:
         self.exec_print('echo Begin of warmup')
 
         for index, node in enumerate(self.all_bitcoind_nodes.values()):
-            self.exec_print(self.wait_until_height_reached(node, index))
+            self.wait_until_height_reached(node, index)
             self.exec_print(node.generate_block())
 
         node = self.all_bitcoind_nodes[config.reference_node]
-        self.exec_print(self.wait_until_height_reached(node, len(self.all_bitcoind_nodes)))
+        self.wait_until_height_reached(node, len(self.all_bitcoind_nodes))
         self.exec_print(node.generate_block(config.warmup_blocks))
-        [self.exec_print(self.wait_until_height_reached(node, config.warmup_blocks + len(self.all_bitcoind_nodes)))
+        [self.wait_until_height_reached(node, config.warmup_blocks + len(self.all_bitcoind_nodes))
          for node in self.all_bitcoind_nodes.values()]
 
         self.exec_print('echo End of warmup')
+
+    def wait_until_height_reached(self, node, height):
+        while int(self.exec(node.get_block_count())) < height:
+            logging.info('Waiting until height={} is reached...'.format(str(height)))
+            time.sleep(0.2)
 
     def wait_for_all_blocks_to_spread(self):
 
