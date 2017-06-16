@@ -199,14 +199,6 @@ class Executor:
     def first_block_height(self):
         return len(self.all_bitcoind_nodes) + 100 + 1
 
-    def exec(self, cmd):
-        self.log_cmd(cmd)
-        return subprocess.check_output(cmd, shell=True, executable='/bin/bash')
-
-    def call(self, cmd):
-        self.log_cmd(cmd)
-        return subprocess.call(cmd, shell=True, executable='/bin/bash')
-
     def log_cmd(self, cmd):
         self.count += 1
         logging.info('{}: {}'.format(self.count, cmd))
@@ -214,6 +206,14 @@ class Executor:
     def exec_print(self, cmd):
         output = self.exec(cmd).decode("utf-8")
         [logging.info(output.strip()) for output in output.splitlines()]
+
+    def exec(self, cmd):
+        self.log_cmd(cmd)
+        return subprocess.check_output(cmd, shell=True, executable='/bin/bash')
+
+    def call(self, cmd):
+        self.log_cmd(cmd)
+        return subprocess.call(cmd, shell=True, executable='/bin/bash')
 
 
 def check_equal(lst):
