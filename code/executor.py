@@ -16,6 +16,7 @@ import re
 class Executor:
     def __init__(self, args, nodes, selfish_nodes):
         self.count = 0
+        self.tick_duration = args.tick_duration
 
         ip_addresses = ipaddress.ip_network(config.ip_range).hosts()
         next(ip_addresses)  # skipping first ip address (docker fails with error "is in use")
@@ -90,6 +91,7 @@ class Executor:
             time.sleep(3 + len(self.all_nodes) * 0.2)
 
             reader = csv.reader(open(config.tick_csv, "r"), delimiter=";")
+            start_time = time.time()
             for i, line in enumerate(reader):
                 for cmd in line:
                     cmd_parts = cmd.split(' ')
@@ -99,7 +101,18 @@ class Executor:
                         node = self.all_bitcoind_nodes[cmd_parts[1]]
                         self.exec_print(node.generate_tx())
                     else:
-                        raise Exception("Unknown cmd={} in {}-file".format(cmd_parts[0], config.tick_csv))
+                        raise Exception('Unknown cmd={} in {}-file'.format(cmd_parts[0], config.tick_csv))
+
+                next_tick = start_time + (i + 1) * self.tick_duration
+                current_time = time.time()
+                if current_time < next_tick:
+                    difference = next_tick - current_time
+                    logging.debug('Sleep {} seconds for next tick.'.format(difference))
+                    time.sleep(difference)
+                else:
+                    raise Exception('Current_time={} is higher then next_tick={}.'
+                                    ' Consider to lower the tick_interval={}.'
+                                    .format(current_time, next_tick, self.tick_duration))
 
             # only use regular nodes since selfish nodes can trail back
             array = [int(self.exec(node.get_block_count())) for node in self.nodes.values()]

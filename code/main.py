@@ -25,6 +25,11 @@ parser.add_argument('--selfish-nodes-args'
                            'Set them as string and if you use just one add a space at the end. Eg.: "--arg "'
                     , default=''
                     )
+parser.add_argument('--tick-duration'
+                    , help='Set the duration of one tick in seconds.'
+                    , default=1
+                    , type=checkargs.check_positive_float
+                    )
 
 args = parser.parse_args()
 
