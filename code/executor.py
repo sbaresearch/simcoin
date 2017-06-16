@@ -113,7 +113,7 @@ class Executor:
             self.exec_print(self.save_consensus_chain())
             self.exec_print(self.save_chains())
 
-            self.consolidate_logs()
+            self.aggregate_logs()
         finally:
             # remove proxies first. if not proxies could be already stopped when trying to remove
             [self.call(node.rm()) for node in self.selfish_node_proxies.values()]
@@ -168,7 +168,7 @@ class Executor:
 
         return '; '.join([csv_header_cmd, self.bitcoind_nodes_array(), iter_cmd])
 
-    def consolidate_logs(self):
+    def aggregate_logs(self):
         try:
             for node in self.all_nodes.values():
                 self.exec_print('{} > {}'.format(node.cat_log(), config.tmp_log))
@@ -187,9 +187,9 @@ class Executor:
                     else:
                         content[i] = '{} {}-{} {}'.format(prev_match, node.name, i, line)
 
-                with open(config.consolidated_log, mode='a') as file:
+                with open(config.aggregated_log, mode='a') as file:
                     file.writelines(content)
-            self.exec_print('sort {} -o {}'.format(config.consolidated_log, config.consolidated_log))
+            self.exec_print('sort {} -o {}'.format(config.aggregated_log, config.aggregated_log))
         finally:
             self.call('rm {}'.format(config.tmp_log))
 
