@@ -10,6 +10,7 @@ from node import ProxyNode
 import subprocess
 import logging
 import time
+import re
 
 
 class Executor:
@@ -112,6 +113,8 @@ class Executor:
             self.exec_print(self.save_consensus_chain())
             self.exec_print(self.save_chains())
 
+            self.consolidate_logs()
+
             # [self.exec_print()(bitcoindcmd.get_chain_tips(node)) for node in self.all_bitcoind_nodes]
             # [for self.exec_print()(cmd) for cmd in logs.aggregate_logs(self.nodes))]
 
@@ -169,6 +172,31 @@ class Executor:
 
         return '; '.join([csv_header_cmd, self.bitcoind_nodes_array(), iter_cmd])
 
+    def consolidate_logs(self):
+        try:
+            for node in self.all_nodes.values():
+                self.exec_print('{} > {}'.format(node.cat_log(), config.tmp_log))
+
+                with open(config.tmp_log) as file:
+                    content = file.readlines()
+
+                prev_match = ''
+                for i, line in enumerate(content):
+                    match = re.match(config.log_timestamp_regex, line)
+                    if match:
+                        content[i] = re.sub(config.log_timestamp_regex
+                                            , r'\1 {}-{}'.format(node.name, i)
+                                            , line)
+                        prev_match = match.group(0)
+                    else:
+                        content[i] = '{} {}-{} {}'.format(prev_match, node.name, i, line)
+
+                with open(config.consolidated_log, mode='a') as file:
+                    file.writelines(content)
+            self.exec_print('sort {} -o {}'.format(config.consolidated_log, config.consolidated_log))
+        finally:
+            self.call('rm {}'.format(config.tmp_log))
+
     def bitcoind_nodes_array(self):
         return 'nodes=(' + ' '.join(node.name for node in self.all_bitcoind_nodes.values()) + ')'
 
@@ -176,9 +204,16 @@ class Executor:
         return len(self.all_bitcoind_nodes) + 100 + 1
 
     def exec(self, cmd):
+        self.log_cmd(cmd)
+        return subprocess.check_output(cmd, shell=True, executable='/bin/bash')
+
+    def call(self, cmd):
+        self.log_cmd(cmd)
+        return subprocess.call(cmd, shell=True, executable='/bin/bash')
+
+    def log_cmd(self, cmd):
         self.count += 1
         logging.info('{}: {}'.format(self.count, cmd))
-        return subprocess.check_output(cmd, shell=True, executable='/bin/bash')
 
     def exec_print(self, cmd):
         output = self.exec(cmd).decode("utf-8")

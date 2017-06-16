@@ -50,6 +50,9 @@ class BitcoindNode(Node):
     def get_block_count(self):
         return bitcoindcmd.get_block_count(self.name)
 
+    def cat_log(self):
+        return dockercmd.exec_cmd(self.name, 'cat /data/regtest/debug.log')
+
 
 class PublicBitcoindNode(BitcoindNode, PublicNode):
     def __init__(self, name, ip):
@@ -77,3 +80,6 @@ class ProxyNode(Node, PublicNode):
         wait_for_selfish_node_cmd = 'while [[ $current_best != $(' + proxycmd.get_best_public_block_hash(self.name) + \
                                     ') ]]; do echo Waiting for blocks to spread...; sleep 0.2; done'
         return '; '.join(['sleep 2', current_best_block_hash_cmd, wait_for_selfish_node_cmd])
+
+    def cat_log(self):
+        return dockercmd.exec_cmd(self.name, 'cat /tmp/selfish_proxy.log')

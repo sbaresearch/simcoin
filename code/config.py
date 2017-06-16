@@ -2,7 +2,7 @@
 # it does not conflict with https://github.com/bitcoin/bitcoin/blob/master/src/netbase.h
 ip_range = "240.0.0.0/4"
 
-root_dir = '$PWD/../data/'
+root_dir = '../data/'
 aggregated_log_file = root_dir + 'log'
 
 node_image = 'btn/base:v3'
@@ -15,11 +15,14 @@ selfish_node_proxy_name = selfish_node_name + selfish_node_proxy_postfix
 
 network_config = 'network.config'
 tick_csv = 'ticks.csv'
+consolidated_log = root_dir + 'consolidated.log'
+tmp_log = root_dir + 'tmp.log'
 
 reference_node = 'node-0'
 
 warmup_blocks = 100
 
+log_timestamp_regex = r'^([0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}.[0-9]{6})'
 
 def host_dir(node):
     return root_dir + node.name
