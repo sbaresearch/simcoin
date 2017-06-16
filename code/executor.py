@@ -8,6 +8,7 @@ from node import PublicBitcoindNode
 from node import SelfishPrivateNode
 from node import ProxyNode
 import subprocess
+import logging
 
 
 class Executor:
@@ -174,19 +175,18 @@ class Executor:
 
     def exec(self, cmd):
         self.count += 1
+        logging.info('{}: {}'.format(self.count, cmd))
         self.execution_function(cmd, self.count)
 
 
 def execute_dry_run(cmd, count):
-    print('{}: {}'.format(count, cmd))
     return 'ret-{}'.format(count)
 
 
 def execute_print(cmd, count):
     output = execute(cmd, count).decode("utf-8")
-    print(output, end='')
+    [logging.info(output) for output in output.split(r'\n')]
 
 
 def execute(cmd, count):
-    print('{}: {}'.format(count, cmd))
     return subprocess.check_output(cmd, shell=True, executable='/bin/bash')
