@@ -116,7 +116,9 @@ class Executor:
             # [for self.exec_print()(cmd) for cmd in logs.aggregate_logs(self.nodes))]
 
         finally:
-            [self.exec_print(node.rm()) for node in self.all_nodes.values()]
+            # remove proxies first. if not proxies could be already stopped when trying to remove
+            [self.exec_print(node.rm()) for node in self.selfish_node_proxies.values()]
+            [self.exec_print(node.rm()) for node in self.all_bitcoind_nodes.values()]
             self.exec_print('sleep 5')
             self.exec_print(dockercmd.rm_network())
 
