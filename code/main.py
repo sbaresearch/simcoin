@@ -33,10 +33,6 @@ parser.add_argument('-v'
                     , help='Increase output verbosity'
                     , action='store_true'
                     )
-parser.add_argument('--dry-run'
-                    , action='store_true'
-                    , help='If true only prints the bash script without execution'
-                    )
 parser.add_argument('--selfish-nodes-args'
                     , help='Set args for selfish nodes. '
                            'Set them as string and if you use just one add a space at the end. Eg.: "--arg "'

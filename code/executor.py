@@ -14,10 +14,6 @@ import logging
 class Executor:
     def __init__(self, args, nodes, selfish_nodes):
         self.count = 0
-        if args.dry_run:
-            self.execution_function = execute_dry_run
-        else:
-            self.execution_function = execute_print
 
         ip_addresses = ipaddress.ip_network(config.ip_range).hosts()
         next(ip_addresses)  # skipping first ip address (docker fails with error "is in use")
@@ -62,73 +58,73 @@ class Executor:
 
     def execute(self):
         try:
-            self.exec('rm -rf ' + config.root_dir + '*')
+            self.exec_print('rm -rf ' + config.root_dir + '*')
 
-            self.exec(dockercmd.create_network(config.ip_range))
-            self.exec('sleep 1')
+            self.exec_print(dockercmd.create_network(config.ip_range))
+            self.exec_print('sleep 1')
 
-            [self.exec(node.run()) for node in self.all_bitcoind_nodes.values()]
+            [self.exec_print(node.run()) for node in self.all_bitcoind_nodes.values()]
             for index, node in enumerate(self.all_bitcoind_nodes.values()):
-                [self.exec(cmd) for cmd
+                [self.exec_print(cmd) for cmd
                  in node.connect([str(node.ip) for node in list(self.all_bitcoind_nodes.values())[index+1:index+5]])]
 
-            self.exec('sleep 5')  # wait before generating otherwise "Error -28" (still warming up)
+            self.exec_print('sleep 5')  # wait before generating otherwise "Error -28" (still warming up)
             self.warmup_block_generation()
 
-            [self.exec('; '.join([node.delete_peers_file(), node.rm()])) for node in self.all_bitcoind_nodes.values()]
+            [self.exec_print('; '.join([node.delete_peers_file(), node.rm()])) for node in self.all_bitcoind_nodes.values()]
 
-            [self.exec(node.run()) for node in self.all_bitcoind_nodes.values()]
-            [self.exec(node.wait_until_height_reached(config.warmup_blocks + len(self.all_bitcoind_nodes)))
+            [self.exec_print(node.run()) for node in self.all_bitcoind_nodes.values()]
+            [self.exec_print(self.wait_until_height_reached(node, config.warmup_blocks + len(self.all_bitcoind_nodes)))
              for node in self.all_bitcoind_nodes.values()]
 
-            [self.exec(node.run()) for node in self.selfish_node_proxies.values()]
-            [self.exec(node.wait_for_highest_tip_of_node(self.one_normal_node))
+            [self.exec_print(node.run()) for node in self.selfish_node_proxies.values()]
+            [self.exec_print(node.wait_for_highest_tip_of_node(self.one_normal_node))
              for node in self.selfish_node_proxies.values()]
 
             for node in self.nodes.values():
-                [self.exec(cmd) for cmd in node.connect(node.outgoing_ips)]
+                [self.exec_print(cmd) for cmd in node.connect(node.outgoing_ips)]
 
             reader = csv.reader(open(config.tick_csv, "r"), delimiter=";")
             for i, line in enumerate(reader):
                 for cmd in line:
                     cmd_parts = cmd.split(' ')
                     if cmd_parts[0] == 'block':
-                        self.exec(bitcoindcmd.generate_block(cmd_parts[1], 1))
+                        self.exec_print(bitcoindcmd.generate_block(cmd_parts[1], 1))
                     elif cmd_parts[0] == 'tx':
                         node = self.all_bitcoind_nodes[cmd_parts[1]]
-                        self.exec(node.generate_tx())
+                        self.exec_print(node.generate_tx())
                     else:
                         raise Exception("Unknown cmd={} in {}-file".format(cmd_parts[0], config.tick_csv))
 
-            self.exec(self.wait_for_all_blocks_to_spread())
+            self.exec_print(self.wait_for_all_blocks_to_spread())
 
-            self.exec(dockercmd.fix_data_dirs_permissions())
+            self.exec_print(dockercmd.fix_data_dirs_permissions())
 
-            self.exec(self.save_consensus_chain())
-            self.exec(self.save_chains())
+            self.exec_print(self.save_consensus_chain())
+            self.exec_print(self.save_chains())
 
-            # [self.exec(bitcoindcmd.get_chain_tips(node)) for node in self.all_bitcoind_nodes]
-            # [for self.exec(cmd) for cmd in logs.aggregate_logs(self.nodes))]
+            # [self.exec_print()(bitcoindcmd.get_chain_tips(node)) for node in self.all_bitcoind_nodes]
+            # [for self.exec_print()(cmd) for cmd in logs.aggregate_logs(self.nodes))]
 
         finally:
-            [self.exec(node.rm()) for node in self.all_nodes.values()]
-            self.exec('sleep 5')
-            self.exec(dockercmd.rm_network())
+            [self.exec_print(node.rm()) for node in self.all_nodes.values()]
+            self.exec_print('sleep 5')
+            self.exec_print(dockercmd.rm_network())
 
     def warmup_block_generation(self):
-        self.exec('echo Begin of warmup')
+        self.exec_print('echo Begin of warmup')
 
         for index, node in enumerate(self.all_bitcoind_nodes.values()):
-            self.exec(node.wait_until_height_reached(index))
-            self.exec(node.generate_block())
+            self.exec_print(self.wait_until_height_reached(node, index))
+            self.exec_print(node.generate_block())
 
         node = self.all_bitcoind_nodes[config.reference_node]
-        self.exec(node.wait_until_height_reached(len(self.all_bitcoind_nodes)))
-        self.exec(node.generate_block(config.warmup_blocks))
-        [self.exec(node.wait_until_height_reached(config.warmup_blocks + len(self.all_bitcoind_nodes)))
+        self.exec_print(self.wait_until_height_reached(node, len(self.all_bitcoind_nodes)))
+        self.exec_print(node.generate_block(config.warmup_blocks))
+        [self.exec_print(self.wait_until_height_reached(node, config.warmup_blocks + len(self.all_bitcoind_nodes)))
          for node in self.all_bitcoind_nodes.values()]
 
-        self.exec('echo End of warmup')
+        self.exec_print('echo End of warmup')
 
     def wait_for_all_blocks_to_spread(self):
 
@@ -176,17 +172,9 @@ class Executor:
     def exec(self, cmd):
         self.count += 1
         logging.info('{}: {}'.format(self.count, cmd))
-        self.execution_function(cmd, self.count)
+        return subprocess.check_output(cmd, shell=True, executable='/bin/bash')
 
+    def exec_print(self, cmd):
+        output = self.exec(cmd).decode("utf-8")
+        [logging.info(output.strip()) for output in output.splitlines()]
 
-def execute_dry_run(cmd, count):
-    return 'ret-{}'.format(count)
-
-
-def execute_print(cmd, count):
-    output = execute(cmd, count).decode("utf-8")
-    [logging.info(output) for output in output.split(r'\n')]
-
-
-def execute(cmd, count):
-    return subprocess.check_output(cmd, shell=True, executable='/bin/bash')
