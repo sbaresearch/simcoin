@@ -65,6 +65,7 @@ class Executor:
             self.exec_print('sleep 1')
 
             [self.exec_print(node.run()) for node in self.all_bitcoind_nodes.values()]
+            self.exec_print('sleep 5')
             for index, node in enumerate(self.all_bitcoind_nodes.values()):
                 [self.exec_print(cmd) for cmd
                  in node.connect([str(node.ip) for node in list(self.all_bitcoind_nodes.values())[index+1:index+5]])]
@@ -84,6 +85,8 @@ class Executor:
 
             for node in self.nodes.values():
                 [self.exec_print(cmd) for cmd in node.connect(node.outgoing_ips)]
+
+            self.exec_print('sleep 5')
 
             reader = csv.reader(open(config.tick_csv, "r"), delimiter=";")
             for i, line in enumerate(reader):
