@@ -64,15 +64,15 @@ class Executor:
             self.exec_print('rm -rf ' + config.root_dir + '*')
 
             self.exec_print(dockercmd.create_network(config.ip_range))
-            time.sleep(1)
+            sleep(1)
 
             [self.exec_print(node.run()) for node in self.all_bitcoind_nodes.values()]
-            time.sleep(4 + len(self.all_bitcoind_nodes) * 0.2)
+            sleep(4 + len(self.all_bitcoind_nodes) * 0.2)
 
             for i, node in enumerate(self.all_bitcoind_nodes.values()):
                 [self.exec_print(cmd) for cmd
                  in node.connect([str(node.ip) for node in list(self.all_bitcoind_nodes.values())[i+1:i+5]])]
-            time.sleep(4 + len(self.all_bitcoind_nodes) * 0.2)
+            sleep(4 + len(self.all_bitcoind_nodes) * 0.2)
 
             self.warmup_block_generation()
 
@@ -88,7 +88,7 @@ class Executor:
 
             for node in self.nodes.values():
                 [self.exec_print(cmd) for cmd in node.connect(node.outgoing_ips)]
-            time.sleep(3 + len(self.all_nodes) * 0.2)
+            sleep(3 + len(self.all_nodes) * 0.2)
 
             reader = csv.reader(open(config.tick_csv, "r"), delimiter=";")
             start_time = time.time()
@@ -108,7 +108,7 @@ class Executor:
                 if current_time < next_tick:
                     difference = next_tick - current_time
                     logging.debug('Sleep {} seconds for next tick.'.format(difference))
-                    time.sleep(difference)
+                    sleep(difference)
                 else:
                     raise Exception('Current_time={} is higher then next_tick={}.'
                                     ' Consider to lower the tick_interval={}.'
@@ -119,7 +119,7 @@ class Executor:
             logging.info(array)
             while check_equal(array) is False:
                 logging.debug('Waiting for blocks to spread...')
-                time.sleep(0.2)
+                sleep(0.2)
 
             self.exec_print(dockercmd.fix_data_dirs_permissions())
 
@@ -131,7 +131,7 @@ class Executor:
             # remove proxies first. if not proxies could be already stopped when trying to remove
             [self.call(node.rm()) for node in self.selfish_node_proxies.values()]
             [self.call(node.rm()) for node in self.all_bitcoind_nodes.values()]
-            time.sleep(3 + len(self.all_nodes) * 0.2)
+            sleep(3 + len(self.all_nodes) * 0.2)
 
             self.call(dockercmd.rm_network())
 
@@ -153,7 +153,7 @@ class Executor:
     def wait_until_height_reached(self, node, height):
         while int(self.exec(node.get_block_count())) < height:
             logging.debug('Waiting until height={} is reached...'.format(str(height)))
-            time.sleep(0.2)
+            sleep(0.2)
 
     def save_consensus_chain(self):
         # idea iterate over chain and check if at some height all hashes are the same.
@@ -228,6 +228,11 @@ class Executor:
     def call(self, cmd):
         self.log_cmd(cmd)
         return subprocess.call(cmd, shell=True, executable='/bin/bash')
+
+
+def sleep(seconds):
+    logging.debug("Sleep for {} seconds".format(seconds))
+    time.sleep(seconds)
 
 
 def check_equal(lst):
