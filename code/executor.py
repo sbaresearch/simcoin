@@ -136,7 +136,7 @@ class Executor:
             self.call(dockercmd.rm_network())
 
     def warmup_block_generation(self):
-        self.exec_print('echo Begin of warmup')
+        logging.info('Begin warmup')
 
         for i, node in enumerate(self.all_bitcoind_nodes.values()):
             self.wait_until_height_reached(node, i)
@@ -148,7 +148,7 @@ class Executor:
         [self.wait_until_height_reached(node, config.warmup_blocks + len(self.all_bitcoind_nodes))
          for node in self.all_bitcoind_nodes.values()]
 
-        self.exec_print('echo End of warmup')
+        logging.info('End of warmup')
 
     def wait_until_height_reached(self, node, height):
         while int(self.exec(node.get_block_count())) < height:
