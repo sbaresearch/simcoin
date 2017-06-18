@@ -56,7 +56,7 @@ class BitcoindNode(Node):
         return dockercmd.exec_cmd(self.name, 'cat {}'.format(BitcoindNode.log_file))
 
     def grep_log_for_errors(self):
-        return dockercmd.exec_cmd(self.name, '{} {}'.format(config.log_error_grep, BitcoindNode.log_file))
+        return dockercmd.exec_cmd(self.name, config.log_error_grep.format(BitcoindNode.log_file))
 
 
 class PublicBitcoindNode(BitcoindNode, PublicNode):
@@ -92,4 +92,4 @@ class ProxyNode(Node, PublicNode):
         return dockercmd.exec_cmd(self.name, 'cat {}'.format(ProxyNode.log_file))
 
     def grep_log_for_errors(self):
-        return dockercmd.exec_cmd(self.name, '{} {}'.format(config.log_error_grep, ProxyNode.log_file))
+        return dockercmd.exec_cmd(self.name, config.log_error_grep.format(ProxyNode.log_file))
