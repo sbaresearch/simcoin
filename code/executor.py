@@ -107,7 +107,7 @@ class Executor:
                 current_time = time.time()
                 if current_time < next_tick:
                     difference = next_tick - current_time
-                    logging.debug('Sleep {} seconds for next tick.'.format(difference))
+                    logging.info('Sleep {} seconds for next tick.'.format(difference))
                     sleep(difference)
                 else:
                     raise Exception('Current_time={} is higher then next_tick={}.'
