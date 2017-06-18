@@ -19,6 +19,8 @@ class PublicNode:
 
 
 class BitcoindNode(Node):
+    log_file = bitcoindcmd.guest_dir + '/regtest/debug.log'
+
     def __init__(self, name, ip):
         super().__init__(name, ip)
         self.name = name
@@ -51,7 +53,10 @@ class BitcoindNode(Node):
         return bitcoindcmd.get_block_count(self.name)
 
     def cat_log(self):
-        return dockercmd.exec_cmd(self.name, 'cat /data/regtest/debug.log')
+        return dockercmd.exec_cmd(self.name, 'cat {}'.format(BitcoindNode.log_file))
+
+    def grep_log_for_errors(self):
+        return dockercmd.exec_cmd(self.name, '{} {}'.format(config.log_error_grep, BitcoindNode.log_file))
 
 
 class PublicBitcoindNode(BitcoindNode, PublicNode):
@@ -65,6 +70,8 @@ class SelfishPrivateNode(BitcoindNode):
 
 
 class ProxyNode(Node, PublicNode):
+    log_file = '/tmp/selfish_proxy.log'
+
     def __init__(self, name, ip, private_ip, args):
         Node.__init__(self, name, ip)
         self.private_ip = private_ip
@@ -82,4 +89,7 @@ class ProxyNode(Node, PublicNode):
         return '; '.join(['sleep 2', current_best_block_hash_cmd, wait_for_selfish_node_cmd])
 
     def cat_log(self):
-        return dockercmd.exec_cmd(self.name, 'cat /tmp/selfish_proxy.log')
+        return dockercmd.exec_cmd(self.name, 'cat {}'.format(ProxyNode.log_file))
+
+    def grep_log_for_errors(self):
+        return dockercmd.exec_cmd(self.name, '{} {}'.format(config.log_error_grep, ProxyNode.log_file))

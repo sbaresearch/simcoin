@@ -126,6 +126,7 @@ class Executor:
             self.exec_print(self.save_consensus_chain())
             self.exec_print(self.save_chains())
 
+            [self.exec_print(node.grep_log_for_errors()) for node in self.all_nodes.values()]
             self.aggregate_logs()
         finally:
             # remove proxies first. if not proxies could be already stopped when trying to remove

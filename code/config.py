@@ -24,6 +24,8 @@ reference_node = 'node-0'
 warmup_blocks = 100
 
 log_timestamp_regex = r'^([0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}.[0-9]{6})'
+log_error_grep = 'grep -E -i "WARN|FATAL|ERROR|CRITICAL|EXCEPTION"'
+
 
 def host_dir(node):
     return root_dir + node.name
