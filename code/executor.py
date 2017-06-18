@@ -195,11 +195,11 @@ class Executor:
                     match = re.match(config.log_timestamp_regex, line)
                     if match:
                         content[i] = re.sub(config.log_timestamp_regex
-                                            , r'\1 {}-{}'.format(node.name, i)
+                                            , r'\1 {}'.format(node.name)
                                             , line)
                         prev_match = match.group(0)
                     else:
-                        content[i] = '{} {}-{} {}'.format(prev_match, node.name, i, line)
+                        content[i] = '{} {} {}'.format(prev_match, node.name, line)
 
                 with open(config.aggregated_log, mode='a') as file:
                     file.writelines(content)
