@@ -8,6 +8,7 @@ from executor import Executor
 import csv
 import logging
 import checkargs
+import time
 
 if sys.version_info <= (3, 0):
     print("Sorry, requires Python 3.x or above")
@@ -33,11 +34,12 @@ parser.add_argument('--tick-duration'
 
 args = parser.parse_args()
 
-logFormatter = logging.Formatter("%(asctime)s.%(msecs)03d000 [%(threadName)-12.12s] "
+logFormatter = logging.Formatter("%(asctime)s.%(msecs)03d000 executor [%(threadName)-12.12s] "
                                  "[%(levelname)-5.5s]  %(message)s", "%Y-%m-%d %H:%M:%S")
+logging.Formatter.converter = time.gmtime
 rootLogger = logging.getLogger()
 
-fileHandler = logging.FileHandler("debug.log", mode='w')
+fileHandler = logging.FileHandler(config.log_file, mode='w')
 fileHandler.setFormatter(logFormatter)
 rootLogger.addHandler(fileHandler)
 

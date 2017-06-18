@@ -203,6 +203,8 @@ class Executor:
 
                 with open(config.aggregated_log, mode='a') as file:
                     file.writelines(content)
+
+            self.exec_print('cat {} >> {}'.format(config.log_file, config.aggregated_log))
             self.exec_print('sort {} -o {}'.format(config.aggregated_log, config.aggregated_log))
         finally:
             self.call('rm {}'.format(config.tmp_log))

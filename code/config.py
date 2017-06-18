@@ -16,6 +16,7 @@ selfish_node_proxy_name = selfish_node_name + selfish_node_proxy_postfix
 network_config = 'network.config'
 tick_csv = 'ticks.csv'
 aggregated_log = root_dir + 'aggregated.log'
+log_file = 'debug.log'
 tmp_log = root_dir + 'tmp.log'
 
 reference_node = 'node-0'
