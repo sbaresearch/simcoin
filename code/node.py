@@ -19,6 +19,8 @@ class PublicNode:
 
 
 class BitcoindNode(Node):
+    log_file = bitcoindcmd.guest_dir + '/regtest/debug.log'
+
     def __init__(self, name, ip):
         super().__init__(name, ip)
         self.name = name
@@ -39,11 +41,6 @@ class BitcoindNode(Node):
     def connect(self, nodes):
         return bitcoindcmd.connect(self.name, nodes)
 
-    def wait_until_height_reached(self, height):
-        height_cmd = bitcoindcmd.get_block_count(self.name)
-        return 'while [[ $(' + height_cmd + ') < ' + str(height) + ' ]]; ' \
-               'do echo Waiting until height=' + str(height) + ' is reached...; sleep 0.2; done'
-
     def generate_tx(self):
         create_address_cmd = 'fresh_address=$(' + bitcoindcmd.get_new_address(self.name) + ')'
         create_tx_cmd = bitcoindcmd.send_to_address(self.name, '$fresh_address', 0.1)
@@ -51,6 +48,15 @@ class BitcoindNode(Node):
 
     def generate_block(self, amount=1):
         return bitcoindcmd.generate_block(self.name, amount)
+
+    def get_block_count(self):
+        return bitcoindcmd.get_block_count(self.name)
+
+    def cat_log(self):
+        return dockercmd.exec_cmd(self.name, 'cat {}'.format(BitcoindNode.log_file))
+
+    def grep_log_for_errors(self):
+        return dockercmd.exec_cmd(self.name, config.log_error_grep.format(BitcoindNode.log_file))
 
 
 class PublicBitcoindNode(BitcoindNode, PublicNode):
@@ -64,6 +70,8 @@ class SelfishPrivateNode(BitcoindNode):
 
 
 class ProxyNode(Node, PublicNode):
+    log_file = '/tmp/selfish_proxy.log'
+
     def __init__(self, name, ip, private_ip, args):
         Node.__init__(self, name, ip)
         self.private_ip = private_ip
@@ -79,3 +87,9 @@ class ProxyNode(Node, PublicNode):
         wait_for_selfish_node_cmd = 'while [[ $current_best != $(' + proxycmd.get_best_public_block_hash(self.name) + \
                                     ') ]]; do echo Waiting for blocks to spread...; sleep 0.2; done'
         return '; '.join(['sleep 2', current_best_block_hash_cmd, wait_for_selfish_node_cmd])
+
+    def cat_log(self):
+        return dockercmd.exec_cmd(self.name, 'cat {}'.format(ProxyNode.log_file))
+
+    def grep_log_for_errors(self):
+        return dockercmd.exec_cmd(self.name, config.log_error_grep.format(ProxyNode.log_file))

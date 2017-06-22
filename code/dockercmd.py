@@ -11,7 +11,7 @@ def run_node(node, cmd):
             ' --ip=' + str(node.ip) +
             ' --name=' + node.name +  # container name
             ' --hostname=' + node.name +
-            ' --volume ' + config.host_dir(node) + ':' + bitcoindcmd.guest_dir +
+            ' --volume $PWD/' + config.host_dir(node) + ':' + bitcoindcmd.guest_dir +
             ' ' + config.node_image +  # image name # src: https://hub.docker.com/r/abrkn/bitcoind/
             ' bash -c "' + cmd + '" ')
 
@@ -48,7 +48,7 @@ def rm_network():
 
 def fix_data_dirs_permissions():
         return ('docker run '
-                ' --rm --volume ' + config.root_dir + ':/mnt' + ' ' + config.node_image + ' chmod a+rwx --recursive /mnt')
+                ' --rm --volume $PWD/' + config.root_dir + ':/mnt' + ' ' + config.node_image + ' chmod a+rwx --recursive /mnt')
 
 
 def rm_container(name):
