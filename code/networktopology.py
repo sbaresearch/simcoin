@@ -59,8 +59,8 @@ nodes = args.nodes
 selfish_nodes = args.selfish_nodes
 
 header = ['']
-header.extend([config.node_prefix + str(i) for i in range(nodes)])
-header.extend([config.selfish_node_prefix + str(i) for i in range(selfish_nodes)])
+header.extend([config.node_name.format(str(i)) for i in range(nodes)])
+header.extend([config.selfish_node_name.format(str(i)) for i in range(selfish_nodes)])
 matrix = [[] for i in range(size_matrix)]
 
 for i in range(1, size_matrix):
@@ -77,6 +77,7 @@ for i in range(1, size_matrix):
 
 print(pandas.DataFrame(matrix))
 
-with open("network.config", "w") as file:
+with open(config.network_config, "w") as file:
     writer = csv.writer(file, delimiter=';')
+    writer.writerows([['nodes', args.nodes], ['selfish-nodes', args.selfish_nodes]])
     writer.writerows(matrix)

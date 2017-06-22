@@ -1,6 +1,5 @@
 from unittest import TestCase
 import bitcoindcmd
-from plan import SelfishNode
 
 
 class TestBitcoindcmd(TestCase):

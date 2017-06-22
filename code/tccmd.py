@@ -1,11 +1,13 @@
 import config
 
 
+# currently not in use
 def slow_network(latency):
         # needed for this cmd: apt install iproute2 and --cap-add=NET_ADMIN
         return 'tc qdisc replace dev eth0 root netem delay ' + str(latency) + 'ms'
 
 
+# currently not in use
 def slow_network_proxy(latency, private_ip):
         # needed for this cmd: apt install iproute2 and --cap-add=NET_ADMIN
         return ('tc qdisc add dev eth0 root handle 1: prio; '

@@ -14,6 +14,7 @@ args = {
     'listen':             '-listen',  # ensure listening even if 'connect' is given
     'listenonion':        '-listenonion=0',  # disable tor
     'onlynet':            '-onlynet=ipv4',  # disable ipv6
+    'reindex':          '-reindex',
 }
 
 
@@ -25,7 +26,6 @@ def start_selfish_mining():
     specific_args = {
         'keypool':          '-keypool=1',
         'dnsseed':          '-dnsseed=0',
-        'reindex':          '-reindex',
     }
     return_args = args.copy()
     return_args.update(specific_args)
@@ -36,17 +36,7 @@ def start_selfish_mining():
 def start_user():
     specific_args = {
         'dnsseed':          '-dnsseed=0',  # disable dns seed lookups, otherwise this gets seeds even with docker --internal network
-        'addnode':          '-addnode=' + config.ip_bootstrap,  # only connect ourself introductionary node
         'keypool':          '-keypool=1'
-    }
-    return_args = args.copy()
-    return_args.update(specific_args)
-    return transform_to_cmd(return_args)
-
-
-def start_bootstrap():
-    specific_args = {
-        'disablewallet':    '-disablewallet=1'  # disable wallet
     }
     return_args = args.copy()
     return_args.update(specific_args)
@@ -68,7 +58,7 @@ def get_best_block_hash(node):
 def generate_block(node, amount=1):
     cmd = exec_cli(node, 'generate {}'.format(amount))
     return (cmd + r' | jq -r "to_entries[] | \"'
-            + node.name + r'; \(.value)\"" | tee -a '
+            + node + r'; \(.value)\"" | tee -a '
             + config.root_dir + '/blocks.csv')
 
 
@@ -98,6 +88,10 @@ def get_block_hash(node, height):
 
 def get_block(node, block_hash):
     return exec_cli(node, 'getblock ' + block_hash)
+
+
+def connect(node, outgoing_ips):
+    return [exec_cli(node, 'addnode ' + ip + ' add') for ip in outgoing_ips]
 
 
 def get_block_with_height(node, height):

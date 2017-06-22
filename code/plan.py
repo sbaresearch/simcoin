@@ -1,69 +1,97 @@
-import random
 import dockercmd
 import bitcoindcmd
-import proxycmd
 import ipaddress
-from scheduler import Scheduler
 import config
+import pandas
+import csv
+from node import PublicBitcoindNode
+from node import SelfishPrivateNode
+from node import ProxyNode
 
 
 class Plan:
-    def __init__(self, args):
-        self.args = args
-
+    def __init__(self, args, nodes, selfish_nodes):
         ip_addresses = ipaddress.ip_network(config.ip_range).hosts()
         next(ip_addresses)  # skipping first ip address (docker fails with error "is in use")
-        next(ip_addresses)  # omit first ip address used by bootstrap node
 
-        self.config = config
-        self.nodes = [Node(config.node_prefix + str(i), next(ip_addresses)) for i in range(args.nodes)]
-        self.selfish_nodes = [SelfishNode(config.selfish_node_prefix + str(i), next(ip_addresses), next(ip_addresses),
-                                          args.selfish_nodes_args) for i in range(args.selfish_nodes)]
+        self.nodes = {config.node_name.format(str(i)):
+                      PublicBitcoindNode(config.node_name.format(str(i)), next(ip_addresses))
+                      for i in range(nodes)}
 
-        self.selfish_node_private_nodes = [node.private_node for node in self.selfish_nodes]
-        self.selfish_node_proxies = [node.proxy for node in self.selfish_nodes]
-        self.all_bitcoind_nodes = self.nodes + self.selfish_node_private_nodes
-        self.all_public_nodes = self.nodes + self.selfish_node_proxies
-        self.all_nodes = self.nodes + self.selfish_node_private_nodes + self.selfish_node_proxies
+        self.selfish_node_private_nodes = {}
+        self.selfish_node_proxies = {}
+        for i in range(selfish_nodes):
+            ip_private_node = next(ip_addresses)
+            ip_proxy = next(ip_addresses)
+            self.selfish_node_private_nodes[config.selfish_node_name.format(str(i))] = \
+                SelfishPrivateNode(config.selfish_node_name.format(str(i)), ip_private_node)
 
-        self.bootstrap_node = Node(config.bootstrap_node_name, config.ip_bootstrap)
+            self.selfish_node_proxies[config.selfish_node_proxy_name.format(str(i))] = \
+                ProxyNode(config.selfish_node_proxy_name.format(str(i)),
+                          ip_proxy, ip_private_node, args.selfish_nodes_args)
+
+        self.all_bitcoind_nodes = dict(self.nodes, **self.selfish_node_private_nodes)
+        self.all_public_nodes = dict(self.nodes, **self.selfish_node_proxies)
+        self.all_nodes = dict(self.nodes, **self.selfish_node_private_nodes, **self.selfish_node_proxies)
+
+        self.one_normal_node = next(iter(self.nodes.values()))
+
+        network_config = pandas.read_csv(open(config.network_config), skiprows=2, delimiter=';', index_col=0)
+        connections = {}
+        for node_row, row in network_config.iterrows():
+            if node_row.startswith(config.selfish_node_prefix):
+                node_row += config.selfish_node_proxy_postfix
+            connections[node_row] = []
+            for node_column, latency in row.iteritems():
+                # exact latency is so far omitted
+                if node_column.startswith(config.selfish_node_prefix):
+                    node_column += config.selfish_node_proxy_postfix
+                if latency >= 0:
+                    connections[node_row].append(node_column)
+
+        for node in self.all_public_nodes.values():
+            node.outgoing_ips = [str(self.all_public_nodes[connection].ip) for connection in connections[node.name]]
 
     def create(self):
-        args = self.args
         plan = []
 
-        if len(self.selfish_nodes) > 0:
-            self.set_public_ips()
-
         try:
-            plan.append("rm -rf " + config.root_dir + '/*')
+            plan.append("rm -rf " + config.root_dir + '*')
 
             plan.append(dockercmd.create_network(config.ip_range))
             plan.append('sleep 1')
 
-            plan.append(dockercmd.run_bootstrap_node(self.bootstrap_node, bitcoindcmd.start_user(), args.latency))
-            plan.extend([dockercmd.run_node(node, bitcoindcmd.start_user(), args.latency) for node in self.nodes])
-            plan.extend([dockercmd.run_node(node, bitcoindcmd.start_user(), args.latency)
-                         for node in self.selfish_node_private_nodes])
+            plan.extend([node.run() for node in self.all_bitcoind_nodes.values()])
+            for index, node in enumerate(self.all_bitcoind_nodes.values()):
+                plan.extend(node.connect([str(node.ip) for node in list(self.all_bitcoind_nodes.values())[index+1:index+5]]))
 
-            plan.append('sleep 2')  # wait before generating otherwise "Error -28" (still warming up)
+            plan.append('sleep 5')  # wait before generating otherwise "Error -28" (still warming up)
             plan.extend(self.warmup_block_generation())
 
-            plan.extend([bitcoindcmd.rm_peers(node) for node in self.selfish_node_private_nodes])
-            plan.extend([node.rm() for node in self.selfish_node_private_nodes])
+            plan.extend(['; '.join([node.delete_peers_file(), node.rm()]) for node in self.all_bitcoind_nodes.values()])
 
-            plan.extend([dockercmd.run_selfish_private_node(node.private_node, bitcoindcmd.start_selfish_mining())
-                         for node in self.selfish_nodes])
-            plan.extend(self.wait_until_nodes_have_same_tip(self.nodes[0], self.selfish_node_private_nodes))
+            plan.extend([node.run() for node in self.all_bitcoind_nodes.values()])
+            plan.extend([node.wait_until_height_reached(config.warmup_blocks + len(self.all_bitcoind_nodes))
+                         for node in self.all_bitcoind_nodes.values()])
 
-            plan.extend([self.run_selfish_node_proxy(node, args.latency) for node in self.selfish_nodes])
-            plan.extend([self.wait_until_selfish_node_proxy_caught_up(node) for node in self.selfish_nodes])
+            plan.extend([node.run() for node in self.selfish_node_proxies.values()])
+            plan.extend([node.wait_for_highest_tip_of_node(self.one_normal_node) for node in self.selfish_node_proxies.values()])
 
-            scheduler = Scheduler(0)
-            scheduler.add_blocks(args.blocks, args.block_interval,
-                                 [bitcoindcmd.generate_block(self.random_node()) for _ in range(1000)])
-            scheduler.add_tx(args.blocks * args.block_interval, [self.random_tx_command() for _ in range(10)])
-            plan.extend(scheduler.bash_commands())
+            for node in self.nodes.values():
+                plan.extend(node.connect(node.outgoing_ips))
+
+            reader = csv.reader(open(config.tick_csv, "r"), delimiter=";")
+            for i, line in enumerate(reader):
+                for cmd in line:
+                    cmd_parts = cmd.split(' ')
+                    if cmd_parts[0] == 'block':
+                        plan.append(bitcoindcmd.generate_block(cmd_parts[1], 1))
+                    elif cmd_parts[0] == 'tx':
+                        node = self.all_bitcoind_nodes[cmd_parts[1]]
+                        plan.append(node.generate_tx())
+                    else:
+                        raise Exception("Unknown cmd={} in {}-file".format(cmd_parts[0], config.tick_csv))
+
             plan.append(self.wait_for_all_blocks_to_spread())
 
             plan.append(dockercmd.fix_data_dirs_permissions())
@@ -75,89 +103,48 @@ class Plan:
             # plan.extend(logs.aggregate_logs(self.nodes))
 
         finally:
-            plan.extend([node.rm() for node in self.all_nodes])
-            plan.append(self.bootstrap_node.rm())
+            plan.extend([node.rm() for node in self.all_nodes.values()])
             plan.append('sleep 5')
             plan.append(dockercmd.rm_network())
 
         return plan
 
-    def random_node(self):
-        return random.choice(self.all_bitcoind_nodes)
-
     def warmup_block_generation(self):
         cmds = ['echo Begin of warmup']
-        iter_nodes = iter(self.all_bitcoind_nodes)
-        prev_node = next(iter_nodes)
-        for node in iter_nodes:
-            cmds.append(bitcoindcmd.generate_block(prev_node))
-            cmds.extend(self.wait_until_nodes_have_same_tip(prev_node, [node]))
-            prev_node = node
 
-        cmds.append(bitcoindcmd.generate_block(prev_node, 101))
-        cmds.extend(self.wait_until_nodes_have_same_tip(prev_node, self.all_bitcoind_nodes))
+        for index, node in enumerate(self.all_bitcoind_nodes.values()):
+            cmds.append(node.wait_until_height_reached(index))
+            cmds.append(node.generate_block())
+
+        node = self.all_bitcoind_nodes[config.reference_node]
+        cmds.append(node.wait_until_height_reached(len(self.all_bitcoind_nodes)))
+        cmds.append(node.generate_block(config.warmup_blocks))
+        cmds.extend([node.wait_until_height_reached(config.warmup_blocks + len(self.all_bitcoind_nodes))
+                     for node in self.all_bitcoind_nodes.values()])
 
         cmds.append('echo End of warmup')
         return cmds
 
-    def wait_until_nodes_have_same_tip(self, leading_node, nodes):
-        cmds = []
-        highest_tip = bitcoindcmd.get_best_block_hash(leading_node)
-        for node in nodes:
-            node_tip = bitcoindcmd.get_best_block_hash(node)
-            cmds.append('while [[ $(' + highest_tip + ') != $(' + node_tip + ') ]]; ' +
-                        'do echo Waiting for blocks to spread...; sleep 0.2; done')
-        return cmds
-
-    def wait_until_selfish_node_proxy_caught_up(self, node):
-        current_best_block_hash_cmd = 'current_best=$(' + bitcoindcmd.get_best_block_hash(self.nodes[0]) + ')'
-        wait_for_selfish_node_cmd = 'while [[ $current_best != $(' + proxycmd.get_best_public_block_hash(node.proxy) + \
-                                    ') ]]; do echo Waiting for blocks to spread...; sleep 0.2; done'
-        return '; '.join(['sleep 2', current_best_block_hash_cmd, wait_for_selfish_node_cmd])
-
     def wait_for_all_blocks_to_spread(self):
 
         # only use regular nodes since selfish nodes can trail back
-        block_counts = ['$(' + bitcoindcmd.get_block_count(node) + ')' for node in self.nodes]
+        block_counts = ['$(' + bitcoindcmd.get_block_count(node.name) + ')' for node in self.nodes.values()]
         return ('while : ; do block_counts=(' + ' '.join(block_counts) + '); '
                 'prev=${block_counts[0]}; wait=false; echo Current block_counts=${block_counts[@]}; '
                 'for i in "${block_counts[@]}"; do if [ $prev != $i ]; then wait=true; fi; done; '
                 'if [ $wait == false ]; then break; fi; '
                 'echo Waiting for blocks to spread...; sleep 0.2; done')
 
-    def random_tx_command(self):
-        node = self.random_node()
-        create_address_cmd = 'fresh_address=$(' + bitcoindcmd.get_new_address(node) + ')'
-        create_tx_cmd = bitcoindcmd.send_to_address(node, '$fresh_address', 0.1)
-        return '; '.join([create_address_cmd, create_tx_cmd])
-
-    def set_public_ips(self):
-        all_ips = [node.ip for node in self.all_public_nodes]
-        amount = int((len(all_ips) - 1) * self.args.connectivity)
-
-        for node in self.selfish_node_proxies:
-            all_ips.remove(node.ip)
-            ips = random.sample(all_ips, amount)
-            node.public_ips = ips
-            all_ips.append(node.ip)
-
-    def run_selfish_node_proxy(self, node, latency):
-        current_best_block_hash_cmd = 'start_hash=$(' + bitcoindcmd.get_best_block_hash(self.nodes[0]) + ')'
-        run_cmd = dockercmd.run_selfish_proxy(node.proxy, proxycmd.run_proxy(node.proxy, node.private_node.ip,
-                                                                             '$start_hash'), latency)
-        return '; '.join([current_best_block_hash_cmd, run_cmd])
-
     def save_consensus_chain(self):
         # idea iterate over chain and check if at some height all hashes are the same.
-        mock_node = Node('$node', None)
 
         file = config.root_dir + '/consensus_chain.csv'
         csv_header_cmd = r'echo "height;block_hash" | tee -a ' + file
         iter_cmd = ('for height in `seq ' + str(self.first_block_height()) +
-                    ' $(' + bitcoindcmd.get_block_count(self.all_bitcoind_nodes[0]) + ')`; do'
-                    ' hash=$(' + bitcoindcmd.get_block_hash(self.all_bitcoind_nodes[0], '$height') + ');'
+                    ' $(' + bitcoindcmd.get_block_count(config.reference_node) + ')`; do'
+                    ' hash=$(' + bitcoindcmd.get_block_hash(config.reference_node, '$height') + ');'
                     ' all_same=true; for node in "${nodes[@]}"; do' +
-                    ' if [[ $hash != $(' + bitcoindcmd.get_block_hash(mock_node, '$height') + ')'
+                    ' if [[ $hash != $(' + bitcoindcmd.get_block_hash('$node', '$height') + ')'
                     ' ]]; then all_same=false; fi; done;'
                     ' if [ "$all_same" = true ]; then echo "$height;$hash" '
                     '| tee -a ' + file + '; fi; done')
@@ -165,40 +152,18 @@ class Plan:
         return '; '.join([csv_header_cmd, self.bitcoind_nodes_array(), iter_cmd])
 
     def save_chains(self):
-        mock_node = Node('$node', None)
-
         file = config.root_dir + '/chains.csv'
         csv_header_cmd = r'echo "node;block_hashes" | tee -a ' + file
         iter_cmd = ('for node in ${nodes[@]}; do'
                     ' line=$node; for height in `seq ' + str(self.first_block_height()) +
-                    ' $(' + bitcoindcmd.get_block_count(mock_node) + ')`; do'
-                    ' line="$line;$(' + bitcoindcmd.get_block_hash(mock_node, '$height') + ')";'
+                    ' $(' + bitcoindcmd.get_block_count('$node') + ')`; do'
+                    ' line="$line;$(' + bitcoindcmd.get_block_hash(config.reference_node, '$height') + ')";'
                     ' done; echo $line | tee -a ' + file + '; done')
 
         return '; '.join([csv_header_cmd, self.bitcoind_nodes_array(), iter_cmd])
 
     def bitcoind_nodes_array(self):
-        return 'nodes=(' + ' '.join(node.name for node in self.all_bitcoind_nodes) + ')'
+        return 'nodes=(' + ' '.join(node.name for node in self.all_bitcoind_nodes.values()) + ')'
 
     def first_block_height(self):
         return len(self.all_bitcoind_nodes) + 100 + 1
-
-
-class Node:
-    def __init__(self, name, ip):
-        self.name = name
-        self.ip = ip
-
-    def rm(self):
-        return dockercmd.rm_container(self.name)
-
-
-class SelfishNode:
-    def __init__(self, name, public_ip, private_ip, selfish_nodes_args):
-        self.proxy = Node(name + config.selfish_node_proxy_postfix, public_ip)
-        self.proxy.args = selfish_nodes_args
-
-        self.private_node = Node(name, private_ip)
-
-    def rm(self):
-        return self.proxy.rm() + '; ' + self.private_node.rm()

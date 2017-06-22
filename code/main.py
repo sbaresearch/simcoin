@@ -5,6 +5,7 @@ import os
 import argparse
 import config
 from plan import Plan
+import csv
 
 if sys.version_info <= (3, 0):
     print("Sorry, requires Python 3.x or above")
@@ -26,38 +27,9 @@ def check_positive(value):
 
 parser = argparse.ArgumentParser(description='Running Simcoin. A Bitcoin Network Simulator.')
 
-parser.add_argument('--nodes'
-                    , default=4
-                    , type=check_positive
-                    , help='Number of Bitcoin nodes spawned.'
-                    )
-parser.add_argument('--blocks'
-                    , default=20
-                    , type=check_positive
-                    , help='Number of blocks to be generated.'
-                    )
-parser.add_argument('--block-interval'
-                    , default=10
-                    , type=check_positive
-                    , help='Targeted block interval time in seconds.'
-                    )
-parser.add_argument('--latency'
-                    , default=100
-                    , type=check_positive
-                    , help='Network latency on all connections.'
-                    )
 parser.add_argument('--dry-run'
                     , action='store_true'
                     , help='If true only prints the bash script without execution'
-                    )
-parser.add_argument('--selfish-nodes'
-                    , default=0
-                    , type=check_positive
-                    , help='Number of selfish nodes spawned'
-                    )
-parser.add_argument('--connectivity'
-                    , type=check_percentage
-                    , help='Number of nodes the selfish nodes are connected to'
                     )
 parser.add_argument('--selfish-nodes-args'
                     , help='Set args for selfish nodes. '
@@ -69,24 +41,29 @@ args = parser.parse_args()
 
 
 def run():
-    if args.selfish_nodes == 0 and args.connectivity is not None:
-            parser.error('when selfish_nodes is 0 connectivity should not be set')
+    for image in [config.node_image, config.selfish_node_image]:
+        if os.system("docker inspect " + image + " > /dev/null") != 0:
+            print("Image " + image + " not found")
+            exit()
 
-    if args.selfish_nodes > 0 and args.connectivity is None:
-        parser.error('when selfish_nodes is > 0 then connectivity should be set')
-
-    if os.system("docker inspect " + config.node_image + " > /dev/null") != 0:
-        print("Image " + config.node_image + " not found")
-        exit()
-
-    if os.system("docker inspect " + config.selfish_node_image + " > /dev/null") != 0:
-        print("Image " + config.selfish_node_image + " not found")
-        exit()
+    for file in [config.network_config, config.tick_csv]:
+        if not os.path.isfile(file):
+            print(file + " file not found. Please generate file before starting Simcoin.")
+            exit()
 
     print("arguments called with: {}".format(sys.argv))
     print("parsed arguments: {}".format(args))
 
-    p = Plan(args)
+    nodes = selfish_nodes = 0
+    for index, row in enumerate(csv.reader(open(config.network_config), delimiter=';')):
+        if index >= 2:
+            break
+        if index == 0:
+            nodes = int(row[1])
+        elif index == 1:
+            selfish_nodes = int(row[1])
+
+    p = Plan(args, nodes, selfish_nodes)
     commands = p.create()
 
     if args.dry_run:
