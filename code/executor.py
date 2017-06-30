@@ -88,7 +88,7 @@ class Executor:
 
             for node in self.nodes.values():
                 [self.exec_print(cmd) for cmd in node.connect(node.outgoing_ips)]
-            sleep(3 + len(self.all_nodes) * 0.2)
+            sleep(4 + len(self.all_nodes) * 0.2)
 
             reader = csv.reader(open(config.tick_csv, "r"), delimiter=";")
             start_time = time.time()
