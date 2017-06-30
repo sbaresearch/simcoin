@@ -115,11 +115,11 @@ class Executor:
                                     .format(current_time, next_tick, self.tick_duration))
 
             # only use regular nodes since selfish nodes can trail back
-            array = [int(self.exec(node.get_block_count())) for node in self.nodes.values()]
-            logging.info(array)
+            array = False
             while check_equal(array) is False:
                 logging.debug('Waiting for blocks to spread...')
                 sleep(0.2)
+                array = [int(self.exec(node.get_block_count())) for node in self.nodes.values()]
 
             self.exec_print(dockercmd.fix_data_dirs_permissions())
 
