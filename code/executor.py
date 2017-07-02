@@ -123,7 +123,7 @@ class Executor:
 
             self.exec_print(dockercmd.fix_data_dirs_permissions())
 
-            self.exec_print(self.save_consensus_chain())
+            self.save_consensus_chain()
             self.save_chains()
 
             self.aggregate_logs()
@@ -157,20 +157,21 @@ class Executor:
             sleep(0.2)
 
     def save_consensus_chain(self):
-        # idea iterate over chain and check if at some height all hashes are the same.
-
-        file = config.root_dir + '/consensus_chain.csv'
-        csv_header_cmd = r'echo "height;block_hash" | tee -a ' + file
-        iter_cmd = ('for height in `seq ' + str(self.first_block_height()) +
-                    ' $(' + bitcoindcmd.get_block_count(config.reference_node) + ')`; do'
-                    ' hash=$(' + bitcoindcmd.get_block_hash(config.reference_node, '$height') + ');'
-                    ' all_same=true; for node in "${nodes[@]}"; do' +
-                    ' if [[ $hash != $(' + bitcoindcmd.get_block_hash('$node', '$height') + ')'
-                    ' ]]; then all_same=false; fi; done;'
-                    ' if [ "$all_same" = true ]; then echo "$height;$hash" '
-                    '| tee -a ' + file + '; fi; done')
-
-        return '; '.join([csv_header_cmd, self.bitcoind_nodes_array(), iter_cmd])
+        with open(config.root_dir + '/consensus_chains.csv', "w") as file:
+            file.write("height;block_hash\n")
+            height = self.first_block_height()
+            while True:
+                blocks = []
+                for node in self.all_bitcoind_nodes.values():
+                    try:
+                        blocks.append(self.exec(node.get_block_hash(height)))
+                    except subprocess.CalledProcessError:
+                        break
+                if len(blocks) > 0 and check_equal(blocks):
+                    file.write('{}; {}\n'.format(height, blocks[0]))
+                    height += 1
+                else:
+                    break
 
     def save_chains(self):
         with open(config.root_dir + '/chains.csv', "w") as file:
