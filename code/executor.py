@@ -228,7 +228,8 @@ class Executor:
 
     def exec(self, cmd):
         self.log_cmd(cmd)
-        return_value = subprocess.check_output(cmd, shell=True, executable='/bin/bash')
+        with open(os.devnull, 'w') as devnull:
+            return_value = subprocess.check_output(cmd, shell=True, executable='/bin/bash', stderr=devnull)
         return return_value.decode('utf-8').rstrip()
 
     def call(self, cmd):
