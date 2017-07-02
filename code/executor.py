@@ -162,7 +162,7 @@ class Executor:
             sleep(0.2)
 
     def save_consensus_chain(self):
-        with open(config.root_dir + '/consensus_chains.csv', 'w') as file:
+        with open(config.consensus_chain_csv, 'w') as file:
             file.write("height;block_hash\n")
             height = self.first_block_height()
             while True:
@@ -179,7 +179,7 @@ class Executor:
                     break
 
     def save_chains(self):
-        with open(config.root_dir + '/chains.csv', 'w') as file:
+        with open(config.chains_csv, 'w') as file:
             file.write("node;block_hashes\n")
             start = self.first_block_height()
             for node in self.all_bitcoind_nodes.values():
@@ -244,7 +244,7 @@ class Executor:
     def generate_block_and_save_creator(self, node, amount):
         blocks_string = self.exec(bitcoindcmd.generate_block(node, amount))
         blocks = json.loads(blocks_string)
-        with open(config.root_dir + '/blocks.csv', 'a') as file:
+        with open(config.blocks_csv, 'a') as file:
             for block in blocks:
                 file.write('{}; {}\n'.format(node, block))
 

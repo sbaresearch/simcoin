@@ -18,6 +18,9 @@ tick_csv = 'ticks.csv'
 aggregated_log = root_dir + 'aggregated.log'
 log_file = 'debug.log'
 tmp_log = root_dir + 'tmp.log'
+blocks_csv = root_dir + 'blocks.csv'
+chains_csv = root_dir + 'chains.csv'
+consensus_chain_csv = root_dir + 'consensus_chains.csv'
 
 reference_node = 'node-0'
 
