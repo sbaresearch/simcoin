@@ -273,6 +273,6 @@ def check_equal(lst):
 def create_simulation_dir():
     if not os.path.exists(config.out_dir):
         os.makedirs(config.out_dir)
-    if not os.path.exists(config.root_dir):
-        os.makedirs(config.root_dir)
+    if not os.path.exists(config.sim_dir):
+        os.makedirs(config.sim_dir)
 

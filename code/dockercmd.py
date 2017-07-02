@@ -48,7 +48,7 @@ def rm_network():
 
 def fix_data_dirs_permissions():
         return ('docker run '
-                ' --rm --volume $PWD/' + config.root_dir + ':/mnt ' + config.node_image + ' chmod a+rwx --recursive /mnt')
+                ' --rm --volume $PWD/' + config.sim_dir + ':/mnt ' + config.node_image + ' chmod a+rwx --recursive /mnt')
 
 
 def rm_container(name):

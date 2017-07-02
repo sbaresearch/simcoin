@@ -5,8 +5,8 @@ import time
 ip_range = "240.0.0.0/4"
 
 out_dir = 'out'
-root_dir = '{}/run-{}/'.format(out_dir, time.time())
-aggregated_log_file = root_dir + 'log'
+sim_dir = '{}/run-{}/'.format(out_dir, time.time())
+aggregated_log_file = sim_dir + 'log'
 
 network_name = 'simcoin-network'
 node_image = 'btn/base:v3'
@@ -20,12 +20,12 @@ selfish_node_proxy_name = selfish_node_name + selfish_node_proxy_postfix
 
 network_config = 'network.config'
 tick_csv = 'ticks.csv'
-aggregated_log = root_dir + 'aggregated.log'
+aggregated_log = sim_dir + 'aggregated.log'
 log_file = 'debug.log'
-tmp_log = root_dir + 'tmp.log'
-blocks_csv = root_dir + 'blocks.csv'
-chains_csv = root_dir + 'chains.csv'
-consensus_chain_csv = root_dir + 'consensus_chains.csv'
+tmp_log = sim_dir + 'tmp.log'
+blocks_csv = sim_dir + 'blocks.csv'
+chains_csv = sim_dir + 'chains.csv'
+consensus_chain_csv = sim_dir + 'consensus_chains.csv'
 
 reference_node = 'node-0'
 
@@ -36,4 +36,4 @@ log_error_grep = 'grep -E -i "WARN|FATAL|ERROR|CRITICAL|EXCEPTION" {} || true'
 
 
 def host_dir(node):
-    return root_dir + node.name
+    return sim_dir + node.name
