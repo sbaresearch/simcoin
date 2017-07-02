@@ -11,6 +11,8 @@ import subprocess
 import logging
 import time
 import re
+import os
+import json
 
 
 class Executor:
@@ -90,13 +92,16 @@ class Executor:
                 [self.exec_print(cmd) for cmd in node.connect(node.outgoing_ips)]
             sleep(4 + len(self.all_nodes) * 0.2)
 
+            if self.latency > 0:
+                [self.exec_print(node.add_latency(self.latency)) for node in self.all_public_nodes.values()]
+
             reader = csv.reader(open(config.tick_csv, "r"), delimiter=";")
             start_time = time.time()
             for i, line in enumerate(reader):
                 for cmd in line:
                     cmd_parts = cmd.split(' ')
                     if cmd_parts[0] == 'block':
-                        self.exec_print(bitcoindcmd.generate_block(cmd_parts[1], 1))
+                        self.generate_block_and_save_creator(cmd_parts[1], 1)
                     elif cmd_parts[0] == 'tx':
                         node = self.all_bitcoind_nodes[cmd_parts[1]]
                         self.exec_print(node.generate_tx())
@@ -235,6 +240,13 @@ class Executor:
     def call(self, cmd):
         self.log_cmd(cmd)
         return subprocess.call(cmd, shell=True, executable='/bin/bash')
+
+    def generate_block_and_save_creator(self, node, amount):
+        blocks_string = self.exec(bitcoindcmd.generate_block(node, amount))
+        blocks = json.loads(blocks_string)
+        with open(config.root_dir + '/blocks.csv', 'a') as file:
+            for block in blocks:
+                file.write('{}; {}\n'.format(node, block))
 
 
 def sleep(seconds):
