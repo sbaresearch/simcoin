@@ -63,7 +63,7 @@ class Executor:
 
     def execute(self):
         try:
-            self.exec_print('rm -rf ' + config.root_dir + '*')
+            self.remove_old_containers_if_exists()
 
             self.exec_print(dockercmd.create_network(config.ip_range))
             sleep(1)
@@ -216,6 +216,11 @@ class Executor:
             self.exec_print('sort {} -o {}'.format(config.aggregated_log, config.aggregated_log))
         finally:
             self.call('rm {}'.format(config.tmp_log))
+
+    def remove_old_containers_if_exists(self):
+        containers = self.exec(dockercmd.ps_containers())
+        if len(containers) > 0:
+            self.call(dockercmd.remove_all_containers())
 
     def first_block_height(self):
         return len(self.all_bitcoind_nodes) + config.warmup_blocks + 1

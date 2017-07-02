@@ -55,5 +55,9 @@ def rm_container(name):
         return 'docker rm --force ' + config.prefix + name
 
 
+def ps_containers():
+        return 'docker ps -a -q -f "name={}*"'.format(config.prefix)
+
+
 def remove_all_containers():
-        return 'docker rm -f $(docker ps -a -q -f "name={}*")'.format(config.prefix)
+        return 'docker rm -f $({})'.format(ps_containers())
