@@ -64,7 +64,6 @@ class Executor:
     def execute(self):
         try:
             self.remove_old_containers_if_exists()
-
             self.recreate_network()
             sleep(4)
 
