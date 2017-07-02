@@ -215,7 +215,7 @@ class Executor:
         return 'nodes=(' + ' '.join(node.name for node in self.all_bitcoind_nodes.values()) + ')'
 
     def first_block_height(self):
-        return len(self.all_bitcoind_nodes) + 100 + 1
+        return len(self.all_bitcoind_nodes) + config.warmup_blocks + 1
 
     def log_cmd(self, cmd):
         self.count += 1
