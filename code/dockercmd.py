@@ -7,7 +7,7 @@ def run_node(node, cmd):
     return ('docker run'
             ' --cap-add=NET_ADMIN'  # for `tc`
             ' --detach=true'
-            ' --net=isolated_network'
+            ' --net=' + config.network_name +
             ' --ip=' + str(node.ip) +
             ' --name=' + config.prefix + node.name +  # container name
             ' --hostname=' + config.prefix + node.name +
@@ -21,7 +21,7 @@ def run_selfish_proxy(node, cmd):
                 'docker run'
                 ' --cap-add=NET_ADMIN'  # for `tc`
                 ' --detach=true'
-                ' --net=isolated_network'
+                ' --net=' + config.network_name +
                 ' --ip=' + str(node.ip) +
                 ' --name=' + config.prefix + node.name +
                 ' --hostname=' + config.prefix + node.name +
@@ -39,11 +39,11 @@ def exec_cmd(node, command):
 def create_network(ip_range):
         return ('docker network create'
                 ' --subnet=' + ip_range +
-                ' --driver bridge isolated_network')
+                ' --driver bridge ' + config.network_name)
 
 
 def rm_network():
-        return 'docker network rm isolated_network'
+        return 'docker network rm {}'.format(config.network_name)
 
 
 def fix_data_dirs_permissions():
@@ -63,4 +63,4 @@ def remove_all_containers():
         return 'docker rm -f $({})'.format(ps_containers())
 
 def inspect_network():
-        return 'docker network inspect {}'.format('isolated_network')
+        return 'docker network inspect {}'.format(config.network_name)

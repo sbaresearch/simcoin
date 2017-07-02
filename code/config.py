@@ -5,6 +5,7 @@ ip_range = "240.0.0.0/4"
 root_dir = '../data/'
 aggregated_log_file = root_dir + 'log'
 
+network_name = 'simcoin-network'
 node_image = 'btn/base:v3'
 prefix = 'simcoin-'
 selfish_node_image = 'proxy'
