@@ -124,7 +124,7 @@ class Executor:
             self.exec_print(dockercmd.fix_data_dirs_permissions())
 
             self.exec_print(self.save_consensus_chain())
-            self.exec_print(self.save_chains())
+            self.save_chains()
 
             self.aggregate_logs()
             [self.exec_print(node.grep_log_for_errors()) for node in self.all_nodes.values()]
@@ -173,15 +173,16 @@ class Executor:
         return '; '.join([csv_header_cmd, self.bitcoind_nodes_array(), iter_cmd])
 
     def save_chains(self):
-        file = config.root_dir + '/chains.csv'
-        csv_header_cmd = r'echo "node;block_hashes" | tee -a ' + file
-        iter_cmd = ('for node in ${nodes[@]}; do'
-                    ' line=$node; for height in `seq ' + str(self.first_block_height()) +
-                    ' $(' + bitcoindcmd.get_block_count('$node') + ')`; do'
-                    ' line="$line;$(' + bitcoindcmd.get_block_hash(config.reference_node, '$height') + ')";'
-                    ' done; echo $line | tee -a ' + file + '; done')
-
-        return '; '.join([csv_header_cmd, self.bitcoind_nodes_array(), iter_cmd])
+        with open(config.root_dir + '/chains.csv', "w") as file:
+            file.write("node;block_hashes\n")
+            start = self.first_block_height()
+            for node in self.all_bitcoind_nodes.values():
+                height = int(self.exec(node.get_block_count()))
+                hashes = []
+                while start <= height:
+                    hashes.append(str(self.exec(node.get_block_hash(height))))
+                    height -= 1
+                file.write('{}; {}\n'.format(node.name, '; '.join(hashes)))
 
     def aggregate_logs(self):
         try:
@@ -221,12 +222,13 @@ class Executor:
         logging.info('{}: {}'.format(self.count, cmd))
 
     def exec_print(self, cmd):
-        output = self.exec(cmd).decode("utf-8")
+        output = self.exec(cmd)
         [logging.info(output.strip()) for output in output.splitlines()]
 
     def exec(self, cmd):
         self.log_cmd(cmd)
-        return subprocess.check_output(cmd, shell=True, executable='/bin/bash')
+        return_value = subprocess.check_output(cmd, shell=True, executable='/bin/bash')
+        return return_value.decode('utf-8').rstrip()
 
     def call(self, cmd):
         self.log_cmd(cmd)
