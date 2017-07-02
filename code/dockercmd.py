@@ -9,8 +9,8 @@ def run_node(node, cmd):
             ' --detach=true'
             ' --net=isolated_network'
             ' --ip=' + str(node.ip) +
-            ' --name=' + node.name +  # container name
-            ' --hostname=' + node.name +
+            ' --name=' + config.prefix + node.name +  # container name
+            ' --hostname=' + config.prefix + node.name +
             ' --volume $PWD/' + config.host_dir(node) + ':' + bitcoindcmd.guest_dir +
             ' ' + config.node_image +  # image name # src: https://hub.docker.com/r/abrkn/bitcoind/
             ' bash -c "' + cmd + '" ')
@@ -23,8 +23,8 @@ def run_selfish_proxy(node, cmd):
                 ' --detach=true'
                 ' --net=isolated_network'
                 ' --ip=' + str(node.ip) +
-                ' --name=' + node.name +
-                ' --hostname=' + node.name +
+                ' --name=' + config.prefix + node.name +
+                ' --hostname=' + config.prefix + node.name +
                 ' --rm'
                 ' ' + config.selfish_node_image +
                 ' bash -c "' + cmd + '"; ')
@@ -32,7 +32,7 @@ def run_selfish_proxy(node, cmd):
 
 def exec_cmd(node, command):
         return ('docker exec '
-                + node + ' '
+                + config.prefix + node + ' '
                 + command)
 
 
@@ -52,4 +52,8 @@ def fix_data_dirs_permissions():
 
 
 def rm_container(name):
-        return 'docker rm --force ' + name
+        return 'docker rm --force ' + config.prefix + name
+
+
+def remove_all_containers():
+        return 'docker rm -f $(docker ps -a -q -f "name={}*")'.format(config.prefix)

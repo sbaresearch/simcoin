@@ -217,9 +217,6 @@ class Executor:
         finally:
             self.call('rm {}'.format(config.tmp_log))
 
-    def bitcoind_nodes_array(self):
-        return 'nodes=(' + ' '.join(node.name for node in self.all_bitcoind_nodes.values()) + ')'
-
     def first_block_height(self):
         return len(self.all_bitcoind_nodes) + config.warmup_blocks + 1
 

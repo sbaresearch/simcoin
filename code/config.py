@@ -6,6 +6,7 @@ root_dir = '../data/'
 aggregated_log_file = root_dir + 'log'
 
 node_image = 'btn/base:v3'
+prefix = 'simcoin-'
 selfish_node_image = 'proxy'
 node_name = 'node-{}'
 selfish_node_prefix = 'selfish-node-'
