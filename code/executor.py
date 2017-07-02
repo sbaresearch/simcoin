@@ -65,6 +65,7 @@ class Executor:
         try:
             self.remove_old_containers_if_exists()
             self.recreate_network()
+            create_simulation_dir()
             sleep(4)
 
             [self.exec_print(node.run()) for node in self.all_bitcoind_nodes.values()]
@@ -267,4 +268,11 @@ def sleep(seconds):
 
 def check_equal(lst):
     return not lst or lst.count(lst[0]) == len(lst)
+
+
+def create_simulation_dir():
+    if not os.path.exists(config.out_dir):
+        os.makedirs(config.out_dir)
+    if not os.path.exists(config.root_dir):
+        os.makedirs(config.root_dir)
 

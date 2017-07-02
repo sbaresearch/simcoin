@@ -1,8 +1,11 @@
+import time
+
 # IP range from RFC6890 - IP range for future use
 # it does not conflict with https://github.com/bitcoin/bitcoin/blob/master/src/netbase.h
 ip_range = "240.0.0.0/4"
 
-root_dir = '../data/'
+out_dir = 'out'
+root_dir = '{}/run-{}/'.format(out_dir, time.time())
 aggregated_log_file = root_dir + 'log'
 
 network_name = 'simcoin-network'
