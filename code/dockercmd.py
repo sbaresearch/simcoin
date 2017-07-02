@@ -62,5 +62,6 @@ def ps_containers():
 def remove_all_containers():
         return 'docker rm -f $({})'.format(ps_containers())
 
+
 def inspect_network():
         return 'docker network inspect {}'.format(config.network_name)
