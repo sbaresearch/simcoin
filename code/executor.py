@@ -65,8 +65,8 @@ class Executor:
         try:
             self.remove_old_containers_if_exists()
 
-            self.exec_print(dockercmd.create_network(config.ip_range))
-            sleep(1)
+            self.recreate_network()
+            sleep(4)
 
             [self.exec_print(node.run()) for node in self.all_bitcoind_nodes.values()]
             sleep(4 + len(self.all_bitcoind_nodes) * 0.2)
@@ -222,6 +222,12 @@ class Executor:
         if len(containers) > 0:
             self.call(dockercmd.remove_all_containers())
 
+    def recreate_network(self):
+        exit_code = self.call(dockercmd.inspect_network(), True)
+        if exit_code == 0:
+            self.exec(dockercmd.rm_network())
+        self.exec(dockercmd.create_network(config.ip_range))
+
     def first_block_height(self):
         return len(self.all_bitcoind_nodes) + config.warmup_blocks + 1
 
@@ -239,9 +245,13 @@ class Executor:
             return_value = subprocess.check_output(cmd, shell=True, executable='/bin/bash', stderr=devnull)
         return return_value.decode('utf-8').rstrip()
 
-    def call(self, cmd):
+    def call(self, cmd, suppress_output=False):
         self.log_cmd(cmd)
-        return subprocess.call(cmd, shell=True, executable='/bin/bash')
+        if suppress_output:
+            with open(os.devnull, 'w') as devnull:
+                return subprocess.call(cmd, shell=True, executable='/bin/bash', stderr=devnull, stdout=devnull)
+        else:
+            return subprocess.call(cmd, shell=True, executable='/bin/bash')
 
     def generate_block_and_save_creator(self, node, amount):
         blocks_string = self.exec(bitcoindcmd.generate_block(node, amount))
