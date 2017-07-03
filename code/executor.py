@@ -7,7 +7,6 @@ import csv
 from node import PublicBitcoindNode
 from node import SelfishPrivateNode
 from node import ProxyNode
-import subprocess
 import logging
 import time
 import re
