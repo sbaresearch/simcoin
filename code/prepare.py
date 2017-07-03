@@ -26,11 +26,14 @@ class Prepare:
         logging.info('End of warmup')
 
 
-def create_simulation_dir():
+def prepare_simulation_dir():
     if not os.path.exists(config.out_dir):
         os.makedirs(config.out_dir)
     if not os.path.exists(config.sim_dir):
         os.makedirs(config.sim_dir)
+
+    bash.check_output('cp {} {}'.format(config.network_config, config.sim_dir))
+    bash.check_output('cp {} {}'.format(config.tick_csv, config.sim_dir))
 
 
 def remove_old_containers_if_exists():

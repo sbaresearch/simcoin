@@ -81,7 +81,7 @@ class Executor:
         try:
             prepare.remove_old_containers_if_exists()
             prepare.recreate_network()
-            prepare.create_simulation_dir()
+            prepare.prepare_simulation_dir()
             utils.sleep(4)
 
             [bash.check_output(node.run()) for node in self.all_bitcoind_nodes.values()]
