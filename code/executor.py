@@ -138,11 +138,11 @@ class Executor:
             [bash.check_output(node.grep_log_for_errors()) for node in self.all_nodes.values()]
         finally:
             # remove proxies first. if not proxies could be already stopped when trying to remove
-            [bash.check_output(node.rm(), lvl=logging.DEBUG) for node in self.selfish_node_proxies.values()]
-            [bash.check_output(node.rm(), lvl=logging.DEBUG) for node in self.all_bitcoind_nodes.values()]
+            [bash.call_silent(node.rm()) for node in self.selfish_node_proxies.values()]
+            [bash.call_silent(node.rm()) for node in self.all_bitcoind_nodes.values()]
             utils.sleep(3 + len(self.all_nodes) * 0.2)
 
-            bash.check_output(dockercmd.rm_network(), lvl=logging.DEBUG)
+            bash.call_silent(dockercmd.rm_network())
 
     def first_block_height(self):
         return len(self.all_bitcoind_nodes) + config.warmup_blocks + 1
