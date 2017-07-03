@@ -45,17 +45,18 @@ class Executor:
 
         self.one_normal_node = next(iter(self.nodes.values()))
 
-        network_config = pandas.read_csv(open(config.network_config), skiprows=2, delimiter=';', index_col=0)
+        network_config = pandas.read_csv(open(config.network_config), delimiter=';', index_col=0)
         connections = {}
         for node_row, row in network_config.iterrows():
             if node_row.startswith(config.selfish_node_prefix):
                 node_row += config.selfish_node_proxy_postfix
             connections[node_row] = []
-            for node_column, latency in row.iteritems():
-                # exact latency is so far omitted
+            for node_column, value in row.iteritems():
                 if node_column.startswith(config.selfish_node_prefix):
                     node_column += config.selfish_node_proxy_postfix
-                if latency >= 0:
+                if node_column == node_row:
+                    self.all_public_nodes[node_column].latency = value
+                elif value == 1:
                     connections[node_row].append(node_column)
 
         for node in self.all_public_nodes.values():
@@ -92,8 +93,7 @@ class Executor:
                 [bash.check_output(cmd) for cmd in node.connect(node.outgoing_ips)]
             sleep(4 + len(self.all_nodes) * 0.2)
 
-            if self.latency > 0:
-                [bash.check_output(node.add_latency(self.latency)) for node in self.all_public_nodes.values()]
+            [[bash.check_output(cmd) for cmd in node.add_latency()] for node in self.all_public_nodes.values()]
 
             reader = csv.reader(open(config.tick_csv, "r"), delimiter=";")
             start_time = time.time()

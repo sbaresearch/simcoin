@@ -2,6 +2,7 @@ import dockercmd
 import bitcoindcmd
 import proxycmd
 import config
+import tccmd
 
 
 class Node:
@@ -16,6 +17,7 @@ class Node:
 class PublicNode:
     def __init__(self):
         self.outgoing_ips = []
+        self.latency = -1
 
 
 class BitcoindNode(Node):
@@ -65,6 +67,10 @@ class BitcoindNode(Node):
 class PublicBitcoindNode(BitcoindNode, PublicNode):
     def __init__(self, name, ip):
         BitcoindNode.__init__(self, name, ip)
+        PublicNode.__init__(self)
+
+    def add_latency(self):
+        return [dockercmd.exec_cmd(self.name, tccmd.add(self.latency))]
 
 
 class SelfishPrivateNode(BitcoindNode):
@@ -77,6 +83,7 @@ class ProxyNode(Node, PublicNode):
 
     def __init__(self, name, ip, private_ip, args):
         Node.__init__(self, name, ip)
+        PublicNode.__init__(self)
         self.private_ip = private_ip
         self.args = args
 
@@ -96,3 +103,6 @@ class ProxyNode(Node, PublicNode):
 
     def grep_log_for_errors(self):
         return dockercmd.exec_cmd(self.name, config.log_error_grep.format(ProxyNode.log_file))
+
+    def add_latency(self):
+        return [dockercmd.exec_cmd(self.name, cmd) for cmd in tccmd.add_except_ip(self.latency, self.private_ip)]
