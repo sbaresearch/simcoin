@@ -3,20 +3,12 @@ import os
 import subprocess
 
 
-def check_output_and_log(cmd):
-    output = check_output(cmd)
-    [logging.info(output.strip()) for output in output.splitlines()]
-
-
-def check_output(cmd):
+def check_output(cmd, lvl=logging.INFO):
     logging.info(cmd)
-    return_value = subprocess.check_output(cmd, shell=True, executable='/bin/bash')
-    return return_value.decode('utf-8').rstrip()
-
-
-def call(cmd):
-    logging.info(cmd)
-    return subprocess.call(cmd, shell=True, executable='/bin/bash')
+    output = subprocess.check_output(cmd, shell=True, executable='/bin/bash')
+    encoded_output = output.decode('utf-8').rstrip()
+    [logging.log(lvl, line.strip()) for line in encoded_output.splitlines()]
+    return encoded_output
 
 
 def call_silent(cmd):
