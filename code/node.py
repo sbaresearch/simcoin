@@ -87,10 +87,8 @@ class ProxyNode(Node, PublicNode):
         self.private_ip = private_ip
         self.args = args
 
-    def run(self):
-        current_best_block_hash_cmd = 'start_hash=$(' + bitcoindcmd.get_best_block_hash(config.reference_node) + ')'
-        run_cmd = dockercmd.run_selfish_proxy(self, proxycmd.run_proxy(self, '$start_hash'))
-        return '; '.join([current_best_block_hash_cmd, run_cmd])
+    def run(self, start_hash):
+        return dockercmd.run_selfish_proxy(self, proxycmd.run_proxy(self, start_hash))
 
     def wait_for_highest_tip_of_node(self, node):
         current_best_block_hash_cmd = 'current_best=$(' + bitcoindcmd.get_best_block_hash(node.name) + ')'

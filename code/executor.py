@@ -85,7 +85,8 @@ class Executor:
             [wait_until_height_reached(node, config.warmup_blocks + len(self.all_bitcoind_nodes))
              for node in self.all_bitcoind_nodes.values()]
 
-            [bash.check_output(node.run()) for node in self.selfish_node_proxies.values()]
+            start_hash = bash.check_output(bitcoindcmd.get_best_block_hash(config.reference_node))
+            [bash.check_output(node.run(start_hash)) for node in self.selfish_node_proxies.values()]
             [bash.check_output(node.wait_for_highest_tip_of_node(self.one_normal_node))
              for node in self.selfish_node_proxies.values()]
 
