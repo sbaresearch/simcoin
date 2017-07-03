@@ -3,7 +3,7 @@ import logging
 import bash
 import dockercmd
 import os
-import executor
+import utils
 
 
 class Prepare:
@@ -49,4 +49,4 @@ def recreate_network():
 def wait_until_height_reached(node, height):
     while int(bash.check_output(node.get_block_count())) < height:
         logging.debug('Waiting until height={} is reached...'.format(str(height)))
-        executor.sleep(0.2)
+        utils.sleep(0.2)
