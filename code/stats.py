@@ -16,7 +16,7 @@ class Stats:
             height = self.executor.first_block_height
             while True:
                 blocks = []
-                for node in self.executor.all_bitcoind_nodes.values():
+                for node in self.executor.all_bitcoin_nodes.values():
                     if bash.call_silent(node.get_block_hash(height)) is not 0:
                         break
                     blocks.append(bash.check_output(node.get_block_hash(height), lvl=logging.DEBUG))
@@ -30,7 +30,7 @@ class Stats:
     def save_chains(self):
         with open(config.chains_csv, 'w') as file:
             file.write("node;block_hashes\n")
-            for node in self.executor.all_bitcoind_nodes.values():
+            for node in self.executor.all_bitcoin_nodes.values():
                 height = int(bash.check_output(node.get_block_count(), lvl=logging.DEBUG))
                 hashes = []
                 while self.executor.first_block_height <= height:

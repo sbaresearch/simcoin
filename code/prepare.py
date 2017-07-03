@@ -13,15 +13,15 @@ class Prepare:
     def warmup_block_generation(self):
         logging.info('Begin warmup')
 
-        for i, node in enumerate(self.executor.all_bitcoind_nodes.values()):
+        for i, node in enumerate(self.executor.all_bitcoin_nodes.values()):
             wait_until_height_reached(node, i)
             bash.check_output(node.generate_block())
 
-        node = self.executor.all_bitcoind_nodes[config.reference_node]
-        wait_until_height_reached(node, len(self.executor.all_bitcoind_nodes))
+        node = self.executor.all_bitcoin_nodes[config.reference_node]
+        wait_until_height_reached(node, len(self.executor.all_bitcoin_nodes))
         bash.check_output(node.generate_block(config.warmup_blocks))
-        [wait_until_height_reached(node, config.warmup_blocks + len(self.executor.all_bitcoind_nodes))
-         for node in self.executor.all_bitcoind_nodes.values()]
+        [wait_until_height_reached(node, config.warmup_blocks + len(self.executor.all_bitcoin_nodes))
+         for node in self.executor.all_bitcoin_nodes.values()]
 
         logging.info('End of warmup')
 

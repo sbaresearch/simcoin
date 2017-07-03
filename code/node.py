@@ -1,5 +1,5 @@
 import dockercmd
-import bitcoindcmd
+import bitcoincmd
 import proxycmd
 import config
 import tccmd
@@ -20,8 +20,8 @@ class PublicNode:
         self.latency = -1
 
 
-class BitcoindNode(Node):
-    log_file = bitcoindcmd.guest_dir + '/regtest/debug.log'
+class BitcoinNode(Node):
+    log_file = bitcoincmd.guest_dir + '/regtest/debug.log'
 
     def __init__(self, name, ip):
         super().__init__(name, ip)
@@ -29,51 +29,51 @@ class BitcoindNode(Node):
         self.ip = ip
 
     def run(self):
-        return dockercmd.run_node(self, bitcoindcmd.start_user())
+        return dockercmd.run_node(self, bitcoincmd.start_user())
 
     def delete_peers_file(self):
-        return bitcoindcmd.rm_peers(self.name)
+        return bitcoincmd.rm_peers(self.name)
 
     def wait_for_highest_tip_of_node(self, node):
-        highest_tip = bitcoindcmd.get_best_block_hash(node.name)
-        node_tip = bitcoindcmd.get_best_block_hash(self.name)
+        highest_tip = bitcoincmd.get_best_block_hash(node.name)
+        node_tip = bitcoincmd.get_best_block_hash(self.name)
         return 'while [[ $(' + highest_tip + ') != $(' + node_tip + ') ]]; ' \
                'do echo Waiting for blocks to spread...; sleep 0.2; done'
 
     def connect(self, nodes):
-        return bitcoindcmd.connect(self.name, nodes)
+        return bitcoincmd.connect(self.name, nodes)
 
     def generate_tx(self):
-        create_address_cmd = 'fresh_address=$(' + bitcoindcmd.get_new_address(self.name) + ')'
-        create_tx_cmd = bitcoindcmd.send_to_address(self.name, '$fresh_address', 0.1)
+        create_address_cmd = 'fresh_address=$(' + bitcoincmd.get_new_address(self.name) + ')'
+        create_tx_cmd = bitcoincmd.send_to_address(self.name, '$fresh_address', 0.1)
         return '; '.join([create_address_cmd, create_tx_cmd])
 
     def generate_block(self, amount=1):
-        return bitcoindcmd.generate_block(self.name, amount)
+        return bitcoincmd.generate_block(self.name, amount)
 
     def get_block_count(self):
-        return bitcoindcmd.get_block_count(self.name)
+        return bitcoincmd.get_block_count(self.name)
 
     def get_block_hash(self, height):
-            return bitcoindcmd.get_block_hash(self.name, height)
+            return bitcoincmd.get_block_hash(self.name, height)
 
     def cat_log(self):
-        return dockercmd.exec_cmd(self.name, 'cat {}'.format(BitcoindNode.log_file))
+        return dockercmd.exec_cmd(self.name, 'cat {}'.format(BitcoinNode.log_file))
 
     def grep_log_for_errors(self):
-        return dockercmd.exec_cmd(self.name, config.log_error_grep.format(BitcoindNode.log_file))
+        return dockercmd.exec_cmd(self.name, config.log_error_grep.format(BitcoinNode.log_file))
 
 
-class PublicBitcoindNode(BitcoindNode, PublicNode):
+class PublicBitcoinNode(BitcoinNode, PublicNode):
     def __init__(self, name, ip):
-        BitcoindNode.__init__(self, name, ip)
+        BitcoinNode.__init__(self, name, ip)
         PublicNode.__init__(self)
 
     def add_latency(self):
         return [dockercmd.exec_cmd(self.name, tccmd.add(self.latency))]
 
 
-class SelfishPrivateNode(BitcoindNode):
+class SelfishPrivateNode(BitcoinNode):
     def __init__(self, name, ip):
         super().__init__(name, ip)
 
@@ -91,7 +91,7 @@ class ProxyNode(Node, PublicNode):
         return dockercmd.run_selfish_proxy(self, proxycmd.run_proxy(self, start_hash))
 
     def wait_for_highest_tip_of_node(self, node):
-        current_best_block_hash_cmd = 'current_best=$(' + bitcoindcmd.get_best_block_hash(node.name) + ')'
+        current_best_block_hash_cmd = 'current_best=$(' + bitcoincmd.get_best_block_hash(node.name) + ')'
         wait_for_selfish_node_cmd = 'while [[ $current_best != $(' + proxycmd.get_best_public_block_hash(self.name) + \
                                     ') ]]; do echo Waiting for blocks to spread...; sleep 0.2; done'
         return '; '.join(['sleep 2', current_best_block_hash_cmd, wait_for_selfish_node_cmd])
