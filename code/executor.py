@@ -124,7 +124,7 @@ class Executor:
             while check_equal(array) is False:
                 logging.debug('Waiting for blocks to spread...')
                 sleep(0.2)
-                array = [int(self.exec(node.get_block_count())) for node in self.nodes.values()]
+                array = [int(check_output(node.get_block_count())) for node in self.nodes.values()]
 
             self.exec_print(dockercmd.fix_data_dirs_permissions())
 
@@ -135,11 +135,11 @@ class Executor:
             [self.exec_print(node.grep_log_for_errors()) for node in self.all_nodes.values()]
         finally:
             # remove proxies first. if not proxies could be already stopped when trying to remove
-            [self.call(node.rm()) for node in self.selfish_node_proxies.values()]
-            [self.call(node.rm()) for node in self.all_bitcoind_nodes.values()]
+            [call(node.rm()) for node in self.selfish_node_proxies.values()]
+            [call(node.rm()) for node in self.all_bitcoind_nodes.values()]
             sleep(3 + len(self.all_nodes) * 0.2)
 
-            self.call(dockercmd.rm_network())
+            call(dockercmd.rm_network())
 
     def warmup_block_generation(self):
         logging.info('Begin warmup')
@@ -157,7 +157,7 @@ class Executor:
         logging.info('End of warmup')
 
     def wait_until_height_reached(self, node, height):
-        while int(self.exec(node.get_block_count())) < height:
+        while int(check_output(node.get_block_count())) < height:
             logging.debug('Waiting until height={} is reached...'.format(str(height)))
             sleep(0.2)
 
@@ -169,7 +169,7 @@ class Executor:
                 blocks = []
                 for node in self.all_bitcoind_nodes.values():
                     try:
-                        blocks.append(self.exec(node.get_block_hash(height)))
+                        blocks.append(check_output(node.get_block_hash(height)))
                     except subprocess.CalledProcessError:
                         break
                 if len(blocks) > 0 and check_equal(blocks):
@@ -183,10 +183,10 @@ class Executor:
             file.write("node;block_hashes\n")
             start = self.first_block_height()
             for node in self.all_bitcoind_nodes.values():
-                height = int(self.exec(node.get_block_count()))
+                height = int(check_output(node.get_block_count()))
                 hashes = []
                 while start <= height:
-                    hashes.append(str(self.exec(node.get_block_hash(height))))
+                    hashes.append(str(check_output(node.get_block_hash(height))))
                     height -= 1
                 file.write('{}; {}\n'.format(node.name, '; '.join(hashes)))
 
@@ -215,50 +215,48 @@ class Executor:
             self.exec_print('cat {} >> {}'.format(config.log_file, config.aggregated_log))
             self.exec_print('sort {} -o {}'.format(config.aggregated_log, config.aggregated_log))
         finally:
-            self.call('rm {}'.format(config.tmp_log))
+            call('rm {}'.format(config.tmp_log))
 
     def remove_old_containers_if_exists(self):
-        containers = self.exec(dockercmd.ps_containers())
+        containers = check_output(dockercmd.ps_containers())
         if len(containers) > 0:
-            self.call(dockercmd.remove_all_containers())
+            call(dockercmd.remove_all_containers())
 
     def recreate_network(self):
-        exit_code = self.call(dockercmd.inspect_network(), True)
+        exit_code = call(dockercmd.inspect_network(), True)
         if exit_code == 0:
-            self.exec(dockercmd.rm_network())
-        self.exec(dockercmd.create_network(config.ip_range))
+            check_output(dockercmd.rm_network())
+        call(dockercmd.create_network(config.ip_range))
 
     def first_block_height(self):
         return len(self.all_bitcoind_nodes) + config.warmup_blocks + 1
 
-    def log_cmd(self, cmd):
-        self.count += 1
-        logging.info('{}: {}'.format(self.count, cmd))
-
     def exec_print(self, cmd):
-        output = self.exec(cmd)
+        output = check_output(cmd)
         [logging.info(output.strip()) for output in output.splitlines()]
 
-    def exec(self, cmd):
-        self.log_cmd(cmd)
-        with open(os.devnull, 'w') as devnull:
-            return_value = subprocess.check_output(cmd, shell=True, executable='/bin/bash', stderr=devnull)
-        return return_value.decode('utf-8').rstrip()
-
-    def call(self, cmd, suppress_output=False):
-        self.log_cmd(cmd)
-        if suppress_output:
-            with open(os.devnull, 'w') as devnull:
-                return subprocess.call(cmd, shell=True, executable='/bin/bash', stderr=devnull, stdout=devnull)
-        else:
-            return subprocess.call(cmd, shell=True, executable='/bin/bash')
-
     def generate_block_and_save_creator(self, node, amount):
-        blocks_string = self.exec(bitcoindcmd.generate_block(node, amount))
+        blocks_string = check_output(bitcoindcmd.generate_block(node, amount))
         blocks = json.loads(blocks_string)
         with open(config.blocks_csv, 'a') as file:
             for block in blocks:
                 file.write('{}; {}\n'.format(node, block))
+
+
+def check_output(cmd):
+    logging.info(cmd)
+    with open(os.devnull, 'w') as devnull:
+        return_value = subprocess.check_output(cmd, shell=True, executable='/bin/bash', stderr=devnull)
+    return return_value.decode('utf-8').rstrip()
+
+
+def call(cmd, suppress_output=False):
+    logging.info(cmd)
+    if suppress_output:
+        with open(os.devnull, 'w') as devnull:
+            return subprocess.call(cmd, shell=True, executable='/bin/bash', stderr=devnull, stdout=devnull)
+    else:
+        return subprocess.call(cmd, shell=True, executable='/bin/bash')
 
 
 def sleep(seconds):
