@@ -10,6 +10,7 @@ import checkargs
 import time
 import pandas
 from stats import Stats
+from prepare import Prepare
 
 if sys.version_info <= (3, 0):
     print("Sorry, requires Python 3.x or above")
@@ -80,8 +81,12 @@ def run():
     logging.info('Parsed {} nodes and {} selfish nodes from {}'.format(nodes, selfish_nodes, config.network_config))
 
     executor = Executor(args, nodes, selfish_nodes)
+
     stats = Stats(executor)
     executor.stats = stats
+
+    prepare = Prepare(executor)
+    executor.prepare = prepare
 
     executor.execute()
 

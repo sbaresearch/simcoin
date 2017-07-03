@@ -9,16 +9,16 @@ from node import SelfishPrivateNode
 from node import ProxyNode
 import logging
 import time
-import os
 import json
 import bash
-
+import prepare
 
 class Executor:
     def __init__(self, args, nodes, selfish_nodes):
         self.count = 0
         self.tick_duration = args.tick_duration
         self.stats = None
+        self.prepare = None
 
         ip_addresses = ipaddress.ip_network(config.ip_range).hosts()
         next(ip_addresses)  # skipping first ip address (docker fails with error "is in use")
@@ -64,9 +64,9 @@ class Executor:
 
     def execute(self):
         try:
-            remove_old_containers_if_exists()
-            recreate_network()
-            create_simulation_dir()
+            prepare.remove_old_containers_if_exists()
+            prepare.recreate_network()
+            prepare.create_simulation_dir()
             sleep(4)
 
             [bash.check_output(node.run()) for node in self.all_bitcoind_nodes.values()]
@@ -77,12 +77,12 @@ class Executor:
                  in node.connect([str(node.ip) for node in list(self.all_bitcoind_nodes.values())[i+1:i+5]])]
             sleep(4 + len(self.all_bitcoind_nodes) * 0.2)
 
-            self.warmup_block_generation()
+            self.prepare.warmup_block_generation()
 
             [bash.check_output('; '.join([node.delete_peers_file(), node.rm()])) for node in self.all_bitcoind_nodes.values()]
 
             [bash.check_output(node.run()) for node in self.all_bitcoind_nodes.values()]
-            [wait_until_height_reached(node, config.warmup_blocks + len(self.all_bitcoind_nodes))
+            [prepare.wait_until_height_reached(node, config.warmup_blocks + len(self.all_bitcoind_nodes))
              for node in self.all_bitcoind_nodes.values()]
 
             start_hash = bash.check_output(bitcoindcmd.get_best_block_hash(config.reference_node))
@@ -142,21 +142,6 @@ class Executor:
 
             bash.check_output(dockercmd.rm_network(), lvl=logging.DEBUG)
 
-    def warmup_block_generation(self):
-        logging.info('Begin warmup')
-
-        for i, node in enumerate(self.all_bitcoind_nodes.values()):
-            wait_until_height_reached(node, i)
-            bash.check_output(node.generate_block())
-
-        node = self.all_bitcoind_nodes[config.reference_node]
-        wait_until_height_reached(node, len(self.all_bitcoind_nodes))
-        bash.check_output(node.generate_block(config.warmup_blocks))
-        [wait_until_height_reached(node, config.warmup_blocks + len(self.all_bitcoind_nodes))
-         for node in self.all_bitcoind_nodes.values()]
-
-        logging.info('End of warmup')
-
     def first_block_height(self):
         return len(self.all_bitcoind_nodes) + config.warmup_blocks + 1
 
@@ -169,25 +154,6 @@ def generate_block_and_save_creator(node, amount):
             file.write('{}; {}\n'.format(node, block))
 
 
-def wait_until_height_reached(node, height):
-    while int(bash.check_output(node.get_block_count())) < height:
-        logging.debug('Waiting until height={} is reached...'.format(str(height)))
-        sleep(0.2)
-
-
-def remove_old_containers_if_exists():
-    containers = bash.check_output(dockercmd.ps_containers())
-    if len(containers) > 0:
-        bash.check_output(dockercmd.remove_all_containers(), lvl=logging.DEBUG)
-
-
-def recreate_network():
-    exit_code = bash.call_silent(dockercmd.inspect_network())
-    if exit_code == 0:
-        bash.check_output(dockercmd.rm_network())
-    bash.check_output(dockercmd.create_network(config.ip_range))
-
-
 def sleep(seconds):
     logging.debug("Sleep for {} seconds".format(seconds))
     time.sleep(seconds)
@@ -195,11 +161,3 @@ def sleep(seconds):
 
 def check_equal(lst):
     return not lst or lst.count(lst[0]) == len(lst)
-
-
-def create_simulation_dir():
-    if not os.path.exists(config.out_dir):
-        os.makedirs(config.out_dir)
-    if not os.path.exists(config.sim_dir):
-        os.makedirs(config.sim_dir)
-
