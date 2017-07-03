@@ -5,7 +5,6 @@ import os
 import argparse
 import config
 from executor import Executor
-import csv
 import logging
 import checkargs
 import time

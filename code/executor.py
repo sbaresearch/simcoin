@@ -9,7 +9,6 @@ from node import SelfishPrivateNode
 from node import ProxyNode
 import logging
 import time
-import re
 import os
 import json
 import bash
