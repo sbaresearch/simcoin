@@ -12,7 +12,7 @@ class Stats:
     def save_consensus_chain(self):
         with open(config.consensus_chain_csv, 'w') as file:
             file.write("height;block_hash\n")
-            height = self.executor.first_block_height()
+            height = self.executor.first_block_height
             while True:
                 blocks = []
                 for node in self.executor.all_bitcoind_nodes.values():
@@ -28,11 +28,10 @@ class Stats:
     def save_chains(self):
         with open(config.chains_csv, 'w') as file:
             file.write("node;block_hashes\n")
-            start = self.executor.first_block_height()
             for node in self.executor.all_bitcoind_nodes.values():
                 height = int(bash.check_output(node.get_block_count(), lvl=logging.DEBUG))
                 hashes = []
-                while start <= height:
+                while self.executor.first_block_height <= height:
                     hashes.append(str(bash.check_output(node.get_block_hash(height), lvl=logging.DEBUG)))
                     height -= 1
                 file.write('{}; {}\n'.format(node.name, '; '.join(hashes)))

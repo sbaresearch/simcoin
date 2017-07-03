@@ -42,6 +42,8 @@ class Executor:
                           ip_proxy, ip_private_node, args.selfish_nodes_args)
 
         self.all_bitcoind_nodes = dict(self.nodes, **self.selfish_node_private_nodes)
+        self.first_block_height = len(self.all_bitcoind_nodes) + config.warmup_blocks + 1
+
         self.all_public_nodes = dict(self.nodes, **self.selfish_node_proxies)
         self.all_nodes = dict(self.nodes, **self.selfish_node_private_nodes, **self.selfish_node_proxies)
 
@@ -143,9 +145,6 @@ class Executor:
             utils.sleep(3 + len(self.all_nodes) * 0.2)
 
             bash.call_silent(dockercmd.rm_network())
-
-    def first_block_height(self):
-        return len(self.all_bitcoind_nodes) + config.warmup_blocks + 1
 
 
 def generate_block_and_save_creator(node, amount):
