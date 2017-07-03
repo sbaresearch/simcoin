@@ -27,6 +27,7 @@ class BitcoinNode(Node):
         super().__init__(name, ip)
         self.name = name
         self.ip = ip
+        self.mined_blocks = 0
 
     def run(self):
         return dockercmd.run_node(self, bitcoincmd.start_user())

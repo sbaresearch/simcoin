@@ -117,7 +117,7 @@ class Executor:
                 for cmd in line:
                     cmd_parts = cmd.split(' ')
                     if cmd_parts[0] == 'block':
-                        generate_block_and_save_creator(cmd_parts[1], 1)
+                        self.generate_block_and_save_creator(cmd_parts[1], 1)
                     elif cmd_parts[0] == 'tx':
                         node = self.all_bitcoin_nodes[cmd_parts[1]]
                         bash.check_output(node.generate_tx())
@@ -153,15 +153,15 @@ class Executor:
         finally:
             # remove proxies first. if not proxies could be already stopped when trying to remove
             [bash.call_silent(node.rm()) for node in self.selfish_node_proxies.values()]
-            [bash.call_silent(node.rm()) for node in self.all_bitcoind_nodes.values()]
+            [bash.call_silent(node.rm()) for node in self.all_bitcoin_nodes.values()]
             utils.sleep(3 + len(self.all_nodes) * 0.2)
 
             bash.call_silent(dockercmd.rm_network())
 
-
-def generate_block_and_save_creator(node, amount):
-    blocks_string = bash.check_output(bitcoindcmd.generate_block(node, amount))
-    blocks = json.loads(blocks_string)
-    with open(config.blocks_csv, 'a') as file:
-        for block in blocks:
-            file.write('{};{}\n'.format(node, block))
+    def generate_block_and_save_creator(self, node, amount):
+        blocks_string = bash.check_output(bitcoincmd.generate_block(node, amount))
+        blocks = json.loads(blocks_string)
+        with open(config.blocks_csv, 'a') as file:
+            for block in blocks:
+                file.write('{};{}\n'.format(node, block))
+        self.all_bitcoin_nodes[node].mined_blocks += 1
