@@ -69,18 +69,7 @@ def run():
     logging.info("arguments called with: {}".format(sys.argv))
     logging.info("parsed arguments: {}".format(args))
 
-    nodes = selfish_nodes = 0
-    network_config = pandas.read_csv(open(config.network_config), delimiter=';', index_col=0)
-    for node_row, row in network_config.iterrows():
-        if node_row.startswith(config.node_prefix):
-            nodes += 1
-        elif node_row.startswith(config.selfish_node_prefix):
-            selfish_nodes += 1
-        else:
-            raise Exception('Unknown node type in {}'.format(config.network_config))
-    logging.info('Parsed {} nodes and {} selfish nodes from {}'.format(nodes, selfish_nodes, config.network_config))
-
-    executor = Executor(args, nodes, selfish_nodes)
+    executor = Executor(args)
 
     stats = Stats(executor)
     executor.stats = stats
