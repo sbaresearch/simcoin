@@ -8,6 +8,7 @@ import utils
 class Stats:
     def __init__(self, _executor):
         self.executor = _executor
+        self.consensus_chain = []
 
     def save_consensus_chain(self):
         with open(config.consensus_chain_csv, 'w') as file:
@@ -20,6 +21,7 @@ class Stats:
                         break
                     blocks.append(bash.check_output(node.get_block_hash(height), lvl=logging.DEBUG))
                 if len(blocks) > 0 and utils.check_equal(blocks):
+                    self.consensus_chain.append(blocks[0])
                     file.write('{}; {}\n'.format(height, blocks[0]))
                     height += 1
                 else:
@@ -62,3 +64,21 @@ class Stats:
             bash.check_output('sort {} -o {}'.format(config.aggregated_log, config.aggregated_log))
         finally:
             bash.check_output('rm {}'.format(config.tmp_log))
+
+    def update_blocks_csv(self):
+        with open(config.blocks_csv, 'r+') as file:
+            lines = file.readlines()
+            file.seek(0)
+            file.truncate()
+
+            iter_lines = iter(lines)
+            first_line = next(iter_lines)
+            file.write(first_line.rstrip() + ';stale_block\n')
+
+            for line in iter_lines:
+                block = line.split(';')[1].rstrip()
+                if block in self.consensus_chain:
+                    line = line.rstrip() + ';False\n'
+                else:
+                    line = line.rstrip() + ';True\n'
+                file.write(line)

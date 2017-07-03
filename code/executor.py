@@ -145,6 +145,7 @@ class Executor:
             bash.check_output(dockercmd.fix_data_dirs_permissions())
 
             self.stats.save_consensus_chain()
+            self.stats.update_blocks_csv()
             self.stats.save_chains()
             self.stats.aggregate_logs()
 
@@ -163,4 +164,4 @@ def generate_block_and_save_creator(node, amount):
     blocks = json.loads(blocks_string)
     with open(config.blocks_csv, 'a') as file:
         for block in blocks:
-            file.write('{}; {}\n'.format(node, block))
+            file.write('{};{}\n'.format(node, block))

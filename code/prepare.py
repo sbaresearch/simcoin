@@ -35,6 +35,9 @@ def prepare_simulation_dir():
     bash.check_output('cp {} {}'.format(config.network_config, config.sim_dir))
     bash.check_output('cp {} {}'.format(config.tick_csv, config.sim_dir))
 
+    with open(config.blocks_csv, 'a') as file:
+        file.write('node; block\n')
+
 
 def remove_old_containers_if_exists():
     containers = bash.check_output(dockercmd.ps_containers())
