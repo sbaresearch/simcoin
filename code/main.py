@@ -8,7 +8,6 @@ from executor import Executor
 import logging
 import checkargs
 import time
-import pandas
 from stats import Stats
 from prepare import Prepare
 
