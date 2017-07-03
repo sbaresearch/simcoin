@@ -99,6 +99,6 @@ datadirs
 *.iml
 
 # project specific
-network.config
+network.csv
 ticks.csv
 out
