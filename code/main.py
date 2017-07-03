@@ -58,13 +58,11 @@ else:
 def run():
     for image in [config.node_image, config.selfish_node_image]:
         if os.system("docker inspect " + image + " > /dev/null") != 0:
-            logging.error("Image " + image + " not found")
-            exit()
+            raise Exception("Image {} not found".format(image))
 
     for file in [config.network_config, config.tick_csv]:
         if not os.path.isfile(file):
-            logging.error(file + " file not found. Please generate file before starting Simcoin.")
-            exit()
+            raise Exception("{} file not found. Please generate file before starting Simcoin.".format(file))
 
     logging.info("arguments called with: {}".format(sys.argv))
     logging.info("parsed arguments: {}".format(args))
