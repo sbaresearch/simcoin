@@ -2,7 +2,7 @@ import config
 import bash
 import re
 import logging
-import executor
+import utils
 
 
 class Stats:
@@ -19,7 +19,7 @@ class Stats:
                     if bash.call_silent(node.get_block_hash(height)) is not 0:
                         break
                     blocks.append(bash.check_output(node.get_block_hash(height), lvl=logging.DEBUG))
-                if len(blocks) > 0 and executor.check_equal(blocks):
+                if len(blocks) > 0 and utils.check_equal(blocks):
                     file.write('{}; {}\n'.format(height, blocks[0]))
                     height += 1
                 else:

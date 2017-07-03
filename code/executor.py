@@ -12,6 +12,8 @@ import time
 import json
 import bash
 import prepare
+import utils
+
 
 class Executor:
     def __init__(self, args, nodes, selfish_nodes):
@@ -67,15 +69,15 @@ class Executor:
             prepare.remove_old_containers_if_exists()
             prepare.recreate_network()
             prepare.create_simulation_dir()
-            sleep(4)
+            utils.sleep(4)
 
             [bash.check_output(node.run()) for node in self.all_bitcoind_nodes.values()]
-            sleep(4 + len(self.all_bitcoind_nodes) * 0.2)
+            utils.sleep(4 + len(self.all_bitcoind_nodes) * 0.2)
 
             for i, node in enumerate(self.all_bitcoind_nodes.values()):
                 [bash.check_output(cmd) for cmd
                  in node.connect([str(node.ip) for node in list(self.all_bitcoind_nodes.values())[i+1:i+5]])]
-            sleep(4 + len(self.all_bitcoind_nodes) * 0.2)
+            utils.sleep(4 + len(self.all_bitcoind_nodes) * 0.2)
 
             self.prepare.warmup_block_generation()
 
@@ -92,7 +94,7 @@ class Executor:
 
             for node in self.nodes.values():
                 [bash.check_output(cmd) for cmd in node.connect(node.outgoing_ips)]
-            sleep(4 + len(self.all_nodes) * 0.2)
+            utils.sleep(4 + len(self.all_nodes) * 0.2)
 
             [[bash.check_output(cmd) for cmd in node.add_latency()] for node in self.all_public_nodes.values()]
 
@@ -114,7 +116,7 @@ class Executor:
                 if current_time < next_tick:
                     difference = next_tick - current_time
                     logging.info('Sleep {} seconds for next tick.'.format(difference))
-                    sleep(difference)
+                    utils.sleep(difference)
                 else:
                     raise Exception('Current_time={} is higher then next_tick={}.'
                                     ' Consider to lower the tick_interval={}.'
@@ -122,9 +124,9 @@ class Executor:
 
             # only use regular nodes since selfish nodes can trail back
             array = False
-            while check_equal(array) is False:
+            while utils.check_equal(array) is False:
                 logging.debug('Waiting for blocks to spread...')
-                sleep(0.2)
+                utils.sleep(0.2)
                 array = [int(bash.check_output(node.get_block_count())) for node in self.nodes.values()]
 
             bash.check_output(dockercmd.fix_data_dirs_permissions())
@@ -138,7 +140,7 @@ class Executor:
             # remove proxies first. if not proxies could be already stopped when trying to remove
             [bash.check_output(node.rm(), lvl=logging.DEBUG) for node in self.selfish_node_proxies.values()]
             [bash.check_output(node.rm(), lvl=logging.DEBUG) for node in self.all_bitcoind_nodes.values()]
-            sleep(3 + len(self.all_nodes) * 0.2)
+            utils.sleep(3 + len(self.all_nodes) * 0.2)
 
             bash.check_output(dockercmd.rm_network(), lvl=logging.DEBUG)
 
@@ -152,12 +154,3 @@ def generate_block_and_save_creator(node, amount):
     with open(config.blocks_csv, 'a') as file:
         for block in blocks:
             file.write('{}; {}\n'.format(node, block))
-
-
-def sleep(seconds):
-    logging.debug("Sleep for {} seconds".format(seconds))
-    time.sleep(seconds)
-
-
-def check_equal(lst):
-    return not lst or lst.count(lst[0]) == len(lst)
