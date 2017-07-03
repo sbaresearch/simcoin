@@ -25,7 +25,6 @@ def run_selfish_proxy(node, cmd):
                 ' --ip=' + str(node.ip) +
                 ' --name=' + config.prefix + node.name +
                 ' --hostname=' + config.prefix + node.name +
-                ' --rm'
                 ' ' + config.selfish_node_image +
                 ' bash -c "' + cmd + '"; ')
 
