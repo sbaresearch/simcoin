@@ -9,6 +9,7 @@ import csv
 import logging
 import checkargs
 import time
+import pandas
 
 if sys.version_info <= (3, 0):
     print("Sorry, requires Python 3.x or above")
@@ -68,13 +69,15 @@ def run():
     logging.info("parsed arguments: {}".format(args))
 
     nodes = selfish_nodes = 0
-    for index, row in enumerate(csv.reader(open(config.network_config), delimiter=';')):
-        if index >= 2:
-            break
-        if index == 0:
-            nodes = int(row[1])
-        elif index == 1:
-            selfish_nodes = int(row[1])
+    network_config = pandas.read_csv(open(config.network_config), skiprows=1, delimiter=';', index_col=0)
+    for node_row, row in network_config.iterrows():
+        if node_row.startswith(config.node_prefix):
+            nodes += 1
+        elif node_row.startswith(config.selfish_node_prefix):
+            selfish_nodes += 1
+        else:
+            raise Exception('Unknown node type in {}'.format(config.network_config))
+    logging.info('Parsed {} nodes and {} selfish nodes from {}'.format(nodes, selfish_nodes, config.network_config))
 
     executor = Executor(args, nodes, selfish_nodes)
     executor.execute()
