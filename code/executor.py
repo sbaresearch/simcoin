@@ -68,32 +68,32 @@ class Executor:
             create_simulation_dir()
             sleep(4)
 
-            [exec_print(node.run()) for node in self.all_bitcoind_nodes.values()]
+            [bash.check_output_and_log(node.run()) for node in self.all_bitcoind_nodes.values()]
             sleep(4 + len(self.all_bitcoind_nodes) * 0.2)
 
             for i, node in enumerate(self.all_bitcoind_nodes.values()):
-                [exec_print(cmd) for cmd
+                [bash.check_output_and_log(cmd) for cmd
                  in node.connect([str(node.ip) for node in list(self.all_bitcoind_nodes.values())[i+1:i+5]])]
             sleep(4 + len(self.all_bitcoind_nodes) * 0.2)
 
             self.warmup_block_generation()
 
-            [exec_print('; '.join([node.delete_peers_file(), node.rm()])) for node in self.all_bitcoind_nodes.values()]
+            [bash.check_output_and_log('; '.join([node.delete_peers_file(), node.rm()])) for node in self.all_bitcoind_nodes.values()]
 
-            [exec_print(node.run()) for node in self.all_bitcoind_nodes.values()]
+            [bash.check_output_and_log(node.run()) for node in self.all_bitcoind_nodes.values()]
             [wait_until_height_reached(node, config.warmup_blocks + len(self.all_bitcoind_nodes))
              for node in self.all_bitcoind_nodes.values()]
 
-            [exec_print(node.run()) for node in self.selfish_node_proxies.values()]
-            [exec_print(node.wait_for_highest_tip_of_node(self.one_normal_node))
+            [bash.check_output_and_log(node.run()) for node in self.selfish_node_proxies.values()]
+            [bash.check_output_and_log(node.wait_for_highest_tip_of_node(self.one_normal_node))
              for node in self.selfish_node_proxies.values()]
 
             for node in self.nodes.values():
-                [exec_print(cmd) for cmd in node.connect(node.outgoing_ips)]
+                [bash.check_output_and_log(cmd) for cmd in node.connect(node.outgoing_ips)]
             sleep(4 + len(self.all_nodes) * 0.2)
 
             if self.latency > 0:
-                [exec_print(node.add_latency(self.latency)) for node in self.all_public_nodes.values()]
+                [bash.check_output_and_log(node.add_latency(self.latency)) for node in self.all_public_nodes.values()]
 
             reader = csv.reader(open(config.tick_csv, "r"), delimiter=";")
             start_time = time.time()
@@ -104,7 +104,7 @@ class Executor:
                         generate_block_and_save_creator(cmd_parts[1], 1)
                     elif cmd_parts[0] == 'tx':
                         node = self.all_bitcoind_nodes[cmd_parts[1]]
-                        exec_print(node.generate_tx())
+                        bash.check_output_and_log(node.generate_tx())
                     else:
                         raise Exception('Unknown cmd={} in {}-file'.format(cmd_parts[0], config.tick_csv))
 
@@ -124,33 +124,33 @@ class Executor:
             while check_equal(array) is False:
                 logging.debug('Waiting for blocks to spread...')
                 sleep(0.2)
-                array = [int(check_output(node.get_block_count())) for node in self.nodes.values()]
+                array = [int(bash.check_output(node.get_block_count())) for node in self.nodes.values()]
 
-            exec_print(dockercmd.fix_data_dirs_permissions())
+            bash.check_output_and_log(dockercmd.fix_data_dirs_permissions())
 
             self.save_consensus_chain()
             self.save_chains()
 
             self.aggregate_logs()
-            [exec_print(node.grep_log_for_errors()) for node in self.all_nodes.values()]
+            [bash.check_output_and_log(node.grep_log_for_errors()) for node in self.all_nodes.values()]
         finally:
             # remove proxies first. if not proxies could be already stopped when trying to remove
-            [call(node.rm()) for node in self.selfish_node_proxies.values()]
-            [call(node.rm()) for node in self.all_bitcoind_nodes.values()]
+            [bash.call(node.rm()) for node in self.selfish_node_proxies.values()]
+            [bash.call(node.rm()) for node in self.all_bitcoind_nodes.values()]
             sleep(3 + len(self.all_nodes) * 0.2)
 
-            call(dockercmd.rm_network())
+            bash.call(dockercmd.rm_network())
 
     def warmup_block_generation(self):
         logging.info('Begin warmup')
 
         for i, node in enumerate(self.all_bitcoind_nodes.values()):
             wait_until_height_reached(node, i)
-            exec_print(node.generate_block())
+            bash.check_output_and_log(node.generate_block())
 
         node = self.all_bitcoind_nodes[config.reference_node]
         wait_until_height_reached(node, len(self.all_bitcoind_nodes))
-        exec_print(node.generate_block(config.warmup_blocks))
+        bash.check_output_and_log(node.generate_block(config.warmup_blocks))
         [wait_until_height_reached(node, config.warmup_blocks + len(self.all_bitcoind_nodes))
          for node in self.all_bitcoind_nodes.values()]
 
@@ -164,7 +164,7 @@ class Executor:
                 blocks = []
                 for node in self.all_bitcoind_nodes.values():
                     try:
-                        blocks.append(check_output(node.get_block_hash(height)))
+                        blocks.append(bash.check_output(node.get_block_hash(height)))
                     except subprocess.CalledProcessError:
                         break
                 if len(blocks) > 0 and check_equal(blocks):
@@ -178,17 +178,17 @@ class Executor:
             file.write("node;block_hashes\n")
             start = self.first_block_height()
             for node in self.all_bitcoind_nodes.values():
-                height = int(check_output(node.get_block_count()))
+                height = int(bash.check_output(node.get_block_count()))
                 hashes = []
                 while start <= height:
-                    hashes.append(str(check_output(node.get_block_hash(height))))
+                    hashes.append(str(bash.check_output(node.get_block_hash(height))))
                     height -= 1
                 file.write('{}; {}\n'.format(node.name, '; '.join(hashes)))
 
     def aggregate_logs(self):
         try:
             for node in self.all_nodes.values():
-                exec_print('{} > {}'.format(node.cat_log(), config.tmp_log))
+                bash.check_output_and_log('{} > {}'.format(node.cat_log(), config.tmp_log))
 
                 with open(config.tmp_log) as file:
                     content = file.readlines()
@@ -207,17 +207,17 @@ class Executor:
                 with open(config.aggregated_log, mode='a') as file:
                     file.writelines(content)
 
-            exec_print('cat {} >> {}'.format(config.log_file, config.aggregated_log))
-            exec_print('sort {} -o {}'.format(config.aggregated_log, config.aggregated_log))
+            bash.check_output_and_log('cat {} >> {}'.format(config.log_file, config.aggregated_log))
+            bash.check_output_and_log('sort {} -o {}'.format(config.aggregated_log, config.aggregated_log))
         finally:
-            call('rm {}'.format(config.tmp_log))
+            bash.call('rm {}'.format(config.tmp_log))
 
     def first_block_height(self):
         return len(self.all_bitcoind_nodes) + config.warmup_blocks + 1
 
 
 def generate_block_and_save_creator(node, amount):
-    blocks_string = check_output(bitcoindcmd.generate_block(node, amount))
+    blocks_string = bash.check_output(bitcoindcmd.generate_block(node, amount))
     blocks = json.loads(blocks_string)
     with open(config.blocks_csv, 'a') as file:
         for block in blocks:
@@ -225,43 +225,22 @@ def generate_block_and_save_creator(node, amount):
 
 
 def wait_until_height_reached(node, height):
-    while int(check_output(node.get_block_count())) < height:
+    while int(bash.check_output(node.get_block_count())) < height:
         logging.debug('Waiting until height={} is reached...'.format(str(height)))
         sleep(0.2)
 
 
 def remove_old_containers_if_exists():
-    containers = check_output(dockercmd.ps_containers())
+    containers = bash.check_output(dockercmd.ps_containers())
     if len(containers) > 0:
-        call(dockercmd.remove_all_containers())
+        bash.call(dockercmd.remove_all_containers())
 
 
 def recreate_network():
-    exit_code = call(dockercmd.inspect_network(), True)
+    exit_code = bash.call_silent(dockercmd.inspect_network())
     if exit_code == 0:
-        check_output(dockercmd.rm_network())
-    call(dockercmd.create_network(config.ip_range))
-
-
-def exec_print(cmd):
-    output = check_output(cmd)
-    [logging.info(output.strip()) for output in output.splitlines()]
-
-
-def check_output(cmd):
-    logging.info(cmd)
-    with open(os.devnull, 'w') as devnull:
-        return_value = subprocess.check_output(cmd, shell=True, executable='/bin/bash', stderr=devnull)
-    return return_value.decode('utf-8').rstrip()
-
-
-def call(cmd, suppress_output=False):
-    logging.info(cmd)
-    if suppress_output:
-        with open(os.devnull, 'w') as devnull:
-            return subprocess.call(cmd, shell=True, executable='/bin/bash', stderr=devnull, stdout=devnull)
-    else:
-        return subprocess.call(cmd, shell=True, executable='/bin/bash')
+        bash.check_output(dockercmd.rm_network())
+    bash.call(dockercmd.create_network(config.ip_range))
 
 
 def sleep(seconds):
