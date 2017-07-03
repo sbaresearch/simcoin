@@ -3,6 +3,8 @@ import bash
 import re
 import logging
 import utils
+import json
+import numpy as np
 
 
 class Stats:
@@ -82,3 +84,34 @@ class Stats:
                 else:
                     line = line.rstrip() + ';True\n'
                 file.write(line)
+
+    def node_stats(self):
+        with open(config.nodes_csv, 'w') as file:
+            file.write('name;mined_blocks;'
+                       'total_tips;total_tips_median_branchlen;tips_std_branchlen;'
+                       'valid_headers;valid_headers_median_branchlen;valid_headers_std_branchlen;'
+                       'valid_fork;valid_fork_median_branchlen;valid_fork_std_branchlen;\n')
+            for node in self.executor.all_bitcoin_nodes.values():
+                tips = json.loads(bash.check_output(node.get_chain_tips()))
+                tips_info = {
+                    'valid-headers': np.array([], dtype=np.uint),
+                    'valid-fork': np.array([], dtype=np.uint),
+                }
+                iter_tips = iter(tips)
+
+                # omit first active tip
+                next(iter_tips)
+
+                for tip in iter_tips:
+                    tips_info[tip['status']] = np.append(tips_info[tip['status']], tip['branchlen'])
+                total = np.append(tips_info['valid-headers'], tips_info['valid-fork'])
+                headers = tips_info['valid-headers']
+                fork = tips_info['valid-fork']
+                file.write('{};{};'
+                           '{};{};{};'
+                           '{};{};{};'
+                           '{};{};{};\n'
+                           .format(node.name, node.mined_blocks,
+                                   np.size(total), np.median(total), np.std(total),
+                                   np.size(headers), np.median(headers), np.std(headers),
+                                   np.size(fork), np.median(fork), np.std(fork)))

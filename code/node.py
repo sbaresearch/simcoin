@@ -52,6 +52,9 @@ class BitcoinNode(Node):
     def generate_block(self, amount=1):
         return bitcoincmd.generate_block(self.name, amount)
 
+    def get_chain_tips(self):
+        return bitcoincmd.get_chain_tips(self.name)
+
     def get_block_count(self):
         return bitcoincmd.get_block_count(self.name)
 
