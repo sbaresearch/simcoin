@@ -7,7 +7,7 @@ from textwrap import dedent
 
 class TestNetworktopology(TestCase):
 
-    @patch('tick.create_nodes_array')
+    @patch('intervals.create_nodes_array')
     def test_create_header(self, mock):
         mock.return_value = ['node-0', 'selfish-node-1']
 

@@ -21,7 +21,7 @@ def main():
         if os.system("docker inspect " + image + " > /dev/null") != 0:
             raise Exception("Image {} not found".format(image))
 
-    for file in [config.network_config, config.tick_csv]:
+    for file in [config.network_config, config.interval_csv]:
         if not os.path.isfile(file):
             raise Exception("{} file not found. Please generate file before starting Simcoin.".format(file))
 
@@ -49,8 +49,8 @@ def parse():
                                'Set them as string and if you use just one add a space at the end. Eg.: "--arg "'
                         , default=''
                         )
-    parser.add_argument('--tick-duration'
-                        , help='Set the duration of one tick in seconds.'
+    parser.add_argument('--interval-duration'
+                        , help='Set the duration of one interval in seconds.'
                         , default=1
                         , type=checkargs.check_positive_float
                         )

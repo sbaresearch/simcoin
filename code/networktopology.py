@@ -6,7 +6,7 @@ import sys
 import config
 import checkargs
 import logging
-import tick
+import intervals
 
 
 def main():
@@ -63,7 +63,7 @@ def parse():
 
 def create_header(nodes, selfish_nodes):
     header = ['']
-    header.extend(tick.create_nodes_array(nodes, selfish_nodes))
+    header.extend(intervals.create_nodes_array(nodes, selfish_nodes))
 
     return header
 

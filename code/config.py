@@ -20,7 +20,7 @@ selfish_node_name = selfish_node_prefix + '{}'
 selfish_node_proxy_name = selfish_node_name + selfish_node_proxy_postfix
 
 network_config = 'network.csv'
-tick_csv = 'ticks.csv'
+interval_csv = 'intervals.csv'
 aggregated_log = sim_dir + 'aggregated.log'
 log_file = 'debug.log'
 tmp_log = sim_dir + 'tmp.log'

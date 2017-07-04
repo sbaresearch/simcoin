@@ -18,7 +18,7 @@ import networktopology
 class Executor:
     def __init__(self, args):
         self.count = 0
-        self.tick_duration = args.tick_duration
+        self.interval_duration = args.interval_duration
         self.stats = None
         self.prepare = None
 
@@ -92,7 +92,7 @@ class Executor:
 
             [[bash.check_output(cmd) for cmd in node.add_latency()] for node in self.all_public_nodes.values()]
 
-            reader = csv.reader(open(config.tick_csv, "r"), delimiter=";")
+            reader = csv.reader(open(config.interval_csv, "r"), delimiter=";")
             start_time = time.time()
             for i, line in enumerate(reader):
                 for cmd in line:
@@ -103,18 +103,18 @@ class Executor:
                         node = self.all_bitcoin_nodes[cmd_parts[1]]
                         bash.check_output(node.generate_tx())
                     else:
-                        raise Exception('Unknown cmd={} in {}-file'.format(cmd_parts[0], config.tick_csv))
+                        raise Exception('Unknown cmd={} in {}-file'.format(cmd_parts[0], config.interval_csv))
 
-                next_tick = start_time + (i + 1) * self.tick_duration
+                next_interval = start_time + (i + 1) * self.interval_duration
                 current_time = time.time()
-                if current_time < next_tick:
-                    difference = next_tick - current_time
-                    logging.info('Sleep {} seconds for next tick.'.format(difference))
+                if current_time < next_interval:
+                    difference = next_interval - current_time
+                    logging.info('Sleep {} seconds for next interval.'.format(difference))
                     utils.sleep(difference)
                 else:
-                    raise Exception('Current_time={} is higher then next_tick={}.'
-                                    ' Consider to lower the tick_duration which is currently {}s.'
-                                    .format(current_time, next_tick, self.tick_duration))
+                    raise Exception('Current_time={} is higher then next_interval={}.'
+                                    ' Consider to lower the interval_duration which is currently {}s.'
+                                    .format(current_time, next_interval, self.interval_duration))
 
             # only use regular nodes since selfish nodes can trail back
             array = False
