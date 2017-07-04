@@ -22,5 +22,7 @@ def check_positive_float(value):
 
 def check_positive_int(value):
     int_value = int(value)
+    if int_value != value:
+        raise argparse.ArgumentTypeError("%s is an invalid integer" % value)
     check_positive(int_value)
     return int_value
