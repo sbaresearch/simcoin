@@ -76,6 +76,7 @@ def main():
 def read_amount_of_nodes():
     nodes = selfish_nodes = 0
     network_config = pandas.read_csv(open(config.network_config), delimiter=';', index_col=0)
+
     for node_row, row in network_config.iterrows():
         if node_row.startswith(config.node_prefix):
             nodes += 1
