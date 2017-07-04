@@ -33,23 +33,23 @@ def main():
 
     args = parser.parse_args()
 
-    logFormatter = logging.Formatter("%(asctime)s.%(msecs)03d000 executor [%(threadName)-12.12s] "
-                                     "[%(levelname)-5.5s]  %(message)s", "%Y-%m-%d %H:%M:%S")
+    log_formatter = logging.Formatter("%(asctime)s.%(msecs)03d000 executor [%(threadName)-12.12s] "
+                                      "[%(levelname)-5.5s]  %(message)s", "%Y-%m-%d %H:%M:%S")
     logging.Formatter.converter = time.gmtime
-    rootLogger = logging.getLogger()
+    root_logger = logging.getLogger()
 
-    fileHandler = logging.FileHandler(config.log_file, mode='w')
-    fileHandler.setFormatter(logFormatter)
-    rootLogger.addHandler(fileHandler)
+    file_handler = logging.FileHandler(config.log_file, mode='w')
+    file_handler.setFormatter(log_formatter)
+    root_logger.addHandler(file_handler)
 
-    consoleHandler = logging.StreamHandler(sys.stdout)
-    consoleHandler.setFormatter(logFormatter)
-    rootLogger.addHandler(consoleHandler)
+    console_handler = logging.StreamHandler(sys.stdout)
+    console_handler.setFormatter(log_formatter)
+    root_logger.addHandler(console_handler)
 
     if args.verbose:
-        rootLogger.setLevel(logging.DEBUG)
+        root_logger.setLevel(logging.DEBUG)
     else:
-        rootLogger.setLevel(logging.INFO)
+        root_logger.setLevel(logging.INFO)
 
     for image in [config.node_image, config.selfish_node_image]:
         if os.system("docker inspect " + image + " > /dev/null") != 0:
