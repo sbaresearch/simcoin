@@ -44,7 +44,7 @@ def transform_to_cmd(args_to_transform):
 
 
 def rm_peers(node):
-    return dockercmd.exec_cmd(node, 'rm -f /data/regtest/peers.dat')
+    return dockercmd.exec_cmd(node, 'rm -f {}/regtest/peers.dat'.format(guest_dir))
 
 
 def get_best_block_hash(node):
