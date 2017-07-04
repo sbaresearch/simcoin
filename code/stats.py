@@ -94,8 +94,8 @@ class Stats:
             for node in self.executor.all_bitcoin_nodes.values():
                 tips = json.loads(bash.check_output(node.get_chain_tips()))
                 tips_info = {
-                    'valid-headers': np.array([], dtype=np.uint),
-                    'valid-fork': np.array([], dtype=np.uint),
+                    'valid-headers': {'values': np.array([], dtype=np.uint)},
+                    'valid-fork': {'values': np.array([], dtype=np.uint)},
                 }
                 iter_tips = iter(tips)
 
@@ -103,8 +103,20 @@ class Stats:
                 next(iter_tips)
 
                 for tip in iter_tips:
-                    tips_info[tip['status']] = np.append(tips_info[tip['status']], tip['branchlen'])
-                total = np.append(tips_info['valid-headers'], tips_info['valid-fork'])
+                    tips_info[tip['status']]['values'] = np.append(tips_info[tip['status']]['values'], tip['branchlen'])
+                tips_info['total'] = {'values': np.append(tips_info['valid-headers']['values'], tips_info['valid-fork']['values'])}
+
+                for key in tips_info.keys():
+                    tips_info[key]['size'] = np.size(tips_info[key]['values'])
+
+                    if tips_info[key]['size'] > 0:
+                        tips_info[key]['median'] = np.median(tips_info[key]['values'])
+                        tips_info[key]['std'] = np.std(tips_info[key]['values'])
+                    else:
+                        tips_info[key]['median'] = float('nan')
+                        tips_info[key]['std'] = float('nan')
+
+                total = tips_info['total']
                 headers = tips_info['valid-headers']
                 fork = tips_info['valid-fork']
                 file.write('{};{};'
@@ -112,6 +124,6 @@ class Stats:
                            '{};{};{};'
                            '{};{};{};\n'
                            .format(node.name, node.mined_blocks,
-                                   np.size(total), np.median(total), np.std(total),
-                                   np.size(headers), np.median(headers), np.std(headers),
-                                   np.size(fork), np.median(fork), np.std(fork)))
+                                   total['size'], total['median'], total['std'],
+                                   headers['size'], headers['median'], headers['std'],
+                                   fork['size'], fork['median'], fork['std']))
