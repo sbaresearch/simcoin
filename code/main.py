@@ -1,6 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import sys
+if sys.version_info <= (3, 0):
+    print("Sorry, requires Python 3.x or above")
+    exit()
+
 import os
 import argparse
 import config
@@ -13,10 +17,6 @@ from prepare import Prepare
 
 
 def main():
-    if sys.version_info <= (3, 0):
-        print("Sorry, requires Python 3.x or above")
-        exit()
-
     parser = argparse.ArgumentParser(description='Running Simcoin. A Bitcoin Network Simulator.')
 
     parser.add_argument('-v'
