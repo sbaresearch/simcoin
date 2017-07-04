@@ -11,6 +11,24 @@ import logging
 def main():
     random.seed(1)
 
+    args = parse()
+
+    total_nodes = args.nodes + args.selfish_nodes
+    size_matrix = total_nodes + 1
+    nodes = args.nodes
+    selfish_nodes = args.selfish_nodes
+
+    header = create_header(nodes, selfish_nodes)
+    matrix = create_matrix(header, size_matrix, args.latency, args.connectivity)
+
+    print(pandas.DataFrame(matrix))
+
+    with open(config.network_config, "w") as file:
+        writer = csv.writer(file, delimiter=';')
+        writer.writerows(matrix)
+
+
+def parse():
     parser = argparse.ArgumentParser(description='Create a simple network.config for Bitcoin Network Simulator.')
 
     parser.add_argument('--nodes'
@@ -38,18 +56,21 @@ def main():
                         )
 
     args = parser.parse_args()
-
     print("arguments called with: {}".format(sys.argv))
     print("parsed arguments: {}".format(args))
 
-    total_nodes = args.nodes + args.selfish_nodes
-    size_matrix = total_nodes + 1
-    nodes = args.nodes
-    selfish_nodes = args.selfish_nodes
+    return args
 
+
+def create_header(nodes, selfish_nodes):
     header = ['']
     header.extend([config.node_name.format(str(i)) for i in range(nodes)])
     header.extend([config.selfish_node_name.format(str(i)) for i in range(selfish_nodes)])
+
+    return header
+
+
+def create_matrix(header, size_matrix, latency, connectivity):
     matrix = [[] for i in range(size_matrix)]
 
     for i in range(1, size_matrix):
@@ -60,17 +81,12 @@ def main():
     for i in range(1, size_matrix):
         for j in range(1, i + 1):
             if i is j:
-                matrix[i][i] = args.latency
-            elif random.random() < args.connectivity:
+                matrix[i][i] = latency
+            elif random.random() < connectivity:
                 matrix[i][j] = matrix[j][i] = 1
             else:
                 matrix[i][j] = matrix[j][i] = 0
-
-    print(pandas.DataFrame(matrix))
-
-    with open(config.network_config, "w") as file:
-        writer = csv.writer(file, delimiter=';')
-        writer.writerows(matrix)
+    return matrix
 
 
 def read_amount_of_nodes():
