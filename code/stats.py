@@ -103,8 +103,10 @@ class Stats:
                 next(iter_tips)
 
                 for tip in iter_tips:
-                    tips_info[tip['status']]['values'] = np.append(tips_info[tip['status']]['values'], tip['branchlen'])
-                tips_info['total'] = {'values': np.append(tips_info['valid-headers']['values'], tips_info['valid-fork']['values'])}
+                    tips_info[tip['status']]['values'] \
+                        = np.append(tips_info[tip['status']]['values'], tip['branchlen'])
+                tips_info['total'] \
+                    = {'values': np.append(tips_info['valid-headers']['values'], tips_info['valid-fork']['values'])}
 
                 for key in tips_info.keys():
                     tips_info[key]['size'] = np.size(tips_info[key]['values'])
