@@ -29,16 +29,13 @@ def run_selfish_proxy(node, cmd):
                 ' bash -c "' + cmd + '"')
 
 
-def exec_cmd(node, command):
-        return ('docker exec '
-                + config.prefix + node + ' '
-                + command)
+def exec_cmd(node, cmd):
+        return 'docker exec {}{} {}'.format(config.prefix, node, cmd)
 
 
 def create_network():
         return ('docker network create'
-                ' --subnet=' + config.ip_range +
-                ' --driver bridge ' + config.network_name)
+                ' --subnet={}  --driver bridge {}'.format(config.ip_range, config.network_name))
 
 
 def rm_network():
@@ -47,11 +44,12 @@ def rm_network():
 
 def fix_data_dirs_permissions():
         return ('docker run '
-                ' --rm --volume $PWD/' + config.sim_dir + ':/mnt ' + config.node_image + ' chmod a+rwx --recursive /mnt')
+                ' --rm --volume $PWD/{}:/mnt {}'
+                ' chmod a+rwx --recursive /mnt'.format(config.sim_dir, config.node_image))
 
 
 def rm_container(name):
-        return 'docker rm --force ' + config.prefix + name
+        return 'docker rm --force {}{}'.format(config.prefix, name)
 
 
 def ps_containers():
