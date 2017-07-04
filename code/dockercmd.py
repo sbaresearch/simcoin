@@ -13,7 +13,7 @@ def run_node(node, cmd):
             ' --hostname=' + config.prefix + node.name +
             ' --volume $PWD/' + config.host_dir(node) + ':' + bitcoincmd.guest_dir +
             ' ' + config.node_image +  # image name # src: https://hub.docker.com/r/abrkn/bitcoind/
-            ' bash -c "' + cmd + '" ')
+            ' bash -c "' + cmd + '"')
 
 
 def run_selfish_proxy(node, cmd):
@@ -26,7 +26,7 @@ def run_selfish_proxy(node, cmd):
                 ' --name=' + config.prefix + node.name +
                 ' --hostname=' + config.prefix + node.name +
                 ' ' + config.selfish_node_image +
-                ' bash -c "' + cmd + '"; ')
+                ' bash -c "' + cmd + '"')
 
 
 def exec_cmd(node, command):
