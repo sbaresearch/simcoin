@@ -113,8 +113,7 @@ def create_ticks(block_events, tx_events, amount_of_ticks, nodes):
 def check_if_only_block_per_node(nodes):
     most_common = Counter(nodes).most_common(1)
     if len(most_common) > 0 and most_common[0][1] > 1:
-        raise Exception("Block interval={} is too low. "
-                        "Only one block per node per tick is allowed.".format(args.block_interval))
+        raise Exception("Block interval is too low. Only one block per node per tick is allowed.")
 
 
 if __name__ == "__main__":
