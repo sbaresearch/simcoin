@@ -1,25 +1,20 @@
 from unittest import TestCase
 import networktopology
-import config
 from mock import patch
 from mock import mock_open
 from textwrap import dedent
 
 
-class TestExecutor(TestCase):
+class TestNetworktopology(TestCase):
 
-    def test_create_header(self):
-        number_of_nodes = 2
-        number_of_selfish_nodes = 3
-        header = networktopology.create_header(number_of_nodes, number_of_selfish_nodes)
+    @patch('tick.create_nodes_array')
+    def test_create_header(self, mock):
+        mock.return_value = ['node-0', 'selfish-node-1']
 
-        self.assertEqual(len(header), 6)
+        header = networktopology.create_header(0, 0)
+
+        self.assertEqual(len(header), 3)
         self.assertEqual(header[0], '')
-
-        for i in range(0, number_of_nodes):
-            self.assertTrue(config.node_name.format(str(i)) in header)
-        for i in range(0, number_of_selfish_nodes):
-            self.assertTrue(config.selfish_node_name.format(str(i)) in header)
 
     def test_create_matrix_full_connection(self):
         header = ['', 'node-0', 'node-1', 'node-2']
