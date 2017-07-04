@@ -16,7 +16,7 @@ def main():
 
     args = parse()
 
-    nodes = create_nodes(args.nodes, args.selfish_nodes)
+    nodes = create_nodes_array(args.nodes, args.selfish_nodes)
 
     expected_blocks = calc_expected_events(args.amount_of_ticks, args.block_interval)
     expected_tx = calc_expected_events(args.amount_of_ticks, args.tx_interval)
@@ -73,7 +73,7 @@ def parse():
     return args
 
 
-def create_nodes(number_of_nodes, number_of_selfish_nodes):
+def create_nodes_array(number_of_nodes, number_of_selfish_nodes):
     nodes = [config.node_name.format(str(i)) for i in range(number_of_nodes)]
     nodes.extend([config.selfish_node_name.format(str(i)) for i in range(number_of_selfish_nodes)])
 
