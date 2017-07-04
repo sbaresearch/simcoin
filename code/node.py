@@ -30,7 +30,7 @@ class BitcoinNode(Node):
         self.mined_blocks = 0
 
     def run(self):
-        return dockercmd.run_node(self, bitcoincmd.start_user())
+        return dockercmd.run_node(self, bitcoincmd.start())
 
     def delete_peers_file(self):
         return bitcoincmd.rm_peers(self.name)
