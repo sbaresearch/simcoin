@@ -16,34 +16,16 @@ def main():
 
     args = parse()
 
-    all_nodes = [config.node_name.format(str(i)) for i in range(args.nodes)]
-    all_nodes.extend([config.selfish_node_name.format(str(i)) for i in range(args.selfish_nodes)])
+    nodes = create_nodes(args.nodes, args.selfish_nodes)
 
-    expected_blocks = int(int(args.amount_of_ticks * (1.0 / args.block_interval)) * 3)
-    expected_tx = int(int(args.amount_of_ticks * (1.0 / args.tx_interval)) * 3)
+    expected_blocks = calc_expected_events(args.amount_of_ticks, args.block_interval)
+    expected_tx = calc_expected_events(args.amount_of_ticks, args.tx_interval)
 
     scale = 0.1
-    random_block_intervals = [(i + (1-scale)) * args.block_interval for i in list(np.random.exponential(scale, expected_blocks))]
-    random_tx_intervals = [(i + (1-scale)) * args.tx_interval for i in list(np.random.exponential(scale, expected_tx))]
-    block_point_in_time = np.cumsum(random_block_intervals)
-    tx_point_in_time = np.cumsum(random_tx_intervals)
+    block_events = create_events(scale, args.block_interval, expected_blocks)
+    tx_events = create_events(scale, args.tx_interval, expected_tx)
 
-    index_block = 0
-    index_tx = 0
-    ticks = [[] for i in range(args.amount_of_ticks)]
-    for index, tick in enumerate(ticks):
-        chosen_nodes = []
-        while block_point_in_time[index_block] < index + 1:
-            node = random.choice(all_nodes)
-            chosen_nodes.append(node)
-            tick.append('block ' + node)
-            index_block += 1
-
-        check_if_only_block_per_node(chosen_nodes)
-
-        while tx_point_in_time[index_tx] < index + 1:
-            tick.append('tx ' + random.choice(all_nodes))
-            index_tx += 1
+    ticks = create_ticks(block_events, tx_events, args.amount_of_ticks, nodes)
 
     print(pandas.DataFrame(ticks))
 
@@ -89,6 +71,43 @@ def parse():
     print("parsed arguments: {}".format(args))
 
     return args
+
+
+def create_nodes(number_of_nodes, number_of_selfish_nodes):
+    nodes = [config.node_name.format(str(i)) for i in range(number_of_nodes)]
+    nodes.extend([config.selfish_node_name.format(str(i)) for i in range(number_of_selfish_nodes)])
+
+    return nodes
+
+
+def calc_expected_events(number_of_ticks, event_interval):
+    # 3 times to have some buffer
+    return int(int(number_of_ticks * (1.0 / event_interval)) * 3)
+
+
+def create_events(scale, event_interval, number_of_events):
+    random_event_intervals = [(i + (1-scale)) * event_interval for i in list(np.random.exponential(scale, number_of_events))]
+    return np.cumsum(random_event_intervals)
+
+
+def create_ticks(block_events, tx_events, amount_of_ticks, nodes):
+    index_block = 0
+    index_tx = 0
+    ticks = [[] for _ in range(amount_of_ticks)]
+    for index, tick in enumerate(ticks):
+        chosen_nodes = []
+        while block_events[index_block] < index + 1:
+            node = random.choice(nodes)
+            chosen_nodes.append(node)
+            tick.append('block ' + node)
+            index_block += 1
+
+        check_if_only_block_per_node(chosen_nodes)
+
+        while tx_events[index_tx] < index + 1:
+            tick.append('tx ' + random.choice(nodes))
+            index_tx += 1
+    return ticks
 
 
 def check_if_only_block_per_node(nodes):
