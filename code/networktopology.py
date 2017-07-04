@@ -13,13 +13,11 @@ def main():
 
     args = parse()
 
-    total_nodes = args.nodes + args.selfish_nodes
-    size_matrix = total_nodes + 1
     nodes = args.nodes
     selfish_nodes = args.selfish_nodes
 
     header = create_header(nodes, selfish_nodes)
-    matrix = create_matrix(header, size_matrix, args.latency, args.connectivity)
+    matrix = create_matrix(header, args.latency, args.connectivity)
 
     print(pandas.DataFrame(matrix))
 
@@ -70,15 +68,16 @@ def create_header(nodes, selfish_nodes):
     return header
 
 
-def create_matrix(header, size_matrix, latency, connectivity):
-    matrix = [[] for i in range(size_matrix)]
+def create_matrix(header, latency, connectivity):
+    length = len(header)
+    matrix = [[] for _ in range(length)]
 
-    for i in range(1, size_matrix):
-        matrix[i] = [-1 for j in range(size_matrix)]
+    for i in range(1, length):
+        matrix[i] = [-1 for _ in range(length)]
         matrix[i][0] = header[i]
     matrix[0] = header
 
-    for i in range(1, size_matrix):
+    for i in range(1, length):
         for j in range(1, i + 1):
             if i is j:
                 matrix[i][i] = latency
