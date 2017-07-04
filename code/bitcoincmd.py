@@ -91,13 +91,6 @@ def connect(node, outgoing_ips):
     return [exec_cli(node, 'addnode ' + ip + ' add') for ip in outgoing_ips]
 
 
-def get_block_with_height(node, height):
-    get_hash_cmd = 'hash=$(' + get_block_hash(node, height) + ')'
-    get_block_cmd = get_block(node, '$hash')
-
-    return '; '.join([get_hash_cmd, get_block_cmd])
-
-
 def exec_cli(node, command):
     return dockercmd.exec_cmd(node,
                               'bitcoin-cli'
