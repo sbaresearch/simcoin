@@ -132,7 +132,7 @@ class Executor:
                     utils.sleep(difference)
                 else:
                     raise Exception('Current_time={} is higher then next_tick={}.'
-                                    ' Consider to lower the tick_interval={}.'
+                                    ' Consider to lower the tick_duration which is currently {}s.'
                                     .format(current_time, next_tick, self.tick_duration))
 
             # only use regular nodes since selfish nodes can trail back
