@@ -35,9 +35,9 @@ def exec_cmd(node, command):
                 + command)
 
 
-def create_network(ip_range):
+def create_network():
         return ('docker network create'
-                ' --subnet=' + ip_range +
+                ' --subnet=' + config.ip_range +
                 ' --driver bridge ' + config.network_name)
 
 

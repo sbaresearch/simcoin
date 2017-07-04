@@ -49,7 +49,7 @@ def recreate_network():
     exit_code = bash.call_silent(dockercmd.inspect_network())
     if exit_code == 0:
         bash.check_output(dockercmd.rm_network())
-    bash.check_output(dockercmd.create_network(config.ip_range))
+    bash.check_output(dockercmd.create_network())
 
 
 def wait_until_height_reached(node, height):
