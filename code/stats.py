@@ -38,7 +38,7 @@ class Stats:
                 while self.executor.first_block_height <= height:
                     hashes.append(str(bash.check_output(node.get_block_hash(height), lvl=logging.DEBUG)))
                     height -= 1
-                file.write('{}; {}\n'.format(node.name, '; '.join(hashes)))
+                file.write('{};{}\n'.format(node.name, '; '.join(hashes)))
 
     def aggregate_logs(self):
         try:
