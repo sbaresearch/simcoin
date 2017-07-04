@@ -51,22 +51,13 @@ class Executor:
 
         self.one_normal_node = next(iter(self.nodes.values()))
 
-        network_config = pandas.read_csv(open(config.network_config), delimiter=';', index_col=0)
-        connections = {}
-        for node_row, row in network_config.iterrows():
-            if node_row.startswith(config.selfish_node_prefix):
-                node_row += config.selfish_node_proxy_postfix
-            connections[node_row] = []
-            for node_column, value in row.iteritems():
-                if node_column.startswith(config.selfish_node_prefix):
-                    node_column += config.selfish_node_proxy_postfix
-                if node_column == node_row:
-                    self.all_public_nodes[node_column].latency = value
-                elif value == 1:
-                    connections[node_row].append(node_column)
-
+        connections = networktopology.read_connections()
         for node in self.all_public_nodes.values():
             node.outgoing_ips = [str(self.all_public_nodes[connection].ip) for connection in connections[node.name]]
+
+        latencies = networktopology.read_latencies()
+        for node in latencies.keys():
+            self.all_public_nodes[node].latency = latencies[node]
 
     def execute(self):
         try:

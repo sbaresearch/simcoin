@@ -87,5 +87,39 @@ def read_amount_of_nodes():
     return nodes, selfish_nodes
 
 
+def read_connections():
+    connections = {}
+    network_config = pandas.read_csv(open(config.network_config), delimiter=';', index_col=0)
+
+    for node_row, row in network_config.iterrows():
+        if node_row.startswith(config.selfish_node_prefix):
+            node_row += config.selfish_node_proxy_postfix
+        connections[node_row] = []
+        for node_column, value in row.iteritems():
+            if node_column.startswith(config.selfish_node_prefix):
+                node_column += config.selfish_node_proxy_postfix
+            if node_column == node_row:
+                pass
+            elif value == 1:
+                connections[node_row].append(node_column)
+
+    return connections
+
+
+def read_latencies():
+    latencies = {}
+    network_config = pandas.read_csv(open(config.network_config), delimiter=';', index_col=0)
+
+    for node_row, row in network_config.iterrows():
+        if node_row.startswith(config.selfish_node_prefix):
+            node_row += config.selfish_node_proxy_postfix
+        for node_column, value in row.iteritems():
+            if node_column.startswith(config.selfish_node_prefix):
+                node_column += config.selfish_node_proxy_postfix
+            if node_column == node_row:
+                latencies[node_column] = value
+
+    return latencies
+
 if __name__ == "__main__":
     main()
