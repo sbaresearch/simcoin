@@ -61,6 +61,9 @@ class BitcoinNode(Node):
     def get_block_hash(self, height):
         return bitcoincmd.get_block_hash(self.name, height)
 
+    def get_block(self, block_hash):
+        return bitcoincmd.get_block(self.name, block_hash)
+
     def cat_log(self):
         return dockercmd.exec_cmd(self.name, 'cat {}'.format(BitcoinNode.log_file))
 

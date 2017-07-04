@@ -75,14 +75,20 @@ class Stats:
 
             iter_lines = iter(lines)
             first_line = next(iter_lines)
-            file.write(first_line.rstrip() + ';stale_block\n')
+            file.write(first_line.rstrip() + ';stale_block;size;number_of_tx\n')
 
             for line in iter_lines:
-                block = line.split(';')[1].rstrip()
-                if block in self.consensus_chain:
-                    line = line.rstrip() + ';False\n'
+                tokens = line.split(';')
+                node = self.executor.all_bitcoin_nodes[tokens[0].rstrip()]
+                block_hash = tokens[1].rstrip()
+
+                if block_hash in self.consensus_chain:
+                    line = line.rstrip() + ';False'
                 else:
-                    line = line.rstrip() + ';True\n'
+                    line = line.rstrip() + ';True'
+
+                block = json.loads(bash.check_output(node.get_block(block_hash), lvl=logging.DEBUG))
+                line += ';{};{}\n'.format(block['size'], len(block['tx']))
                 file.write(line)
 
     def node_stats(self):
