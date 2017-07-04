@@ -13,6 +13,7 @@ import json
 import bash
 import prepare
 import utils
+import networktopology
 
 
 class Executor:
@@ -22,17 +23,7 @@ class Executor:
         self.stats = None
         self.prepare = None
 
-        nodes = selfish_nodes = 0
-        network_config = pandas.read_csv(open(config.network_config), delimiter=';', index_col=0)
-        for node_row, row in network_config.iterrows():
-            if node_row.startswith(config.node_prefix):
-                nodes += 1
-            elif node_row.startswith(config.selfish_node_prefix):
-                selfish_nodes += 1
-            else:
-                raise Exception('Unknown node type in {}'.format(config.network_config))
-        logging.info('Parsed {} nodes and {} selfish nodes from {}'.format(nodes, selfish_nodes, config.network_config))
-
+        nodes, selfish_nodes = networktopology.read_amount_of_nodes()
         ip_addresses = ipaddress.ip_network(config.ip_range).hosts()
         next(ip_addresses)  # skipping first ip address (docker fails with error "is in use")
 
