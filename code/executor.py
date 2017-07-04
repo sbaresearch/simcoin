@@ -2,7 +2,6 @@ import dockercmd
 import bitcoincmd
 import ipaddress
 import config
-import pandas
 import csv
 from node import PublicBitcoinNode
 from node import SelfishPrivateNode
