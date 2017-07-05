@@ -4,6 +4,8 @@ import proxycmd
 import config
 import tccmd
 import bash
+import utils
+import logging
 
 
 class Node:
@@ -34,7 +36,7 @@ class BitcoinNode(Node):
         self.mined_blocks = 0
 
     def run(self):
-        return bash.check_output(dockercmd.run_node(self, bitcoincmd.start()))
+        return bash.check_output(bitcoincmd.start(self))
 
     def delete_peers_file(self):
         return bash.check_output(bitcoincmd.rm_peers(self.name))
@@ -81,7 +83,7 @@ class PublicBitcoinNode(BitcoinNode, PublicNode):
         PublicNode.__init__(self)
 
     def add_latency(self):
-        return bash.check_output(dockercmd.exec_cmd(self.name, tccmd.add(self.latency)))
+        return bash.check_output(tccmd.add(self.name, self.latency))
 
 
 class SelfishPrivateNode(BitcoinNode):
@@ -99,7 +101,7 @@ class ProxyNode(Node, PublicNode):
         self.args = args
 
     def run(self, start_hash):
-        return bash.check_output(dockercmd.run_selfish_proxy(self, proxycmd.run_proxy(self, start_hash)))
+        return bash.check_output(proxycmd.run_proxy(self, start_hash))
 
     def wait_for_highest_tip_of_node(self, node):
         block_hash = bash.check_output(bitcoincmd.get_best_block_hash(node.name))
@@ -115,5 +117,5 @@ class ProxyNode(Node, PublicNode):
         return bash.check_output(dockercmd.exec_cmd(self.name, config.log_error_grep.format(ProxyNode.log_file)))
 
     def add_latency(self):
-        cmds = [dockercmd.exec_cmd(self.name, cmd) for cmd in tccmd.add_except_ip(self.latency, self.private_ip)]
-        return [bash.check_output(cmd) for cmd in cmds]
+        for cmd in tccmd.add_except_ip(self.name, self.latency, self.private_ip):
+            bash.check_output(cmd)

@@ -1,6 +1,6 @@
 from unittest import TestCase
 import bitcoincmd
-
+from mock import MagicMock
 
 class TestBitcoincmd(TestCase):
 
@@ -10,7 +10,8 @@ class TestBitcoincmd(TestCase):
         self.assertTrue('  ' not in cmd)
 
     def test_start(self):
-        cmd = bitcoincmd.start()
+        node = MagicMock()
+        cmd = bitcoincmd.start(node)
 
         self.assertTrue('  ' not in cmd)
 

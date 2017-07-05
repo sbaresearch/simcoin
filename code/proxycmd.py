@@ -3,10 +3,10 @@ import dockercmd
 
 def run_proxy(node, start_hash):
         args = '{} '.format(node.args) if node.args else ''
-        return ('python main.py ' + args +
-                '--ip-private ' + str(node.private_ip) + ' '
-                '--ips-public ' + ' '.join(node.outgoing_ips) +
-                '--start-hash=' + start_hash)
+        return dockercmd.run_selfish_proxy(node, 'python main.py ' + args +
+                                                 '--ip-private ' + str(node.private_ip) + ' '
+                                                 '--ips-public ' + ' '.join(node.outgoing_ips) + ' '
+                                                 '--start-hash=' + start_hash)
 
 
 def get_best_public_block_hash(node):

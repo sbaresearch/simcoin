@@ -18,14 +18,14 @@ args = {
 }
 
 
-def start():
+def start(node):
     specific_args = {
         'dnsseed':          '-dnsseed=0',  # disable dns seed lookups, otherwise this gets seeds even with docker --internal network
         'keypool':          '-keypool=1'
     }
     return_args = args.copy()
     return_args.update(specific_args)
-    return transform_to_cmd(return_args)
+    return dockercmd.run_node(node, transform_to_cmd(return_args))
 
 
 def start_selfish_mining():
