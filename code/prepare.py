@@ -6,24 +6,19 @@ import os
 import utils
 
 
-class Prepare:
-    def __init__(self, _executor):
-        self.executor = _executor
+def warmup_block_generation(nodes):
+    logging.info('Begin warmup')
 
-    def warmup_block_generation(self):
-        logging.info('Begin warmup')
+    for i, node in enumerate(nodes):
+        wait_until_height_reached(node, i)
+        node.generate_block()
 
-        for i, node in enumerate(self.executor.all_bitcoin_nodes.values()):
-            wait_until_height_reached(node, i)
-            node.generate_block()
+    wait_until_height_reached(nodes[0], len(nodes))
+    nodes[0].generate_block(config.warmup_blocks)
+    [wait_until_height_reached(node, config.warmup_blocks + len(nodes))
+     for node in nodes]
 
-        node = self.executor.all_bitcoin_nodes[config.reference_node]
-        wait_until_height_reached(node, len(self.executor.all_bitcoin_nodes))
-        node.generate_block(config.warmup_blocks)
-        [wait_until_height_reached(node, config.warmup_blocks + len(self.executor.all_bitcoin_nodes))
-         for node in self.executor.all_bitcoin_nodes.values()]
-
-        logging.info('End of warmup')
+    logging.info('End of warmup')
 
 
 def prepare_simulation_dir():

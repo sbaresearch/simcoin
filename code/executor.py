@@ -20,7 +20,6 @@ class Executor:
         self.count = 0
         self.interval_duration = args.interval_duration
         self.stats = None
-        self.prepare = None
 
         nodes, selfish_nodes = networktopology.read_amount_of_nodes()
         ip_addresses = ipaddress.ip_network(config.ip_range).hosts()
@@ -72,7 +71,7 @@ class Executor:
                 node.connect([str(node.ip) for node in list(self.all_bitcoin_nodes.values())[i + 1:i + 5]])
             utils.sleep(4 + len(self.all_bitcoin_nodes) * 0.2)
 
-            self.prepare.warmup_block_generation()
+            prepare.warmup_block_generation(self.all_bitcoin_nodes)
 
             [(node.delete_peers_file(), node.rm()) for node in self.all_bitcoin_nodes.values()]
 

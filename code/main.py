@@ -33,9 +33,6 @@ def main():
     stats = Stats(executor)
     executor.stats = stats
 
-    prepare = Prepare(executor)
-    executor.prepare = prepare
-
     executor.execute()
 
 
