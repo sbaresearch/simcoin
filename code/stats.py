@@ -20,7 +20,7 @@ class Stats:
             while True:
                 blocks = []
                 for node in nodes:
-                    if node.get_block_hash_silent(height) is not 0:
+                    if node.get_block_hash_silent(height) != 0:
                         break
                     blocks.append(node.get_block_hash(height))
                 if len(blocks) > 0 and utils.check_equal(blocks):
