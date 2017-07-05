@@ -16,9 +16,10 @@ class Stats:
         with open(config.consensus_chain_csv, 'w') as file:
             file.write("height;block_hash\n")
             height = self.executor.first_block_height
+            nodes = self.executor.all_bitcoin_nodes.values()
             while True:
                 blocks = []
-                for node in self.executor.all_bitcoin_nodes.values():
+                for node in nodes:
                     if node.get_block_hash_silent(height) is not 0:
                         break
                     blocks.append(node.get_block_hash(height))
