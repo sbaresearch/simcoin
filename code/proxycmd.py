@@ -6,7 +6,7 @@ def run_proxy(node, start_hash):
         return ('python main.py ' + args +
                 '--ip-private ' + str(node.private_ip) + ' '
                 '--ips-public ' + ' '.join(node.outgoing_ips) +
-                ' --start-hash=' + start_hash)
+                '--start-hash=' + start_hash)
 
 
 def get_best_public_block_hash(node):
