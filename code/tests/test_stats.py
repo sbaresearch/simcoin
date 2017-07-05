@@ -130,7 +130,7 @@ class TestStats(TestCase):
         handle = m_open()
         self.assertEqual(handle.writelines.call_args[0][0], ['1', '2'])
 
-        self.assertEqual(m_bash.call_count, 4)
+        self.assertEqual(m_bash.call_count, 3)
 
     @patch('builtins.open', new_callable=mock_open)
     @patch('bash.check_output')
@@ -149,7 +149,7 @@ class TestStats(TestCase):
         self.assertTrue(['1', '2'] in contents)
         self.assertTrue(['11', '22'] in contents)
 
-        self.assertEqual(m_bash.call_count, 5)
+        self.assertEqual(m_bash.call_count, 4)
 
     @patch('json.loads')
     def test_update_blocks_csv(self, m_json):

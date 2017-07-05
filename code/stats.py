@@ -42,19 +42,16 @@ class Stats:
                 file.write('{};{}\n'.format(node.name, ';'.join(hashes)))
 
     def aggregate_logs(self):
-        try:
-            for node in self.executor.all_nodes.values():
-                content = bash.check_output(node.cat_log_cmd())
+        for node in self.executor.all_nodes.values():
+            content = bash.check_output(node.cat_log_cmd())
 
-                content = prefix_log(content, node.name)
+            content = prefix_log(content, node.name)
 
-                with open(config.aggregated_log, 'a') as file:
-                    file.writelines(content)
+            with open(config.aggregated_log, 'a') as file:
+                file.writelines(content)
 
-            bash.check_output('cat {} >> {}'.format(config.log_file, config.aggregated_log))
-            bash.check_output('sort {} -o {}'.format(config.aggregated_log, config.aggregated_log))
-        finally:
-            bash.check_output('rm {}'.format(config.tmp_log))
+        bash.check_output('cat {} >> {}'.format(config.log_file, config.aggregated_log))
+        bash.check_output('sort {} -o {}'.format(config.aggregated_log, config.aggregated_log))
 
     def update_blocks_csv(self):
         with open(config.blocks_csv, 'r+') as file:
