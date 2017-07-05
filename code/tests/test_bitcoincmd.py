@@ -81,10 +81,10 @@ class TestBitcoincmd(TestCase):
         self.assertTrue('getblock block_hash' in cmd)
 
     def test_connect(self):
-        cmd = bitcoincmd.connect('node', ['ip1', 'ip2'])
+        cmd = bitcoincmd.connect('node', 'ip1')
 
         self.assertTrue('  ' not in cmd)
-        self.assertTrue('addnode ip1 ip2 add')
+        self.assertTrue('addnode ip1 add')
 
     def text_exec_cli(self):
         cmd = bitcoincmd.exec_cli('node', 'cmd')
