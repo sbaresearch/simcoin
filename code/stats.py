@@ -102,16 +102,17 @@ class Stats:
 
 def prefix_log(lines, node_name):
     prev_match = ''
-    for i, line in enumerate(lines):
+    prefixed_lines = []
+    for line in lines:
         match = re.match(config.log_timestamp_regex, line)
         if match:
-            lines[i] = re.sub(config.log_timestamp_regex
+            prefixed_lines.append(re.sub(config.log_timestamp_regex
                               , r'\1 {}'.format(node_name)
-                              , line)
+                              , line))
             prev_match = match.group(0)
         else:
-            lines[i] = '{} {} {}'.format(prev_match, node_name, line)
-    return lines
+            prefixed_lines.append('{} {} {}'.format(prev_match, node_name, line))
+    return prefixed_lines
 
 
 def tips_statistics(tips):
