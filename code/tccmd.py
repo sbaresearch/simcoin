@@ -7,12 +7,12 @@ import config
 
 
 def add(latency):
-        return 'tc qdisc add dev eth0 root netem delay ' + str(latency) + 'ms'
+        return 'tc qdisc add dev eth0 root netem delay {}ms'.format(str(latency))
 
 
 def add_except_ip(latency, ip):
         return ['tc qdisc add dev eth0 root handle 1: prio',
-                'tc filter add dev eth0 parent 1:0 protocol ip prio 1 u32 match ip dst ' + str(ip) + ' flowid 1:1',
-                'tc filter add dev eth0 parent 1:0 protocol ip prio 1 u32 match ip dst ' + config.ip_range + ' flowid 1:2',
+                'tc filter add dev eth0 parent 1:0 protocol ip prio 1 u32 match ip dst {} flowid 1:1'.format(str(ip)),
+                'tc filter add dev eth0 parent 1:0 protocol ip prio 1 u32 match ip dst {} flowid 1:2'.format(config.ip_range),
                 'tc qdisc add dev eth0 parent 1:1 handle 10: netem delay 0ms',
-                'tc qdisc add dev eth0 parent 1:2 handle 20: netem delay ' + str(latency) + 'ms']
+                'tc qdisc add dev eth0 parent 1:2 handle 20: netem delay {}ms'.format(str(latency))]
