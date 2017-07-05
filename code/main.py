@@ -17,6 +17,9 @@ def main():
 
     config_logger(args.verbose)
 
+    logging.info("arguments called with: {}".format(sys.argv))
+    logging.info("parsed arguments: {}".format(args))
+
     for image in [config.node_image, config.selfish_node_image]:
         if os.system("docker inspect " + image + " > /dev/null") != 0:
             raise Exception("Image {} not found".format(image))
@@ -56,9 +59,6 @@ def parse():
                         )
 
     args = parser.parse_args()
-    logging.info("arguments called with: {}".format(sys.argv))
-    logging.info("parsed arguments: {}".format(args))
-
     return args
 
 
