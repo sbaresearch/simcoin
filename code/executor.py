@@ -71,7 +71,7 @@ class Executor:
                 node.connect([str(node.ip) for node in list(self.all_bitcoin_nodes.values())[i + 1:i + 5]])
             utils.sleep(4 + len(self.all_bitcoin_nodes) * 0.2)
 
-            prepare.warmup_block_generation(self.all_bitcoin_nodes)
+            prepare.warmup_block_generation(list(self.all_bitcoin_nodes.values()))
 
             [(node.delete_peers_file(), node.rm()) for node in self.all_bitcoin_nodes.values()]
 
