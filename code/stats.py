@@ -19,9 +19,9 @@ class Stats:
             while True:
                 blocks = []
                 for node in self.executor.all_bitcoin_nodes.values():
-                    if bash.call_silent(node.get_block_hash(height)) is not 0:
+                    if node.get_block_hash_silent(height) is not 0:
                         break
-                    blocks.append(bash.check_output(node.get_block_hash(height), lvl=logging.DEBUG))
+                    blocks.append(node.get_block_hash(height))
                 if len(blocks) > 0 and utils.check_equal(blocks):
                     self.consensus_chain.append(blocks[0])
                     file.write('{}; {}\n'.format(height, blocks[0]))
@@ -33,17 +33,17 @@ class Stats:
         with open(config.chains_csv, 'w') as file:
             file.write("node;block_hashes\n")
             for node in self.executor.all_bitcoin_nodes.values():
-                height = int(bash.check_output(node.get_block_count(), lvl=logging.DEBUG))
+                height = int(node.get_block_count())
                 hashes = []
                 while self.executor.first_block_height <= height:
-                    hashes.append(str(bash.check_output(node.get_block_hash(height), lvl=logging.DEBUG)))
+                    hashes.append(str(node.get_block_hash(height)))
                     height -= 1
                 file.write('{};{}\n'.format(node.name, '; '.join(hashes)))
 
     def aggregate_logs(self):
         try:
             for node in self.executor.all_nodes.values():
-                bash.check_output('{} > {}'.format(node.cat_log(), config.tmp_log))
+                bash.check_output('{} > {}'.format(node.cat_log_cmd(), config.tmp_log))
 
                 with open(config.tmp_log) as file:
                     content = file.readlines()
@@ -87,7 +87,7 @@ class Stats:
                 else:
                     line = line.rstrip() + ';True'
 
-                block = json.loads(bash.check_output(node.get_block(block_hash), lvl=logging.DEBUG))
+                block = json.loads(node.get_block(block_hash))
                 line += ';{};{}\n'.format(block['size'], len(block['tx']))
                 file.write(line)
 
@@ -98,7 +98,7 @@ class Stats:
                        'valid_headers;valid_headers_median_branchlen;valid_headers_std_branchlen;'
                        'valid_fork;valid_fork_median_branchlen;valid_fork_std_branchlen;\n')
             for node in self.executor.all_bitcoin_nodes.values():
-                tips = json.loads(bash.check_output(node.get_chain_tips()))
+                tips = json.loads(node.get_chain_tips())
                 tips_info = {
                     'valid-headers': {'values': np.array([], dtype=np.uint)},
                     'valid-fork': {'values': np.array([], dtype=np.uint)},

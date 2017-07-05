@@ -15,11 +15,11 @@ class Prepare:
 
         for i, node in enumerate(self.executor.all_bitcoin_nodes.values()):
             wait_until_height_reached(node, i)
-            bash.check_output(node.generate_block())
+            node.generate_block()
 
         node = self.executor.all_bitcoin_nodes[config.reference_node]
         wait_until_height_reached(node, len(self.executor.all_bitcoin_nodes))
-        bash.check_output(node.generate_block(config.warmup_blocks))
+        node.generate_block(config.warmup_blocks)
         [wait_until_height_reached(node, config.warmup_blocks + len(self.executor.all_bitcoin_nodes))
          for node in self.executor.all_bitcoin_nodes.values()]
 
@@ -53,6 +53,6 @@ def recreate_network():
 
 
 def wait_until_height_reached(node, height):
-    while int(bash.check_output(node.get_block_count())) < height:
+    while int(node.get_block_count()) < height:
         logging.debug('Waiting until height={} is reached...'.format(str(height)))
         utils.sleep(0.2)

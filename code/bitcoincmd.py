@@ -83,8 +83,8 @@ def get_block(node, block_hash):
     return exec_cli(node, 'getblock ' + block_hash)
 
 
-def connect(node, outgoing_ips):
-    return [exec_cli(node, 'addnode ' + ip + ' add') for ip in outgoing_ips]
+def connect(node, ip):
+    return exec_cli(node, 'addnode ' + ip + ' add')
 
 
 def exec_cli(node, command):
