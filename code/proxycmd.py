@@ -18,4 +18,4 @@ def start_hash(node):
 
 
 def exec_cli(node, cmd):
-        return dockercmd.exec_cmd(node, 'python cli.py ' + cmd)
+        return dockercmd.exec_cmd(node, 'python cli.py {}'.format(cmd))
