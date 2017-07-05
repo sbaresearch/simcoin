@@ -9,7 +9,6 @@ import logging
 import checkargs
 import time
 from stats import Stats
-from prepare import Prepare
 
 
 def main():
