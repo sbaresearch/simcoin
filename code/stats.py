@@ -39,28 +39,16 @@ class Stats:
                 while self.executor.first_block_height <= height:
                     hashes.append(str(node.get_block_hash(height)))
                     height -= 1
-                file.write('{};{}\n'.format(node.name, '; '.join(hashes)))
+                file.write('{};{}\n'.format(node.name, ';'.join(hashes)))
 
     def aggregate_logs(self):
         try:
             for node in self.executor.all_nodes.values():
-                bash.check_output('{} > {}'.format(node.cat_log_cmd(), config.tmp_log))
+                content = bash.check_output(node.cat_log_cmd())
 
-                with open(config.tmp_log) as file:
-                    content = file.readlines()
+                content = prefix_log(content, node.name)
 
-                prev_match = ''
-                for i, line in enumerate(content):
-                    match = re.match(config.log_timestamp_regex, line)
-                    if match:
-                        content[i] = re.sub(config.log_timestamp_regex
-                                            , r'\1 {}'.format(node.name)
-                                            , line)
-                        prev_match = match.group(0)
-                    else:
-                        content[i] = '{} {} {}'.format(prev_match, node.name, line)
-
-                with open(config.aggregated_log, mode='a') as file:
+                with open(config.aggregated_log, 'a') as file:
                     file.writelines(content)
 
             bash.check_output('cat {} >> {}'.format(config.log_file, config.aggregated_log))
@@ -73,7 +61,6 @@ class Stats:
             lines = file.readlines()
             file.seek(0)
             file.truncate()
-
             iter_lines = iter(lines)
             first_line = next(iter_lines)
             file.write(first_line.rstrip() + ';stale_block;size;number_of_tx\n')
@@ -100,39 +87,64 @@ class Stats:
                        'valid_fork;valid_fork_median_branchlen;valid_fork_std_branchlen;\n')
             for node in self.executor.all_bitcoin_nodes.values():
                 tips = json.loads(node.get_chain_tips())
-                tips_info = {
-                    'valid-headers': {'values': np.array([], dtype=np.uint)},
-                    'valid-fork': {'values': np.array([], dtype=np.uint)},
-                }
-                iter_tips = iter(tips)
 
-                # omit first active tip
-                next(iter_tips)
+                tips_stats = tips_statistics(tips)
 
-                for tip in iter_tips:
-                    tips_info[tip['status']]['values'] \
-                        = np.append(tips_info[tip['status']]['values'], tip['branchlen'])
-                tips_info['total'] \
-                    = {'values': np.append(tips_info['valid-headers']['values'], tips_info['valid-fork']['values'])}
-
-                for key in tips_info.keys():
-                    tips_info[key]['size'] = np.size(tips_info[key]['values'])
-
-                    if tips_info[key]['size'] > 0:
-                        tips_info[key]['median'] = np.median(tips_info[key]['values'])
-                        tips_info[key]['std'] = np.std(tips_info[key]['values'])
-                    else:
-                        tips_info[key]['median'] = float('nan')
-                        tips_info[key]['std'] = float('nan')
-
-                total = tips_info['total']
-                headers = tips_info['valid-headers']
-                fork = tips_info['valid-fork']
+                total = tips_stats['total']
+                headers = tips_stats['valid-headers']
+                fork = tips_stats['valid-fork']
                 file.write('{};{};'
                            '{};{};{};'
                            '{};{};{};'
-                           '{};{};{};\n'
+                           '{};{};{}\n'
                            .format(node.name, node.mined_blocks,
                                    total['size'], total['median'], total['std'],
                                    headers['size'], headers['median'], headers['std'],
                                    fork['size'], fork['median'], fork['std']))
+
+
+def prefix_log(lines, node_name):
+    prev_match = ''
+    for i, line in enumerate(lines):
+        match = re.match(config.log_timestamp_regex, line)
+        if match:
+            lines[i] = re.sub(config.log_timestamp_regex
+                              , r'\1 {}'.format(node_name)
+                              , line)
+            prev_match = match.group(0)
+        else:
+            lines[i] = '{} {} {}'.format(prev_match, node_name, line)
+    return lines
+
+
+def tips_statistics(tips):
+    tips_info = {
+        'valid-headers': {'values': np.array([], dtype=np.uint)},
+        'valid-fork': {'values': np.array([], dtype=np.uint)},
+    }
+
+    iter_tips = iter(tips)
+    # omit first active tip
+    next(iter_tips)
+
+    for tip in iter_tips:
+        tips_info[tip['status']]['values'] \
+            = np.append(tips_info[tip['status']]['values'], tip['branchlen'])
+    tips_info['total'] \
+        = {'values': np.append(tips_info['valid-headers']['values'], tips_info['valid-fork']['values'])}
+
+    tips_info = median_std(tips_info)
+    return tips_info
+
+
+def median_std(tips_info):
+    for key in tips_info.keys():
+        tips_info[key]['size'] = np.size(tips_info[key]['values'])
+
+        if tips_info[key]['size'] > 0:
+            tips_info[key]['median'] = np.median(tips_info[key]['values'])
+            tips_info[key]['std'] = np.std(tips_info[key]['values'])
+        else:
+            tips_info[key]['median'] = float('nan')
+            tips_info[key]['std'] = float('nan')
+    return tips_info
