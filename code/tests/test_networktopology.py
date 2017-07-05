@@ -73,7 +73,7 @@ class TestNetworktopology(TestCase):
         with self.assertRaises(Exception) as context:
             networktopology.read_amount_of_nodes()
 
-            self.assertEqual('Unknown node type in network.csv' in str(context))
+        self.assertTrue('Unknown node type in network.csv' in str(context.exception))
 
     @patch("builtins.open", mock_open(read_data=DATA_1))
     def test_read_connections(self):

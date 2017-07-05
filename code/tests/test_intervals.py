@@ -63,4 +63,4 @@ class TestIntervals(TestCase):
         with self.assertRaises(Exception) as context:
             intervals.check_if_only_block_per_node(['nodes-1', 'nodes-1'])
 
-            self.assertTrue('Block interval is too low. Only one block per node per interval is allowed.' in str(context))
+        self.assertTrue('Block interval is too low. Only one block per node per interval is allowed.' in str(context.exception))

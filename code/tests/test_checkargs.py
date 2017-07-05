@@ -17,7 +17,7 @@ class TestCheckargs(TestCase):
         with self.assertRaises(argparse.ArgumentTypeError) as context:
             checkargs.check_positive(-1)
 
-            self.assertTrue('-1 is an invalid positive value' in str(context.exception))
+        self.assertTrue('-1 is an invalid positive value' in str(context.exception))
 
     def test_check_percentage_zero(self):
         value = checkargs.check_percentage(0)
@@ -29,15 +29,15 @@ class TestCheckargs(TestCase):
 
     def test_check_percentage_negative(self):
         with self.assertRaises(argparse.ArgumentTypeError) as context:
-            checkargs.check_percentage(-.1)
+            checkargs.check_percentage(-0.1)
 
-            self.assertTrue('-.1 is an invalid percentage value [0,1]' in str(context.exception))
+        self.assertTrue('-0.1 is an invalid percentage value [0,1]' in str(context.exception))
 
     def test_check_percentage_over_one(self):
         with self.assertRaises(argparse.ArgumentTypeError) as context:
             checkargs.check_percentage(1.1)
 
-            self.assertTrue('1.1 is an invalid percentage value [0,1]' in str(context.exception))
+        self.assertTrue('1.1 is an invalid percentage value [0,1]' in str(context.exception))
 
     def test_check_percentage_with_string(self):
         with self.assertRaises(ValueError):
@@ -55,4 +55,4 @@ class TestCheckargs(TestCase):
     def test_check_positive_int(self):
         with self.assertRaises(argparse.ArgumentTypeError) as context:
             checkargs.check_positive_int(1.1)
-            self.assertTrue('1.1 is an invalid integer' in str(context.exception))
+        self.assertTrue('1.1 is an invalid integer' in str(context.exception))
