@@ -40,7 +40,8 @@ class BitcoinNode(Node):
         return bash.check_output(bitcoincmd.rm_peers(self.name))
 
     def connect(self, ips):
-        return [bash.check_output(bitcoincmd.connect(self.name, ip)) for ip in ips]
+        for ip in ips:
+            bash.check_output(bitcoincmd.connect(self.name, ip))
 
     def generate_tx(self):
         address = bash.check_output(bitcoincmd.get_new_address(self.name))
