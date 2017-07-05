@@ -24,7 +24,7 @@ class Stats:
                     blocks.append(node.get_block_hash(height))
                 if len(blocks) > 0 and utils.check_equal(blocks):
                     self.consensus_chain.append(blocks[0])
-                    file.write('{}; {}\n'.format(height, blocks[0]))
+                    file.write('{};{}\n'.format(height, blocks[0]))
                     height += 1
                 else:
                     break
