@@ -7,7 +7,8 @@ def check_output(cmd, lvl=logging.INFO):
     logging.info(cmd)
     output = subprocess.check_output(cmd, shell=True, executable='/bin/bash')
     encoded_output = output.decode('utf-8').rstrip()
-    [logging.log(lvl, line.strip()) for line in encoded_output.splitlines()]
+    for line in encoded_output.splitlines():
+        logging.log(lvl, line.strip())
     return encoded_output
 
 
