@@ -105,7 +105,6 @@ class ProxyNode(Node, PublicNode):
 
     def wait_for_highest_tip_of_node(self, node):
         block_hash = bash.check_output(bitcoincmd.get_best_block_hash(node.name))
-        utils.sleep(2)
         while block_hash != bash.check_output(proxycmd.get_best_public_block_hash(self.name)):
             utils.sleep(0.2)
             logging.debug('Waiting for  blocks to spread...')

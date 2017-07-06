@@ -15,8 +15,9 @@ def warmup_block_generation(nodes):
 
     wait_until_height_reached(nodes[0], len(nodes))
     nodes[0].generate_block(config.warmup_blocks)
-    [wait_until_height_reached(node, config.warmup_blocks + len(nodes))
-     for node in nodes]
+
+    for node in nodes:
+        wait_until_height_reached(node, config.warmup_blocks + len(nodes))
 
     logging.info('End of warmup')
 

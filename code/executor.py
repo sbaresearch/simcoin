@@ -64,7 +64,8 @@ class Executor:
             prepare.prepare_simulation_dir()
             utils.sleep(4)
 
-            [node.run() for node in self.all_bitcoin_nodes.values()]
+            for node in self.all_bitcoin_nodes.values():
+                node.run()
             utils.sleep(4 + len(self.all_bitcoin_nodes) * 0.2)
 
             for i, node in enumerate(self.all_bitcoin_nodes.values()):
@@ -73,21 +74,29 @@ class Executor:
 
             prepare.warmup_block_generation(list(self.all_bitcoin_nodes.values()))
 
-            [(node.delete_peers_file(), node.rm()) for node in self.all_bitcoin_nodes.values()]
+            for node in self.all_bitcoin_nodes.values():
+                node.delete_peers_file()
+                node.rm()
 
-            [node.run() for node in self.all_bitcoin_nodes.values()]
-            [prepare.wait_until_height_reached(node, config.warmup_blocks + len(self.all_bitcoin_nodes))
-             for node in self.all_bitcoin_nodes.values()]
+            for node in self.all_bitcoin_nodes.values():
+                node.run()
+
+            for node in self.all_bitcoin_nodes.values():
+                prepare.wait_until_height_reached(node, config.warmup_blocks + len(self.all_bitcoin_nodes))
 
             start_hash = self.one_normal_node.get_best_block_hash()
-            [node.run(start_hash) for node in self.selfish_node_proxies.values()]
-            [node.wait_for_highest_tip_of_node(self.one_normal_node)
-             for node in self.selfish_node_proxies.values()]
+            for node in self.selfish_node_proxies.values():
+                node.run(start_hash)
+            utils.sleep(2)
+            for node in self.selfish_node_proxies.values():
+                node.wait_for_highest_tip_of_node(self.one_normal_node)
 
-            [node.connect(node.outgoing_ips) for node in self.nodes.values()]
+            for node in self.nodes.values():
+                node.connect(node.outgoing_ips)
             utils.sleep(4 + len(self.all_nodes) * 0.2)
 
-            [node.add_latency() for node in self.all_public_nodes.values()]
+            for node in self.all_public_nodes.values():
+                node.add_latency()
 
             reader = csv.reader(open(config.interval_csv, "r"), delimiter=";")
             start_time = time.time()
@@ -128,11 +137,14 @@ class Executor:
             self.stats.node_stats()
             self.stats.aggregate_logs()
 
-            [node.grep_log_for_errors() for node in self.all_nodes.values()]
+            for node in self.all_nodes.values():
+                node.grep_log_for_errors()
         finally:
             # remove proxies first. if not proxies could be already stopped when trying to remove
-            [node.rm_silent() for node in self.selfish_node_proxies.values()]
-            [node.rm_silent() for node in self.all_bitcoin_nodes.values()]
+            for node in self.selfish_node_proxies.values():
+                node.rm_silent()
+            for node in self.all_bitcoin_nodes.values():
+                node.rm_silent()
             utils.sleep(3 + len(self.all_nodes) * 0.2)
 
             bash.call_silent(dockercmd.rm_network())
