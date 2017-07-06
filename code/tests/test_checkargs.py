@@ -52,7 +52,10 @@ class TestCheckargs(TestCase):
         with self.assertRaises(ValueError):
             checkargs.check_positive_float('test')
 
-    def test_check_positive_int(self):
+    def test_check_positive_int_with_float(self):
         with self.assertRaises(argparse.ArgumentTypeError) as context:
             checkargs.check_positive_int(1.1)
         self.assertTrue('1.1 is an invalid integer' in str(context.exception))
+
+    def test_check_positive_int(self):
+        checkargs.check_positive_int('10')
