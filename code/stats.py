@@ -43,7 +43,7 @@ class Stats:
 
     def aggregate_logs(self):
         for node in self.executor.all_nodes.values():
-            content = bash.check_output(node.cat_log_cmd())
+            content = bash.check_output_without_log(node.cat_log_cmd())
 
             content = prefix_log(content, node.name)
 
