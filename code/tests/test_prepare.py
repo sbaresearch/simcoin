@@ -10,14 +10,16 @@ import config
 class TestPrepare(TestCase):
 
     @patch('prepare.wait_until_height_reached')
-    def test_warmup_block_generation(self, mock):
+    @patch('utils.sleep')
+    @patch('prepare.delete_nodes')
+    def test_warmup_block_generation(self, __, _, m_wait_until_height_reached):
         node_0 = MagicMock()
         node_1 = MagicMock()
         nodes = [node_0, node_1]
 
-        prepare.warmup_block_generation(nodes)
+        prepare.give_nodes_spendable_coins(nodes)
 
-        self.assertEqual(mock.call_count, len(nodes) * 2 + 1)
+        self.assertEqual(m_wait_until_height_reached.call_count, len(nodes) * 2 + 1)
         self.assertEqual(node_0.generate_block.call_count, 2)
         self.assertEqual(node_1.generate_block.call_count, 1)
 

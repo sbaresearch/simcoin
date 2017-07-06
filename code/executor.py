@@ -64,19 +64,7 @@ class Executor:
             prepare.prepare_simulation_dir()
             utils.sleep(4)
 
-            for node in self.all_bitcoin_nodes.values():
-                node.run()
-            utils.sleep(4 + len(self.all_bitcoin_nodes) * 0.2)
-
-            for i, node in enumerate(self.all_bitcoin_nodes.values()):
-                node.connect([str(node.ip) for node in list(self.all_bitcoin_nodes.values())[i + 1:i + 5]])
-            utils.sleep(4 + len(self.all_bitcoin_nodes) * 0.2)
-
-            prepare.warmup_block_generation(list(self.all_bitcoin_nodes.values()))
-
-            for node in self.all_bitcoin_nodes.values():
-                node.delete_peers_file()
-                node.rm()
+            prepare.give_nodes_spendable_coins(list(self.all_bitcoin_nodes.values()))
 
             for node in self.all_bitcoin_nodes.values():
                 node.run()

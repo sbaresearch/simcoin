@@ -6,10 +6,13 @@ import os
 import utils
 
 
-def warmup_block_generation(nodes):
+def give_nodes_spendable_coins(nodes):
     logging.info('Begin warmup')
 
+    run_nodes(nodes)
+
     for i, node in enumerate(nodes):
+        node.connect([str(node.ip) for node in nodes[max(0, i - 5):i]])
         wait_until_height_reached(node, i)
         node.generate_block()
 
@@ -19,7 +22,21 @@ def warmup_block_generation(nodes):
     for node in nodes:
         wait_until_height_reached(node, config.warmup_blocks + len(nodes))
 
+    delete_nodes(nodes)
+
     logging.info('End of warmup')
+
+
+def delete_nodes(nodes):
+    for node in nodes:
+        node.delete_peers_file()
+        node.rm()
+
+
+def run_nodes(nodes):
+    for node in nodes:
+        node.run()
+    utils.sleep(4 + len(nodes) * 0.2)
 
 
 def prepare_simulation_dir():
