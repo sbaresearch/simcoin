@@ -14,7 +14,7 @@ args = {
     'listen':             '-listen',  # ensure listening even if 'connect' is given
     'listenonion':        '-listenonion=0',  # disable tor
     'onlynet':            '-onlynet=ipv4',  # disable ipv6
-    'reindex':          '-reindex',
+    'reindex':            '-reindex',
 }
 
 
