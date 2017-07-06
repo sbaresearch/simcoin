@@ -20,6 +20,9 @@ def main():
     header = create_header(nodes, selfish_nodes)
     matrix = create_matrix(header, args.latency, args.connectivity)
 
+    if check_if_fully_connected(matrix) is not True:
+        raise Exception("Not all nodes a reachable. Consider to raise the connectivity.")
+
     print(pandas.DataFrame(matrix))
 
     with open(config.network_config, "w") as file:
@@ -86,6 +89,26 @@ def create_matrix(header, latency, connectivity):
             else:
                 matrix[i][j] = matrix[j][i] = 0
     return matrix
+
+
+def check_if_fully_connected(matrix):
+    connected = recursive_check(matrix)
+
+    return len(connected) == len(matrix) - 1
+
+
+def recursive_check(matrix, visited=None, start=1):
+    if visited is None:
+        visited = {key: False for key in range(1, len(matrix))}
+
+    if visited[start]:
+        return []
+    visited[start] = True
+    output = [start]
+    for neighbour in range(1, len(matrix)):
+        if matrix[start][neighbour] > 0:
+            output += recursive_check(matrix, visited, neighbour)
+    return output
 
 
 def read_amount_of_nodes():

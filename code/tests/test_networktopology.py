@@ -94,3 +94,71 @@ class TestNetworktopology(TestCase):
         self.assertEqual(latencies['node-0'], 1)
         self.assertEqual(latencies['node-1'], 2)
         self.assertEqual(latencies['selfish-node-0-proxy'], 3)
+
+    def test_check_if_fully_connected_1(self):
+        matrix = [
+            ['',        'node-0',   'node-1'],
+            ['node-0',  1,          0],
+            ['node-1',  0,          1]
+        ]
+        fully_connected = networktopology.check_if_fully_connected(matrix)
+
+        self.assertFalse(fully_connected)
+
+    def test_check_if_fully_connected_2(self):
+        matrix = [
+            ['',        'node-0',   'node-1'],
+            ['node-0',  1,          1],
+            ['node-1',  1,          1]
+        ]
+        fully_connected = networktopology.check_if_fully_connected(matrix)
+
+        self.assertTrue(fully_connected)
+
+    def test_check_if_fully_connected_3(self):
+        matrix = [
+            ['',        'node-0',   'node-1',   'node-2'],
+            ['node-0',  1,          0,          1],
+            ['node-1',  0,          1,          1],
+            ['node-2',  1,          1,          1]
+        ]
+        fully_connected = networktopology.check_if_fully_connected(matrix)
+
+        self.assertTrue(fully_connected)
+
+    def test_check_if_fully_connected_4(self):
+        matrix = [
+            ['',        'node-0',   'node-1',   'node-2'],
+            ['node-0',  1,          0,          1],
+            ['node-1',  0,          1,          0],
+            ['node-2',  1,          0,          1]
+        ]
+        fully_connected = networktopology.check_if_fully_connected(matrix)
+
+        self.assertFalse(fully_connected)
+
+    def test_check_if_fully_connected_5(self):
+        matrix = [
+            ['',        'node-0',   'node-1',   'node-2',   'node-3'],
+            ['node-0',  1,          0,          0,          1],
+            ['node-1',  0,          1,          1,          0],
+            ['node-2',  0,          1,          1,          0],
+            ['node-3',  1,          0,          0,          1],
+
+        ]
+        fully_connected = networktopology.check_if_fully_connected(matrix)
+
+        self.assertFalse(fully_connected)
+
+    def test_check_if_fully_connected_6(self):
+        matrix = [
+            ['',        'node-0',   'node-1',   'node-2',   'node-3'],
+            ['node-0',  1,          1,          0,          0],
+            ['node-1',  1,          1,          1,          0],
+            ['node-2',  0,          1,          1,          0],
+            ['node-3',  0,          0,          0,          1],
+
+        ]
+        fully_connected = networktopology.check_if_fully_connected(matrix)
+
+        self.assertFalse(fully_connected)
