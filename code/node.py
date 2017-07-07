@@ -79,31 +79,23 @@ class BitcoinNode(Node):
         return dockercmd.exec_cmd(self.name, 'cat {}'.format(BitcoinNode.log_file))
 
     def tx_created(self, tx_hash):
-        cmd = dockercmd.exec_cmd(self.name, 'cat {} | grep "Relaying wtx {}"'.format(BitcoinNode.log_file, tx_hash))
-        return_value = bash.call_silent(cmd)
-        if return_value != 0:
-            return -1
-        line = bash.check_output(cmd)
-        matched = re.match(config.log_timestamp_regex, line)
-        return datetime.strptime(matched.group(0), config.log_time_format).timestamp()
+        return get_timestamp(self.name, 'Relaying wtx {}'.format(tx_hash))
 
     def tx_received(self, tx_hash):
-        cmd = dockercmd.exec_cmd(self.name, 'cat {} | grep "accepted {}"'.format(BitcoinNode.log_file, tx_hash))
-        return_value = bash.call_silent(cmd)
-        if return_value != 0:
-            return -1
-        line = bash.check_output(cmd)
-        matched = re.match(config.log_timestamp_regex, line)
-        return datetime.strptime(matched.group(0), config.log_time_format).timestamp()
+        return get_timestamp(self.name, 'accepted {}'.format(tx_hash))
 
     def block_is_new_tip(self, block_hash):
-        cmd = dockercmd.exec_cmd(self.name, 'cat {} | grep "best={}"'.format(BitcoinNode.log_file, block_hash))
-        return_value = bash.call_silent(cmd)
-        if return_value != 0:
-            return -1
-        line = bash.check_output(cmd)
-        matched = re.match(config.log_timestamp_regex, line)
-        return datetime.strptime(matched.group(0), config.log_time_format).timestamp()
+        return get_timestamp(self.name, 'best={}'.format(block_hash))
+
+
+def get_timestamp(node_name, grep_cmd):
+    cmd = dockercmd.exec_cmd(node_name, 'cat {} | grep "{}"'.format(BitcoinNode.log_file, grep_cmd))
+    return_value = bash.call_silent(cmd)
+    if return_value != 0:
+        return -1
+    line = bash.check_output(cmd)
+    matched = re.match(config.log_timestamp_regex, line)
+    return datetime.strptime(matched.group(0), config.log_time_format).timestamp()
 
 
 class PublicBitcoinNode(BitcoinNode, PublicNode):
