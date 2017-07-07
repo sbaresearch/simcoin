@@ -118,7 +118,7 @@ class TestStats(TestCase):
         self.assertTrue('node-0;hash1;hash2\n' in lines)
 
     @patch('builtins.open', new_callable=mock_open)
-    @patch('bash.check_output')
+    @patch('bash.check_output_without_log')
     @patch('stats.prefix_log')
     def test_aggregate_logs(self, m_prefix, m_bash, m_open):
         node_0 = MagicMock()
@@ -134,7 +134,7 @@ class TestStats(TestCase):
         self.assertEqual(m_bash.call_count, 3)
 
     @patch('builtins.open', new_callable=mock_open)
-    @patch('bash.check_output')
+    @patch('bash.check_output_without_log')
     @patch('stats.prefix_log')
     def test_aggregate_logs_two_nodes(self, m_prefix, m_bash, m_open):
         node_0 = MagicMock()
