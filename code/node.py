@@ -81,6 +81,9 @@ class BitcoinNode(Node):
     def tx_received(self, tx_hash):
         return -1
 
+    def tx_created(self, tx_hash):
+        return -1
+
     def block_is_new_tip(self, block_hash):
         cmd = dockercmd.exec_cmd(self.name, 'cat {} | grep "best={}"'.format(BitcoinNode.log_file, block_hash))
         return_value = bash.call_silent(cmd)

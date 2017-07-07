@@ -178,6 +178,28 @@ class TestStats(TestCase):
             self.assertEqual(handle.write.call_args_list[0][0][0], 'node-0;hash1;5;False;45;2;1;11;22\n')
             self.assertEqual(handle.write.call_args_list[1][0][0], 'node-1;hash2;5;True;1;0;1;11;22\n')
 
+    def test_update_tx_csv(self):
+        data = dedent("""
+            node;block
+            node-0;hash1
+            node-1;hash2
+        """).strip()
+
+        with patch('builtins.open', mock_open(read_data=data)) as m_open:
+            node_0 = MagicMock()
+            self.executor.all_bitcoin_nodes = {'node-0': node_0, 'node-1': node_0}
+            self.stats.tx_propagation = MagicMock()
+            self.stats.tx_propagation.return_value = {'values': np.array([1]), 'median': 11, 'std': 22}
+
+            self.stats.update_tx_csv()
+
+            m_open.assert_called_with(config.tx_csv, 'r+')
+            self.assertTrue(m_open.called)
+            handle = m_open()
+            self.assertEqual(handle.write.call_count, 2)
+            self.assertEqual(handle.write.call_args_list[0][0][0], 'node-0;hash1;1;11;22\n')
+            self.assertEqual(handle.write.call_args_list[1][0][0], 'node-1;hash2;1;11;22\n')
+
     @patch('builtins.open', new_callable=mock_open)
     @patch('json.loads')
     @patch('stats.tips_statistics')
@@ -297,3 +319,36 @@ class TestStats(TestCase):
 
         self.assertTrue(np.isnan(statistics['median']))
         self.assertTrue(np.isnan(statistics['std']))
+
+    @patch('stats.calc_median_std')
+    def test_tx_propagation(self, mock):
+        node_1 = MagicMock()
+        node_1.tx_arrived.return_value = 11
+        node_1.name = 'node_1'
+        node_2 = MagicMock()
+        node_2.tx_arrived.return_value = -1
+        node_2.name = 'node_2'
+
+        self.executor.all_bitcoin_nodes = {'node_1': node_1, 'node_2': node_2}
+
+        self.stats.tx_propagation('node-0', 'hash0', 1)
+
+        self.assertEqual(mock.call_args[0][0], np.array([10]))
+
+    def test_calc_median_std_no_values(self):
+        array = np.array([])
+        statistics = stats.calc_median_std(array)
+
+        self.assertTrue(np.isnan(statistics['median']))
+        self.assertTrue(np.isnan(statistics['std']))
+        self.assertEqual(statistics['len'], 0)
+        self.assertTrue((statistics['values'] == array).all())
+
+    def test_calc_median_std(self):
+        array = np.array([1, 2])
+        statistics = stats.calc_median_std(array)
+
+        self.assertEqual(statistics['median'], 1.5)
+        self.assertEqual(statistics['std'], 0.5)
+        self.assertEqual(statistics['len'], 2)
+        self.assertTrue((statistics['values'] == array).all())
