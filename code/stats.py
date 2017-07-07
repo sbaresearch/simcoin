@@ -5,6 +5,7 @@ import logging
 import utils
 import json
 import numpy as np
+from node import BitcoinNode
 
 
 class Stats:
@@ -60,7 +61,9 @@ class Stats:
             file.truncate()
             iter_lines = iter(lines)
             first_line = next(iter_lines)
-            file.write(first_line.rstrip() + ';stale_block;size;number_of_tx\n')
+            file.write(first_line.rstrip() + ';stale_block;size;number_of_tx;'
+                                             'headers_propagation_median;headers_propagation_std'
+                                             'blocks_propagation_median;blocks_propagation_std\n')
 
             for line in iter_lines:
                 tokens = line.split(';')
@@ -72,8 +75,15 @@ class Stats:
                 else:
                     line = line.rstrip() + ';True'
 
+                propagation_stats = self.block_propagation(node.name, block_hash)
+
                 block = json.loads(node.get_block(block_hash))
-                line += ';{};{}\n'.format(block['size'], len(block['tx']))
+                line += ';{};{};{};{};{};{}\n'\
+                    .format(block['size'], len(block['tx']),
+                            propagation_stats[BitcoinNode.headers_received.__name__]['median'],
+                            propagation_stats[BitcoinNode.headers_received.__name__]['std'],
+                            propagation_stats[BitcoinNode.block_received.__name__]['median'],
+                            propagation_stats[BitcoinNode.block_received.__name__]['std'])
                 file.write(line)
 
     def node_stats(self):
@@ -98,6 +108,30 @@ class Stats:
                                    total['size'], total['median'], total['std'],
                                    headers['size'], headers['median'], headers['std'],
                                    fork['size'], fork['median'], fork['std']))
+
+    def block_propagation(self, source_node_name, block_hash):
+        functions = [BitcoinNode.headers_received.__name__, BitcoinNode.block_received.__name__]
+        propagation_stats = {}
+        for _function in functions:
+            arrive_times = []
+
+            for node in self.executor.all_bitcoin_nodes.values():
+                if source_node_name != node.name:
+                    arrived = getattr(node, _function)(block_hash)
+                    if arrived >= 0:
+                        arrive_times.append(arrived)
+            propagation_stats[_function] = {'values': np.array(arrive_times)}
+
+        for _function in functions:
+            values = propagation_stats[_function]['values']
+            if len(values) == 0:
+                propagation_stats[_function]['median'] = float('nan')
+                propagation_stats[_function]['std'] = float('nan')
+            else:
+                propagation_stats[_function]['median'] = np.median(values)
+                propagation_stats[_function]['std'] = np.std(values)
+
+        return propagation_stats
 
 
 def prefix_log(lines, node_name):

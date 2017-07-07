@@ -8,6 +8,7 @@ from textwrap import dedent
 import stats
 import numpy as np
 import math
+from node import BitcoinNode
 
 
 class TestStats(TestCase):
@@ -162,6 +163,9 @@ class TestStats(TestCase):
         with patch('builtins.open', mock_open(read_data=DATA)) as m_open:
             node_0 = MagicMock()
             self.executor.all_nodes = {'node-0': node_0}
+            self.stats.block_propagation = MagicMock()
+            self.stats.block_propagation.return_value = {BitcoinNode.headers_received.__name__: {'median': 11, 'std': 22},
+                                                         BitcoinNode.block_received.__name__: {'median': 111, 'std': 222}}
             m_json.side_effect = [{'size': 45, 'tx': ['tx1', 'tx2']}, {'size': 1, 'tx': []}]
             self.stats.consensus_chain = ['hash1']
 
@@ -171,9 +175,11 @@ class TestStats(TestCase):
             self.assertTrue(m_open.called)
             handle = m_open()
             self.assertEqual(handle.write.call_count, 3)
-            self.assertEqual(handle.write.call_args_list[0][0][0], 'node;block;stale_block;size;number_of_tx\n')
-            self.assertEqual(handle.write.call_args_list[1][0][0], 'node-0;hash1;False;45;2\n')
-            self.assertEqual(handle.write.call_args_list[2][0][0], 'node-1;hash2;True;1;0\n')
+            self.assertEqual(handle.write.call_args_list[0][0][0], 'node;block;stale_block;size;number_of_tx;'
+                                                                   'headers_propagation_median;headers_propagation_std'
+                                                                   'blocks_propagation_median;blocks_propagation_std\n')
+            self.assertEqual(handle.write.call_args_list[1][0][0], 'node-0;hash1;False;45;2;11;22;111;222\n')
+            self.assertEqual(handle.write.call_args_list[2][0][0], 'node-1;hash2;True;1;0;11;22;111;222\n')
 
     @patch('builtins.open', new_callable=mock_open)
     @patch('json.loads')
@@ -267,3 +273,37 @@ class TestStats(TestCase):
 
         self.assertEqual(len(received), 2)
         self.assertTrue(all(key in ['key1', 'key2'] for key in received.keys()))
+
+    def test_block_propagation(self):
+        node_1 = MagicMock()
+        node_1.headers_received.return_value = 10
+        node_1.block_received.return_value = 10
+        node_1.name = 'node_1'
+        node_2 = MagicMock()
+        node_2.headers_received.return_value = 20
+        node_2.block_received.return_value = 11
+        node_2.name = 'node_2'
+
+        self.executor.all_bitcoin_nodes = {'node_1': node_1, 'node_2': node_2}
+
+        statistics = self.stats.block_propagation('node_0', 'hash')
+
+        self.assertEqual(statistics[BitcoinNode.headers_received.__name__]['median'], 15)
+        self.assertEqual(statistics[BitcoinNode.headers_received.__name__]['std'], 5)
+        self.assertEqual(statistics[BitcoinNode.block_received.__name__]['median'], 10.5)
+        self.assertEqual(statistics[BitcoinNode.block_received.__name__]['std'], 0.5)
+
+    def test_block_propagation_no_propagation(self):
+        node_1 = MagicMock()
+        node_1.headers_received.return_value = -1
+        node_1.block_received.return_value = -1
+        node_1.name = 'node_1'
+
+        self.executor.all_bitcoin_nodes = {'node_1': node_1}
+
+        statistics = self.stats.block_propagation('node_0', 'hash')
+
+        self.assertTrue(np.isnan(statistics[BitcoinNode.headers_received.__name__]['median']))
+        self.assertTrue(np.isnan(statistics[BitcoinNode.headers_received.__name__]['std']))
+        self.assertTrue(np.isnan(statistics[BitcoinNode.block_received.__name__]['median']))
+        self.assertTrue(np.isnan(statistics[BitcoinNode.block_received.__name__]['std']))
