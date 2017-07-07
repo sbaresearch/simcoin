@@ -154,13 +154,13 @@ class TestStats(TestCase):
 
     @patch('json.loads')
     def test_update_blocks_csv(self, m_json):
-        DATA = dedent("""
+        data = dedent("""
             node;block
             node-0;hash1
             node-1;hash2
         """).strip()
 
-        with patch('builtins.open', mock_open(read_data=DATA)) as m_open:
+        with patch('builtins.open', mock_open(read_data=data)) as m_open:
             node_0 = MagicMock()
             self.executor.all_nodes = {'node-0': node_0}
             self.stats.block_propagation = MagicMock()
