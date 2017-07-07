@@ -162,10 +162,11 @@ class TestStats(TestCase):
 
         with patch('builtins.open', mock_open(read_data=data)) as m_open:
             node_0 = MagicMock()
-            self.executor.all_nodes = {'node-0': node_0}
+            node_0.block_received.return_value = 5
+            self.executor.all_bitcoin_nodes = {'node-0': node_0, 'node-1': node_0}
             self.stats.block_propagation = MagicMock()
             self.stats.block_propagation.return_value = {'median': 11, 'std': 22, 'values': np.array([1])}
-            m_json.side_effect = [{'size': 45, 'tx': ['tx1', 'tx2'], 'time': 5}, {'size': 1, 'tx': [], 'time': 55}]
+            m_json.side_effect = [{'size': 45, 'tx': ['tx1', 'tx2']}, {'size': 1, 'tx': []}]
             self.stats.consensus_chain = ['hash1']
 
             self.stats.update_blocks_csv()
@@ -178,7 +179,7 @@ class TestStats(TestCase):
                              'node;block;mine_time;stale_block;size;number_of_tx;'
                              'number_of_reached_nodes;blocks_propagation_median;blocks_propagation_std\n')
             self.assertEqual(handle.write.call_args_list[1][0][0], 'node-0;hash1;5;False;45;2;1;11;22\n')
-            self.assertEqual(handle.write.call_args_list[2][0][0], 'node-1;hash2;55;True;1;0;1;11;22\n')
+            self.assertEqual(handle.write.call_args_list[2][0][0], 'node-1;hash2;5;True;1;0;1;11;22\n')
 
     @patch('builtins.open', new_callable=mock_open)
     @patch('json.loads')

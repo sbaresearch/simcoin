@@ -72,13 +72,13 @@ class Stats:
                 if block_hash in self.consensus_chain:
                     stale = False
 
+                time = node.block_received(block_hash)
+                propagation_stats = self.block_propagation(node.name, block_hash, time)
+
                 block = json.loads(node.get_block(block_hash))
-
-                propagation_stats = self.block_propagation(node.name, block_hash, int(block['time']))
-
                 line = line.rstrip()
                 line += ';{};{};{};{};{};{};{}\n'\
-                    .format(block['time'], stale, block['size'], len(block['tx']),
+                    .format(time, stale, block['size'], len(block['tx']),
                             np.size(propagation_stats['values']),
                             propagation_stats['median'],
                             propagation_stats['std'])
