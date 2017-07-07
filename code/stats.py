@@ -152,7 +152,7 @@ class Stats:
 
         for node in self.executor.all_bitcoin_nodes.values():
             if source_node_name != node.name:
-                arrived = node.tx_arrived(tx_hash)
+                arrived = node.tx_received(tx_hash)
                 if arrived >= 0:
                     arrive_times.append(arrived - created_at)
 

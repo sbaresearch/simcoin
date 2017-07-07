@@ -323,10 +323,10 @@ class TestStats(TestCase):
     @patch('stats.calc_median_std')
     def test_tx_propagation(self, mock):
         node_1 = MagicMock()
-        node_1.tx_arrived.return_value = 11
+        node_1.tx_received.return_value = 11
         node_1.name = 'node_1'
         node_2 = MagicMock()
-        node_2.tx_arrived.return_value = -1
+        node_2.tx_received.return_value = -1
         node_2.name = 'node_2'
 
         self.executor.all_bitcoin_nodes = {'node_1': node_1, 'node_2': node_2}

@@ -121,6 +121,7 @@ class Executor:
 
             self.stats.save_consensus_chain()
             self.stats.update_blocks_csv()
+            self.stats.update_tx_csv()
             self.stats.save_chains()
             self.stats.node_stats()
             self.stats.aggregate_logs()

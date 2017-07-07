@@ -78,11 +78,23 @@ class BitcoinNode(Node):
     def cat_log_cmd(self):
         return dockercmd.exec_cmd(self.name, 'cat {}'.format(BitcoinNode.log_file))
 
-    def tx_received(self, tx_hash):
-        return -1
-
     def tx_created(self, tx_hash):
-        return -1
+        cmd = dockercmd.exec_cmd(self.name, 'cat {} | grep "Relaying wtx {}"'.format(BitcoinNode.log_file, tx_hash))
+        return_value = bash.call_silent(cmd)
+        if return_value != 0:
+            return -1
+        line = bash.check_output(cmd)
+        matched = re.match(config.log_timestamp_regex, line)
+        return datetime.strptime(matched.group(0), config.log_time_format).timestamp()
+
+    def tx_received(self, tx_hash):
+        cmd = dockercmd.exec_cmd(self.name, 'cat {} | grep "accepted {}"'.format(BitcoinNode.log_file, tx_hash))
+        return_value = bash.call_silent(cmd)
+        if return_value != 0:
+            return -1
+        line = bash.check_output(cmd)
+        matched = re.match(config.log_timestamp_regex, line)
+        return datetime.strptime(matched.group(0), config.log_time_format).timestamp()
 
     def block_is_new_tip(self, block_hash):
         cmd = dockercmd.exec_cmd(self.name, 'cat {} | grep "best={}"'.format(BitcoinNode.log_file, block_hash))
