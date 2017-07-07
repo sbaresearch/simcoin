@@ -72,7 +72,7 @@ class Stats:
                 if block_hash in self.consensus_chain:
                     stale = False
 
-                time = node.block_received(block_hash)
+                time = node.block_is_new_tip(block_hash)
                 propagation_stats = self.block_propagation(node.name, block_hash, time)
 
                 block = json.loads(node.get_block(block_hash))
@@ -112,7 +112,7 @@ class Stats:
 
         for node in self.executor.all_bitcoin_nodes.values():
             if source_node_name != node.name:
-                arrived = node.block_received(block_hash)
+                arrived = node.block_is_new_tip(block_hash)
                 if arrived >= 0:
                     arrive_times.append(arrived - mine_time)
         propagation_stats = {'values': np.array(arrive_times)}
