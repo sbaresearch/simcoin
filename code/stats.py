@@ -59,7 +59,7 @@ class Stats:
             file.truncate()
             iter_lines = iter(lines)
             first_line = next(iter_lines)
-            file.write(first_line.rstrip() + ';stale_block;size;number_of_tx;'
+            file.write(first_line.rstrip() + ';mine_time;stale_block;size;number_of_tx;'
                                              'number_of_reached_nodes;'
                                              'blocks_propagation_median;blocks_propagation_std\n')
 
@@ -68,16 +68,17 @@ class Stats:
                 node = self.executor.all_bitcoin_nodes[tokens[0].rstrip()]
                 block_hash = tokens[1].rstrip()
 
+                stale = True
                 if block_hash in self.consensus_chain:
-                    line = line.rstrip() + ';False'
-                else:
-                    line = line.rstrip() + ';True'
-
-                propagation_stats = self.block_propagation(node.name, block_hash)
+                    stale = False
 
                 block = json.loads(node.get_block(block_hash))
-                line += ';{};{};{};{};{}\n'\
-                    .format(block['size'], len(block['tx']),
+
+                propagation_stats = self.block_propagation(node.name, block_hash, int(block['time']))
+
+                line = line.rstrip()
+                line += ';{};{};{};{};{};{};{}\n'\
+                    .format(block['time'], stale, block['size'], len(block['tx']),
                             np.size(propagation_stats['values']),
                             propagation_stats['median'],
                             propagation_stats['std'])
@@ -106,14 +107,14 @@ class Stats:
                                    headers['size'], headers['median'], headers['std'],
                                    fork['size'], fork['median'], fork['std']))
 
-    def block_propagation(self, source_node_name, block_hash):
+    def block_propagation(self, source_node_name, block_hash, mine_time):
         arrive_times = []
 
         for node in self.executor.all_bitcoin_nodes.values():
             if source_node_name != node.name:
                 arrived = node.block_received(block_hash)
                 if arrived >= 0:
-                    arrive_times.append(arrived)
+                    arrive_times.append(arrived - mine_time)
         propagation_stats = {'values': np.array(arrive_times)}
 
         values = propagation_stats['values']

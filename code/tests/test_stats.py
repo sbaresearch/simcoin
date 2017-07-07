@@ -165,7 +165,7 @@ class TestStats(TestCase):
             self.executor.all_nodes = {'node-0': node_0}
             self.stats.block_propagation = MagicMock()
             self.stats.block_propagation.return_value = {'median': 11, 'std': 22, 'values': np.array([1])}
-            m_json.side_effect = [{'size': 45, 'tx': ['tx1', 'tx2']}, {'size': 1, 'tx': []}]
+            m_json.side_effect = [{'size': 45, 'tx': ['tx1', 'tx2'], 'time': 5}, {'size': 1, 'tx': [], 'time': 55}]
             self.stats.consensus_chain = ['hash1']
 
             self.stats.update_blocks_csv()
@@ -175,10 +175,10 @@ class TestStats(TestCase):
             handle = m_open()
             self.assertEqual(handle.write.call_count, 3)
             self.assertEqual(handle.write.call_args_list[0][0][0],
-                             'node;block;stale_block;size;number_of_tx;'
+                             'node;block;mine_time;stale_block;size;number_of_tx;'
                              'number_of_reached_nodes;blocks_propagation_median;blocks_propagation_std\n')
-            self.assertEqual(handle.write.call_args_list[1][0][0], 'node-0;hash1;False;45;2;1;11;22\n')
-            self.assertEqual(handle.write.call_args_list[2][0][0], 'node-1;hash2;True;1;0;1;11;22\n')
+            self.assertEqual(handle.write.call_args_list[1][0][0], 'node-0;hash1;5;False;45;2;1;11;22\n')
+            self.assertEqual(handle.write.call_args_list[2][0][0], 'node-1;hash2;55;True;1;0;1;11;22\n')
 
     @patch('builtins.open', new_callable=mock_open)
     @patch('json.loads')
@@ -275,15 +275,15 @@ class TestStats(TestCase):
 
     def test_block_propagation(self):
         node_1 = MagicMock()
-        node_1.block_received.return_value = 10
+        node_1.block_received.return_value = 11
         node_1.name = 'node_1'
         node_2 = MagicMock()
-        node_2.block_received.return_value = 20
+        node_2.block_received.return_value = 21
         node_2.name = 'node_2'
 
         self.executor.all_bitcoin_nodes = {'node_1': node_1, 'node_2': node_2}
 
-        statistics = self.stats.block_propagation('node_0', 'hash')
+        statistics = self.stats.block_propagation('node_0', 'hash', 1)
 
         self.assertEqual(statistics['median'], 15)
         self.assertEqual(statistics['std'], 5)
@@ -295,7 +295,7 @@ class TestStats(TestCase):
 
         self.executor.all_bitcoin_nodes = {'node_1': node_1}
 
-        statistics = self.stats.block_propagation('node_0', 'hash')
+        statistics = self.stats.block_propagation('node_0', 'hash', 1)
 
         self.assertTrue(np.isnan(statistics['median']))
         self.assertTrue(np.isnan(statistics['std']))
