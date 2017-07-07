@@ -107,7 +107,7 @@ def recursive_check(matrix, visited=None, start=1):
     output = [start]
     for neighbour in range(1, len(matrix)):
         if matrix[start][neighbour] > 0:
-            output += recursive_check(matrix, visited, neighbour)
+            output.extend(recursive_check(matrix, visited, neighbour))
     return output
 
 
