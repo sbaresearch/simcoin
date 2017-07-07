@@ -60,7 +60,8 @@ class Stats:
             iter_lines = iter(lines)
             first_line = next(iter_lines)
             file.write(first_line.rstrip() + ';stale_block;size;number_of_tx;'
-                                             'number_of_reached_nodes;blocks_propagation_median;blocks_propagation_std\n')
+                                             'number_of_reached_nodes;'
+                                             'blocks_propagation_median;blocks_propagation_std\n')
 
             for line in iter_lines:
                 tokens = line.split(';')
