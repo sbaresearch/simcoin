@@ -141,8 +141,8 @@ def prefix_log(lines, node_name):
         match = re.match(config.log_timestamp_regex, line)
         if match:
             prefixed_lines.append(re.sub(config.log_timestamp_regex
-                              , r'\1 {}'.format(node_name)
-                              , line))
+                                  , r'\1 {}'.format(node_name)
+                                  , line))
             prev_match = match.group(0)
         else:
             prefixed_lines.append('{} {} {}'.format(prev_match, node_name, line))
