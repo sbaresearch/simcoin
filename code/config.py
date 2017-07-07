@@ -35,6 +35,7 @@ warmup_blocks = 100
 
 log_timestamp_regex = r'^([0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}.[0-9]{6})'
 log_error_grep = 'grep -E -i "WARN|FATAL|ERROR|CRITICAL|EXCEPTION" {} || true'
+log_time_format = '%Y-%m-%d %H:%M:%S.%f'
 
 
 def host_dir(node):

@@ -6,6 +6,8 @@ import tccmd
 import bash
 import utils
 import logging
+from datetime import datetime
+import re
 
 
 class Node:
@@ -79,8 +81,14 @@ class BitcoinNode(Node):
     def headers_received(self):
         return -1
 
-    def block_received(self):
-        return -1
+    def block_received(self, block_hash):
+        cmd = dockercmd.exec_cmd(self.name, 'cat {} | grep "best={}"'.format(BitcoinNode.log_file, block_hash))
+        return_value = bash.call_silent(cmd)
+        if return_value != 0:
+            return -1
+        line = bash.check_output(cmd)
+        matched = re.match(config.log_timestamp_regex, line)
+        return datetime.strptime(matched.group(0), config.log_time_format).timestamp()
 
 
 class PublicBitcoinNode(BitcoinNode, PublicNode):
