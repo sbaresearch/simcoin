@@ -174,12 +174,9 @@ class TestStats(TestCase):
             m_open.assert_called_with(config.blocks_csv, 'r+')
             self.assertTrue(m_open.called)
             handle = m_open()
-            self.assertEqual(handle.write.call_count, 3)
-            self.assertEqual(handle.write.call_args_list[0][0][0],
-                             'node;block;mine_time;stale_block;size;number_of_tx;'
-                             'number_of_reached_nodes;blocks_propagation_median;blocks_propagation_std\n')
-            self.assertEqual(handle.write.call_args_list[1][0][0], 'node-0;hash1;5;False;45;2;1;11;22\n')
-            self.assertEqual(handle.write.call_args_list[2][0][0], 'node-1;hash2;5;True;1;0;1;11;22\n')
+            self.assertEqual(handle.write.call_count, 2)
+            self.assertEqual(handle.write.call_args_list[0][0][0], 'node-0;hash1;5;False;45;2;1;11;22\n')
+            self.assertEqual(handle.write.call_args_list[1][0][0], 'node-1;hash2;5;True;1;0;1;11;22\n')
 
     @patch('builtins.open', new_callable=mock_open)
     @patch('json.loads')

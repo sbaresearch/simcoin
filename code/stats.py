@@ -58,10 +58,8 @@ class Stats:
             file.seek(0)
             file.truncate()
             iter_lines = iter(lines)
-            first_line = next(iter_lines)
-            file.write(first_line.rstrip() + ';mine_time;stale_block;size;number_of_tx;'
-                                             'number_of_reached_nodes;'
-                                             'blocks_propagation_median;blocks_propagation_std\n')
+            # omit header
+            next(iter_lines)
 
             for line in iter_lines:
                 tokens = line.split(';')

@@ -49,7 +49,8 @@ def prepare_simulation_dir():
     bash.check_output('cp {} {}'.format(config.interval_csv, config.sim_dir))
 
     with open(config.blocks_csv, 'a') as file:
-        file.write('node;block\n')
+        file.write('node;block;mine_time;stale_block;size;number_of_tx;'
+                   'number_of_reached_nodes;propagation_median;propagation_std\n')
 
     with open(config.tx_csv, 'a') as file:
         file.write('node;tx;number_of_reached_nodes;propagation_median;propagation_std\n')
