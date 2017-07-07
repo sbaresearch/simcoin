@@ -59,7 +59,7 @@ def parse():
 
 
 def config_logger(verbose):
-    log_formatter = logging.Formatter("%(asctime)s.%(msecs)03d000 executor [%(threadName)-12.12s] "
+    log_formatter = logging.Formatter("%(asctime)s.%(msecs)03d000 simcoin [%(threadName)-12.12s] "
                                       "[%(levelname)-5.5s]  %(message)s", "%Y-%m-%d %H:%M:%S")
     logging.Formatter.converter = time.gmtime
     root_logger = logging.getLogger()
