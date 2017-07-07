@@ -59,7 +59,8 @@ class Stats:
             file.truncate()
             iter_lines = iter(lines)
             # omit header
-            next(iter_lines)
+            line = next(iter_lines)
+            file.write(line)
 
             for line in iter_lines:
                 tokens = line.split(';')
@@ -89,7 +90,8 @@ class Stats:
             file.truncate()
             iter_lines = iter(lines)
             # omit header
-            next(iter_lines)
+            line = next(iter_lines)
+            file.write(line)
 
             for line in iter_lines:
                 tokens = line.split(';')
