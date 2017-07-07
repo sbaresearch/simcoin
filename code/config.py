@@ -28,6 +28,7 @@ blocks_csv = sim_dir + 'blocks.csv'
 chains_csv = sim_dir + 'chains.csv'
 consensus_chain_csv = sim_dir + 'consensus_chain.csv'
 nodes_csv = sim_dir + 'nodes.csv'
+tx_csv = sim_dir + 'tx.csv'
 
 reference_node = 'node-0'
 

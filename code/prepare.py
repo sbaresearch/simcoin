@@ -51,6 +51,9 @@ def prepare_simulation_dir():
     with open(config.blocks_csv, 'a') as file:
         file.write('node;block\n')
 
+    with open(config.tx_csv, 'a') as file:
+        file.write('node;tx;number_of_reached_nodes;propagation_median;propagation_std\n')
+
 
 def remove_old_containers_if_exists():
     containers = bash.check_output(dockercmd.ps_containers())

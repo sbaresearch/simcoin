@@ -95,7 +95,7 @@ class Executor:
                         self.generate_block_and_save_creator(cmd_parts[1], 1)
                     elif cmd_parts[0] == 'tx':
                         node = self.all_bitcoin_nodes[cmd_parts[1]]
-                        node.generate_tx()
+                        generate_tx_and_save_creator(node)
                     else:
                         raise Exception('Unknown cmd={} in {}-file'.format(cmd_parts[0], config.interval_csv))
 
@@ -144,3 +144,9 @@ class Executor:
             for block in blocks:
                 file.write('{};{}\n'.format(node, block))
         self.all_bitcoin_nodes[node].mined_blocks += 1
+
+
+def generate_tx_and_save_creator(node):
+    tx_hash = node.generate_tx()
+    with open(config.tx_csv, 'a') as file:
+        file.write('{};{}\n'.format(node.name, tx_hash))
