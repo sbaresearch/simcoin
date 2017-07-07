@@ -78,7 +78,7 @@ class BitcoinNode(Node):
     def cat_log_cmd(self):
         return dockercmd.exec_cmd(self.name, 'cat {}'.format(BitcoinNode.log_file))
 
-    def headers_received(self):
+    def tx_received(self, tx_hash):
         return -1
 
     def block_received(self, block_hash):
