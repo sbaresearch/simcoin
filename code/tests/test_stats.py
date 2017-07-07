@@ -165,7 +165,7 @@ class TestStats(TestCase):
             node_0.block_is_new_tip.return_value = 5
             self.executor.all_bitcoin_nodes = {'node-0': node_0, 'node-1': node_0}
             self.stats.block_propagation = MagicMock()
-            self.stats.block_propagation.return_value = {'median': 11, 'std': 22, 'values': np.array([1])}
+            self.stats.block_propagation.return_value = {'values': np.array([1]), 'median': 11, 'std': 22}
             m_json.side_effect = [{'size': 45, 'tx': ['tx1', 'tx2']}, {'size': 1, 'tx': []}]
             self.stats.consensus_chain = ['hash1']
 
