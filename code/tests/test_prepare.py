@@ -35,9 +35,14 @@ class TestPrepare(TestCase):
         self.assertEqual(m_makedirs.call_count, 2)
         self.assertEqual(m_check_output.call_count, 2)
 
-        m_open.assert_called_with(config.blocks_csv, 'a')
+        self.assertEqual(m_open.call_count, 2)
+        self.assertEqual(m_open.call_args_list[0][0][0], config.blocks_csv)
+        self.assertEqual(m_open.call_args_list[1][0][0], config.tx_csv)
         handle = m_open()
-        handle.write.assert_called_once_with('node;block\n')
+        self.assertEqual(handle.write.call_args_list[0][0][0], 'node;block;mine_time;stale_block;size;number_of_tx;'
+                                                               'number_of_reached_nodes;propagation_median;propagation_std\n')
+        self.assertEqual(handle.write.call_args_list[1][0][0], 'node;tx;number_of_reached_nodes;propagation_median;propagation_std\n')
+
 
     @patch('bash.check_output')
     def test_remove_old_containers_if_exists(self, m_check_output):

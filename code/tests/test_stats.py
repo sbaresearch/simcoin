@@ -162,7 +162,7 @@ class TestStats(TestCase):
 
         with patch('builtins.open', mock_open(read_data=data)) as m_open:
             node_0 = MagicMock()
-            node_0.block_received.return_value = 5
+            node_0.block_is_new_tip.return_value = 5
             self.executor.all_bitcoin_nodes = {'node-0': node_0, 'node-1': node_0}
             self.stats.block_propagation = MagicMock()
             self.stats.block_propagation.return_value = {'median': 11, 'std': 22, 'values': np.array([1])}
@@ -273,10 +273,10 @@ class TestStats(TestCase):
 
     def test_block_propagation(self):
         node_1 = MagicMock()
-        node_1.block_received.return_value = 11
+        node_1.block_is_new_tip.return_value = 11
         node_1.name = 'node_1'
         node_2 = MagicMock()
-        node_2.block_received.return_value = 21
+        node_2.block_is_new_tip.return_value = 21
         node_2.name = 'node_2'
 
         self.executor.all_bitcoin_nodes = {'node_1': node_1, 'node_2': node_2}
@@ -288,7 +288,7 @@ class TestStats(TestCase):
 
     def test_block_propagation_no_propagation(self):
         node_1 = MagicMock()
-        node_1.block_received.return_value = -1
+        node_1.block_is_new_tip.return_value = -1
         node_1.name = 'node_1'
 
         self.executor.all_bitcoin_nodes = {'node_1': node_1}
