@@ -165,7 +165,7 @@ class TestStats(TestCase):
             node_0.block_is_new_tip.return_value = 5
             self.executor.all_bitcoin_nodes = {'node-0': node_0, 'node-1': node_0}
             self.stats.block_propagation = MagicMock()
-            self.stats.block_propagation.return_value = {'values': np.array([1]), 'median': 11, 'std': 22}
+            self.stats.block_propagation.return_value = {'values': np.array([1]), 'len': 1, 'median': 11, 'std': 22}
             m_json.side_effect = [{'size': 45, 'tx': ['tx1', 'tx2']}, {'size': 1, 'tx': []}]
             self.stats.consensus_chain = ['hash1']
 
@@ -189,7 +189,7 @@ class TestStats(TestCase):
             node_0 = MagicMock()
             self.executor.all_bitcoin_nodes = {'node-0': node_0, 'node-1': node_0}
             self.stats.tx_propagation = MagicMock()
-            self.stats.tx_propagation.return_value = {'values': np.array([1]), 'median': 11, 'std': 22}
+            self.stats.tx_propagation.return_value = {'values': np.array([1]), 'len': 1, 'median': 11, 'std': 22}
 
             self.stats.update_tx_csv()
 
@@ -237,88 +237,37 @@ class TestStats(TestCase):
         expected = ['2017-07-05 14:33:35.324000 node-0 test', '2017-07-05 14:33:35.324000 node-0 test']
         self.assertEqual(received, expected)
 
-    @patch('stats.median_std')
-    def test_tips_statistics_valid_headers(self, mock):
-        tips = ['skip', {'status': 'valid-headers', 'branchlen': 2}, {'status': 'valid-headers', 'branchlen': 3}]
-        stats.tips_statistics(tips)
+    @patch('stats.calc_median_std')
+    def test_tips_statistics_unknown_status(self, mock):
+        tips = ['skip', {'status': 'unknown'}]
+        with self.assertRaises(Exception) as context:
+            stats.tips_statistics(tips)
 
-        tips_info = mock.call_args[0][0]
-        self.assertEqual(len(tips_info.keys()), 3)
-        self.assertTrue(all(item in [2, 3] for item in tips_info['valid-headers']['values']))
-        self.assertEqual(np.size(tips_info['valid-fork']['values']), 0)
-        self.assertTrue(all(item in [2, 3] for item in tips_info['total']['values']))
+        self.assertTrue('Unknown tip type=unknown' in str(context.exception))
 
-    @patch('stats.median_std')
-    def test_tips_statistics_valid_fork(self, mock):
-        tips = ['skip', {'status': 'valid-fork', 'branchlen': 2}, {'status': 'valid-fork', 'branchlen': 3}]
-        stats.tips_statistics(tips)
-
-        tips_info = mock.call_args[0][0]
-        self.assertEqual(len(tips_info.keys()), 3)
-        self.assertEqual(np.size(tips_info['valid-headers']['values']), 0)
-        self.assertTrue(all(item in [2, 3] for item in tips_info['valid-fork']['values']))
-        self.assertTrue(all(item in [2, 3] for item in tips_info['total']['values']))
-
-    @patch('stats.median_std')
+    @patch('stats.calc_median_std')
     def test_tips_statistics_both(self, mock):
         tips = ['skip', {'status': 'valid-fork', 'branchlen': 2}, {'status': 'valid-headers', 'branchlen': 3}]
         stats.tips_statistics(tips)
 
-        tips_info = mock.call_args[0][0]
-        self.assertEqual(len(tips_info.keys()), 3)
-        self.assertTrue(all(item in [2] for item in tips_info['valid-fork']['values']))
-        self.assertTrue(all(item in [3] for item in tips_info['valid-headers']['values']))
-        self.assertTrue(all(item in [2, 3] for item in tips_info['total']['values']))
+        self.assertEqual(mock.call_args_list[0][0][0], [3])
+        self.assertEqual(mock.call_args_list[1][0][0], [2])
+        self.assertTrue(item in [2, 3] for item in mock.call_args_list[2][0][0])
 
-    def test_median_std_empty(self):
-        tips = {'key': {'values': np.array([])}}
-        received = stats.median_std(tips)
-
-        self.assertEqual(received['key']['size'], 0)
-        self.assertTrue(math.isnan(received['key']['median']))
-        self.assertTrue(math.isnan(received['key']['std']))
-
-    def test_median_std(self):
-        tips = {'key': {'values': np.array([1, 2, 3])}}
-        received = stats.median_std(tips)
-
-        self.assertEqual(received['key']['size'], 3)
-        self.assertEqual(received['key']['median'], 2)
-        self.assertTrue(received['key']['std'] != 0)
-
-    def test_median_std_two_tips(self):
-        tips = {'key1': {'values': np.array([2])}, 'key2': {'values': np.array([1])}}
-        received = stats.median_std(tips)
-
-        self.assertEqual(len(received), 2)
-        self.assertTrue(all(key in ['key1', 'key2'] for key in received.keys()))
-
-    def test_block_propagation(self):
+    @patch('stats.calc_median_std')
+    def test_block_propagation(self, mock):
         node_1 = MagicMock()
         node_1.block_is_new_tip.return_value = 11
         node_1.name = 'node_1'
         node_2 = MagicMock()
-        node_2.block_is_new_tip.return_value = 21
+        node_2.block_is_new_tip.return_value = -1
         node_2.name = 'node_2'
 
         self.executor.all_bitcoin_nodes = {'node_1': node_1, 'node_2': node_2}
 
-        statistics = self.stats.block_propagation('node_0', 'hash', 1)
+        self.stats.block_propagation('node_0', 'hash', 1)
 
-        self.assertEqual(statistics['median'], 15)
-        self.assertEqual(statistics['std'], 5)
-
-    def test_block_propagation_no_propagation(self):
-        node_1 = MagicMock()
-        node_1.block_is_new_tip.return_value = -1
-        node_1.name = 'node_1'
-
-        self.executor.all_bitcoin_nodes = {'node_1': node_1}
-
-        statistics = self.stats.block_propagation('node_0', 'hash', 1)
-
-        self.assertTrue(np.isnan(statistics['median']))
-        self.assertTrue(np.isnan(statistics['std']))
+        self.assertEqual(mock.call_args[0][0], np.array([10]))
 
     @patch('stats.calc_median_std')
     def test_tx_propagation(self, mock):

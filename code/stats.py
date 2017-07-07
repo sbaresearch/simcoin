@@ -78,7 +78,7 @@ class Stats:
                 line = line.rstrip()
                 line += ';{};{};{};{};{};{};{}\n'\
                     .format(time, stale, block['size'], len(block['tx']),
-                            np.size(propagation_stats['values']),
+                            propagation_stats['len'],
                             propagation_stats['median'],
                             propagation_stats['std'])
                 file.write(line)
@@ -104,7 +104,7 @@ class Stats:
 
                 line = line.rstrip()
                 line += ';{};{};{}\n'\
-                    .format(np.size(propagation_stats['values']), propagation_stats['median'], propagation_stats['std'])
+                    .format(propagation_stats['len'], propagation_stats['median'], propagation_stats['std'])
                 file.write(line)
 
     def node_stats(self):
@@ -138,15 +138,9 @@ class Stats:
                 arrived = node.block_is_new_tip(block_hash)
                 if arrived >= 0:
                     arrive_times.append(arrived - mine_time)
-        propagation_stats = {'values': np.array(arrive_times)}
 
-        values = propagation_stats['values']
-        if len(values) == 0:
-            propagation_stats['median'] = float('nan')
-            propagation_stats['std'] = float('nan')
-        else:
-            propagation_stats['median'] = np.median(values)
-            propagation_stats['std'] = np.std(values)
+        propagation_stats = calc_median_std(np.array(arrive_times))
+        propagation_stats['values'] = np.array(arrive_times)
         return propagation_stats
 
     def tx_propagation(self, source_node_name, tx_hash, created_at):
@@ -191,33 +185,21 @@ def prefix_log(lines, node_name):
 
 
 def tips_statistics(tips):
-    tips_info = {
-        'valid-headers': {'values': np.array([], dtype=np.uint)},
-        'valid-fork': {'values': np.array([], dtype=np.uint)},
-    }
+    valid_headers = []
+    valid_fork = []
 
     iter_tips = iter(tips)
     # omit first active tip
     next(iter_tips)
 
     for tip in iter_tips:
-        tips_info[tip['status']]['values'] \
-            = np.append(tips_info[tip['status']]['values'], tip['branchlen'])
-    tips_info['total'] \
-        = {'values': np.append(tips_info['valid-headers']['values'], tips_info['valid-fork']['values'])}
-
-    tips_info = median_std(tips_info)
-    return tips_info
-
-
-def median_std(tips_info):
-    for key in tips_info.keys():
-        tips_info[key]['size'] = np.size(tips_info[key]['values'])
-
-        if tips_info[key]['size'] > 0:
-            tips_info[key]['median'] = np.median(tips_info[key]['values'])
-            tips_info[key]['std'] = np.std(tips_info[key]['values'])
+        if tip['status'] == 'valid-headers':
+            valid_headers.append(tip['branchlen'])
+        elif tip['status'] == 'valid-fork':
+            valid_fork.append(tip['branchlen'])
         else:
-            tips_info[key]['median'] = float('nan')
-            tips_info[key]['std'] = float('nan')
-    return tips_info
+            raise Exception('Unknown tip type={}'.format(tip['status']))
+
+    return {'valid-headers': calc_median_std(np.array(valid_headers)),
+            'valid-fork': calc_median_std(np.array(valid_fork)),
+            'total': calc_median_std(np.array(valid_fork + valid_headers))}
