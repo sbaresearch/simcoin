@@ -26,7 +26,7 @@ parser.add_argument('--selfish-nodes'
 parser.add_argument('--latency'
                     , default=200
                     , type=checkargs.check_positive_int
-                    , help='Latency between nodes in milliseconds.'
+                    , help='Latency of nodes in milliseconds.'
                     )
 
 parser.add_argument('--connectivity'
@@ -57,15 +57,16 @@ for i in range(1, size_matrix):
 matrix[0] = header
 
 for i in range(1, size_matrix):
-    for j in range(1, i):
-        if random.random() < args.connectivity:
-            matrix[i][j] = matrix[j][i] = args.latency
+    for j in range(1, i + 1):
+        if i is j:
+            matrix[i][i] = args.latency
+        elif random.random() < args.connectivity:
+            matrix[i][j] = matrix[j][i] = 1
         else:
-            matrix[i][j] = matrix[j][i] = -1
+            matrix[i][j] = matrix[j][i] = 0
 
 print(pandas.DataFrame(matrix))
 
 with open(config.network_config, "w") as file:
     writer = csv.writer(file, delimiter=';')
-    writer.writerows([['nodes', args.nodes], ['selfish-nodes', args.selfish_nodes]])
     writer.writerows(matrix)

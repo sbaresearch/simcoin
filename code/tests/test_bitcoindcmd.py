@@ -1,10 +1,10 @@
 from unittest import TestCase
-import bitcoindcmd
+import bitcoincmd
 
 
 class TestBitcoindcmd(TestCase):
 
     def test_start_selfish_miner_private_node(self):
-        cmd = bitcoindcmd.start_selfish_mining()
+        cmd = bitcoincmd.start_selfish_mining()
 
         self.assertTrue('  ' not in cmd)

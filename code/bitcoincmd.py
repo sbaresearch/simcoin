@@ -56,10 +56,7 @@ def get_best_block_hash(node):
 
 
 def generate_block(node, amount=1):
-    cmd = exec_cli(node, 'generate {}'.format(amount))
-    return (cmd + r' | jq -r "to_entries[] | \"'
-            + node + r'; \(.value)\"" | tee -a '
-            + config.root_dir + '/blocks.csv')
+    return exec_cli(node, 'generate {}'.format(amount))
 
 
 def get_new_address(node):
@@ -71,7 +68,7 @@ def send_to_address(node, address, amount):
 
 
 def get_chain_tips(node):
-    return exec_cli(node, 'getchaintips > ' + guest_dir + '/chaintips.json')
+    return exec_cli(node, 'getchaintips')
 
 
 def get_block_count(node):
@@ -92,13 +89,6 @@ def get_block(node, block_hash):
 
 def connect(node, outgoing_ips):
     return [exec_cli(node, 'addnode ' + ip + ' add') for ip in outgoing_ips]
-
-
-def get_block_with_height(node, height):
-    get_hash_cmd = 'hash=$(' + get_block_hash(node, height) + ')'
-    get_block_cmd = get_block(node, '$hash')
-
-    return '; '.join([get_hash_cmd, get_block_cmd])
 
 
 def exec_cli(node, command):
