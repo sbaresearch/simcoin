@@ -43,18 +43,21 @@ class TestIntervals(TestCase):
     def test_create_intervals(self, _):
         end = 4
         block_events = [0.5, 2.1, end]
-        tx_events = [0.5, 0.9, 1.0, end]
+        tx_per_interval = 2
         nodes = ['node-0', 'node-1']
 
-        event_intervals = intervals.create_intervals(block_events, tx_events, end, nodes)
+        event_intervals = intervals.create_intervals(block_events, tx_per_interval, end, nodes)
 
         self.assertEqual(len(event_intervals), 4)
         self.assertEqual(len(event_intervals[0]), 3)
-        self.assertEqual(len(event_intervals[1]), 1)
+        self.assertEqual(len(event_intervals[1]), 2)
+        self.assertEqual(len(event_intervals[2]), 3)
+        self.assertEqual(len(event_intervals[3]), 2)
+        self.assertTrue('tx ' in event_intervals[0][0])
         self.assertTrue('tx ' in event_intervals[1][0])
-        self.assertEqual(len(event_intervals[2]), 1)
-        self.assertTrue('block ' in event_intervals[2][0])
-        self.assertEqual(len(event_intervals[3]), 0)
+        self.assertTrue('tx ' in event_intervals[2][0])
+        self.assertTrue('block ' in event_intervals[0][2])
+        self.assertTrue('block ' in event_intervals[2][2])
 
     def test_check_if_only_one_block_per_node(self):
         intervals.check_if_only_block_per_node(['nodes-1', 'nodes-0'])

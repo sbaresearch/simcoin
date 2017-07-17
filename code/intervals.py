@@ -19,13 +19,11 @@ def main():
     nodes = create_nodes_array(args.nodes, args.selfish_nodes)
 
     expected_blocks = calc_expected_events(args.amount_of_intervals, args.blocks_per_interval)
-    expected_tx = calc_expected_events(args.amount_of_intervals, args.tx_per_interval)
 
     scale = 0.1
     block_events = create_events(scale, args.blocks_per_interval, expected_blocks)
-    tx_events = create_events(scale, args.tx_per_interval, expected_tx)
 
-    intervals = create_intervals(block_events, tx_events, args.amount_of_intervals, nodes)
+    intervals = create_intervals(block_events, args.tx_per_interval, args.amount_of_intervals, nodes)
 
     print(pandas.DataFrame(intervals))
 
@@ -62,7 +60,7 @@ def parse():
 
     parser.add_argument('--tx-per-interval'
                         , default=1
-                        , type=checkargs.check_positive_float
+                        , type=checkargs.check_positive_int
                         , help='Tx per interval.'
                         )
 
@@ -90,11 +88,15 @@ def create_events(scale, events_per_interval, number_of_events):
     return np.cumsum(random_event_intervals)
 
 
-def create_intervals(block_events, tx_events, amount_of_intervals, nodes):
+def create_intervals(block_events, tx_per_interval, amount_of_intervals, nodes):
     index_block = 0
     index_tx = 0
     intervals = [[] for _ in range(amount_of_intervals)]
     for index, interval in enumerate(intervals):
+        for i in range(tx_per_interval):
+            interval.append('tx ' + random.choice(nodes))
+            index_tx += 1
+
         chosen_nodes = []
         while block_events[index_block] < index + 1:
             node = random.choice(nodes)
@@ -103,10 +105,6 @@ def create_intervals(block_events, tx_events, amount_of_intervals, nodes):
             index_block += 1
 
         check_if_only_block_per_node(chosen_nodes)
-
-        while tx_events[index_tx] < index + 1:
-            interval.append('tx ' + random.choice(nodes))
-            index_tx += 1
     return intervals
 
 
