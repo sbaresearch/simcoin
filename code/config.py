@@ -20,7 +20,7 @@ selfish_node_name = selfish_node_prefix + '{}'
 selfish_node_proxy_name = selfish_node_name + selfish_node_proxy_postfix
 
 network_config = 'network.csv'
-tick_csv = 'ticks.csv'
+interval_csv = 'intervals.csv'
 aggregated_log = sim_dir + 'aggregated.log'
 log_file = 'debug.log'
 tmp_log = sim_dir + 'tmp.log'
@@ -28,6 +28,7 @@ blocks_csv = sim_dir + 'blocks.csv'
 chains_csv = sim_dir + 'chains.csv'
 consensus_chain_csv = sim_dir + 'consensus_chain.csv'
 nodes_csv = sim_dir + 'nodes.csv'
+tx_csv = sim_dir + 'tx.csv'
 
 reference_node = 'node-0'
 
@@ -35,6 +36,7 @@ warmup_blocks = 100
 
 log_timestamp_regex = r'^([0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}.[0-9]{6})'
 log_error_grep = 'grep -E -i "WARN|FATAL|ERROR|CRITICAL|EXCEPTION" {} || true'
+log_time_format = '%Y-%m-%d %H:%M:%S.%f'
 
 
 def host_dir(node):

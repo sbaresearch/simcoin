@@ -3,6 +3,11 @@ import bitcoincmd
 import proxycmd
 import config
 import tccmd
+import bash
+import utils
+import logging
+from datetime import datetime
+import re
 
 
 class Node:
@@ -11,7 +16,10 @@ class Node:
         self.ip = ip
 
     def rm(self):
-        return dockercmd.rm_container(self.name)
+        return bash.check_output(dockercmd.rm_container(self.name))
+
+    def rm_silent(self):
+        return bash.call_silent(dockercmd.rm_container(self.name))
 
 
 class PublicNode:
@@ -30,45 +38,64 @@ class BitcoinNode(Node):
         self.mined_blocks = 0
 
     def run(self):
-        return dockercmd.run_node(self, bitcoincmd.start_user())
+        return bash.check_output(bitcoincmd.start(self))
 
     def delete_peers_file(self):
-        return bitcoincmd.rm_peers(self.name)
+        return bash.check_output(bitcoincmd.rm_peers(self.name))
 
-    def wait_for_highest_tip_of_node(self, node):
-        highest_tip = bitcoincmd.get_best_block_hash(node.name)
-        node_tip = bitcoincmd.get_best_block_hash(self.name)
-        return 'while [[ $(' + highest_tip + ') != $(' + node_tip + ') ]]; ' \
-               'do echo Waiting for blocks to spread...; sleep 0.2; done'
-
-    def connect(self, nodes):
-        return bitcoincmd.connect(self.name, nodes)
+    def connect(self, ips):
+        for ip in ips:
+            bash.check_output(bitcoincmd.connect(self.name, ip))
 
     def generate_tx(self):
-        create_address_cmd = 'fresh_address=$(' + bitcoincmd.get_new_address(self.name) + ')'
-        create_tx_cmd = bitcoincmd.send_to_address(self.name, '$fresh_address', 0.1)
-        return '; '.join([create_address_cmd, create_tx_cmd])
+        address = bash.check_output(bitcoincmd.get_new_address(self.name))
+        return bash.check_output(bitcoincmd.send_to_address(self.name, address, 0.1))
 
     def generate_block(self, amount=1):
-        return bitcoincmd.generate_block(self.name, amount)
+        return bash.check_output(bitcoincmd.generate_block(self.name, amount))
 
     def get_chain_tips(self):
-        return bitcoincmd.get_chain_tips(self.name)
+        return bash.check_output(bitcoincmd.get_chain_tips(self.name))
 
     def get_block_count(self):
-        return bitcoincmd.get_block_count(self.name)
+        return bash.check_output(bitcoincmd.get_block_count(self.name))
 
     def get_block_hash(self, height):
-        return bitcoincmd.get_block_hash(self.name, height)
+        return bash.check_output(bitcoincmd.get_block_hash(self.name, height))
+
+    def get_block_hash_silent(self, height):
+        return bash.call_silent(bitcoincmd.get_block_hash(self.name, height))
 
     def get_block(self, block_hash):
-        return bitcoincmd.get_block(self.name, block_hash)
+        return bash.check_output(bitcoincmd.get_block(self.name, block_hash))
 
-    def cat_log(self):
-        return dockercmd.exec_cmd(self.name, 'cat {}'.format(BitcoinNode.log_file))
+    def get_best_block_hash(self):
+        return bash.check_output(bitcoincmd.get_best_block_hash(self.name))
 
     def grep_log_for_errors(self):
-        return dockercmd.exec_cmd(self.name, config.log_error_grep.format(BitcoinNode.log_file))
+        return bash.check_output(dockercmd.exec_cmd(self.name, config.log_error_grep.format(BitcoinNode.log_file)))
+
+    def cat_log_cmd(self):
+        return dockercmd.exec_cmd(self.name, 'cat {}'.format(BitcoinNode.log_file))
+
+    def tx_created(self, tx_hash):
+        return get_timestamp(self.name, 'Relaying wtx {}'.format(tx_hash))
+
+    def tx_received(self, tx_hash):
+        return get_timestamp(self.name, 'accepted {}'.format(tx_hash))
+
+    def block_is_new_tip(self, block_hash):
+        return get_timestamp(self.name, 'best={}'.format(block_hash))
+
+
+def get_timestamp(node_name, grep_cmd):
+    cmd = dockercmd.exec_cmd(node_name, 'cat {} | grep "{}"'.format(BitcoinNode.log_file, grep_cmd))
+    return_value = bash.call_silent(cmd)
+    if return_value != 0:
+        return -1
+    line = bash.check_output(cmd)
+    matched = re.match(config.log_timestamp_regex, line)
+    return datetime.strptime(matched.group(0), config.log_time_format).timestamp()
 
 
 class PublicBitcoinNode(BitcoinNode, PublicNode):
@@ -77,7 +104,7 @@ class PublicBitcoinNode(BitcoinNode, PublicNode):
         PublicNode.__init__(self)
 
     def add_latency(self):
-        return [dockercmd.exec_cmd(self.name, tccmd.add(self.latency))]
+        return bash.check_output(tccmd.add(self.name, self.latency))
 
 
 class SelfishPrivateNode(BitcoinNode):
@@ -95,19 +122,20 @@ class ProxyNode(Node, PublicNode):
         self.args = args
 
     def run(self, start_hash):
-        return dockercmd.run_selfish_proxy(self, proxycmd.run_proxy(self, start_hash))
+        return bash.check_output(proxycmd.run_proxy(self, start_hash))
 
     def wait_for_highest_tip_of_node(self, node):
-        current_best_block_hash_cmd = 'current_best=$(' + bitcoincmd.get_best_block_hash(node.name) + ')'
-        wait_for_selfish_node_cmd = 'while [[ $current_best != $(' + proxycmd.get_best_public_block_hash(self.name) + \
-                                    ') ]]; do echo Waiting for blocks to spread...; sleep 0.2; done'
-        return '; '.join(['sleep 2', current_best_block_hash_cmd, wait_for_selfish_node_cmd])
+        block_hash = bash.check_output(bitcoincmd.get_best_block_hash(node.name))
+        while block_hash != bash.check_output(proxycmd.get_best_public_block_hash(self.name)):
+            utils.sleep(0.2)
+            logging.debug('Waiting for  blocks to spread...')
 
-    def cat_log(self):
+    def cat_log_cmd(self):
         return dockercmd.exec_cmd(self.name, 'cat {}'.format(ProxyNode.log_file))
 
     def grep_log_for_errors(self):
-        return dockercmd.exec_cmd(self.name, config.log_error_grep.format(ProxyNode.log_file))
+        return bash.check_output(dockercmd.exec_cmd(self.name, config.log_error_grep.format(ProxyNode.log_file)))
 
     def add_latency(self):
-        return [dockercmd.exec_cmd(self.name, cmd) for cmd in tccmd.add_except_ip(self.latency, self.private_ip)]
+        for cmd in tccmd.add_except_ip(self.name, self.latency, self.private_ip):
+            bash.check_output(cmd)

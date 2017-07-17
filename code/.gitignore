@@ -100,5 +100,5 @@ datadirs
 
 # project specific
 network.csv
-ticks.csv
+intervals.csv
 out

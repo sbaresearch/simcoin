@@ -6,24 +6,37 @@ import os
 import utils
 
 
-class Prepare:
-    def __init__(self, _executor):
-        self.executor = _executor
+def give_nodes_spendable_coins(nodes):
+    logging.info('Begin warmup')
 
-    def warmup_block_generation(self):
-        logging.info('Begin warmup')
+    run_nodes(nodes)
 
-        for i, node in enumerate(self.executor.all_bitcoin_nodes.values()):
-            wait_until_height_reached(node, i)
-            bash.check_output(node.generate_block())
+    for i, node in enumerate(nodes):
+        node.connect([str(node.ip) for node in nodes[max(0, i - 5):i]])
+        wait_until_height_reached(node, i)
+        node.generate_block()
 
-        node = self.executor.all_bitcoin_nodes[config.reference_node]
-        wait_until_height_reached(node, len(self.executor.all_bitcoin_nodes))
-        bash.check_output(node.generate_block(config.warmup_blocks))
-        [wait_until_height_reached(node, config.warmup_blocks + len(self.executor.all_bitcoin_nodes))
-         for node in self.executor.all_bitcoin_nodes.values()]
+    wait_until_height_reached(nodes[0], len(nodes))
+    nodes[0].generate_block(config.warmup_blocks)
 
-        logging.info('End of warmup')
+    for node in nodes:
+        wait_until_height_reached(node, config.warmup_blocks + len(nodes))
+
+    delete_nodes(nodes)
+
+    logging.info('End of warmup')
+
+
+def delete_nodes(nodes):
+    for node in nodes:
+        node.delete_peers_file()
+        node.rm()
+
+
+def run_nodes(nodes):
+    for node in nodes:
+        node.run()
+    utils.sleep(4 + len(nodes) * 0.2)
 
 
 def prepare_simulation_dir():
@@ -33,10 +46,14 @@ def prepare_simulation_dir():
         os.makedirs(config.sim_dir)
 
     bash.check_output('cp {} {}'.format(config.network_config, config.sim_dir))
-    bash.check_output('cp {} {}'.format(config.tick_csv, config.sim_dir))
+    bash.check_output('cp {} {}'.format(config.interval_csv, config.sim_dir))
 
     with open(config.blocks_csv, 'a') as file:
-        file.write('node; block\n')
+        file.write('node;block;mine_time;stale_block;size;number_of_tx;'
+                   'number_of_reached_nodes;propagation_median;propagation_std\n')
+
+    with open(config.tx_csv, 'a') as file:
+        file.write('node;tx;number_of_reached_nodes;propagation_median;propagation_std\n')
 
 
 def remove_old_containers_if_exists():
@@ -49,10 +66,10 @@ def recreate_network():
     exit_code = bash.call_silent(dockercmd.inspect_network())
     if exit_code == 0:
         bash.check_output(dockercmd.rm_network())
-    bash.check_output(dockercmd.create_network(config.ip_range))
+    bash.check_output(dockercmd.create_network())
 
 
 def wait_until_height_reached(node, height):
-    while int(bash.check_output(node.get_block_count())) < height:
+    while int(node.get_block_count()) < height:
         logging.debug('Waiting until height={} is reached...'.format(str(height)))
         utils.sleep(0.2)
