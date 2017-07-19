@@ -81,8 +81,8 @@ class TestBitcoincmd(TestCase):
         self.assertTrue('  ' not in cmd)
         self.assertTrue('getblock block_hash' in cmd)
 
-    def test_set_tx_fee_high_enough(self):
-        cmd = bitcoincmd.set_tx_fee_high_enough('node')
+    def test_set_tx_fee_as_low_as_possible(self):
+        cmd = bitcoincmd.set_tx_fee_as_low_as_possible('node')
 
         self.assertTrue('  ' not in cmd)
         self.assertTrue('settxfee 0.1' in cmd)

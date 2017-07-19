@@ -87,8 +87,8 @@ def get_block(node, block_hash):
     return exec_cli(node, 'getblock ' + block_hash)
 
 
-def set_tx_fee_high_enough(node):
-    return exec_cli(node, 'settxfee 0.1')
+def set_tx_fee_as_low_as_possible(node):
+    return exec_cli(node, 'settxfee 0.00000001')
 
 
 def connect(node, ip):
