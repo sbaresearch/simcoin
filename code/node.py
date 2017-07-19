@@ -49,7 +49,7 @@ class BitcoinNode(Node):
 
     def generate_tx(self):
         address = bash.check_output(bitcoincmd.get_new_address(self.name))
-        return bash.check_output(bitcoincmd.send_to_address(self.name, address, 0.1))
+        return bash.check_output(bitcoincmd.send_to_address(self.name, address, 0.00001))
 
     def get_balance(self):
         return bash.check_output(bitcoincmd.get_balance(self.name))
