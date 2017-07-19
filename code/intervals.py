@@ -16,12 +16,13 @@ class Node:
 
 
 def main():
-    random.seed(1)
-    np.random.seed(1)
     np.set_printoptions(precision=2, suppress=True)
 
     args = parse()
     nodes = create_nodes(args)
+
+    random.seed(int(args.seed))
+    np.random.seed(int(args.seed))
 
     intervals = create_intervals(nodes, args.tx_per_interval, args.amount_of_intervals)
 
@@ -62,6 +63,12 @@ def parse():
                         , default=1
                         , type=checkargs.check_positive_int
                         , help='Tx per interval.'
+                        )
+
+    parser.add_argument('--seed'
+                        , default=0
+                        , type=checkargs.check_positive_int
+                        , help='Set the seed.'
                         )
 
     args = parser.parse_args()
@@ -119,7 +126,8 @@ def create_intervals(nodes, tx_per_interval, amount_of_intervals):
                 interval.append('block ' + node.name)
                 node.processed += 1
             if node.processed - processed > 1:
-                raise Exception("Block interval is too low. Only one block per node per interval is allowed.")
+                raise Exception("Intervals per block is too low. Only one block per node per interval is allowed. "
+                                "Raise the intervals_per_block or try a different seeed. ")
 
     return intervals
 
