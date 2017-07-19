@@ -89,7 +89,7 @@ def create_nodes(args):
 
     sum_of_shares = 0
     for node in nodes:
-        share = float(input('Share of computation power of {} [0, 1]: '.format(node.name)))
+        share = round(float(input('Share of computation power of {} [0, 1]: '.format(node.name))), 2)
         node.block_events = create_block_events(share, args.intervals_per_block, expected_blocks)
         sum_of_shares += share
     if sum_of_shares != 1:
