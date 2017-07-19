@@ -67,7 +67,7 @@ class TestIntervals(TestCase):
 
         with self.assertRaises(Exception) as context:
             intervals.create_intervals([node_0], 0, end)
-        self.assertTrue('Block interval is too low. Only one block per node per interval is allowed.' in str(context.exception))
+        self.assertTrue('Intervals per block is too low.' in str(context.exception))
 
     def test_create_block_events(self):
         block_events = intervals.create_block_events(0.5, 5, 10)

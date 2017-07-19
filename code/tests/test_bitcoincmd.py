@@ -85,7 +85,7 @@ class TestBitcoincmd(TestCase):
         cmd = bitcoincmd.set_tx_fee_as_low_as_possible('node')
 
         self.assertTrue('  ' not in cmd)
-        self.assertTrue('settxfee 0.1' in cmd)
+        self.assertTrue('settxfee' in cmd)
 
     def test_connect(self):
         cmd = bitcoincmd.connect('node', 'ip1')
