@@ -208,9 +208,9 @@ class TestStats(TestCase):
         node_0.name = 'name'
         node_0.mined_blocks = 45
         self.executor.all_bitcoin_nodes = {'0': node_0}
-        m_calc_tips_stats.return_value = {'total': {'size': 1, 'median': 2, 'std': 3},
-                                          'valid-headers': {'size': 11, 'median': 22, 'std': 33,},
-                                          'valid-fork': {'size': 111, 'median': 222, 'std': 333,}}
+        m_calc_tips_stats.return_value = {'total': {'len': 1, 'median': 2, 'std': 3},
+                                          'valid-headers': {'len': 11, 'median': 22, 'std': 33,},
+                                          'valid-fork': {'len': 111, 'median': 222, 'std': 333,}}
         self.stats.node_stats()
 
         m_open.assert_called_with(config.nodes_csv, 'w')
