@@ -59,6 +59,14 @@ def get_new_address(node):
     return exec_cli(node, 'getnewaddress')
 
 
+def list_lock_unspent(node):
+    return exec_cli(node, 'listlockunspent')
+
+
+def list_unspent(node):
+    return exec_cli(node, 'listunspent')
+
+
 def send_to_address(node, address, amount):
     return exec_cli(node, 'sendtoaddress ' + address + ' ' + str(amount))
 

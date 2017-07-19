@@ -53,6 +53,12 @@ class BitcoinNode(Node):
     def get_new_address(self):
         return bash.check_output(bitcoincmd.get_new_address(self.name))
 
+    def list_unspent(self):
+        return bash.check_output(bitcoincmd.list_unspent(self.name))
+
+    def list_lock_unspent(self):
+        return bash.check_output(bitcoincmd.list_lock_unspent(self.name))
+
     def get_balance(self):
         return bash.check_output(bitcoincmd.get_balance(self.name))
 
