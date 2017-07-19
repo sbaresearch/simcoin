@@ -81,6 +81,12 @@ class TestBitcoincmd(TestCase):
         self.assertTrue('  ' not in cmd)
         self.assertTrue('getblock block_hash' in cmd)
 
+    def test_set_tx_fee_high_enough(self):
+        cmd = bitcoincmd.set_tx_fee_high_enough('node')
+
+        self.assertTrue('  ' not in cmd)
+        self.assertTrue('settxfee 0.1' in cmd)
+
     def test_connect(self):
         cmd = bitcoincmd.connect('node', 'ip1')
 
