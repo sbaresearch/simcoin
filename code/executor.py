@@ -20,6 +20,7 @@ class Executor:
         self.count = 0
         self.interval_duration = args.interval_duration
         self.stats = None
+        self.recipient_address_for_all_tx = None
 
         nodes, selfish_nodes = networktopology.read_amount_of_nodes()
         ip_addresses = ipaddress.ip_network(config.ip_range).hosts()
@@ -89,6 +90,8 @@ class Executor:
             for node in self.all_public_nodes.values():
                 node.add_latency()
 
+            self.recipient_address_for_all_tx = self.one_normal_node.get_new_address()
+
             reader = csv.reader(open(config.interval_csv, "r"), delimiter=";")
             start_time = time.time()
             for i, line in enumerate(reader):
@@ -98,7 +101,7 @@ class Executor:
                         self.generate_block_and_save_creator(cmd_parts[1], 1)
                     elif cmd_parts[0] == 'tx':
                         node = self.all_bitcoin_nodes[cmd_parts[1]]
-                        generate_tx_and_save_creator(node)
+                        generate_tx_and_save_creator(node, self.recipient_address_for_all_tx)
                     else:
                         raise Exception('Unknown cmd={} in {}-file'.format(cmd_parts[0], config.interval_csv))
 
@@ -150,7 +153,7 @@ class Executor:
         self.all_bitcoin_nodes[node].mined_blocks += 1
 
 
-def generate_tx_and_save_creator(node):
-    tx_hash = node.generate_tx()
+def generate_tx_and_save_creator(node, address):
+    tx_hash = node.generate_tx(address)
     with open(config.tx_csv, 'a') as file:
         file.write('{};{}\n'.format(node.name, tx_hash))
