@@ -63,6 +63,10 @@ def send_to_address(node, address, amount):
     return exec_cli(node, 'sendtoaddress ' + address + ' ' + str(amount))
 
 
+def get_balance(node):
+    return exec_cli(node, 'getbalance')
+
+
 def get_chain_tips(node):
     return exec_cli(node, 'getchaintips')
 

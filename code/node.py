@@ -51,6 +51,9 @@ class BitcoinNode(Node):
         address = bash.check_output(bitcoincmd.get_new_address(self.name))
         return bash.check_output(bitcoincmd.send_to_address(self.name, address, 0.1))
 
+    def get_balance(self):
+        return bash.check_output(bitcoincmd.get_balance(self.name))
+
     def set_tx_fee_high_enough(self):
         return bash.check_output(bitcoincmd.set_tx_fee_high_enough(self.name))
 
