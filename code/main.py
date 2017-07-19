@@ -32,7 +32,11 @@ def main():
     stats = Stats(executor)
     executor.stats = stats
 
+    start = time.time()
+
     executor.execute()
+
+    logging.info("the duration of the experiment was {} seconds".format(str(time.time() - start)))
 
 
 def parse():
