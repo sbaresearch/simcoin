@@ -126,9 +126,9 @@ class Stats:
                            '{};{};{};'
                            '{};{};{}\n'
                            .format(node.name, node.mined_blocks,
-                                   total['size'], total['median'], total['std'],
-                                   headers['size'], headers['median'], headers['std'],
-                                   fork['size'], fork['median'], fork['std']))
+                                   total['len'], total['median'], total['std'],
+                                   headers['len'], headers['median'], headers['std'],
+                                   fork['len'], fork['median'], fork['std']))
 
     def block_propagation(self, source_node_name, block_hash, mine_time):
         arrive_times = []
