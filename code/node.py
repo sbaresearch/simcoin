@@ -36,6 +36,7 @@ class BitcoinNode(Node):
         self.name = name
         self.ip = ip
         self.mined_blocks = 0
+        self.spent_to_address = ''
 
     def run(self):
         return bash.check_output(bitcoincmd.start(self))
