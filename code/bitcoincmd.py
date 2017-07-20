@@ -43,6 +43,10 @@ def transform_to_cmd(args_to_transform):
     return daemon + ' '.join(args_to_transform.values())
 
 
+def stop(node):
+    return exec_cli(node, 'stop')
+
+
 def rm_peers(node):
     return dockercmd.exec_cmd(node, 'rm -f {}/regtest/peers.dat'.format(guest_dir))
 

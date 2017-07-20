@@ -30,6 +30,7 @@ def give_nodes_spendable_coins(nodes):
 def delete_nodes(nodes):
     for node in nodes:
         node.delete_peers_file()
+        node.stop()
         node.rm()
 
 

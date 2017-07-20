@@ -40,6 +40,9 @@ class BitcoinNode(Node):
     def run(self):
         return bash.check_output(bitcoincmd.start(self))
 
+    def stop(self):
+        return bash.check_output(bitcoincmd.stop(self.name))
+
     def delete_peers_file(self):
         return bash.check_output(bitcoincmd.rm_peers(self.name))
 
