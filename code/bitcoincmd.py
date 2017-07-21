@@ -73,7 +73,7 @@ def list_unspent(node):
 
 
 def send_to_address(node, address, amount):
-    return exec_cli(node, 'sendtoaddress ' + address + ' ' + str(amount))
+    return exec_cli(node, 'sendtoaddress {} {}'.format(address, amount))
 
 
 def get_balance(node):
