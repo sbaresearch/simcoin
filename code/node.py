@@ -66,9 +66,6 @@ class BitcoinNode(Node):
     def get_balance(self):
         return bash.check_output(bitcoincmd.get_balance(self.name))
 
-    def set_tx_fee_as_low_as_possible(self):
-        return bash.check_output(bitcoincmd.set_tx_fee_as_low_as_possible(self.name))
-
     def generate_block(self, amount=1):
         return bash.check_output(bitcoincmd.generate_block(self.name, amount))
 
