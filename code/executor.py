@@ -42,7 +42,6 @@ class Executor:
                           ip_proxy, ip_private_node, args.selfish_nodes_args)
 
         self.all_bitcoin_nodes = dict(self.nodes, **self.selfish_node_private_nodes)
-        self.first_block_height = len(self.all_bitcoin_nodes) + config.warmup_blocks + 1
 
         self.all_public_nodes = dict(self.nodes, **self.selfish_node_proxies)
         self.all_nodes = dict(self.nodes, **self.selfish_node_private_nodes, **self.selfish_node_proxies)
