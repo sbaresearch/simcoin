@@ -13,6 +13,7 @@ import bash
 import prepare
 import utils
 import networktopology
+import subprocess
 
 
 class Executor:
@@ -150,6 +151,9 @@ class Executor:
 
 
 def generate_tx_and_save_creator(node, address):
-    tx_hash = node.generate_tx(address)
-    with open(config.tx_csv, 'a') as file:
-        file.write('{};{}\n'.format(node.name, tx_hash))
+    try:
+        tx_hash = node.generate_tx(address)
+        with open(config.tx_csv, 'a') as file:
+            file.write('{};{}\n'.format(node.name, tx_hash))
+    except subprocess.CalledProcessError:
+        logging.info('Could not generate tx for node {}'.format(node.name))
