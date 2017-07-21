@@ -7,3 +7,6 @@ tc filter add dev eth0 parent 1:0 protocol ip prio 1 u32 match ip dst 240.0.0.3 
 tc filter add dev eth0 parent 1:0 protocol ip prio 1 u32 match ip dst 240.0.0.0/4 flowid 1:2
 tc qdisc add dev eth0 parent 1:1 handle 10: netem delay 0ms
 tc qdisc add dev eth0 parent 1:2 handle 20: netem delay 1000ms
+
+
+array=(0.5 1); for i in "${array[@]}"; do python3 main.py --interval-duration $i; done
