@@ -13,14 +13,14 @@ def give_nodes_spendable_coins(nodes):
 
     for i, node in enumerate(nodes):
         node.connect([str(node.ip) for node in nodes[max(0, i - 5):i]])
-        wait_until_height_reached(node, i)
-        node.generate_block()
+        wait_until_height_reached(node, i * config.start_blocks_per_node)
+        node.generate_block(config.start_blocks_per_node)
 
     wait_until_height_reached(nodes[0], len(nodes))
     nodes[0].generate_block(config.warmup_blocks)
 
     for node in nodes:
-        wait_until_height_reached(node, config.warmup_blocks + len(nodes))
+        wait_until_height_reached(node, config.warmup_blocks + config.start_blocks_per_node * len(nodes))
 
     delete_nodes(nodes)
 
