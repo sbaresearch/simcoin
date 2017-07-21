@@ -122,7 +122,8 @@ class PublicBitcoinNode(BitcoinNode, PublicNode):
         PublicNode.__init__(self)
 
     def add_latency(self):
-        return bash.check_output(tccmd.add(self.name, self.latency))
+        if self.latency > 0:
+            return bash.check_output(tccmd.add(self.name, self.latency))
 
 
 class SelfishPrivateNode(BitcoinNode):
@@ -155,5 +156,6 @@ class ProxyNode(Node, PublicNode):
         return bash.check_output(dockercmd.exec_cmd(self.name, config.log_error_grep.format(ProxyNode.log_file)))
 
     def add_latency(self):
-        for cmd in tccmd.add_except_ip(self.name, self.latency, self.private_ip):
-            bash.check_output(cmd)
+        if self.latency > 0:
+            for cmd in tccmd.add_except_ip(self.name, self.latency, self.private_ip):
+                bash.check_output(cmd)
