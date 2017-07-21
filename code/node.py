@@ -52,7 +52,7 @@ class BitcoinNode(Node):
             bash.check_output(bitcoincmd.connect(self.name, ip))
 
     def generate_tx(self, address):
-        return bash.check_output(bitcoincmd.send_to_address(self.name, address, .1))
+        return bash.check_output(bitcoincmd.send_to_address(self.name, address, '0.001'))
 
     def get_new_address(self):
         return bash.check_output(bitcoincmd.get_new_address(self.name))
