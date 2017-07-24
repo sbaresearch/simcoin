@@ -9,6 +9,7 @@ import logging
 import checkargs
 import time
 from stats import Stats
+from event import Event
 
 
 def main():
@@ -31,6 +32,9 @@ def main():
 
     stats = Stats(executor)
     executor.stats = stats
+
+    event = Event(executor, args.interval_duration)
+    executor.event = event
 
     start = time.time()
 

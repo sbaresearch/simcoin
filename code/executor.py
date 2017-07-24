@@ -19,8 +19,8 @@ import subprocess
 class Executor:
     def __init__(self, args):
         self.count = 0
-        self.interval_duration = args.interval_duration
         self.stats = None
+        self.event = None
 
         nodes, selfish_nodes = networktopology.read_amount_of_nodes()
         ip_addresses = ipaddress.ip_network(config.ip_range).hosts()
@@ -91,29 +91,7 @@ class Executor:
             for node in self.all_bitcoin_nodes.values():
                 node.spent_to_address = node.get_new_address()
 
-            reader = csv.reader(open(config.interval_csv, "r"), delimiter=";")
-            start_time = time.time()
-            for i, line in enumerate(reader):
-                for cmd in line:
-                    cmd_parts = cmd.split(' ')
-                    if cmd_parts[0] == 'block':
-                        self.generate_block_and_save_creator(cmd_parts[1], 1)
-                    elif cmd_parts[0] == 'tx':
-                        node = self.all_bitcoin_nodes[cmd_parts[1]]
-                        generate_tx_and_save_creator(node, node.spent_to_address)
-                    else:
-                        raise Exception('Unknown cmd={} in {}-file'.format(cmd_parts[0], config.interval_csv))
-
-                next_interval = start_time + (i + 1) * self.interval_duration
-                current_time = time.time()
-                if current_time < next_interval:
-                    difference = next_interval - current_time
-                    logging.info('Sleep {} seconds for next interval.'.format(difference))
-                    utils.sleep(difference)
-                else:
-                    raise Exception('Current_time={} is higher then next_interval={}.'
-                                    ' Consider to lower the interval_duration which is currently {}s.'
-                                    .format(current_time, next_interval, self.interval_duration))
+            self.event.execute()
 
             # only use regular nodes since selfish nodes can trail back
             array = False
