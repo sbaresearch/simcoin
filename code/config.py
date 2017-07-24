@@ -21,6 +21,7 @@ selfish_node_proxy_name = selfish_node_name + selfish_node_proxy_postfix
 
 network_config = 'network.csv'
 interval_csv = 'intervals.csv'
+nodes_config_json = 'nodes_config.json'
 aggregated_log = sim_dir + 'aggregated.log'
 log_file = 'debug.log'
 tmp_log = sim_dir + 'tmp.log'

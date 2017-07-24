@@ -101,4 +101,5 @@ datadirs
 # project specific
 network.csv
 intervals.csv
+nodes_config.json
 out
