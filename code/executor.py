@@ -2,9 +2,9 @@ import dockercmd
 import bitcoincmd
 import ipaddress
 import config
-from node import PublicBitcoinNode
-from node import SelfishPrivateNode
-from node import ProxyNode
+from node.normal_node import PublicBitcoinNode
+from node.selfish_node import SelfishPrivateNode
+from node.selfish_node import ProxyNode
 import logging
 import json
 import bash
