@@ -37,7 +37,6 @@ def create(create_all):
 def read():
     with open(config.nodes_config_json) as data_file:
         nodes = json.load(data_file, object_hook=object_decoder)
-    print(nodes)
     return nodes
 
 
