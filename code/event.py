@@ -16,8 +16,6 @@ class Event:
 
     def execute(self):
         exce_queue = queue.Queue()
-        logging.error('hallo')
-
         with open(config.interval_csv, 'r') as file:
 
             for line in file.readlines():
