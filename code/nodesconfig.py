@@ -35,7 +35,6 @@ def create(create_all):
 def check_if_share_sum_is_1(nodes):
     sum_of_shares = 0
     for node in nodes:
-        print(node)
         sum_of_shares += node['share']
     sum_of_shares = round(sum_of_shares, 2)
     if sum_of_shares != 1:
