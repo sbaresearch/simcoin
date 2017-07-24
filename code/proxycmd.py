@@ -3,7 +3,7 @@ import dockercmd
 
 def run_proxy(node, start_hash):
         args = '{} '.format(node.args) if node.args else ''
-        return dockercmd.run_selfish_proxy(node, 'python main.py ' + args +
+        return dockercmd.run_selfish_proxy(node, 'python simcoin.py ' + args +
                                                  '--ip-private ' + str(node.private_ip) + ' '
                                                  '--ips-public ' + ' '.join(node.outgoing_ips) + ' '
                                                  '--start-hash=' + start_hash)
