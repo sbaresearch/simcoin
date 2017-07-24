@@ -2,12 +2,10 @@ import dockercmd
 import bitcoincmd
 import ipaddress
 import config
-import csv
 from node import PublicBitcoinNode
 from node import SelfishPrivateNode
 from node import ProxyNode
 import logging
-import time
 import json
 import bash
 import prepare
