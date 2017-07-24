@@ -17,7 +17,7 @@ def create(create_all):
         if add_nodes is False:
             check = check_if_share_sum_is_1(nodes)
             if check is False:
-                print('Share of computation power needs to be 1. Starting from scratch!')
+                print('Starting from scratch!')
                 nodes = []
                 add_nodes = True
 
@@ -50,7 +50,16 @@ def create_normal_node_config():
 
 
 def check_if_share_sum_is_1(nodes):
-    return True
+    sum_of_shares = 0
+    for node in nodes:
+        print(node)
+        sum_of_shares += node['share']
+    sum_of_shares = round(sum_of_shares, 2)
+    if sum_of_shares != 1:
+        print('Sum of shares should be 1. It was {} instead.'.format(sum_of_shares))
+        return False
+    else:
+        return True
 
 node_types = {
     'normal': create_normal_node_config

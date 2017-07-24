@@ -1,7 +1,6 @@
 from unittest import TestCase
 from mock import patch
 from mock import mock_open
-from mock import Mock
 import nodesconfig
 import config
 
@@ -12,11 +11,13 @@ class TestNodesConfig(TestCase):
     @patch('utils.get_node_type')
     @patch('utils.get_boolean')
     @patch('json.dumps')
-    def test_create(self, m_dumps, m_get_boolean, m_get_node_type, m_open):
+    @patch('nodesconfig.check_if_share_sum_is_1')
+    def test_create(self, m_check_if_share_sum_is_1, m_dumps, m_get_boolean, m_get_node_type, m_open):
         m_get_node_type.return_value = 'normal'
         nodesconfig.node_types = {'normal': lambda: [{'name': 'node-1'}, {'name': 'node-2'}]}
         m_get_boolean.return_value = False
         m_dumps.return_value = 'mock'
+        m_check_if_share_sum_is_1.return_value = True
 
         nodesconfig.create(False)
 
@@ -29,11 +30,13 @@ class TestNodesConfig(TestCase):
     @patch('utils.get_node_type')
     @patch('utils.get_boolean')
     @patch('json.dumps')
-    def test_create_two_node_types(self, m_dumps, m_get_boolean, m_get_node_type, m_open):
+    @patch('nodesconfig.check_if_share_sum_is_1')
+    def test_create_two_node_types(self, m_check_if_share_sum_is_1, m_dumps, m_get_boolean, m_get_node_type, m_open):
         m_get_node_type.return_value = 'normal'
         nodesconfig.node_types = {'normal': lambda: [{'name': 'node-1'}]}
         m_get_boolean.side_effect = [True, False]
         m_dumps.return_value = 'mock'
+        m_check_if_share_sum_is_1.return_value = True
 
         nodesconfig.create(False)
 
@@ -65,3 +68,13 @@ class TestNodesConfig(TestCase):
 
         self.assertEqual(nodes, [{'type': 'normal', 'latency': 3, 'share': 0.1},
                                  {'type': 'normal', 'latency': 4, 'share': 0.1}])
+
+    def test_check_if_share_sum_is_1_false(self):
+        nodes = [{'share': 0.4}, {'share': 0.4}]
+
+        self.assertFalse(nodesconfig.check_if_share_sum_is_1(nodes))
+
+    def test_check_if_share_sum_is_1_true(self):
+        nodes = [{'share': 0.4}, {'share': 0.6}]
+
+        self.assertTrue(nodesconfig.check_if_share_sum_is_1(nodes))
