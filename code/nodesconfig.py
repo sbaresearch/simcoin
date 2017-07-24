@@ -1,6 +1,8 @@
 import utils
 import json
 import config
+from node import normal_node
+from node import selfish_node
 
 
 def create(create_all):
@@ -30,25 +32,6 @@ def create(create_all):
         pass
 
 
-def create_normal_node_config():
-    amount = utils.get_non_negative_int('How many normal nodes do you want create?\n> ')
-    nodes = []
-
-    for i in range(amount):
-        node = {'type': 'normal'}
-
-        print('{}. Node'.format(i+1))
-        latency = utils.get_non_negative_int('What should be the latency of this node? [ms]\n> ')
-        node['latency'] = latency
-
-        share = utils.get_percentage('What should be the computational share? [0,1]\n> ')
-        node['share'] = share
-
-        nodes.append(node)
-
-    return nodes
-
-
 def check_if_share_sum_is_1(nodes):
     sum_of_shares = 0
     for node in nodes:
@@ -62,7 +45,8 @@ def check_if_share_sum_is_1(nodes):
         return True
 
 node_types = {
-    'normal': create_normal_node_config
+    'normal': normal_node.create_config,
+    'selfish': selfish_node.create_config,
 }
 
 if __name__ == '__main__':

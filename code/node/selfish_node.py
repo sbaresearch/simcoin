@@ -9,6 +9,7 @@ import logging
 from node.abstract import BitcoinNode
 from node.abstract import PublicNode
 from node.abstract import Node
+from node import abstract
 
 
 class PublicBitcoinNode(BitcoinNode, PublicNode):
@@ -54,3 +55,18 @@ class ProxyNode(Node, PublicNode):
         if self.latency > 0:
             for cmd in tccmd.add_except_ip(self.name, self.latency, self.private_ip):
                 bash.check_output(cmd)
+
+
+def create_config():
+    amount = utils.get_non_negative_int('How many normal nodes do you want create?\n> ')
+    nodes = []
+
+    for i in range(amount):
+        node = {'type': 'normal'}
+
+        print('{}. Node'.format(i+1))
+
+        node = abstract.create_config(node)
+
+        nodes.append(node)
+    return nodes
