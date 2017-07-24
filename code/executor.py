@@ -57,6 +57,8 @@ class Executor:
         for node in latencies.keys():
             self.all_public_nodes[node].latency = latencies[node]
 
+        self.first_block_height = config.warmup_blocks + config.start_blocks_per_node * len(self.all_bitcoin_nodes)
+
     def execute(self):
         try:
             prepare.remove_old_containers_if_exists()
@@ -70,8 +72,7 @@ class Executor:
                 node.run()
 
             for node in self.all_bitcoin_nodes.values():
-                prepare.wait_until_height_reached(node, config.warmup_blocks
-                                                  + config.start_blocks_per_node * len(self.all_bitcoin_nodes))
+                prepare.wait_until_height_reached(node, self.first_block_height)
 
             start_hash = self.one_normal_node.get_best_block_hash()
             for node in self.selfish_node_proxies.values():
