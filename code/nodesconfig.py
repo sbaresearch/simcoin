@@ -1,8 +1,10 @@
 import utils
 import json
 import config
-from node import normal_node
-from node import selfish_node
+from node.bitcoinnode import BitcoinNodeConfig
+from node.selfishnode import SelfishNodeConfig
+from node import bitcoinnode
+from node import selfishnode
 
 
 def create(create_all):
@@ -26,16 +28,23 @@ def create(create_all):
     print('Creating {}...'.format(config.nodes_config_json))
 
     with open(config.nodes_config_json, 'w') as file:
-        file.write(json.dumps(nodes, indent=4))
+        file.write(json.dumps([node.__dict__ for node in nodes], indent=4))
 
     if create_all:
         pass
 
 
+def read():
+    with open(config.nodes_config_json) as data_file:
+        nodes = json.load(data_file, object_hook=object_decoder)
+    print(nodes)
+    return nodes
+
+
 def check_if_share_sum_is_1(nodes):
     sum_of_shares = 0
     for node in nodes:
-        sum_of_shares += node['share']
+        sum_of_shares += node.share
     sum_of_shares = round(sum_of_shares, 2)
     if sum_of_shares != 1:
         print('Sum of shares should be 1. It was {} instead.'.format(sum_of_shares))
@@ -44,9 +53,17 @@ def check_if_share_sum_is_1(nodes):
         return True
 
 node_types = {
-    'normal': normal_node.create_config,
-    'selfish': selfish_node.create_config,
+    'bitcoin': bitcoinnode.create_bitcoin_config,
+    'selfish': selfishnode.create_selfish_config,
 }
+
+
+def object_decoder(obj):
+    if '__type__' in obj and obj['__type__'] == 'BitcoinNode':
+        return BitcoinNodeConfig(obj['name'], obj['share'], obj['latency'])
+    if '__type__' in obj and obj['__type__'] == 'SelfishNode':
+        return SelfishNodeConfig(obj['name'], obj['share'], obj['latency'])
+    raise Exception('Unknown node type')
 
 if __name__ == '__main__':
     create(False)

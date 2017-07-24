@@ -4,6 +4,9 @@ from node.abstract import BitcoinNode
 from node.abstract import PublicNode
 from node import abstract
 import utils
+from node.abstract import AbstractNodeConfig
+from node import abstract
+import config
 
 
 class PublicBitcoinNode(BitcoinNode, PublicNode):
@@ -16,12 +19,18 @@ class PublicBitcoinNode(BitcoinNode, PublicNode):
             return bash.check_output(tccmd.add(self.name, self.latency))
 
 
-def create_config():
+class BitcoinNodeConfig(AbstractNodeConfig):
+    def __init__(self, name=None, share=None, latency=None):
+        super().__init__(name, share, latency)
+
+
+def create_bitcoin_config():
     amount = utils.get_non_negative_int('How many normal nodes do you want create?\n> ')
     nodes = []
 
     for i in range(amount):
-        node = {'type': 'normal'}
+        node = BitcoinNode()
+        node.name = config.node_name.format(i)
 
         print('{}. Node'.format(i+1))
 

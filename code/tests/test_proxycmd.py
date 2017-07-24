@@ -1,6 +1,6 @@
 from unittest import TestCase
 import proxycmd
-from node.selfish_node import ProxyNode
+from node.selfishnode import ProxyNode
 import ipaddress
 
 

@@ -10,6 +10,8 @@ from node.abstract import BitcoinNode
 from node.abstract import PublicNode
 from node.abstract import Node
 from node import abstract
+from node.abstract import AbstractNodeConfig
+from node import abstract
 
 
 class PublicBitcoinNode(BitcoinNode, PublicNode):
@@ -57,12 +59,18 @@ class ProxyNode(Node, PublicNode):
                 bash.check_output(cmd)
 
 
-def create_config():
+class SelfishNodeConfig(AbstractNodeConfig):
+    def __init__(self, name=None, share=None, latency=None):
+        super().__init__(name, share, latency)
+
+
+def create_selfish_config():
     amount = utils.get_non_negative_int('How many normal nodes do you want create?\n> ')
     nodes = []
 
     for i in range(amount):
-        node = {'type': 'normal'}
+        node = SelfishNodeConfig()
+        node.name = config.selfish_node_name.format(i)
 
         print('{}. Node'.format(i+1))
 
