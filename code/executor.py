@@ -72,6 +72,9 @@ class Executor:
             for node in self.all_bitcoin_nodes.values():
                 prepare.wait_until_height_reached(node, config.warmup_blocks + len(self.all_bitcoin_nodes))
 
+            for node in self.all_bitcoin_nodes.values():
+                node.set_tx_fee_high_enough()
+
             start_hash = self.one_normal_node.get_best_block_hash()
             for node in self.selfish_node_proxies.values():
                 node.run(start_hash)
