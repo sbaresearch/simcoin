@@ -2,24 +2,23 @@ import dockercmd
 import bitcoincmd
 import ipaddress
 import config
-import csv
 from node import PublicBitcoinNode
 from node import SelfishPrivateNode
 from node import ProxyNode
 import logging
-import time
 import json
 import bash
 import prepare
 import utils
 import networktopology
+import subprocess
 
 
 class Executor:
     def __init__(self, args):
         self.count = 0
-        self.interval_duration = args.interval_duration
         self.stats = None
+        self.event = None
 
         nodes, selfish_nodes = networktopology.read_amount_of_nodes()
         ip_addresses = ipaddress.ip_network(config.ip_range).hosts()
@@ -42,7 +41,6 @@ class Executor:
                           ip_proxy, ip_private_node, args.selfish_nodes_args)
 
         self.all_bitcoin_nodes = dict(self.nodes, **self.selfish_node_private_nodes)
-        self.first_block_height = len(self.all_bitcoin_nodes) + config.warmup_blocks + 1
 
         self.all_public_nodes = dict(self.nodes, **self.selfish_node_proxies)
         self.all_nodes = dict(self.nodes, **self.selfish_node_private_nodes, **self.selfish_node_proxies)
@@ -57,6 +55,8 @@ class Executor:
         for node in latencies.keys():
             self.all_public_nodes[node].latency = latencies[node]
 
+        self.first_block_height = config.warmup_blocks + config.start_blocks_per_node * len(self.all_bitcoin_nodes)
+
     def execute(self):
         try:
             prepare.remove_old_containers_if_exists()
@@ -70,10 +70,7 @@ class Executor:
                 node.run()
 
             for node in self.all_bitcoin_nodes.values():
-                prepare.wait_until_height_reached(node, config.warmup_blocks + len(self.all_bitcoin_nodes))
-
-            for node in self.all_bitcoin_nodes.values():
-                node.set_tx_fee_high_enough()
+                prepare.wait_until_height_reached(node, self.first_block_height)
 
             start_hash = self.one_normal_node.get_best_block_hash()
             for node in self.selfish_node_proxies.values():
@@ -89,29 +86,10 @@ class Executor:
             for node in self.all_public_nodes.values():
                 node.add_latency()
 
-            reader = csv.reader(open(config.interval_csv, "r"), delimiter=";")
-            start_time = time.time()
-            for i, line in enumerate(reader):
-                for cmd in line:
-                    cmd_parts = cmd.split(' ')
-                    if cmd_parts[0] == 'block':
-                        self.generate_block_and_save_creator(cmd_parts[1], 1)
-                    elif cmd_parts[0] == 'tx':
-                        node = self.all_bitcoin_nodes[cmd_parts[1]]
-                        generate_tx_and_save_creator(node)
-                    else:
-                        raise Exception('Unknown cmd={} in {}-file'.format(cmd_parts[0], config.interval_csv))
+            for node in self.all_bitcoin_nodes.values():
+                node.spent_to_address = node.get_new_address()
 
-                next_interval = start_time + (i + 1) * self.interval_duration
-                current_time = time.time()
-                if current_time < next_interval:
-                    difference = next_interval - current_time
-                    logging.info('Sleep {} seconds for next interval.'.format(difference))
-                    utils.sleep(difference)
-                else:
-                    raise Exception('Current_time={} is higher then next_interval={}.'
-                                    ' Consider to lower the interval_duration which is currently {}s.'
-                                    .format(current_time, next_interval, self.interval_duration))
+            self.event.execute()
 
             # only use regular nodes since selfish nodes can trail back
             array = False
@@ -150,7 +128,10 @@ class Executor:
         self.all_bitcoin_nodes[node].mined_blocks += 1
 
 
-def generate_tx_and_save_creator(node):
-    tx_hash = node.generate_tx()
-    with open(config.tx_csv, 'a') as file:
-        file.write('{};{}\n'.format(node.name, tx_hash))
+def generate_tx_and_save_creator(node, address):
+    try:
+        tx_hash = node.generate_tx(address)
+        with open(config.tx_csv, 'a') as file:
+            file.write('{};{}\n'.format(node.name, tx_hash))
+    except subprocess.CalledProcessError:
+        logging.info('Could not generate tx for node {}'.format(node.name))

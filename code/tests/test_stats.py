@@ -7,8 +7,6 @@ import config
 from textwrap import dedent
 import stats
 import numpy as np
-import math
-from node import BitcoinNode
 
 
 class TestStats(TestCase):

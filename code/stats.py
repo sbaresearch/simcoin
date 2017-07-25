@@ -58,7 +58,6 @@ class Stats:
             file.seek(0)
             file.truncate()
             iter_lines = iter(lines)
-            # omit header
             line = next(iter_lines)
             file.write(line)
 

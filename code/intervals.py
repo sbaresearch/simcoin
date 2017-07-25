@@ -5,27 +5,26 @@ import pandas
 import sys
 import numpy as np
 import config
-from collections import Counter
 import checkargs
 
 
+class Node:
+    def __init__(self, name):
+        self.name = name
+        self.processed = 0
+        self.block_events = []
+
+
 def main():
-    random.seed(1)
-    np.random.seed(1)
     np.set_printoptions(precision=2, suppress=True)
 
     args = parse()
+    nodes = create_nodes(args)
 
-    nodes = create_nodes_array(args.nodes, args.selfish_nodes)
+    random.seed(int(args.seed))
+    np.random.seed(int(args.seed))
 
-    expected_blocks = calc_expected_events(args.amount_of_intervals, args.blocks_per_interval)
-    expected_tx = calc_expected_events(args.amount_of_intervals, args.tx_per_interval)
-
-    scale = 0.1
-    block_events = create_events(scale, args.blocks_per_interval, expected_blocks)
-    tx_events = create_events(scale, args.tx_per_interval, expected_tx)
-
-    intervals = create_intervals(block_events, tx_events, args.amount_of_intervals, nodes)
+    intervals = create_intervals(nodes, args.tx_per_interval, args.amount_of_intervals)
 
     print(pandas.DataFrame(intervals))
 
@@ -54,16 +53,22 @@ def parse():
                         , type=checkargs.check_positive_int
                         , help='Amount of intervals.')
 
-    parser.add_argument('--blocks-per-interval'
+    parser.add_argument('--intervals-per-block'
                         , default=10
-                        , type=checkargs.check_positive_float
-                        , help='Blocks per interval.'
+                        , type=checkargs.check_positive_int
+                        , help='Intervals per block.'
                         )
 
     parser.add_argument('--tx-per-interval'
                         , default=1
-                        , type=checkargs.check_positive_float
+                        , type=checkargs.check_positive_int
                         , help='Tx per interval.'
+                        )
+
+    parser.add_argument('--seed'
+                        , default=0
+                        , type=checkargs.check_positive_int
+                        , help='Set the seed.'
                         )
 
     args = parser.parse_args()
@@ -85,35 +90,46 @@ def calc_expected_events(number_of_intervals, events_per_interval):
     return int(int(number_of_intervals * (1.0 / events_per_interval)) * 3)
 
 
-def create_events(scale, events_per_interval, number_of_events):
-    random_event_intervals = [(i + (1-scale)) * events_per_interval for i in list(np.random.exponential(scale, number_of_events))]
-    return np.cumsum(random_event_intervals)
+def create_nodes(args):
+    nodes = [Node(node) for node in create_nodes_array(args.nodes, args.selfish_nodes)]
+    expected_blocks = calc_expected_events(args.amount_of_intervals, args.intervals_per_block)
+
+    sum_of_shares = 0
+    for node in nodes:
+        share = float(input('Share of computation power of {} [0, 1]: '.format(node.name)))
+        node.block_events = create_block_events(share, args.intervals_per_block, expected_blocks)
+        sum_of_shares += share
+    sum_of_shares = round(sum_of_shares, 2)
+    if sum_of_shares != 1:
+        raise Exception('Sum of shares should be 1. It was {} instead.'.format(sum_of_shares))
+
+    return nodes
 
 
-def create_intervals(block_events, tx_events, amount_of_intervals, nodes):
-    index_block = 0
+def create_block_events(share, intervals_per_block, expected_blocks):
+    random_event_intervals = np.random.exponential(intervals_per_block * (1 / share), expected_blocks)
+    block_events = np.cumsum(random_event_intervals)
+    return block_events
+
+
+def create_intervals(nodes, tx_per_interval, amount_of_intervals):
     index_tx = 0
     intervals = [[] for _ in range(amount_of_intervals)]
     for index, interval in enumerate(intervals):
-        chosen_nodes = []
-        while block_events[index_block] < index + 1:
-            node = random.choice(nodes)
-            chosen_nodes.append(node)
-            interval.append('block ' + node)
-            index_block += 1
-
-        check_if_only_block_per_node(chosen_nodes)
-
-        while tx_events[index_tx] < index + 1:
-            interval.append('tx ' + random.choice(nodes))
+        for i in range(tx_per_interval):
+            interval.append('tx ' + random.choice(nodes).name)
             index_tx += 1
+
+        for node in nodes:
+            processed = node.processed
+            while node.block_events[node.processed] < index + 1:
+                interval.append('block ' + node.name)
+                node.processed += 1
+            if node.processed - processed > 1:
+                raise Exception("Intervals per block is too low. Only one block per node per interval is allowed. "
+                                "Raise the intervals_per_block or try a different seeed. ")
+
     return intervals
-
-
-def check_if_only_block_per_node(nodes):
-    most_common = Counter(nodes).most_common(1)
-    if len(most_common) > 0 and most_common[0][1] > 1:
-        raise Exception("Block interval is too low. Only one block per node per interval is allowed.")
 
 
 if __name__ == "__main__":

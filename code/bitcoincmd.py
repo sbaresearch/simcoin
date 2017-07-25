@@ -15,6 +15,7 @@ args = {
     'listenonion':        '-listenonion=0',  # disable tor
     'onlynet':            '-onlynet=ipv4',  # disable ipv6
     'reindex':            '-reindex',
+    'paytxfee':           '-paytxfee=0.00001',
 }
 
 
@@ -43,6 +44,10 @@ def transform_to_cmd(args_to_transform):
     return daemon + ' '.join(args_to_transform.values())
 
 
+def stop(node):
+    return exec_cli(node, 'stop')
+
+
 def rm_peers(node):
     return dockercmd.exec_cmd(node, 'rm -f {}/regtest/peers.dat'.format(guest_dir))
 
@@ -59,8 +64,20 @@ def get_new_address(node):
     return exec_cli(node, 'getnewaddress')
 
 
+def list_lock_unspent(node):
+    return exec_cli(node, 'listlockunspent')
+
+
+def list_unspent(node):
+    return exec_cli(node, 'listunspent')
+
+
 def send_to_address(node, address, amount):
-    return exec_cli(node, 'sendtoaddress ' + address + ' ' + str(amount))
+    return exec_cli(node, 'sendtoaddress {} {}'.format(address, amount))
+
+
+def get_balance(node):
+    return exec_cli(node, 'getbalance')
 
 
 def get_chain_tips(node):
@@ -81,10 +98,6 @@ def get_block_hash(node, height):
 
 def get_block(node, block_hash):
     return exec_cli(node, 'getblock ' + block_hash)
-
-
-def set_tx_fee_high_enough(node):
-    return exec_cli(node, 'settxfee 0.1')
 
 
 def connect(node, ip):

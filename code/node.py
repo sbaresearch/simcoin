@@ -36,9 +36,13 @@ class BitcoinNode(Node):
         self.name = name
         self.ip = ip
         self.mined_blocks = 0
+        self.spent_to_address = ''
 
     def run(self):
         return bash.check_output(bitcoincmd.start(self))
+
+    def stop(self):
+        return bash.check_output(bitcoincmd.stop(self.name))
 
     def delete_peers_file(self):
         return bash.check_output(bitcoincmd.rm_peers(self.name))
@@ -47,12 +51,20 @@ class BitcoinNode(Node):
         for ip in ips:
             bash.check_output(bitcoincmd.connect(self.name, ip))
 
-    def generate_tx(self):
-        address = bash.check_output(bitcoincmd.get_new_address(self.name))
-        return bash.check_output(bitcoincmd.send_to_address(self.name, address, 0.1))
+    def generate_tx(self, address):
+        return bash.check_output(bitcoincmd.send_to_address(self.name, address, '0.001'))
 
-    def set_tx_fee_high_enough(self):
-        return bash.check_output(bitcoincmd.set_tx_fee_high_enough(self.name))
+    def get_new_address(self):
+        return bash.check_output(bitcoincmd.get_new_address(self.name))
+
+    def list_unspent(self):
+        return bash.check_output(bitcoincmd.list_unspent(self.name))
+
+    def list_lock_unspent(self):
+        return bash.check_output(bitcoincmd.list_lock_unspent(self.name))
+
+    def get_balance(self):
+        return bash.check_output(bitcoincmd.get_balance(self.name))
 
     def generate_block(self, amount=1):
         return bash.check_output(bitcoincmd.generate_block(self.name, amount))
@@ -107,7 +119,8 @@ class PublicBitcoinNode(BitcoinNode, PublicNode):
         PublicNode.__init__(self)
 
     def add_latency(self):
-        return bash.check_output(tccmd.add(self.name, self.latency))
+        if self.latency > 0:
+            return bash.check_output(tccmd.add(self.name, self.latency))
 
 
 class SelfishPrivateNode(BitcoinNode):
@@ -140,5 +153,6 @@ class ProxyNode(Node, PublicNode):
         return bash.check_output(dockercmd.exec_cmd(self.name, config.log_error_grep.format(ProxyNode.log_file)))
 
     def add_latency(self):
-        for cmd in tccmd.add_except_ip(self.name, self.latency, self.private_ip):
-            bash.check_output(cmd)
+        if self.latency > 0:
+            for cmd in tccmd.add_except_ip(self.name, self.latency, self.private_ip):
+                bash.check_output(cmd)
