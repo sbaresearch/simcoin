@@ -55,8 +55,8 @@ node_types = {
 
 
 def object_decoder(obj):
-    if '__type__' in obj and obj['__type__'] == 'BitcoinNode':
+    if '__type__' in obj and obj['__type__'] == BitcoinNodeConfig.__name__:
         return BitcoinNodeConfig(obj['name'], obj['share'], obj['latency'])
-    if '__type__' in obj and obj['__type__'] == 'SelfishNode':
+    if '__type__' in obj and obj['__type__'] == SelfishNodeConfig.__name__:
         return SelfishNodeConfig(obj['name'], obj['share'], obj['latency'])
     raise Exception('Unknown node type')
