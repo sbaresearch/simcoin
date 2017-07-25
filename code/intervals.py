@@ -50,7 +50,7 @@ def create_block_events(nodes, amount_of_intervals, intervals_per_block):
 def create_block_series(share, intervals_per_block, expected_blocks):
     random_event_intervals = np.random.exponential(intervals_per_block * (1 / share), expected_blocks)
     block_events = np.cumsum(random_event_intervals)
-    return block_events
+    return block_events.tolist()
 
 
 def create_intervals(nodes, block_events, tx_per_interval, amount_of_intervals):
