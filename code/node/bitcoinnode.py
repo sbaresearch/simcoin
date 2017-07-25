@@ -28,7 +28,7 @@ def create_bitcoin_config():
     nodes = []
 
     for i in range(amount):
-        node = BitcoinNode()
+        node = BitcoinNodeConfig()
         node.name = config.node_name.format(i)
 
         print('{}. Node'.format(i+1))
