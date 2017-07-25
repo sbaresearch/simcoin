@@ -10,30 +10,26 @@ import checkargs
 import time
 from stats import Stats
 from event import Event
+import utils
 
 
 def main():
-    args = parse()
 
-    config_logger(args.verbose)
-
-    logging.info("arguments called with: {}".format(sys.argv))
-    logging.info("parsed arguments: {}".format(args))
-
-    for image in [config.node_image, config.selfish_node_image]:
-        if os.system("docker inspect " + image + " > /dev/null") != 0:
-            raise Exception("Image {} not found".format(image))
-
-    for file in [config.network_config, config.interval_csv]:
+    for file in [config.network_config, config.interval_csv, config.nodes_config_json]:
         if not os.path.isfile(file):
             raise Exception("{} file not found. Please generate file before starting Simcoin.".format(file))
 
-    executor = Executor(args)
+    interval_duration = utils.get_non_negative_int('How long should one interval last? [s]\n> ')
+
+    verbose = utils.get_boolean('Should the logging be verbose? [yes/no]\n> ')
+    config_logger(verbose)
+
+    executor = Executor()
 
     stats = Stats(executor)
     executor.stats = stats
 
-    event = Event(executor, args.interval_duration)
+    event = Event(executor, interval_duration)
     executor.event = event
 
     start = time.time()
@@ -41,29 +37,6 @@ def main():
     executor.execute()
 
     logging.info("the duration of the experiment was {} seconds".format(str(time.time() - start)))
-
-
-def parse():
-    parser = argparse.ArgumentParser(description='Running Simcoin. A Bitcoin Network Simulator.')
-
-    parser.add_argument('-v'
-                        , '--verbose'
-                        , help='Increase output verbosity'
-                        , action='store_true'
-                        )
-    parser.add_argument('--selfish-nodes-args'
-                        , help='Set args for selfish nodes. '
-                               'Set them as string and if you use just one add a space at the end. Eg.: "--arg "'
-                        , default=''
-                        )
-    parser.add_argument('--interval-duration'
-                        , help='Set the duration of one interval in seconds.'
-                        , default=1
-                        , type=checkargs.check_positive_float
-                        )
-
-    args = parser.parse_args()
-    return args
 
 
 def config_logger(verbose):

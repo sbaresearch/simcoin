@@ -18,7 +18,7 @@ import nodesconfig
 
 
 class Executor:
-    def __init__(self, args):
+    def __init__(self):
         self.count = 0
         self.stats = None
         self.event = None
@@ -39,7 +39,7 @@ class Executor:
             self.selfish_node_private_nodes[node.name] = SelfishPrivateNode(node.name, ip_private_node)
 
             self.selfish_node_proxies[node.name_proxy] = \
-                ProxyNode(node.name_proxy, ip_proxy, ip_private_node, args.selfish_nodes_args, node.latency)
+                ProxyNode(node.name_proxy, ip_proxy, ip_private_node, node.selfish_nodes_args, node.latency)
 
         self.all_bitcoin_nodes = dict(self.nodes, **self.selfish_node_private_nodes)
 
