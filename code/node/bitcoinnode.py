@@ -2,7 +2,6 @@ import tccmd
 import bash
 from node.abstract import BitcoinNode
 from node.abstract import PublicNode
-from node import abstract
 import utils
 from node.abstract import AbstractNodeConfig
 from node import abstract
@@ -10,9 +9,9 @@ import config
 
 
 class PublicBitcoinNode(BitcoinNode, PublicNode):
-    def __init__(self, name, ip):
+    def __init__(self, name, ip, latency):
         BitcoinNode.__init__(self, name, ip)
-        PublicNode.__init__(self)
+        PublicNode.__init__(self, latency)
 
     def add_latency(self):
         if self.latency > 0:

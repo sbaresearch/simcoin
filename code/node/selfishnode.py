@@ -32,9 +32,9 @@ class SelfishPrivateNode(BitcoinNode):
 class ProxyNode(Node, PublicNode):
     log_file = '/tmp/selfish_proxy.log'
 
-    def __init__(self, name, ip, private_ip, args):
+    def __init__(self, name, ip, private_ip, args, latency):
         Node.__init__(self, name, ip)
-        PublicNode.__init__(self)
+        PublicNode.__init__(self, latency)
         self.private_ip = private_ip
         self.args = args
 

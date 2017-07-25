@@ -20,9 +20,9 @@ class Node:
 
 
 class PublicNode:
-    def __init__(self):
+    def __init__(self, latency):
+        self.latency = latency
         self.outgoing_ips = []
-        self.latency = -1
 
 
 class BitcoinNode(Node):
@@ -116,6 +116,7 @@ def get_timestamp(node_name, grep_cmd):
     line = bash.check_output(cmd)
     matched = re.match(config.log_timestamp_regex, line)
     return datetime.strptime(matched.group(0), config.log_time_format).timestamp()
+
 
 def create_config(node):
     latency = utils.get_non_negative_int('What should be the latency of this node? [ms]\n> ')
