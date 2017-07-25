@@ -4,17 +4,11 @@ import pandas
 import numpy as np
 import config
 import utils
-import nodesconfig
 
 np.set_printoptions(precision=2, suppress=True)
 
 
-def main():
-    nodes = nodesconfig.read()
-    create(False, nodes)
-
-
-def create(create_all, nodes):
+def create():
     amount_of_intervals = utils.get_non_negative_int('How many intervals do you want create?\n> ')
 
     intervals_per_block = utils.get_non_negative_int('How many intervals should pass by per block?\n> ')
@@ -35,9 +29,6 @@ def create(create_all, nodes):
     with open(config.interval_csv, "w") as file:
         writer = csv.writer(file, delimiter=';')
         writer.writerows(intervals)
-
-    if create_all:
-        pass
 
 
 def calc_expected_events(number_of_intervals, events_per_interval):
@@ -78,7 +69,3 @@ def create_intervals(nodes, block_events, tx_per_interval, amount_of_intervals):
                                 "Raise the intervals_per_block or try a different seeed. ")
 
     return intervals
-
-
-if __name__ == "__main__":
-    main()

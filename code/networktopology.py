@@ -6,14 +6,9 @@ import nodesconfig
 import utils
 
 
-def main():
-    nodes = nodesconfig.read()
-    create(False, nodes)
+def create():
 
-
-def create(create_all, nodes):
-
-    seed = utils.get_non_negative_int('Which seed do you want use?\n> ')
+    seed = utils.get_non_negative_int('Which seed do you want use for the networktopolgy?\n> ')
 
     connectivity = utils.get_percentage('What should be the connectivity?\n> ')
 
@@ -31,9 +26,6 @@ def create(create_all, nodes):
     with open(config.network_config, "w") as file:
         writer = csv.writer(file, delimiter=';')
         writer.writerows(matrix)
-
-    if create_all:
-        pass
 
 
 def create_header(nodes):
@@ -100,7 +92,3 @@ def read_connections():
                 connections[node_row].append(node_column)
 
     return connections
-
-
-if __name__ == "__main__":
-    main()

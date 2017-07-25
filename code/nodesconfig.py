@@ -7,7 +7,7 @@ from node import bitcoinnode
 from node import selfishnode
 
 
-def create(create_all):
+def create():
     nodes = []
 
     add_nodes = True
@@ -29,9 +29,6 @@ def create(create_all):
 
     with open(config.nodes_config_json, 'w') as file:
         file.write(json.dumps([node.__dict__ for node in nodes], indent=4))
-
-    if create_all:
-        pass
 
 
 def read():
@@ -63,6 +60,3 @@ def object_decoder(obj):
     if '__type__' in obj and obj['__type__'] == 'SelfishNode':
         return SelfishNodeConfig(obj['name'], obj['share'], obj['latency'])
     raise Exception('Unknown node type')
-
-if __name__ == '__main__':
-    create(False)
