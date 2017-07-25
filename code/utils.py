@@ -53,7 +53,7 @@ def get_node_type(prompt):
             print("Sorry, I didn't understand that.")
             continue
 
-        if value not in ['normal', 'selfish']:
+        if value not in ['bitcoin', 'selfish']:
             print("Sorry, I don't know this node type.")
             continue
         else:
