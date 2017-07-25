@@ -7,6 +7,7 @@ import utils
 
 
 def create():
+    nodes = nodesconfig.read()
 
     seed = utils.get_non_negative_int('Which seed do you want use for the networktopolgy?\n> ')
 

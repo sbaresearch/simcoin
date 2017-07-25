@@ -4,11 +4,14 @@ import pandas
 import numpy as np
 import config
 import utils
+import nodesconfig
 
 np.set_printoptions(precision=2, suppress=True)
 
 
 def create():
+    nodes = nodesconfig.read()
+
     amount_of_intervals = utils.get_non_negative_int('How many intervals do you want create?\n> ')
 
     intervals_per_block = utils.get_non_negative_int('How many intervals should pass by per block?\n> ')
