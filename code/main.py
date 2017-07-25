@@ -11,6 +11,7 @@ import time
 from stats import Stats
 from event import Event
 
+sys.tracebacklimit=None
 
 def main():
     args = parse()
