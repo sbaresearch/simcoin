@@ -100,14 +100,6 @@ class BitcoinNode(Node):
         return get_timestamp(self.name, 'best={}'.format(block_hash))
 
 
-class AbstractNodeConfig:
-    def __init__(self, name, share, latency):
-        self.name = name
-        self.share = share
-        self.latency = latency
-        self.__type__ = type(self).__name__
-
-
 def get_timestamp(node_name, grep_cmd):
     cmd = dockercmd.exec_cmd(node_name, 'cat {} | grep "{}"'.format(BitcoinNode.log_file, grep_cmd))
     return_value = bash.call_silent(cmd)

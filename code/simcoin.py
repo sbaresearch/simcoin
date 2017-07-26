@@ -7,11 +7,12 @@ import logging
 import time
 from stats import Stats
 from event import Event
-import fire
 import utils
 import nodesconfig
 import intervals
 import networktopology
+import sys
+import argparse
 
 
 def create_nodes():
@@ -23,7 +24,7 @@ def create_intervals():
 
 
 def create_networktopology():
-    networktopology.create()
+    networktopology.parse()
 
 
 def run():
@@ -61,6 +62,34 @@ def run_simulation():
 
     logging.info("the duration of the experiment was {} seconds".format(str(time.time() - start)))
 
+commands = {
+    'nodes':        nodesconfig.create,
+    'network':      networktopology.create,
+    'intervals':    intervals.create,
+    'simulate':     run_simulation,
+    'run':          run,
+}
 
 if __name__ == '__main__':
-    fire.Fire()
+    parser = argparse.ArgumentParser(
+        description='Simcoin a cryptocurrency simulator.',
+        usage='''git <command> [<args>]
+
+        The most commonly used git commands are:
+        network
+        intervals
+        nodes
+        simulate
+        run
+        ''')
+
+    parser.add_argument('command', help='Subcommand to run')
+    # parse_args defaults to [1:] for args, but you need to
+    # exclude the rest of the args too, or validation will fail
+    args = parser.parse_args(sys.argv[1:2])
+    if args.command not in commands:
+        print('Unrecognized command')
+        parser.print_help()
+        exit(1)
+    # use dispatch pattern to invoke method with same name
+    commands[args.command]()

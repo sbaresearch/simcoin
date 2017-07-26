@@ -3,9 +3,7 @@ import bitcoincmd
 import ipaddress
 import config
 from node.bitcoinnode import PublicBitcoinNode
-from node.bitcoinnode import BitcoinNodeConfig
 from node.selfishnode import SelfishPrivateNode
-from node.selfishnode import SelfishNodeConfig
 from node.selfishnode import ProxyNode
 import logging
 import json
@@ -24,8 +22,8 @@ class Executor:
         self.event = None
 
         config_nodes = nodesconfig.read()
-        nodes = [node for node in config_nodes if type(node) is BitcoinNodeConfig]
-        selfish_nodes = [node for node in config_nodes if type(node) is SelfishNodeConfig]
+        nodes = [node for node in config_nodes if node.node_type == 'bitcoin']
+        selfish_nodes = [node for node in config_nodes if node.node_type == 'selfish']
         ip_addresses = ipaddress.ip_network(config.ip_range).hosts()
         next(ip_addresses)  # skipping first ip address (docker fails with error "is in use")
 

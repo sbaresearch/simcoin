@@ -3,21 +3,42 @@ import random
 import pandas
 import config
 import nodesconfig
-import utils
+import argparse
+import checkargs
+import sys
+
+
+def parse():
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument('--seed'
+                        , default=0
+                        , type=checkargs.check_positive_int
+                        , help='Set the seed'
+                        )
+
+    parser.add_argument('--connectivity'
+                        , default=.5
+                        , type=checkargs.check_percentage
+                        , help='Connectivity between nodes.'
+                        )
+
+    args = parser.parse_known_args()[0]
+    print("arguments called with: {}".format(sys.argv))
+    print("parsed arguments: {}".format(args))
+    return args
 
 
 def create():
+    args = parse()
+
     nodes = nodesconfig.read()
 
-    seed = utils.get_non_negative_int('Which seed do you want use for the networktopolgy?\n> ')
-
-    connectivity = utils.get_percentage('What should be the connectivity?\n> ')
-
-    random.seed(seed)
+    random.seed(args.seed)
 
     header = create_header(nodes)
 
-    matrix = create_matrix(header, connectivity)
+    matrix = create_matrix(header, args.connectivity)
 
     if check_if_fully_connected(matrix) is not True:
         raise Exception("Not all nodes a reachable. Consider to raise the connectivity.")

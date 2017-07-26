@@ -1,29 +1,41 @@
-import utils
 import json
 import config
-from node.bitcoinnode import BitcoinNodeConfig
-from node.selfishnode import SelfishNodeConfig
-from node import bitcoinnode
-from node import selfishnode
+import argparse
+import sys
+
+
+node_groups = [
+    {'argparse': '--node-group-a', 'variable': 'node_group_a', 'default': ['bitcoin', 10, 1, 200]},
+    {'argparse': '--node-group-b', 'variable': 'node_group_b', 'default': None},
+    ]
+
+
+def parse():
+    parser = argparse.ArgumentParser()
+
+    for node_group in node_groups:
+        parser.add_argument(node_group['argparse']
+                            , default=node_group['default']
+                            , nargs='+'
+                            , help='{}. Pass [node_type] [amount] [share] [latency]'.format(node_group['variable'])
+                            )
+
+    args = parser.parse_known_args()[0]
+    print("arguments called with: {}".format(sys.argv))
+    print("parsed arguments: {}".format(args))
+    return args
 
 
 def create():
+    args = parse()
+
     nodes = []
+    for node_group in node_groups:
+        node_args = getattr(args, node_group['variable'])
+        if node_args:
+            nodes.extend(create_node_group(node_args))
 
-    add_nodes = True
-    while add_nodes:
-        node_type = utils.get_node_type('Which node type do you want configure?\n> ')
-
-        nodes.extend(node_types[node_type]())
-
-        add_nodes = utils.get_boolean('Do you want to add another node type?\n> ')
-
-        if add_nodes is False:
-            check = check_if_share_sum_is_1(nodes)
-            if check is False:
-                print('Starting from scratch!')
-                nodes = []
-                add_nodes = True
+    check_if_share_sum_is_1(nodes)
 
     print('Creating {}...'.format(config.nodes_config_json))
 
@@ -37,6 +49,10 @@ def read():
     return nodes
 
 
+def object_decoder(obj):
+    return NodeConfig(obj['node_type'], obj['name'], obj['share'], obj['latency'])
+
+
 def check_if_share_sum_is_1(nodes):
     sum_of_shares = 0
     for node in nodes:
@@ -48,15 +64,22 @@ def check_if_share_sum_is_1(nodes):
     else:
         return True
 
-node_types = {
-    'bitcoin': bitcoinnode.create_bitcoin_config,
-    'selfish': selfishnode.create_selfish_config,
-}
+
+def create_node_group(node_args):
+    node_type = str(node_args[0])
+    amount = int(node_args[1])
+    share = float(node_args[2])
+    latency = int(node_args[3])
+
+    nodes = []
+    for i in range(amount):
+        nodes.append(NodeConfig(node_type, config.node_name.format(i + 1), share/amount, latency))
+    return nodes
 
 
-def object_decoder(obj):
-    if '__type__' in obj and obj['__type__'] == BitcoinNodeConfig.__name__:
-        return BitcoinNodeConfig(obj['name'], obj['share'], obj['latency'])
-    if '__type__' in obj and obj['__type__'] == SelfishNodeConfig.__name__:
-        return SelfishNodeConfig(obj['name'], obj['share'], obj['latency'])
-    raise Exception('Unknown node type')
+class NodeConfig:
+    def __init__(self, node_type, name, share, latency):
+        self.node_type = node_type
+        self.name = name
+        self.share = share
+        self.latency = latency

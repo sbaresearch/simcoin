@@ -9,8 +9,6 @@ import logging
 from node.abstract import BitcoinNode
 from node.abstract import PublicNode
 from node.abstract import Node
-from node.abstract import AbstractNodeConfig
-from node import abstract
 
 
 class SelfishPrivateNode(BitcoinNode):
@@ -46,24 +44,3 @@ class ProxyNode(Node, PublicNode):
         if self.latency > 0:
             for cmd in tccmd.add_except_ip(self.name, self.latency, self.private_ip):
                 bash.check_output(cmd)
-
-
-class SelfishNodeConfig(AbstractNodeConfig):
-    def __init__(self, name=None, share=None, latency=None):
-        super().__init__(name, share, latency)
-
-
-def create_selfish_config():
-    amount = utils.get_non_negative_int('How many normal nodes do you want create?\n> ')
-    nodes = []
-
-    for i in range(amount):
-        node = SelfishNodeConfig()
-        node.name = config.selfish_node_name.format(i)
-
-        print('{}. Node'.format(i+1))
-
-        node = abstract.create_config(node)
-
-        nodes.append(node)
-    return nodes
