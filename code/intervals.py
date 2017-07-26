@@ -37,7 +37,7 @@ def parse():
                         , help='Set the seed.'
                         )
 
-    args = parser.parse_args()
+    args = parser.parse_args(sys.argv[2:])
     print("arguments called with: {}".format(sys.argv))
     print("parsed arguments: {}".format(args))
     return args

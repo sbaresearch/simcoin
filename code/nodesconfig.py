@@ -20,7 +20,7 @@ def parse():
                             , help='{}. Pass [node_type] [amount] [share] [latency]'.format(node_group['variable'])
                             )
 
-    args = parser.parse_known_args()[0]
+    args = parser.parse_args(sys.argv[2:])
     print("arguments called with: {}".format(sys.argv))
     print("parsed arguments: {}".format(args))
     return args
