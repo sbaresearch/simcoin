@@ -31,10 +31,7 @@ def parse():
 
 
 def run():
-
     args = parse()
-
-    utils.check_for_files([config.intervals_csv, config.network_csv, config.nodes_json])
 
     utils.config_logger(args.verbose)
 

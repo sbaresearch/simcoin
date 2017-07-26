@@ -35,14 +35,9 @@ def config_logger(verbose):
         root_logger.setLevel(logging.INFO)
 
 
-def check_for_files(files):
-    missing_file = False
-    for file in files:
-        if not os.path.isfile(file):
-            command = re.split('\.|/', file)[-2]
-            print("{} file not found. Please generate this with the command `python3 simcoin.py {} [args]."
-                  .format(file, command))
-            missing_file = True
-
-    if missing_file:
-        exit(1)
+def check_for_file(file):
+    if not os.path.isfile(file):
+        command = re.split('\.|/', file)[-2]
+        print("{} file not found. Please generate this with the command `python3 simcoin.py {} [args]."
+              .format(file, command))
+    exit(1)

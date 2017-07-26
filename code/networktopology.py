@@ -6,6 +6,7 @@ import nodesconfig
 import argparse
 import checkargs
 import sys
+import utils
 
 
 def parse():
@@ -98,6 +99,7 @@ def recursive_check(matrix, visited=None, start=1):
 
 
 def read_connections():
+    utils.check_for_file(config.network_csv)
     connections = {}
     network_config = pandas.read_csv(open(config.network_csv), delimiter=';', index_col=0)
 

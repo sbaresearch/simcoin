@@ -15,6 +15,7 @@ class Event:
         self.interval_duration = interval_duration
 
     def execute(self):
+        utils.check_for_file(config.intervals_csv)
         exce_queue = queue.Queue()
         with open(config.intervals_csv, 'r') as file:
 
