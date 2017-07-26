@@ -24,7 +24,7 @@ class TestEvent(TestCase):
             thread = Mock()
             e.create_thread.return_value = thread
 
-            m_time.side_effect = [0, 1, 1]
+            m_time.return_value = 0
 
             e.execute()
 
@@ -46,7 +46,7 @@ class TestEvent(TestCase):
             thread = Mock()
             e.create_thread.return_value = thread
 
-            m_time.side_effect = [0, 1, 1, 1, 1]
+            m_time.return_value = 0
 
             e.execute()
 
