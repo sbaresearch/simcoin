@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import nodesconfig
-import intervals
+import ticks
 import networktopology
 import sys
 import argparse
@@ -11,7 +11,7 @@ import simulation
 def run():
     nodesconfig.create()
 
-    intervals.create()
+    ticks.create()
 
     networktopology.create()
 
@@ -20,7 +20,7 @@ def run():
 commands = {
     'nodes':        nodesconfig.create,
     'network':      networktopology.create,
-    'intervals':    intervals.create,
+    'ticks':    ticks.create,
     'simulate':     simulation.run,
     'run':          run,
 }
@@ -32,7 +32,7 @@ if __name__ == '__main__':
 
         The commands are:
         network
-        intervals
+        ticks
         nodes
         simulate
         run

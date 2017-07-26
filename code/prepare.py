@@ -45,7 +45,7 @@ def prepare_simulation_dir():
         os.makedirs(config.sim_dir)
 
     bash.check_output('cp {} {}'.format(config.network_csv, config.sim_dir))
-    bash.check_output('cp {} {}'.format(config.intervals_csv, config.sim_dir))
+    bash.check_output('cp {} {}'.format(config.ticks_csv, config.sim_dir))
 
     with open(config.blocks_csv, 'a') as file:
         file.write('node;block;mine_time;stale_block;size;number_of_tx;'

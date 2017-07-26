@@ -10,14 +10,14 @@ import queue
 
 class Event:
 
-    def __init__(self, executor, interval_duration):
+    def __init__(self, executor, tick_duration):
         self.executor = executor
-        self.interval_duration = interval_duration
+        self.tick_duration = tick_duration
 
     def execute(self):
-        utils.check_for_file(config.intervals_csv)
+        utils.check_for_file(config.ticks_csv)
         exce_queue = queue.Queue()
-        with open(config.intervals_csv, 'r') as file:
+        with open(config.ticks_csv, 'r') as file:
 
             for line in file.readlines():
 
@@ -37,16 +37,16 @@ class Event:
                 if exce_queue.empty() is False:
                     raise Exception('One or more exception occurred during the execution of line {}'.format(line))
 
-                next_interval = start_time + self.interval_duration
+                next_tick = start_time + self.tick_duration
                 current_time = time.time()
-                if current_time < next_interval:
-                    difference = next_interval - current_time
-                    logging.info('Sleep {} seconds for next interval.'.format(difference))
+                if current_time < next_tick:
+                    difference = next_tick - current_time
+                    logging.info('Sleep {} seconds for next tick.'.format(difference))
                     utils.sleep(difference)
                 else:
-                    raise Exception('Current_time={} is higher then next_interval={}.'
-                                    ' Consider to raise the interval_duration which is currently {}s.'
-                                    .format(current_time, next_interval, self.interval_duration))
+                    raise Exception('Current_time={} is higher then next_tick={}.'
+                                    ' Consider to raise the tick_duration which is currently {}s.'
+                                    .format(current_time, next_tick, self.tick_duration))
 
     def create_thread(self, cmd, exce_queue):
         return threading.Thread(target=execute_cmd, args=(cmd, self.executor.all_bitcoin_nodes, exce_queue))
@@ -61,7 +61,7 @@ def execute_cmd(cmd, nodes, exce_queue):
         elif cmd_parts[0] == 'tx':
             generate_tx_and_save_creator(node, node.spent_to_address)
         else:
-            exce_queue.put(Exception('Unknown cmd={} in {}-file'.format(cmd_parts[0], config.intervals_csv)))
+            exce_queue.put(Exception('Unknown cmd={} in {}-file'.format(cmd_parts[0], config.ticks_csv)))
     except Exception as exception:
         exce_queue.put(exception)
 

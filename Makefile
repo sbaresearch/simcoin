@@ -4,7 +4,7 @@ all:
 smoke:
 	cd code; \
 		python3 ./main.py \
-			--interval-duration 10
+			--tick-duration 10
 			# dryRun
 
 install:
