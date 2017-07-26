@@ -8,7 +8,7 @@ class TestProxycmd(TestCase):
 
     def test_run_proxy(self):
         args = 'args1 args2'
-        node = ProxyNode('name', ipaddress.ip_address('1.1.1.1'), ipaddress.ip_address('2.2.2.1'), args)
+        node = ProxyNode('name', ipaddress.ip_address('1.1.1.1'), ipaddress.ip_address('2.2.2.1'), args, 0)
         node.outgoing_ips = ['ip1', 'ip2']
         cmd = proxycmd.run_proxy(node, 'hash')
         self.assertTrue('  ' not in cmd)

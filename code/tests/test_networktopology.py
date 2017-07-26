@@ -3,13 +3,12 @@ import networktopology
 from mock import patch
 from mock import mock_open
 from textwrap import dedent
-from node.bitcoinnode import BitcoinNodeConfig
-
+from nodesconfig import NodeConfig
 
 class TestNetworktopology(TestCase):
 
     def test_create_header(self, ):
-        header = networktopology.create_header([BitcoinNodeConfig(name='node-1'), BitcoinNodeConfig(name='node-2')])
+        header = networktopology.create_header([NodeConfig('type', 'node-1', 0, 0), NodeConfig('type','node-2', 0, 0)])
 
         self.assertEqual(len(header), 3)
         self.assertEqual(header, ['', 'node-1', 'node-2'])
