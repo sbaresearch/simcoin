@@ -75,7 +75,7 @@ if __name__ == '__main__':
         description='Simcoin a cryptocurrency simulator.',
         usage='''git <command> [<args>]
 
-        The most commonly used git commands are:
+        The commands are:
         network
         intervals
         nodes
