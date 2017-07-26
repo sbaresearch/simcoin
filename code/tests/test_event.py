@@ -13,6 +13,7 @@ class TestEvent(TestCase):
 
     @patch('time.time')
     @patch('utils.sleep')
+    @patch('utils.check_for_file', lambda file: None)
     def test_execute_multiple_cmds(self, m_sleep, m_time):
         data = dedent("""
             cmd1;cmd2;cmd3
@@ -34,6 +35,7 @@ class TestEvent(TestCase):
 
     @patch('time.time')
     @patch('utils.sleep')
+    @patch('utils.check_for_file', lambda file: None)
     def test_execute_multiple_lines(self, m_sleep, m_time):
         data = dedent("""
             cmd1
@@ -55,6 +57,7 @@ class TestEvent(TestCase):
             self.assertTrue(m_sleep.call_count, 2)
 
     @patch('time.time')
+    @patch('utils.check_for_file', lambda file: None)
     def test_execute(self, m_time):
         data = dedent("""
             cmd1;cmd2;cmd3
@@ -73,6 +76,7 @@ class TestEvent(TestCase):
             self.assertTrue('Consider to raise the interval_duration' in str(context.exception))
 
     @patch('queue.Queue')
+    @patch('utils.check_for_file', lambda file: None)
     def test_execute_with_exce_in_queue(self, m_Queue):
         data = dedent("""
             cmd1

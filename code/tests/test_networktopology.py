@@ -41,6 +41,7 @@ class TestNetworktopology(TestCase):
         """).strip()
 
     @patch("builtins.open", mock_open(read_data=DATA_1))
+    @patch('utils.check_for_file', lambda file: None)
     def test_read_connections(self):
         connections = networktopology.read_connections()
 
