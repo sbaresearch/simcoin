@@ -17,8 +17,8 @@ selfish_node_proxy_name = selfish_node_name + selfish_node_proxy_postfix
 
 data_dir = '../data/'
 sim_dir = '{}run-{}/'.format(data_dir, time.time())
-network_config = data_dir + 'network.csv'
-interval_csv = data_dir + 'intervals.csv'
+network_csv = data_dir + 'network.csv'
+intervals_csv = data_dir + 'intervals.csv'
 nodes_json = data_dir + 'nodes.json'
 aggregated_log = data_dir + sim_dir + 'aggregated.log'
 log_file = data_dir + 'debug.log'

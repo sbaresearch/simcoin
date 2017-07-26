@@ -25,7 +25,7 @@ def main():
         if os.system("docker inspect " + image + " > /dev/null") != 0:
             raise Exception("Image {} not found".format(image))
 
-    for file in [config.network_config, config.interval_csv]:
+    for file in [config.network_csv, config.intervals_csv]:
         if not os.path.isfile(file):
             raise Exception("{} file not found. Please generate file before starting Simcoin.".format(file))
 

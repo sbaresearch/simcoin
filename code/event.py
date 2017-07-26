@@ -16,7 +16,7 @@ class Event:
 
     def execute(self):
         exce_queue = queue.Queue()
-        with open(config.interval_csv, 'r') as file:
+        with open(config.intervals_csv, 'r') as file:
 
             for line in file.readlines():
 
@@ -60,7 +60,7 @@ def execute_cmd(cmd, nodes, exce_queue):
         elif cmd_parts[0] == 'tx':
             generate_tx_and_save_creator(node, node.spent_to_address)
         else:
-            exce_queue.put(Exception('Unknown cmd={} in {}-file'.format(cmd_parts[0], config.interval_csv)))
+            exce_queue.put(Exception('Unknown cmd={} in {}-file'.format(cmd_parts[0], config.intervals_csv)))
     except Exception as exception:
         exce_queue.put(exception)
 

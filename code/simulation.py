@@ -35,7 +35,7 @@ def run():
 
     args = parse()
 
-    for file in [config.network_config, config.interval_csv, config.nodes_json]:
+    for file in [config.network_csv, config.intervals_csv, config.nodes_json]:
         if not os.path.isfile(file):
             raise Exception("{} file not found. Please generate file before starting Simcoin.".format(file))
 

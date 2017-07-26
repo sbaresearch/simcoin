@@ -57,7 +57,7 @@ def create():
 
     print(pandas.DataFrame(intervals))
 
-    with open(config.interval_csv, "w") as file:
+    with open(config.intervals_csv, "w") as file:
         writer = csv.writer(file, delimiter=';')
         writer.writerows(intervals)
 
