@@ -2,6 +2,7 @@ import json
 import config
 import argparse
 import sys
+import utils
 
 
 node_groups = [
@@ -44,6 +45,7 @@ def create():
 
 
 def read():
+    utils.check_for_files([config.nodes_json])
     with open(config.nodes_json) as data_file:
         nodes = json.load(data_file, object_hook=object_decoder)
     return nodes

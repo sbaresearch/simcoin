@@ -1,4 +1,3 @@
-import os
 import config
 from executor import Executor
 import logging
@@ -35,9 +34,7 @@ def run():
 
     args = parse()
 
-    for file in [config.network_csv, config.intervals_csv, config.nodes_json]:
-        if not os.path.isfile(file):
-            raise Exception("{} file not found. Please generate file before starting Simcoin.".format(file))
+    utils.check_for_files([config.intervals_csv, config.network_csv, config.nodes_json])
 
     utils.config_logger(args.verbose)
 
