@@ -4,10 +4,6 @@ import time
 # it does not conflict with https://github.com/bitcoin/bitcoin/blob/master/src/netbase.h
 ip_range = "240.0.0.0/4"
 
-out_dir = 'out'
-sim_dir = '{}/run-{}/'.format(out_dir, time.time())
-aggregated_log_file = sim_dir + 'log'
-
 network_name = 'simcoin-network'
 node_image = 'btn/base:v3'
 prefix = 'simcoin-'
@@ -19,17 +15,19 @@ selfish_node_proxy_postfix = '-proxy'
 selfish_node_name = selfish_node_prefix + '{}'
 selfish_node_proxy_name = selfish_node_name + selfish_node_proxy_postfix
 
-network_config = 'network.csv'
-interval_csv = 'intervals.csv'
-nodes_config_json = 'nodes_config.json'
-aggregated_log = sim_dir + 'aggregated.log'
-log_file = 'debug.log'
-tmp_log = sim_dir + 'tmp.log'
-blocks_csv = sim_dir + 'blocks.csv'
-chains_csv = sim_dir + 'chains.csv'
-consensus_chain_csv = sim_dir + 'consensus_chain.csv'
-nodes_csv = sim_dir + 'nodes.csv'
-tx_csv = sim_dir + 'tx.csv'
+data_dir = '../data/'
+sim_dir = '{}run-{}/'.format(data_dir, time.time())
+network_config = data_dir + 'network.csv'
+interval_csv = data_dir + 'intervals.csv'
+nodes_config_json = data_dir + 'nodes_config.json'
+aggregated_log = data_dir + sim_dir + 'aggregated.log'
+log_file = data_dir + 'debug.log'
+tmp_log = data_dir + sim_dir + 'tmp.log'
+blocks_csv = data_dir + sim_dir + 'blocks.csv'
+chains_csv = data_dir + sim_dir + 'chains.csv'
+consensus_chain_csv = data_dir + sim_dir + 'consensus_chain.csv'
+nodes_csv = data_dir + sim_dir + 'nodes.csv'
+tx_csv = data_dir + sim_dir + 'tx.csv'
 
 reference_node = 'node-0'
 
