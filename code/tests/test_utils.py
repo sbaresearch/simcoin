@@ -1,5 +1,6 @@
 from unittest import TestCase
 import utils
+from mock import patch
 
 
 class TestUtils(TestCase):
@@ -28,3 +29,21 @@ class TestUtils(TestCase):
         equal = utils.check_equal(["a", "a", "a"])
 
         self.assertTrue(equal)
+
+    @patch('builtins.exit')
+    @patch('os.path.isfile')
+    def test_check_for_files_file_not_existing(self, m_isfile, m_exit):
+        m_isfile.return_value = False
+
+        utils.check_for_files(['file.txt'])
+
+        self.assertTrue(m_exit.called)
+
+    @patch('builtins.exit')
+    @patch('os.path.isfile')
+    def test_check_for_files_file_exists(self, m_isfile, m_exit):
+        m_isfile.return_value = True
+
+        utils.check_for_files(['file.txt'])
+
+        self.assertFalse(m_exit.called)
