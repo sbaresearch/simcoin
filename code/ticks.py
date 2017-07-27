@@ -37,7 +37,7 @@ def parse():
                         , help='Set the seed.'
                         )
 
-    args = parser.parse_args(sys.argv[2:])
+    args = parser.parse_known_args(sys.argv[2:])
     print("arguments called with: {}".format(sys.argv))
     print("parsed arguments: {}".format(args))
     return args
@@ -46,7 +46,7 @@ def parse():
 def create():
     nodes = nodesconfig.read()
 
-    args = parse()
+    args = parse()[0]
 
     random.seed(args.seed)
     np.random.seed(args.seed)

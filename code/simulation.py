@@ -24,14 +24,14 @@ def parse():
                         , help='Verbose log.'
                         )
 
-    args = parser.parse_args(sys.argv[2:])
+    args = parser.parse_known_args(sys.argv[2:])
     print("arguments called with: {}".format(sys.argv))
     print("parsed arguments: {}".format(args))
     return args
 
 
 def run():
-    args = parse()
+    args = parse()[0]
 
     utils.config_logger(args.verbose)
 
