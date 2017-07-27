@@ -19,7 +19,7 @@ def parse():
                         )
 
     parser.add_argument('--connectivity'
-                        , default=.5
+                        , default=1
                         , type=checkargs.check_percentage
                         , help='Connectivity between nodes.'
                         )
