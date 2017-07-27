@@ -96,8 +96,6 @@ class TestEvent(TestCase):
             self.assertTrue('One or more exception occurred during the execution of' in str(context.exception))
 
 
-
-
     @patch('event.generate_block_and_save_creator')
     def test_execute_cmd_with_block_cmd(self, m_generate_block_and_save_creator):
         nodes = {'node-1': 'mock'}
