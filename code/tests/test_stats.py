@@ -211,7 +211,7 @@ class TestStats(TestCase):
 
     @patch('stats.calc_median_std')
     def test_tips_statistics_unknown_status(self, mock):
-        tips = ['skip', {'status': 'unknown'}]
+        tips = [{'status': 'unknown'}]
         with self.assertRaises(Exception) as context:
             stats.tips_statistics(tips)
 
@@ -219,7 +219,7 @@ class TestStats(TestCase):
 
     @patch('stats.calc_median_std')
     def test_tips_statistics_both(self, mock):
-        tips = ['skip', {'status': 'valid-fork', 'branchlen': 2}, {'status': 'valid-headers', 'branchlen': 3}]
+        tips = [{'status': 'active'}, {'status': 'valid-fork', 'branchlen': 2}, {'status': 'valid-headers', 'branchlen': 3}]
         stats.tips_statistics(tips)
 
         self.assertEqual(mock.call_args_list[0][0][0], [3])

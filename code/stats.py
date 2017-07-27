@@ -187,15 +187,14 @@ def tips_statistics(tips):
     valid_headers = []
     valid_fork = []
 
-    iter_tips = iter(tips)
-    # omit first active tip
-    next(iter_tips)
-
-    for tip in iter_tips:
+    for tip in tips:
         if tip['status'] == 'valid-headers':
             valid_headers.append(tip['branchlen'])
         elif tip['status'] == 'valid-fork':
             valid_fork.append(tip['branchlen'])
+        elif tip['status'] == 'active':
+            # omit active tip
+            pass
         else:
             raise Exception('Unknown tip type={}'.format(tip['status']))
 
