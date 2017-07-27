@@ -32,7 +32,6 @@ class BitcoinNode(Node):
         super().__init__(name, ip)
         self.name = name
         self.ip = ip
-        self.mined_blocks = 0
         self.spent_to_address = ''
 
     def run(self):

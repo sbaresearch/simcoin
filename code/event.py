@@ -57,21 +57,13 @@ def execute_cmd(cmd, nodes, exce_queue):
         cmd_parts = cmd.split(' ')
         node = nodes[cmd_parts[1].rstrip()]
         if cmd_parts[0] == 'block':
-            generate_block_and_save_creator(node)
+            node.generate_block()
         elif cmd_parts[0] == 'tx':
             generate_tx_and_save_creator(node, node.spent_to_address)
         else:
             exce_queue.put(Exception('Unknown cmd={} in {}-file'.format(cmd_parts[0], config.ticks_csv)))
     except Exception as exception:
         exce_queue.put(exception)
-
-
-def generate_block_and_save_creator(node):
-    blocks_string = node.generate_block()
-    blocks = json.loads(blocks_string)
-    with open(config.blocks_csv, 'a') as file:
-        file.write('{};{}\n'.format(node.name, blocks[0]))
-    node.mined_blocks += 1
 
 
 def generate_tx_and_save_creator(node, address):

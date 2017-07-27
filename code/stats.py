@@ -108,7 +108,7 @@ class Stats:
 
     def node_stats(self):
         with open(config.nodes_csv, 'w') as file:
-            file.write('name;mined_blocks;'
+            file.write('name;'
                        'total_tips;total_tips_median_branchlen;tips_std_branchlen;'
                        'valid_headers;valid_headers_median_branchlen;valid_headers_std_branchlen;'
                        'valid_fork;valid_fork_median_branchlen;valid_fork_std_branchlen;\n')
@@ -120,11 +120,11 @@ class Stats:
                 total = tips_stats['total']
                 headers = tips_stats['valid-headers']
                 fork = tips_stats['valid-fork']
-                file.write('{};{};'
+                file.write('{};'
                            '{};{};{};'
                            '{};{};{};'
                            '{};{};{}\n'
-                           .format(node.name, node.mined_blocks,
+                           .format(node.name,
                                    total['len'], total['median'], total['std'],
                                    headers['len'], headers['median'], headers['std'],
                                    fork['len'], fork['median'], fork['std']))

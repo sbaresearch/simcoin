@@ -215,11 +215,11 @@ class TestStats(TestCase):
         handle = m_open()
         self.assertEqual(handle.write.call_count, 2)
         self.assertEqual(handle.write.call_args_list[0][0][0],
-                         'name;mined_blocks;'                                       
+                         'name;'
                          'total_tips;total_tips_median_branchlen;tips_std_branchlen;'
                          'valid_headers;valid_headers_median_branchlen;valid_headers_std_branchlen;'
                          'valid_fork;valid_fork_median_branchlen;valid_fork_std_branchlen;\n')
-        self.assertEqual(handle.write.call_args_list[1][0][0], 'name;45;1;2;3;11;22;33;111;222;333\n')
+        self.assertEqual(handle.write.call_args_list[1][0][0], 'name;1;2;3;11;22;33;111;222;333\n')
 
     def test_prefix_log_no_changes(self):
         lines = ['2017-07-05 14:33:35.324000 test', '2017-07-05 14:33:35.324000 test']
