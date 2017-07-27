@@ -1,12 +1,10 @@
 import dockercmd
-import bitcoincmd
 import ipaddress
 import config
 from node.bitcoinnode import PublicBitcoinNode
 from node.selfishnode import SelfishPrivateNode
 from node.selfishnode import ProxyNode
 import logging
-import json
 import bash
 import prepare
 import utils

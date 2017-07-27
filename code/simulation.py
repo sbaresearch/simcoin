@@ -1,4 +1,3 @@
-import config
 from executor import Executor
 import logging
 import time
