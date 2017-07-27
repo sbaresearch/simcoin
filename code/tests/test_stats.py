@@ -127,7 +127,7 @@ class TestStats(TestCase):
 
         self.assertEqual(m_open.call_args[0][0], config.aggregated_log)
         handle = m_open()
-        self.assertEqual(handle.writelines.call_args[0][0], ['1', '2'])
+        self.assertEqual(handle.write.call_args[0][0], '1\n2\n')
 
         self.assertEqual(m_bash.call_count, 3)
 
@@ -143,38 +143,12 @@ class TestStats(TestCase):
         self.stats.aggregate_logs()
 
         handle = m_open()
-        contents = [line[0][0] for line in handle.writelines.call_args_list]
+        contents = [line[0][0] for line in handle.write.call_args_list]
         self.assertEqual(len(contents), 2)
-        self.assertTrue(['1', '2'] in contents)
-        self.assertTrue(['11', '22'] in contents)
+        self.assertTrue('1\n2\n' in contents)
+        self.assertTrue('11\n22\n' in contents)
 
         self.assertEqual(m_bash.call_count, 4)
-
-    @patch('json.loads')
-    def test_update_blocks_csv(self, m_json):
-        data = dedent("""
-            node;block
-            node-0;hash1
-            node-1;hash2
-        """).strip()
-
-        with patch('builtins.open', mock_open(read_data=data)) as m_open:
-            node_0 = MagicMock()
-            node_0.block_is_new_tip.return_value = 5
-            self.executor.all_bitcoin_nodes = {'node-0': node_0, 'node-1': node_0}
-            self.stats.block_propagation = MagicMock()
-            self.stats.block_propagation.return_value = {'values': np.array([1]), 'len': 1, 'median': 11, 'std': 22}
-            m_json.side_effect = [{'size': 45, 'tx': ['tx1', 'tx2']}, {'size': 1, 'tx': []}]
-            self.stats.consensus_chain = ['hash1']
-
-            self.stats.update_blocks_csv()
-
-            m_open.assert_called_with(config.blocks_csv, 'r+')
-            self.assertTrue(m_open.called)
-            handle = m_open()
-            self.assertEqual(handle.write.call_count, 3)
-            self.assertEqual(handle.write.call_args_list[1][0][0], 'node-0;hash1;5;False;45;2;1;11;22\n')
-            self.assertEqual(handle.write.call_args_list[2][0][0], 'node-1;hash2;5;True;1;0;1;11;22\n')
 
     def test_update_tx_csv(self):
         data = dedent("""
