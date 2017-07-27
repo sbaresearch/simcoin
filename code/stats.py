@@ -42,12 +42,12 @@ class Stats:
 
     def aggregate_logs(self):
         for node in self.executor.all_nodes.values():
-            content = bash.check_output_without_log(node.cat_log_cmd())
+            content = bash.check_output_without_log(node.cat_log_cmd()).splitlines()
 
             content = prefix_log(content, node.name)
 
             with open(config.aggregated_log, 'a') as file:
-                file.writelines(content)
+                file.write('\n'.join(content) + '\n')
 
         bash.check_output('cat {} >> {}'.format(config.log_file, config.aggregated_log))
         bash.check_output('sort {} -o {}'.format(config.aggregated_log, config.aggregated_log))
