@@ -113,20 +113,3 @@ class Executor:
             utils.sleep(3 + len(self.all_nodes) * 0.2)
 
             bash.call_silent(dockercmd.rm_network())
-
-    def generate_block_and_save_creator(self, node, amount):
-        blocks_string = bash.check_output(bitcoincmd.generate_block(node, amount))
-        blocks = json.loads(blocks_string)
-        with open(config.blocks_csv, 'a') as file:
-            for block in blocks:
-                file.write('{};{}\n'.format(node, block))
-        self.all_bitcoin_nodes[node].mined_blocks += 1
-
-
-def generate_tx_and_save_creator(node, address):
-    try:
-        tx_hash = node.generate_tx(address)
-        with open(config.tx_csv, 'a') as file:
-            file.write('{};{}\n'.format(node.name, tx_hash))
-    except subprocess.CalledProcessError:
-        logging.info('Could not generate tx for node {}'.format(node.name))
