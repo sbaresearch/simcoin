@@ -181,8 +181,9 @@ class TestStats(TestCase):
         node_0.mined_blocks = 45
         self.executor.all_bitcoin_nodes = {'0': node_0}
         m_calc_tips_stats.return_value = {'total': {'len': 1, 'median': 2, 'std': 3},
-                                          'valid-headers': {'len': 11, 'median': 22, 'std': 33,},
-                                          'valid-fork': {'len': 111, 'median': 222, 'std': 333,}}
+                                          'valid-headers': {'len': 11, 'median': 22, 'std': 33},
+                                          'valid-fork': {'len': 111, 'median': 222, 'std': 333},
+                                          'headers-only': {'len': 1111, 'median': 2222, 'std': 3333,}}
         self.stats.node_stats()
 
         m_open.assert_called_with(config.nodes_csv, 'w')
@@ -192,8 +193,9 @@ class TestStats(TestCase):
                          'name;'
                          'total_tips;total_tips_median_branchlen;tips_std_branchlen;'
                          'valid_headers;valid_headers_median_branchlen;valid_headers_std_branchlen;'
-                         'valid_fork;valid_fork_median_branchlen;valid_fork_std_branchlen;\n')
-        self.assertEqual(handle.write.call_args_list[1][0][0], 'name;1;2;3;11;22;33;111;222;333\n')
+                         'valid_fork;valid_fork_median_branchlen;valid_fork_std_branchlen;'
+                         'headers_only;headers_only_median_branchlen;headers_only_std_branchlen;\n')
+        self.assertEqual(handle.write.call_args_list[1][0][0], 'name;1;2;3;11;22;33;111;222;333;1111;2222;3333\n')
 
     def test_prefix_log_no_changes(self):
         lines = ['2017-07-05 14:33:35.324000 test', '2017-07-05 14:33:35.324000 test']
@@ -219,12 +221,14 @@ class TestStats(TestCase):
 
     @patch('stats.calc_median_std')
     def test_tips_statistics_both(self, mock):
-        tips = [{'status': 'active'}, {'status': 'valid-fork', 'branchlen': 2}, {'status': 'valid-headers', 'branchlen': 3}]
+        tips = [{'status': 'active'}, {'status': 'valid-headers', 'branchlen': 2},
+                {'status': 'valid-fork', 'branchlen': 3}, {'status': 'headers-only', 'branchlen': 4}]
         stats.tips_statistics(tips)
 
-        self.assertEqual(mock.call_args_list[0][0][0], [3])
-        self.assertEqual(mock.call_args_list[1][0][0], [2])
-        self.assertTrue(item in [2, 3] for item in mock.call_args_list[2][0][0])
+        self.assertEqual(mock.call_args_list[0][0][0], [2])
+        self.assertEqual(mock.call_args_list[1][0][0], [3])
+        self.assertEqual(mock.call_args_list[2][0][0], [4])
+        self.assertTrue(item in [2, 3, 4] for item in mock.call_args_list[3][0][0])
 
     @patch('stats.calc_median_std')
     def test_block_propagation(self, mock):

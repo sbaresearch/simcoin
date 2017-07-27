@@ -111,7 +111,8 @@ class Stats:
             file.write('name;'
                        'total_tips;total_tips_median_branchlen;tips_std_branchlen;'
                        'valid_headers;valid_headers_median_branchlen;valid_headers_std_branchlen;'
-                       'valid_fork;valid_fork_median_branchlen;valid_fork_std_branchlen;\n')
+                       'valid_fork;valid_fork_median_branchlen;valid_fork_std_branchlen;'
+                       'headers_only;headers_only_median_branchlen;headers_only_std_branchlen;\n')
             for node in self.executor.all_bitcoin_nodes.values():
                 tips = json.loads(node.get_chain_tips())
 
@@ -120,14 +121,17 @@ class Stats:
                 total = tips_stats['total']
                 headers = tips_stats['valid-headers']
                 fork = tips_stats['valid-fork']
+                headers_only = tips_stats['headers-only']
                 file.write('{};'
+                           '{};{};{};'
                            '{};{};{};'
                            '{};{};{};'
                            '{};{};{}\n'
                            .format(node.name,
                                    total['len'], total['median'], total['std'],
                                    headers['len'], headers['median'], headers['std'],
-                                   fork['len'], fork['median'], fork['std']))
+                                   fork['len'], fork['median'], fork['std'],
+                                   headers_only['len'], headers_only['median'], headers_only['std']))
 
     def block_propagation(self, source_node_name, block_hash, mine_time):
         arrive_times = []
@@ -172,9 +176,9 @@ def prefix_log(lines, node_name):
     prev_match = ''
     prefixed_lines = []
     for line in lines:
-        match = re.match(config.log_timestamp_regex, line)
+        match = re.match(config.log_prefix_timestamp, line)
         if match:
-            prefixed_lines.append(re.sub(config.log_timestamp_regex
+            prefixed_lines.append(re.sub(config.log_prefix_timestamp
                                   , r'\1 {}'.format(node_name)
                                   , line))
             prev_match = match.group(0)
@@ -186,12 +190,15 @@ def prefix_log(lines, node_name):
 def tips_statistics(tips):
     valid_headers = []
     valid_fork = []
+    headers_only = []
 
     for tip in tips:
         if tip['status'] == 'valid-headers':
             valid_headers.append(tip['branchlen'])
         elif tip['status'] == 'valid-fork':
             valid_fork.append(tip['branchlen'])
+        elif tip['status'] == 'headers-only':
+            headers_only.append(tip['branchlen'])
         elif tip['status'] == 'active':
             # omit active tip
             pass
@@ -200,4 +207,5 @@ def tips_statistics(tips):
 
     return {'valid-headers': calc_median_std(np.array(valid_headers)),
             'valid-fork': calc_median_std(np.array(valid_fork)),
+            'headers-only': calc_median_std(np.array(headers_only)),
             'total': calc_median_std(np.array(valid_fork + valid_headers))}
