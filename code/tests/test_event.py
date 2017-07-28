@@ -91,8 +91,8 @@ class TestEvent(TestCase):
 
         self.assertTrue(node_1.generate_block.called)
 
-    @patch('event.generate_tx_and_save_creator')
-    def test_execute_cmd_with_tx_tmd(self, m_generate_tx_and_save_creator):
+    @patch('event.generate_tx')
+    def test_execute_cmd_with_tx_tmd(self, m_generate_tx):
         node = Mock()
         node.spent_to_address = 'address'
         nodes = {'node-1': node}
@@ -100,9 +100,9 @@ class TestEvent(TestCase):
 
         event.execute_cmd(cmd, nodes)
 
-        self.assertTrue(m_generate_tx_and_save_creator.called)
-        self.assertEqual(m_generate_tx_and_save_creator.call_args[0][0], node)
-        self.assertEqual(m_generate_tx_and_save_creator.call_args[0][1], 'address')
+        self.assertTrue(m_generate_tx.called)
+        self.assertEqual(m_generate_tx.call_args[0][0], node)
+        self.assertEqual(m_generate_tx.call_args[0][1], 'address')
 
     def test_execute_cmd_with_unknown_cmd(self):
         nodes = {'node-1': {}}
@@ -113,23 +113,15 @@ class TestEvent(TestCase):
 
         self.assertTrue('Unknown cmd' in str(context.exception))
 
-    @patch('builtins.open', new_callable=mock_open)
-    def test_generate_tx_and_save_creator(self, m_open):
+    def test_generate_tx(self):
         node = Mock()
         node.name = 'node-1'
-        node.generate_tx.return_value = 'tx_hash'
 
-        event.generate_tx_and_save_creator(node, 'address')
+        event.generate_tx(node, 'address')
+        self.assertTrue(node.generate_tx.called)
 
-        m_open.assert_called_with(config.tx_csv, 'a')
-        handle = m_open()
-        self.assertEqual(handle.write.call_args[0][0], 'node-1;tx_hash\n')
-
-    @patch('builtins.open', new_callable=mock_open)
-    def test_generate_tx_and_save_creator_with_exception(self, m_open):
+    def test_generate_tx_with_exception(self):
         node = Mock()
         node.generate_tx.side_effect = CalledProcessError(None, None)
 
-        event.generate_tx_and_save_creator(node, None)
-
-        self.assertFalse(m_open.called)
+        event.generate_tx(node, None)

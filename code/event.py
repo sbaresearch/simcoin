@@ -39,15 +39,13 @@ def execute_cmd(cmd, nodes):
     if cmd_parts[0] == 'block':
         node.generate_block()
     elif cmd_parts[0] == 'tx':
-        generate_tx_and_save_creator(node, node.spent_to_address)
+        generate_tx(node, node.spent_to_address)
     else:
         raise Exception('Unknown cmd={} in {}-file'.format(cmd_parts[0], config.ticks_csv))
 
 
-def generate_tx_and_save_creator(node, address):
+def generate_tx(node, address):
     try:
-        tx_hash = node.generate_tx(address)
-        with open(config.tx_csv, 'a') as file:
-            file.write('{};{}\n'.format(node.name, tx_hash))
+        node.generate_tx(address)
     except subprocess.CalledProcessError:
         logging.info('Could not generate tx for node {}'.format(node.name))

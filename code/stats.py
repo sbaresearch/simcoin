@@ -82,30 +82,6 @@ class Stats:
                             propagation_stats['std'])
                 file.write(line)
 
-    def update_tx_csv(self):
-        with open(config.tx_csv, 'r+') as file:
-            lines = file.readlines()
-            file.seek(0)
-            file.truncate()
-            iter_lines = iter(lines)
-            # omit header
-            line = next(iter_lines)
-            file.write(line)
-
-            for line in iter_lines:
-                tokens = line.split(';')
-
-                node = self.executor.all_bitcoin_nodes[tokens[0].rstrip()]
-                tx_hash = tokens[1].rstrip()
-                created_at = node.tx_created(tx_hash)
-
-                propagation_stats = self.tx_propagation(node.name,tx_hash, created_at)
-
-                line = line.rstrip()
-                line += ';{};{};{}\n'\
-                    .format(propagation_stats['len'], propagation_stats['median'], propagation_stats['std'])
-                file.write(line)
-
     def node_stats(self):
         with open(config.nodes_csv, 'w') as file:
             file.write('name;'
@@ -141,19 +117,6 @@ class Stats:
                 arrived = node.block_is_new_tip(block_hash)
                 if arrived >= 0:
                     arrive_times.append(arrived - mine_time)
-
-        propagation_stats = calc_median_std(np.array(arrive_times))
-        propagation_stats['values'] = np.array(arrive_times)
-        return propagation_stats
-
-    def tx_propagation(self, source_node_name, tx_hash, created_at):
-        arrive_times = []
-
-        for node in self.executor.all_bitcoin_nodes.values():
-            if source_node_name != node.name:
-                arrived = node.tx_received(tx_hash)
-                if arrived >= 0:
-                    arrive_times.append(arrived - created_at)
 
         propagation_stats = calc_median_std(np.array(arrive_times))
         propagation_stats['values'] = np.array(arrive_times)

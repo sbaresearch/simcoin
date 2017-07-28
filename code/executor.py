@@ -102,7 +102,6 @@ class Executor:
             parse.cut_log()
             parser.parse_aggregated_sim_log()
             parser.create_block_csv()
-            self.stats.update_tx_csv()
             self.stats.save_chains()
             self.stats.node_stats()
 
