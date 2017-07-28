@@ -184,7 +184,6 @@ class TestParse(TestCase):
             self.assertEqual(m_open.call_args_list[1][0][0], config.aggregated_sim_log)
 
             handle = m_open()
-            print(handle.write.call_args_list)
             self.assertEqual(handle.write.call_args_list[0][0][0], 'line2 {}\n'.format(config.log_line_sim_start))
             self.assertEqual(handle.write.call_args_list[1][0][0], 'line3\n')
             self.assertEqual(handle.write.call_args_list[2][0][0], 'line4 {}\n'.format(config.log_line_sim_end))
