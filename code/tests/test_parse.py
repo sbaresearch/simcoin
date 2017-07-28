@@ -12,6 +12,7 @@ from parse import ReceivedBlock
 from parse import BlockStats
 import numpy as np
 import config
+from datetime import datetime
 
 
 class TestParse(TestCase):
@@ -26,7 +27,7 @@ class TestParse(TestCase):
 
         create_new_block = parse.parse_create_new_block(log_line)
 
-        self.assertEqual(create_new_block.timestamp, 1501146082.173139)
+        self.assertEqual(create_new_block.timestamp, datetime(2017, 7, 27, 11, 1, 22, 173139).timestamp())
         self.assertEqual(create_new_block.node, 'node-1')
         self.assertEqual(create_new_block.total_size, 226)
         self.assertEqual(create_new_block.txs, 1)
@@ -45,7 +46,7 @@ class TestParse(TestCase):
 
         update_tip = parse.parse_update_tip(log_line)
 
-        self.assertEqual(update_tip.timestamp, 1501146087.183575)
+        self.assertEqual(update_tip.timestamp, datetime(2017, 7, 27, 11, 1, 27, 183575).timestamp())
         self.assertEqual(update_tip.node, 'node-1')
         self.assertEqual(update_tip.block_hash, '1d205cac616c0344721d2552482024528883e9fdf7439bfbfc02567060c56d71')
         self.assertEqual(update_tip.height, 106)
@@ -121,7 +122,7 @@ class TestParse(TestCase):
 
         received_block = parse.parse_received_block(log_line)
 
-        self.assertEqual(received_block.timestamp, 1501162498.122336)
+        self.assertEqual(received_block.timestamp, datetime(2017, 7, 27, 15, 34, 58, 122336).timestamp())
         self.assertEqual(received_block.node, 'node-1')
         self.assertEqual(received_block.block_hash, '4ec9b518b23d460c01abaf1c6e32ec46dbbfc8c81c599dd71c0c175e2367f278')
 
@@ -132,7 +133,7 @@ class TestParse(TestCase):
 
         received_block = parse.parse_successfully_reconstructed_block(log_line)
 
-        self.assertEqual(received_block.timestamp, 1501224103.637277)
+        self.assertEqual(received_block.timestamp, datetime(2017, 7, 28, 8, 41, 43, 637277).timestamp())
         self.assertEqual(received_block.node, 'node-3')
         self.assertEqual(received_block.block_hash, '27ebf5f20b3860fb3a8ed82f0721300bf96c1836252fddd67b60f48d227d3a3c')
 
