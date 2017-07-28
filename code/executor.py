@@ -9,8 +9,9 @@ import bash
 import prepare
 import utils
 import networktopology
-import subprocess
 import nodesconfig
+from parse import Parser
+import parse
 
 
 class Executor:
@@ -82,6 +83,7 @@ class Executor:
             for node in self.all_bitcoin_nodes.values():
                 node.spent_to_address = node.get_new_address()
 
+            logging.info(config.log_line_sim_start)
             self.event.execute()
 
             # only use regular nodes since selfish nodes can trail back
@@ -90,14 +92,19 @@ class Executor:
                 logging.debug('Waiting for blocks to spread...')
                 utils.sleep(0.2)
                 array = [int(node.get_block_count()) for node in self.nodes.values()]
+            logging.info(config.log_line_sim_end)
 
             bash.check_output(dockercmd.fix_data_dirs_permissions())
 
             self.stats.save_consensus_chain()
+            self.stats.aggregate_logs()
+            parser = Parser([node.name for node in self.all_bitcoin_nodes.values()])
+            parse.cut_log()
+            parser.parse_aggregated_sim_log()
+            parser.create_block_csv()
             self.stats.update_tx_csv()
             self.stats.save_chains()
             self.stats.node_stats()
-            self.stats.aggregate_logs()
 
             for node in self.all_nodes.values():
                 node.grep_log_for_errors()

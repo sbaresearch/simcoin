@@ -105,7 +105,7 @@ def get_timestamp(node_name, grep_cmd):
     if return_value != 0:
         return -1
     line = bash.check_output(cmd)
-    matched = re.match(config.log_timestamp_regex, line)
+    matched = re.match(config.log_prefix_timestamp, line)
     return datetime.strptime(matched.group(0), config.log_time_format).timestamp()
 
 

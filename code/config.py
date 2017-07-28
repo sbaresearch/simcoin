@@ -21,6 +21,7 @@ network_csv = data_dir + 'network.csv'
 ticks_csv = data_dir + 'ticks.csv'
 nodes_json = data_dir + 'nodes.json'
 aggregated_log = data_dir + sim_dir + 'aggregated.log'
+aggregated_sim_log = data_dir + sim_dir + 'aggregated_simulation.log'
 log_file = data_dir + 'debug.log'
 tmp_log = data_dir + sim_dir + 'tmp.log'
 blocks_csv = data_dir + sim_dir + 'blocks.csv'
@@ -34,9 +35,12 @@ reference_node = 'node-0'
 warmup_blocks = 100
 start_blocks_per_node = 2
 
-log_timestamp_regex = r'^([0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}.[0-9]{6})'
+log_prefix_timestamp = r'^([0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}.[0-9]{6})'
+log_prefix_full = log_prefix_timestamp + ' ([a-zA-Z0-9]+-[0-9]+) '
 log_error_grep = 'grep -E -i "WARN|FATAL|ERROR|CRITICAL|EXCEPTION" {} || true'
 log_time_format = '%Y-%m-%d %H:%M:%S.%f'
+log_line_sim_start = 'SIMULATION START'
+log_line_sim_end = 'SIMULATION END'
 
 
 def host_dir(node):
