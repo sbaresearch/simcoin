@@ -45,6 +45,7 @@ def execute_cmd(cmd, nodes):
 
 
 def generate_tx(node, address):
+    # generate_tx is not always successful. eg. miner has not enough money or tx fee calculation fails
     try:
         node.generate_tx(address)
     except subprocess.CalledProcessError:
