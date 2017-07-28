@@ -1,11 +1,8 @@
 import config
 import logging
 import time
-import json
 import utils
 import subprocess
-import threading
-import queue
 
 
 class Event:
@@ -16,27 +13,14 @@ class Event:
 
     def execute(self):
         utils.check_for_file(config.ticks_csv)
-        exce_queue = queue.Queue()
         with open(config.ticks_csv, 'r') as file:
 
             for line in file.readlines():
 
                 start_time = time.time()
                 cmds = line.split(';')
-                threads = []
                 for cmd in cmds:
-                    thread = self.create_thread(cmd, exce_queue)
-
-                    thread.daemon = True
-                    thread.start()
-                    threads.append(thread)
-
-                for thread in threads:
-                    thread.join()
-
-                if exce_queue.empty() is False:
-                    raise Exception('One or more exception occurred during the execution of line {}'.format(line))
-
+                    execute_cmd(cmd, self.executor.all_bitcoin_nodes)
                 next_tick = start_time + self.tick_duration
                 current_time = time.time()
                 if current_time < next_tick:
@@ -48,22 +32,16 @@ class Event:
                                     ' Consider to raise the tick_duration which is currently {}s.'
                                     .format(current_time, next_tick, self.tick_duration))
 
-    def create_thread(self, cmd, exce_queue):
-        return threading.Thread(target=execute_cmd, args=(cmd, self.executor.all_bitcoin_nodes, exce_queue))
 
-
-def execute_cmd(cmd, nodes, exce_queue):
-    try:
-        cmd_parts = cmd.split(' ')
-        node = nodes[cmd_parts[1].rstrip()]
-        if cmd_parts[0] == 'block':
-            node.generate_block()
-        elif cmd_parts[0] == 'tx':
-            generate_tx_and_save_creator(node, node.spent_to_address)
-        else:
-            exce_queue.put(Exception('Unknown cmd={} in {}-file'.format(cmd_parts[0], config.ticks_csv)))
-    except Exception as exception:
-        exce_queue.put(exception)
+def execute_cmd(cmd, nodes):
+    cmd_parts = cmd.split(' ')
+    node = nodes[cmd_parts[1].rstrip()]
+    if cmd_parts[0] == 'block':
+        node.generate_block()
+    elif cmd_parts[0] == 'tx':
+        generate_tx_and_save_creator(node, node.spent_to_address)
+    else:
+        raise Exception('Unknown cmd={} in {}-file'.format(cmd_parts[0], config.ticks_csv))
 
 
 def generate_tx_and_save_creator(node, address):

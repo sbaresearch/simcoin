@@ -14,60 +14,52 @@ class TestEvent(TestCase):
     @patch('time.time')
     @patch('utils.sleep')
     @patch('utils.check_for_file', lambda file: None)
-    def test_execute_multiple_cmds(self, m_sleep, m_time):
+    @patch('event.execute_cmd')
+    def test_execute_multiple_cmds(self, m_execute_cmd, m_sleep, m_time):
         data = dedent("""
             cmd1;cmd2;cmd3
         """).strip()
 
         with patch('builtins.open', mock_open(read_data=data)):
-            e = Event(None, 1)
-            e.create_thread = Mock()
-            thread = Mock()
-            e.create_thread.return_value = thread
+            e = Event(Mock(), 1)
 
             m_time.return_value = 0
 
             e.execute()
 
-            self.assertEqual(thread.start.call_count, 3)
-            self.assertEqual(thread.join.call_count, 3)
+            self.assertEqual(m_execute_cmd.call_count, 3)
             self.assertTrue(m_sleep.called)
 
     @patch('time.time')
     @patch('utils.sleep')
     @patch('utils.check_for_file', lambda file: None)
-    def test_execute_multiple_lines(self, m_sleep, m_time):
+    @patch('event.execute_cmd')
+    def test_execute_multiple_lines(self, m_execute_cmd, m_sleep, m_time):
         data = dedent("""
             cmd1
             cmd2
         """).strip()
 
         with patch('builtins.open', mock_open(read_data=data)):
-            e = Event(None, 1)
-            e.create_thread = Mock()
-            thread = Mock()
-            e.create_thread.return_value = thread
+            e = Event(Mock(), 1)
 
             m_time.return_value = 0
 
             e.execute()
 
-            self.assertEqual(thread.start.call_count, 2)
-            self.assertEqual(thread.join.call_count, 2)
+            self.assertEqual(m_execute_cmd.call_count, 2)
             self.assertTrue(m_sleep.call_count, 2)
 
     @patch('time.time')
     @patch('utils.check_for_file', lambda file: None)
+    @patch('event.execute_cmd', lambda cmd, nodes: None)
     def test_execute(self, m_time):
         data = dedent("""
             cmd1;cmd2;cmd3
         """).strip()
 
         with patch('builtins.open', mock_open(read_data=data)):
-            e = Event(None, 0)
-            e.create_thread = Mock()
-            thread = Mock()
-            e.create_thread.return_value = thread
+            e = Event(Mock(), 0)
 
             m_time.side_effect = [0, 1, 10]
 
@@ -75,32 +67,27 @@ class TestEvent(TestCase):
                 e.execute()
             self.assertTrue('Consider to raise the tick_duration' in str(context.exception))
 
-    @patch('queue.Queue')
     @patch('utils.check_for_file', lambda file: None)
-    def test_execute_with_exce_in_queue(self, m_Queue):
+    @patch('event.execute_cmd')
+    def test_execute_with_exce_execute_cmd(self, m_execute_cmd):
         data = dedent("""
             cmd1
         """).strip()
 
         with patch('builtins.open', mock_open(read_data=data)):
-            e = Event(None, 0)
-            e.create_thread = Mock()
-            thread = Mock()
-            e.create_thread.return_value = thread
-            exce_queue = Mock()
-            m_Queue.return_value = exce_queue
-            exce_queue.empty.return_value = False
+            e = Event(Mock(), 0)
+            m_execute_cmd.side_effect = Exception('mock')
 
             with self.assertRaises(Exception) as context:
                 e.execute()
-            self.assertTrue('One or more exception occurred during the execution of' in str(context.exception))
+            self.assertTrue('mock' in str(context.exception))
 
     def test_execute_cmd_with_block_cmd(self):
         node_1 = Mock()
         nodes = {'node-1': node_1}
         cmd = 'block node-1'
 
-        event.execute_cmd(cmd, nodes, None)
+        event.execute_cmd(cmd, nodes)
 
         self.assertTrue(node_1.generate_block.called)
 
@@ -111,30 +98,20 @@ class TestEvent(TestCase):
         nodes = {'node-1': node}
         cmd = 'tx node-1'
 
-        event.execute_cmd(cmd, nodes, None)
+        event.execute_cmd(cmd, nodes)
 
         self.assertTrue(m_generate_tx_and_save_creator.called)
         self.assertEqual(m_generate_tx_and_save_creator.call_args[0][0], node)
         self.assertEqual(m_generate_tx_and_save_creator.call_args[0][1], 'address')
 
-    def test_execute_cmd_with_key_error(self):
-        nodes = {}
-        cmd = 'cmd node-1'
-        queue = Mock()
-
-        event.execute_cmd(cmd, nodes, queue)
-
-        self.assertEqual(type(queue.put.call_args[0][0]), KeyError)
-
     def test_execute_cmd_with_unknown_cmd(self):
         nodes = {'node-1': {}}
         cmd = 'unknown node-1'
-        queue = Mock()
 
-        event.execute_cmd(cmd, nodes, queue)
+        with self.assertRaises(Exception) as context:
+            event.execute_cmd(cmd, nodes)
 
-        self.assertEqual(type(queue.put.call_args[0][0]), Exception)
-        self.assertTrue('Unknown cmd' in str(queue.put.call_args[0][0]))
+        self.assertTrue('Unknown cmd' in str(context.exception))
 
     @patch('builtins.open', new_callable=mock_open)
     def test_generate_tx_and_save_creator(self, m_open):
