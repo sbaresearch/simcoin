@@ -207,21 +207,6 @@ class TestStats(TestCase):
         self.assertEqual(mock.call_args_list[2][0][0], [4])
         self.assertTrue(item in [2, 3, 4] for item in mock.call_args_list[3][0][0])
 
-    @patch('stats.calc_median_std')
-    def test_block_propagation(self, mock):
-        node_1 = MagicMock()
-        node_1.block_is_new_tip.return_value = 11
-        node_1.name = 'node_1'
-        node_2 = MagicMock()
-        node_2.block_is_new_tip.return_value = -1
-        node_2.name = 'node_2'
-
-        self.executor.all_bitcoin_nodes = {'node_1': node_1, 'node_2': node_2}
-
-        self.stats.block_propagation('node_0', 'hash', 1)
-
-        self.assertEqual(mock.call_args[0][0], np.array([10]))
-
     def test_calc_median_std_no_values(self):
         array = np.array([])
         statistics = stats.calc_median_std(array)

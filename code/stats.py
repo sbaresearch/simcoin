@@ -52,36 +52,6 @@ class Stats:
         bash.check_output('cat {} >> {}'.format(config.log_file, config.aggregated_log))
         bash.check_output('sort {} -o {}'.format(config.aggregated_log, config.aggregated_log))
 
-    def update_blocks_csv(self):
-        with open(config.blocks_csv, 'r+') as file:
-            lines = file.readlines()
-            file.seek(0)
-            file.truncate()
-            iter_lines = iter(lines)
-            line = next(iter_lines)
-            file.write(line)
-
-            for line in iter_lines:
-                tokens = line.split(';')
-                node = self.executor.all_bitcoin_nodes[tokens[0].rstrip()]
-                block_hash = tokens[1].rstrip()
-
-                stale = True
-                if block_hash in self.consensus_chain:
-                    stale = False
-
-                time = node.block_is_new_tip(block_hash)
-                propagation_stats = self.block_propagation(node.name, block_hash, time)
-
-                block = json.loads(node.get_block(block_hash))
-                line = line.rstrip()
-                line += ';{};{};{};{};{};{};{}\n'\
-                    .format(time, stale, block['size'], len(block['tx']),
-                            propagation_stats['len'],
-                            propagation_stats['median'],
-                            propagation_stats['std'])
-                file.write(line)
-
     def node_stats(self):
         with open(config.nodes_csv, 'w') as file:
             file.write('name;'
@@ -108,19 +78,6 @@ class Stats:
                                    headers['len'], headers['median'], headers['std'],
                                    fork['len'], fork['median'], fork['std'],
                                    headers_only['len'], headers_only['median'], headers_only['std']))
-
-    def block_propagation(self, source_node_name, block_hash, mine_time):
-        arrive_times = []
-
-        for node in self.executor.all_bitcoin_nodes.values():
-            if source_node_name != node.name:
-                arrived = node.block_is_new_tip(block_hash)
-                if arrived >= 0:
-                    arrive_times.append(arrived - mine_time)
-
-        propagation_stats = calc_median_std(np.array(arrive_times))
-        propagation_stats['values'] = np.array(arrive_times)
-        return propagation_stats
 
 
 def calc_median_std(values):
