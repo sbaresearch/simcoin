@@ -220,3 +220,13 @@ class TestParse(TestCase):
         self.parser.tx_received_parser('line')
 
         self.assertEqual(self.parser.tx['tx_hash'].receiving_timestamps, np.array([2]))
+
+    @patch('parse.parse_add_to_wallet', lambda line: LogLineWithHash(
+        2, 'node-0', 'tx_hash'
+    ))
+    def test_received_parser(self):
+        self.parser.tx_creation_parser('line')
+
+        self.assertTrue(self.parser.tx['tx_hash'])
+
+        self.assertTrue(self.parser.tx['tx_hash'].tx_hash, 'tx_hash')
