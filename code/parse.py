@@ -179,7 +179,7 @@ class ReceivedBlock(LogLine):
         self.block_hash = block_hash
 
 
-class BlockStats  :
+class BlockStats:
     def __init__(self, timestamp, node, block_hash, height, total_size, txs):
         self.timestamp = timestamp
         self.node = node
