@@ -18,6 +18,7 @@ class Parser:
             self.block_received_parser,
             self.block_reconstructed_parser,
             self.tx_creation_parser,
+            self.tx_received_parser,
         ]
 
     def parse_aggregated_sim_log(self):
