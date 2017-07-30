@@ -77,6 +77,12 @@ class Parser:
         self.tx[log_line_with_hash.obj_hash] = TxStats(log_line_with_hash.timestamp,
                                                        log_line_with_hash.node, log_line_with_hash.obj_hash)
 
+    def tx_received_parser(self, line):
+        log_line_with_hash = parse_accept_to_memory_pool(line)
+
+        tx_stats = self.tx[log_line_with_hash.obj_hash]
+        tx_stats.receiving_timestamps = np.append(tx_stats.receiving_timestamps, log_line_with_hash.timestamp)
+
 
 def parse_create_new_block(line):
     regex = config.log_prefix_full + 'CreateNewBlock\(\): total size: ([0-9]+)' \
@@ -159,6 +165,23 @@ def parse_add_to_wallet(line):
     )
 
 
+def parse_accept_to_memory_pool(line):
+    regex = config.log_prefix_full + 'AcceptToMemoryPool: peer=([0-9]+):' \
+                                     ' accepted ([0-9a-z]{64}) \(poolsz ([0-9]+) txn,' \
+                                     ' ([0-9]+) [a-zA-Z]+\)$'
+
+    matched = re.match(regex, line)
+
+    if matched is None:
+        raise ParseException("Didn't AddToWallet log line.")
+
+    return LogLineWithHash(
+        datetime.strptime(matched.group(1), config.log_time_format).timestamp(),
+        str(matched.group(2)),
+        str(matched.group(4)),
+    )
+
+
 def cut_log():
     with open(config.aggregated_log, 'r') as aggregated_log:
         with open(config.aggregated_sim_log, 'w') as aggregated_sim_log:
@@ -219,6 +242,7 @@ class TxStats:
         self.timestamp = timestamp
         self.node = node
         self.tx_hash = tx_hash
+        self.receiving_timestamps = np.array([])
 
 
 class ParseException(Exception):

@@ -13,6 +13,7 @@ from parse import BlockStats
 import numpy as np
 import config
 from datetime import datetime
+from parse import TxStats
 
 
 class TestParse(TestCase):
@@ -198,3 +199,13 @@ class TestParse(TestCase):
         self.assertEqual(log_line_with_hash.timestamp, datetime(2017, 7, 30, 7, 48, 48, 337577).timestamp())
         self.assertEqual(log_line_with_hash.node, 'node-1')
         self.assertEqual(log_line_with_hash.obj_hash, '2e1b05f9248ae5f29b2234ac0eb86e0fccbacc084ed91937eee7eea248fc9a6a')
+
+    @patch('parse.parse_accept_to_memory_pool', lambda line: LogLineWithHash(
+        2, 'node-0', 'tx_hash'
+    ))
+    def test_received_parser(self):
+        self.parser.tx['tx_hash'] = TxStats(0, 'node-1', 'tx_hash')
+
+        self.parser.tx_received_parser('line')
+
+        self.assertEqual(self.parser.tx['tx_hash'].receiving_timestamps, np.array([2]))
