@@ -104,7 +104,7 @@ def parse_update_tip(line):
     regex = config.log_prefix_full + 'UpdateTip: new best=([0-9,a-z]{64}) height=([0-9]+) version=0x[0-9]{8}' \
                                 ' log2_work=[0-9]+\.?[0-9]* tx=([0-9]+)' \
                                 ' date=\'[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}\'' \
-                                ' progress=[0-9]+.[0-9]+ cache=[0-9]+\.[0-9]+MiB\([0-9]+tx\)$'
+                                ' progress=[0-9]+.[0-9]+ cache=[0-9]+\.[0-9]+[a-zA-Z]+\([0-9]+tx\)$'
     matched = re.match(regex, line)
 
     if matched is None:
