@@ -230,3 +230,22 @@ class TestParse(TestCase):
         self.assertTrue(self.parser.tx['tx_hash'])
 
         self.assertTrue(self.parser.tx['tx_hash'].tx_hash, 'tx_hash')
+
+    @patch('builtins.open', new_callable=mock_open)
+    @patch('stats.calc_median_std')
+    def test_create_tx_csv(self, m_calc_median_std, m_open):
+        self.parser.tx = {
+            'tx_hash': TxStats(1, 'node-0', 'tx_hash'),
+        }
+        m_calc_median_std.return_value = {'len': 2, 'median': 3, 'std': 4}
+
+        self.parser.tx['tx_hash'].receiving_timestamps = np.array([1, 10])
+
+        self.parser.create_tx_csv()
+
+        m_open.assert_called_with(config.tx_csv, 'w')
+        handle = m_open()
+        self.assertEqual(handle.write.call_count, 2)
+        self.assertEqual(handle.write.call_args_list[0][0][0], 'tx_hash;node;timestamp;'
+                                                               'total_accepted;median_propagation;std_propagation\n')
+        self.assertEqual(handle.write.call_args_list[1][0][0], 'tx_hash;node-0;1;2;3;4\n')
