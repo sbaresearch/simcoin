@@ -151,7 +151,7 @@ def parse_successfully_reconstructed_block(line):
 
 
 def parse_add_to_wallet(line):
-    regex = config.log_prefix_full+ 'AddToWallet ([a-z0-9]{64})  new'
+    regex = config.log_prefix_full + 'AddToWallet ([a-z0-9]{64})  new$'
 
     matched = re.match(regex, line)
 
