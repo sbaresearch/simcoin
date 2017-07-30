@@ -10,12 +10,14 @@ class Parser:
     def __init__(self, node_names):
         self.nodes_create_blocks = {node_name: None for node_name in node_names}
         self.blocks = {}
+        self.tx = {}
 
         self.parsers = [
             self.block_creation_parser,
             self.tip_updated_parser,
             self.block_received_parser,
-            self.block_reconstructed_parser
+            self.block_reconstructed_parser,
+            self.tx_creation_parser,
         ]
 
     def parse_aggregated_sim_log(self):
@@ -58,16 +60,22 @@ class Parser:
     def block_received_parser(self, line):
         received_block = parse_received_block(line)
 
-        block_stats = self.blocks[received_block.block_hash]
+        block_stats = self.blocks[received_block.obj_hash]
 
         block_stats.receiving_timestamps = np.append(block_stats.receiving_timestamps, received_block.timestamp)
 
     def block_reconstructed_parser(self, line):
         received_block = parse_successfully_reconstructed_block(line)
 
-        block_stats = self.blocks[received_block.block_hash]
+        block_stats = self.blocks[received_block.obj_hash]
 
         block_stats.receiving_timestamps = np.append(block_stats.receiving_timestamps, received_block.timestamp)
+
+    def tx_creation_parser(self,line):
+        log_line_with_hash = parse_add_to_wallet(line)
+
+        self.tx[log_line_with_hash.obj_hash] = TxStats(log_line_with_hash.timestamp,
+                                                       log_line_with_hash.node, log_line_with_hash.obj_hash)
 
 
 def parse_create_new_block(line):
@@ -113,7 +121,7 @@ def parse_received_block(line):
     if matched is None:
         raise ParseException("Didn't matched Received block log line.")
 
-    return ReceivedBlock(
+    return LogLineWithHash(
         datetime.strptime(matched.group(1), config.log_time_format).timestamp(),
         str(matched.group(2)),
         str(matched.group(3)),
@@ -129,7 +137,22 @@ def parse_successfully_reconstructed_block(line):
     if matched is None:
         raise ParseException("Didn't matched Successfully reconstructed block log line.")
 
-    return ReceivedBlock(
+    return LogLineWithHash(
+        datetime.strptime(matched.group(1), config.log_time_format).timestamp(),
+        str(matched.group(2)),
+        str(matched.group(3)),
+    )
+
+
+def parse_add_to_wallet(line):
+    regex = config.log_prefix_full+ 'AddToWallet ([a-z0-9]{64})  new'
+
+    matched = re.match(regex, line)
+
+    if matched is None:
+        raise ParseException("Didn't AddToWallet log line.")
+
+    return LogLineWithHash(
         datetime.strptime(matched.group(1), config.log_time_format).timestamp(),
         str(matched.group(2)),
         str(matched.group(3)),
@@ -173,10 +196,10 @@ class UpdateTip(LogLine):
         self.txs = txs
 
 
-class ReceivedBlock(LogLine):
-    def __init__(self, timestamp, node, block_hash):
+class LogLineWithHash(LogLine):
+    def __init__(self, timestamp, node, obj_hash):
         super().__init__(timestamp, node)
-        self.block_hash = block_hash
+        self.obj_hash = obj_hash
 
 
 class BlockStats:
@@ -188,6 +211,14 @@ class BlockStats:
         self.total_size = total_size
         self.txs = txs
         self.receiving_timestamps = np.array([])
+
+
+class TxStats:
+
+    def __init__(self, timestamp, node, tx_hash):
+        self.timestamp = timestamp
+        self.node = node
+        self.tx_hash = tx_hash
 
 
 class ParseException(Exception):

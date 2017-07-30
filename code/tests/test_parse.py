@@ -8,7 +8,7 @@ from parse import Parser
 from mock import Mock
 from parse import CreateNewBlock
 from parse import UpdateTip
-from parse import ReceivedBlock
+from parse import LogLineWithHash
 from parse import BlockStats
 import numpy as np
 import config
@@ -120,27 +120,27 @@ class TestParse(TestCase):
                    ' 4ec9b518b23d460c01abaf1c6e32ec46dbbfc8c81c599dd71c0c175e2367f278' \
                    ' peer=0'
 
-        received_block = parse.parse_received_block(log_line)
+        log_line_with_hash = parse.parse_received_block(log_line)
 
-        self.assertEqual(received_block.timestamp, datetime(2017, 7, 27, 15, 34, 58, 122336).timestamp())
-        self.assertEqual(received_block.node, 'node-1')
-        self.assertEqual(received_block.block_hash, '4ec9b518b23d460c01abaf1c6e32ec46dbbfc8c81c599dd71c0c175e2367f278')
+        self.assertEqual(log_line_with_hash.timestamp, datetime(2017, 7, 27, 15, 34, 58, 122336).timestamp())
+        self.assertEqual(log_line_with_hash.node, 'node-1')
+        self.assertEqual(log_line_with_hash.obj_hash, '4ec9b518b23d460c01abaf1c6e32ec46dbbfc8c81c599dd71c0c175e2367f278')
 
     def test_successfully_reconstructed_block(self):
         log_line = '2017-07-28 08:41:43.637277 node-3 Successfully reconstructed' \
                    ' block 27ebf5f20b3860fb3a8ed82f0721300bf96c1836252fddd67b60f48d227d3a3c with 1 txn prefilled,' \
                    ' 0 txn from mempool (incl at least 0 from extra pool) and 0 txn requested'
 
-        received_block = parse.parse_successfully_reconstructed_block(log_line)
+        log_line_with_hash = parse.parse_successfully_reconstructed_block(log_line)
 
-        self.assertEqual(received_block.timestamp, datetime(2017, 7, 28, 8, 41, 43, 637277).timestamp())
-        self.assertEqual(received_block.node, 'node-3')
-        self.assertEqual(received_block.block_hash, '27ebf5f20b3860fb3a8ed82f0721300bf96c1836252fddd67b60f48d227d3a3c')
+        self.assertEqual(log_line_with_hash.timestamp, datetime(2017, 7, 28, 8, 41, 43, 637277).timestamp())
+        self.assertEqual(log_line_with_hash.node, 'node-3')
+        self.assertEqual(log_line_with_hash.obj_hash, '27ebf5f20b3860fb3a8ed82f0721300bf96c1836252fddd67b60f48d227d3a3c')
 
 
     @patch('parse.parse_received_block')
     def test_received_block_parser(self, m_parse_received_block):
-        m_parse_received_block.return_value = ReceivedBlock(123, None, 'block_hash')
+        m_parse_received_block.return_value = LogLineWithHash(123, None, 'block_hash')
 
         self.parser.blocks['block_hash'] = BlockStats(None, None, None, None, None, None)
 
@@ -188,3 +188,13 @@ class TestParse(TestCase):
             self.assertEqual(handle.write.call_args_list[0][0][0], 'line2 {}\n'.format(config.log_line_sim_start))
             self.assertEqual(handle.write.call_args_list[1][0][0], 'line3\n')
             self.assertEqual(handle.write.call_args_list[2][0][0], 'line4 {}\n'.format(config.log_line_sim_end))
+
+    def test_parse_add_to_wallet(self):
+        log_line = '2017-07-30 07:48:48.337577 node-1 AddToWallet' \
+                   ' 2e1b05f9248ae5f29b2234ac0eb86e0fccbacc084ed91937eee7eea248fc9a6a  new'
+
+        log_line_with_hash = parse.parse_add_to_wallet(log_line)
+
+        self.assertEqual(log_line_with_hash.timestamp, datetime(2017, 7, 30, 7, 48, 48, 337577).timestamp())
+        self.assertEqual(log_line_with_hash.node, 'node-1')
+        self.assertEqual(log_line_with_hash.obj_hash, '2e1b05f9248ae5f29b2234ac0eb86e0fccbacc084ed91937eee7eea248fc9a6a')
