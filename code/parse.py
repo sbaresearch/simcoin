@@ -71,7 +71,7 @@ class Parser:
 
         block_stats.receiving_timestamps = np.append(block_stats.receiving_timestamps, received_block.timestamp)
 
-    def tx_creation_parser(self,line):
+    def tx_creation_parser(self, line):
         log_line_with_hash = parse_add_to_wallet(line)
 
         self.tx[log_line_with_hash.obj_hash] = TxStats(log_line_with_hash.timestamp,
