@@ -200,6 +200,17 @@ class TestParse(TestCase):
         self.assertEqual(log_line_with_hash.node, 'node-1')
         self.assertEqual(log_line_with_hash.obj_hash, '2e1b05f9248ae5f29b2234ac0eb86e0fccbacc084ed91937eee7eea248fc9a6a')
 
+    def test_parse_accept_to_memory_pool(self):
+        log_line = '2017-07-30 07:48:42.907223 node-2 AcceptToMemoryPool: peer=1:' \
+                   ' accepted 701cd618d630780ac19a78325f24cdd13cbf87279103c7e9cec9fb6382e90ce7' \
+                   ' (poolsz 11 txn, 13 kB)'
+
+        log_line_with_hash = parse.parse_accept_to_memory_pool(log_line)
+
+        self.assertEqual(log_line_with_hash.timestamp, datetime(2017, 7, 30, 7, 48, 42, 907223).timestamp())
+        self.assertEqual(log_line_with_hash.node, 'node-2')
+        self.assertEqual(log_line_with_hash.obj_hash, '701cd618d630780ac19a78325f24cdd13cbf87279103c7e9cec9fb6382e90ce7')
+
     @patch('parse.parse_accept_to_memory_pool', lambda line: LogLineWithHash(
         2, 'node-0', 'tx_hash'
     ))
