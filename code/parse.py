@@ -156,7 +156,7 @@ def parse_add_to_wallet(line):
     matched = re.match(regex, line)
 
     if matched is None:
-        raise ParseException("Didn't AddToWallet log line.")
+        raise ParseException("Didn't matched AddToWallet log line.")
 
     return LogLineWithHash(
         datetime.strptime(matched.group(1), config.log_time_format).timestamp(),
@@ -173,7 +173,7 @@ def parse_accept_to_memory_pool(line):
     matched = re.match(regex, line)
 
     if matched is None:
-        raise ParseException("Didn't AddToWallet log line.")
+        raise ParseException("Didn't matched AcceptToMemoryPool log line.")
 
     return LogLineWithHash(
         datetime.strptime(matched.group(1), config.log_time_format).timestamp(),
