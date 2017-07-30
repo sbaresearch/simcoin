@@ -36,11 +36,11 @@ class Parser:
             file.write('block_hash;node;timestamp;height;total_size;txs;'
                        'total_received;median_propagation;std_propagation\n')
             for block in self.blocks.values():
-                block_stats = stats.calc_median_std(block.receiving_timestamps)
+                propagation_stats = stats.calc_median_std(block.receiving_timestamps)
 
                 file.write('{};{};{};{};{};{};{};{};{}\n'.format(
                     block.block_hash, block.node, block.timestamp, block.height, block.total_size, block.txs,
-                    block_stats['len'], block_stats['median'], block_stats['std']))
+                    propagation_stats['len'], propagation_stats['median'], propagation_stats['std']))
 
     def create_tx_csv(self):
         with open(config.tx_csv, 'w') as file:
