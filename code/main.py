@@ -30,7 +30,7 @@ def main():
         if not os.path.isfile(file):
             raise Exception("{} file not found. Please generate file before starting Simcoin.".format(file))
 
-    executor = Executor(args)
+    executor = Executor()
 
     post_processing = PostProcessing(executor)
     executor.post_processing = post_processing
