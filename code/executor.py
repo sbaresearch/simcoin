@@ -17,7 +17,7 @@ import parse
 class Executor:
     def __init__(self):
         self.count = 0
-        self.stats = None
+        self.post_processing = None
         self.event = None
 
         config_nodes = nodesconfig.read()
@@ -96,15 +96,7 @@ class Executor:
 
             bash.check_output(dockercmd.fix_data_dirs_permissions())
 
-            self.stats.save_consensus_chain()
-            self.stats.aggregate_logs()
-            parser = Parser([node.name for node in self.all_bitcoin_nodes.values()])
-            parse.cut_log()
-            parser.parse_aggregated_sim_log()
-            parser.create_block_csv()
-            parser.create_tx_csv()
-            self.stats.save_chains()
-            self.stats.node_stats()
+            self.post_processing.execute()
 
             for node in self.all_nodes.values():
                 node.grep_log_for_errors()

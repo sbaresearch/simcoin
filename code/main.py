@@ -8,7 +8,7 @@ from executor import Executor
 import logging
 import checkargs
 import time
-from stats import Stats
+from postprocessing import PostProcessing
 from event import Event
 
 sys.tracebacklimit=None
@@ -31,8 +31,8 @@ def main():
 
     executor = Executor(args)
 
-    stats = Stats(executor)
-    executor.stats = stats
+    post_processing = PostProcessing(executor)
+    executor.post_processing = post_processing
 
     event = Event(executor, args.tick_duration)
     executor.event = event
