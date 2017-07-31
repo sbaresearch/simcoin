@@ -1,5 +1,4 @@
 import config
-import bitcoincmd
 
 
 def run_node(node, cmd):
