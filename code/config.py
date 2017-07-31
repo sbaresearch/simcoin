@@ -51,6 +51,8 @@ log_line_sim_start = 'SIMULATION START'
 log_line_sim_end = 'SIMULATION END'
 
 bitcoin_data_dir = '/data'
+bitcoin_regtest_dir = '/regtest'
+
 
 def host_dir(node):
-    return sim_dir + node.name
+    return sim_dir + node.name + bitcoin_regtest_dir
