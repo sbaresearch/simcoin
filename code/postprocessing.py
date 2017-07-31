@@ -19,9 +19,7 @@ class PostProcessing:
         stats.node_stats()
 
         parser = Parser(self.executor.all_bitcoin_nodes.values())
-        parser.parse_aggregated_sim_log()
-        parser.create_block_csv()
-        parser.create_tx_csv()
+        parser.execute()
 
 
 def aggregate_logs(nodes):
