@@ -82,6 +82,7 @@ class Executor:
 
             for node in self.all_bitcoin_nodes.values():
                 node.spent_to_address = node.get_new_address()
+                node.rpc_connect()
 
             logging.info(config.log_line_sim_start)
             self.event.execute()

@@ -89,7 +89,7 @@ class TestEvent(TestCase):
 
         event.execute_cmd(cmd, nodes)
 
-        self.assertTrue(node_1.generate_block.called)
+        self.assertTrue(node_1.generate_block_rpc.called)
 
     @patch('event.generate_tx')
     def test_execute_cmd_with_tx_tmd(self, m_generate_tx):

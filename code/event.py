@@ -37,7 +37,8 @@ def execute_cmd(cmd, nodes):
     cmd_parts = cmd.split(' ')
     node = nodes[cmd_parts[1].rstrip()]
     if cmd_parts[0] == 'block':
-        node.generate_block()
+        block_hash = node.generate_block_rpc()
+        logging.info('Created block with hash={}'.format(block_hash))
     elif cmd_parts[0] == 'tx':
         generate_tx(node, node.spent_to_address)
     else:

@@ -5,6 +5,8 @@ import bash
 from datetime import datetime
 import re
 import utils
+from bitcoinrpc.authproxy import AuthServiceProxy
+import logging
 
 
 class Node:
@@ -33,6 +35,7 @@ class BitcoinNode(Node):
         self.name = name
         self.ip = ip
         self.spent_to_address = ''
+        self.rpc_connection = None
 
     def run(self):
         return bash.check_output(bitcoincmd.start(self))
@@ -47,8 +50,14 @@ class BitcoinNode(Node):
         for ip in ips:
             bash.check_output(bitcoincmd.connect(self.name, ip))
 
+    def rpc_connect(self):
+        self.rpc_connection = AuthServiceProxy(config.create_rpc_connection_string(self.ip))
+
     def generate_tx(self, address):
         return bash.check_output(bitcoincmd.send_to_address(self.name, address, '0.001'))
+
+    def generate_block_rpc(self, amount=1):
+        return self.rpc_connection.generate(amount)
 
     def get_new_address(self):
         return bash.check_output(bitcoincmd.get_new_address(self.name))
