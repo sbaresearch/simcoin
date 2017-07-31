@@ -249,3 +249,14 @@ class TestParse(TestCase):
         stale = self.parser.check_if_in_consensus_chain('hash_1')
 
         self.assertFalse(stale)
+
+    def test_parse_peer_logic_validation(self):
+        log_line = '2017-07-31 16:09:28.663985 node-0 PeerLogicValidation::NewPoWValidBlock' \
+                   ' sending header-and-ids 107692460326feaa6f0c6c35bb218bdb3ff2adbc0d10a3a36b8252acf54e0c03' \
+                   ' to peer=0'
+
+        log_line_with_hash = parse.parse_peer_logic_validation(log_line)
+
+        self.assertEqual(log_line_with_hash.timestamp, datetime(2017, 7, 31, 16, 9, 28, 663985).timestamp())
+        self.assertEqual(log_line_with_hash.node, 'node-0')
+        self.assertEqual(log_line_with_hash.obj_hash, '107692460326feaa6f0c6c35bb218bdb3ff2adbc0d10a3a36b8252acf54e0c03')

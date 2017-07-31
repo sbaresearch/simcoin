@@ -207,6 +207,22 @@ def parse_accept_to_memory_pool(line):
     )
 
 
+def parse_peer_logic_validation(line):
+    regex = config.log_prefix_full + 'PeerLogicValidation::NewPoWValidBlock ' \
+                                     'sending header-and-ids ([a-z0-9]{64}) ' \
+                                     'to peer=[0-9]+'
+    matched = re.match(regex, line)
+
+    if matched is None:
+        raise ParseException("Didn't matched AcceptToMemoryPool log line.")
+
+    return LogLineWithHash(
+        datetime.strptime(matched.group(1), config.log_time_format).timestamp(),
+        str(matched.group(2)),
+        str(matched.group(3)),
+    )
+
+
 class LogLine:
     def __init__(self, timestamp, node):
         self.timestamp = timestamp
