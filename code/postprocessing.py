@@ -14,9 +14,7 @@ class PostProcessing:
         cut_log()
 
         cli_stats = CliStats(self.executor)
-        cli_stats.save_consensus_chain()
-        cli_stats.save_chains()
-        cli_stats.node_stats()
+        cli_stats.execute()
 
         parser = Parser(self.executor.all_bitcoin_nodes.values())
         parser.execute()
