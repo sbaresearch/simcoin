@@ -194,22 +194,6 @@ def parse_accept_to_memory_pool(line):
     )
 
 
-def cut_log():
-    with open(config.aggregated_log, 'r') as aggregated_log:
-        with open(config.aggregated_sim_log, 'w') as aggregated_sim_log:
-            write = False
-            for line in aggregated_log.readlines():
-                if write:
-                    if config.log_line_sim_end in line:
-                        aggregated_sim_log.write(line)
-                        break
-                    else:
-                        aggregated_sim_log.write(line)
-                if config.log_line_sim_start in line:
-                    aggregated_sim_log.write(line)
-                    write = True
-
-
 class LogLine:
     def __init__(self, timestamp, node):
         self.timestamp = timestamp

@@ -115,41 +115,6 @@ class TestStats(TestCase):
         self.assertTrue('node-0;hash1;hash2\n' in lines)
 
     @patch('builtins.open', new_callable=mock_open)
-    @patch('bash.check_output_without_log')
-    @patch('stats.prefix_log')
-    def test_aggregate_logs(self, m_prefix, m_bash, m_open):
-        node_0 = MagicMock()
-        self.executor.all_nodes = {'0': node_0}
-        m_prefix.return_value = ['1', '2']
-
-        self.stats.aggregate_logs()
-
-        self.assertEqual(m_open.call_args[0][0], config.aggregated_log)
-        handle = m_open()
-        self.assertEqual(handle.write.call_args[0][0], '1\n2\n')
-
-        self.assertEqual(m_bash.call_count, 3)
-
-    @patch('builtins.open', new_callable=mock_open)
-    @patch('bash.check_output_without_log')
-    @patch('stats.prefix_log')
-    def test_aggregate_logs_two_nodes(self, m_prefix, m_bash, m_open):
-        node_0 = MagicMock()
-        node_1 = MagicMock()
-        self.executor.all_nodes = {'0': node_0, '1': node_1}
-        m_prefix.side_effect = [['1', '2'], ['11', '22']]
-
-        self.stats.aggregate_logs()
-
-        handle = m_open()
-        contents = [line[0][0] for line in handle.write.call_args_list]
-        self.assertEqual(len(contents), 2)
-        self.assertTrue('1\n2\n' in contents)
-        self.assertTrue('11\n22\n' in contents)
-
-        self.assertEqual(m_bash.call_count, 4)
-
-    @patch('builtins.open', new_callable=mock_open)
     @patch('json.loads')
     @patch('stats.tips_statistics')
     def test_node_stats(self, m_calc_tips_stats, _, m_open):
@@ -173,20 +138,6 @@ class TestStats(TestCase):
                          'valid_fork;valid_fork_median_branchlen;valid_fork_std_branchlen;'
                          'headers_only;headers_only_median_branchlen;headers_only_std_branchlen;\n')
         self.assertEqual(handle.write.call_args_list[1][0][0], 'name;1;2;3;11;22;33;111;222;333;1111;2222;3333\n')
-
-    def test_prefix_log_no_changes(self):
-        lines = ['2017-07-05 14:33:35.324000 test', '2017-07-05 14:33:35.324000 test']
-        received = stats.prefix_log(lines, 'node-0')
-
-        expected = ['2017-07-05 14:33:35.324000 node-0 test', '2017-07-05 14:33:35.324000 node-0 test']
-        self.assertEqual(received, expected)
-
-    def test_prefix_log(self):
-        lines = ['2017-07-05 14:33:35.324000 test', 'test']
-        received = stats.prefix_log(lines, 'node-0')
-
-        expected = ['2017-07-05 14:33:35.324000 node-0 test', '2017-07-05 14:33:35.324000 node-0 test']
-        self.assertEqual(received, expected)
 
     @patch('stats.calc_median_std')
     def test_tips_statistics_unknown_status(self, mock):

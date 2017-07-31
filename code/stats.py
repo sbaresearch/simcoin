@@ -40,18 +40,6 @@ class Stats:
                     height -= 1
                 file.write('{};{}\n'.format(node.name, ';'.join(hashes)))
 
-    def aggregate_logs(self):
-        for node in self.executor.all_nodes.values():
-            content = bash.check_output_without_log(node.cat_log_cmd()).splitlines()
-
-            content = prefix_log(content, node.name)
-
-            with open(config.aggregated_log, 'a') as file:
-                file.write('\n'.join(content) + '\n')
-
-        bash.check_output('cat {} >> {}'.format(config.log_file, config.aggregated_log))
-        bash.check_output('sort {} -o {}'.format(config.aggregated_log, config.aggregated_log))
-
     def node_stats(self):
         with open(config.nodes_csv, 'w') as file:
             file.write('name;'
@@ -90,21 +78,6 @@ def calc_median_std(values):
         stats['std'] = np.std(values)
 
     return stats
-
-
-def prefix_log(lines, node_name):
-    prev_match = ''
-    prefixed_lines = []
-    for line in lines:
-        match = re.match(config.log_prefix_timestamp, line)
-        if match:
-            prefixed_lines.append(re.sub(config.log_prefix_timestamp
-                                  , r'\1 {}'.format(node_name)
-                                  , line))
-            prev_match = match.group(0)
-        else:
-            prefixed_lines.append('{} {} {}'.format(prev_match, node_name, line))
-    return prefixed_lines
 
 
 def tips_statistics(tips):

@@ -175,27 +175,6 @@ class TestParse(TestCase):
                                                                'median_propagation;std_propagation\n')
         self.assertEqual(handle.write.call_args_list[1][0][0], 'block_hash;node-0;1;2;3;4;5;6;7\n')
 
-    def test_cut_log(self):
-        data = dedent("""
-            line1
-            line2 {}
-            line3
-            line4 {}
-            line5
-        """.format(config.log_line_sim_start, config.log_line_sim_end)).strip()
-
-        with patch('builtins.open', mock_open(read_data=data)) as m_open:
-            parse.cut_log()
-
-            self.assertEqual(m_open.call_count, 2)
-            self.assertEqual(m_open.call_args_list[0][0][0], config.aggregated_log)
-            self.assertEqual(m_open.call_args_list[1][0][0], config.aggregated_sim_log)
-
-            handle = m_open()
-            self.assertEqual(handle.write.call_args_list[0][0][0], 'line2 {}\n'.format(config.log_line_sim_start))
-            self.assertEqual(handle.write.call_args_list[1][0][0], 'line3\n')
-            self.assertEqual(handle.write.call_args_list[2][0][0], 'line4 {}\n'.format(config.log_line_sim_end))
-
     def test_parse_add_to_wallet(self):
         log_line = '2017-07-30 07:48:48.337577 node-1 AddToWallet' \
                    ' 2e1b05f9248ae5f29b2234ac0eb86e0fccbacc084ed91937eee7eea248fc9a6a  new'
