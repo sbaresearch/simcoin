@@ -7,8 +7,8 @@ import stats
 
 
 class Parser:
-    def __init__(self, node_names):
-        self.nodes_create_blocks = {node_name: None for node_name in node_names}
+    def __init__(self, nodes):
+        self.nodes_create_blocks = {node.name: None for node in nodes}
         self.blocks = {}
         self.tx = {}
 

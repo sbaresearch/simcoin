@@ -19,8 +19,14 @@ from parse import TxStats
 class TestParse(TestCase):
 
     def setUp(self):
+        node_0 = Mock()
+        node_0.name = 'node-0'
+        node_1 = Mock()
+        node_1.name = 'node-1'
+        node_2 = Mock()
+        node_2.name = 'node-2'
 
-        self.parser = Parser(['node-0', 'node-1', 'node-2'])
+        self.parser = Parser([node_0, node_1, node_2])
 
     def test_parse_create_new_block(self):
         log_line = '2017-07-27 11:01:22.173139 node-1' \
