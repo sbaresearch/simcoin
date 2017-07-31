@@ -11,10 +11,11 @@ class PostProcessing:
         stats = Stats(self.executor)
         stats.save_consensus_chain()
         stats.aggregate_logs()
+        stats.save_chains()
+        stats.node_stats()
+
         parser = Parser(self.executor.all_bitcoin_nodes.values())
         parse.cut_log()
         parser.parse_aggregated_sim_log()
         parser.create_block_csv()
         parser.create_tx_csv()
-        stats.save_chains()
-        stats.node_stats()
