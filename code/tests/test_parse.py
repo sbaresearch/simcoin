@@ -144,7 +144,6 @@ class TestParse(TestCase):
         self.assertEqual(log_line_with_hash.node, 'node-3')
         self.assertEqual(log_line_with_hash.obj_hash, '27ebf5f20b3860fb3a8ed82f0721300bf96c1836252fddd67b60f48d227d3a3c')
 
-
     @patch('parse.parse_received_block')
     def test_received_block_parser(self, m_parse_received_block):
         m_parse_received_block.return_value = LogLineWithHash(123, None, 'block_hash')
