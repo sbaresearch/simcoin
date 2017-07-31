@@ -7,6 +7,8 @@ import utils
 import argparse
 import checkargs
 import sys
+import config
+import bash
 
 
 def parse():
@@ -47,3 +49,4 @@ def run():
     executor.execute()
 
     logging.info("the duration of the experiment was {} seconds".format(str(time.time() - start)))
+    bash.check_output('cp {} {}'.format(config.log_file, config.sim_dir))
