@@ -1,3 +1,5 @@
+docker build -t btn/base:v3 -f baseimage .
+
 docker run -it --cap-add=NET_ADMIN ubuntu /bin/bash
 apt-get update; apt-get -y install iputils-ping; apt-get -y install net-tools; apt-get -y install iproute
 
