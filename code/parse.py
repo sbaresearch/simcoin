@@ -7,8 +7,9 @@ import clistats
 
 
 class Parser:
-    def __init__(self, nodes):
+    def __init__(self, nodes, consensus_chain):
         self.nodes_create_blocks = {node.name: None for node in nodes}
+        self.consensus_chain = consensus_chain
         self.blocks = {}
         self.tx = {}
 
@@ -39,13 +40,14 @@ class Parser:
 
     def create_block_csv(self):
         with open(config.blocks_csv, 'w') as file:
-            file.write('block_hash;node;timestamp;height;total_size;txs;'
+            file.write('block_hash;node;timestamp;stale;height;total_size;txs;'
                        'total_received;median_propagation;std_propagation\n')
             for block in self.blocks.values():
-                propagation_stats = clistats.calc_median_std(block.receiving_timestamps)
 
-                file.write('{};{};{};{};{};{};{};{};{}\n'.format(
-                    block.block_hash, block.node, block.timestamp, block.height, block.total_size, block.txs,
+                propagation_stats = clistats.calc_median_std(block.receiving_timestamps)
+                stale = self.check_if_in_consensus_chain(block.block_hash)
+                file.write('{};{};{};{};{};{};{};{};{};{}\n'.format(
+                    block.block_hash, block.node, block.timestamp, stale, block.height, block.total_size, block.txs,
                     propagation_stats['len'], propagation_stats['median'], propagation_stats['std']))
 
     def create_tx_csv(self):
@@ -99,6 +101,12 @@ class Parser:
 
         tx_stats = self.tx[log_line_with_hash.obj_hash]
         tx_stats.receiving_timestamps = np.append(tx_stats.receiving_timestamps, log_line_with_hash.timestamp)
+
+    def check_if_in_consensus_chain(self, block_hash):
+        if block_hash in self.consensus_chain:
+            return False
+        else:
+            return True
 
 
 def parse_create_new_block(line):
