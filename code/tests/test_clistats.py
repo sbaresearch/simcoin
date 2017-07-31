@@ -116,7 +116,7 @@ class TestCliStats(TestCase):
 
     @patch('builtins.open', new_callable=mock_open)
     @patch('json.loads')
-    @patch('stats.tips_statistics')
+    @patch('clistats.tips_statistics')
     def test_node_stats(self, m_calc_tips_stats, _, m_open):
         node_0 = MagicMock()
         node_0.name = 'name'
@@ -139,19 +139,19 @@ class TestCliStats(TestCase):
                          'headers_only;headers_only_median_branchlen;headers_only_std_branchlen;\n')
         self.assertEqual(handle.write.call_args_list[1][0][0], 'name;1;2;3;11;22;33;111;222;333;1111;2222;3333\n')
 
-    @patch('stats.calc_median_std')
+    @patch('clistats.calc_median_std')
     def test_tips_statistics_unknown_status(self, mock):
         tips = [{'status': 'unknown'}]
         with self.assertRaises(Exception) as context:
-            stats.tips_statistics(tips)
+            clistats.tips_statistics(tips)
 
         self.assertTrue('Unknown tip type=unknown' in str(context.exception))
 
-    @patch('stats.calc_median_std')
+    @patch('clistats.calc_median_std')
     def test_tips_statistics_both(self, mock):
         tips = [{'status': 'active'}, {'status': 'valid-headers', 'branchlen': 2},
                 {'status': 'valid-fork', 'branchlen': 3}, {'status': 'headers-only', 'branchlen': 4}]
-        stats.tips_statistics(tips)
+        clistats.tips_statistics(tips)
 
         self.assertEqual(mock.call_args_list[0][0][0], [2])
         self.assertEqual(mock.call_args_list[1][0][0], [3])
@@ -160,7 +160,7 @@ class TestCliStats(TestCase):
 
     def test_calc_median_std_no_values(self):
         array = np.array([])
-        statistics = stats.calc_median_std(array)
+        statistics = clistats.calc_median_std(array)
 
         self.assertTrue(np.isnan(statistics['median']))
         self.assertTrue(np.isnan(statistics['std']))
@@ -169,7 +169,7 @@ class TestCliStats(TestCase):
 
     def test_calc_median_std(self):
         array = np.array([1, 2])
-        statistics = stats.calc_median_std(array)
+        statistics = clistats.calc_median_std(array)
 
         self.assertEqual(statistics['median'], 1.5)
         self.assertEqual(statistics['std'], 0.5)

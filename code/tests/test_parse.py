@@ -156,7 +156,7 @@ class TestParse(TestCase):
         self.assertEqual(self.parser.blocks['block_hash'].receiving_timestamps, np.array([123]))
 
     @patch('builtins.open', new_callable=mock_open)
-    @patch('stats.calc_median_std')
+    @patch('clistats.calc_median_std')
     def test_create_block_csv(self, m_calc_median_std, m_open):
         self.parser.blocks = {
             'block_hash': BlockStats(1, 'node-0', 'block_hash', 2, 3, 4),
@@ -217,7 +217,7 @@ class TestParse(TestCase):
         self.assertTrue(self.parser.tx['tx_hash'].tx_hash, 'tx_hash')
 
     @patch('builtins.open', new_callable=mock_open)
-    @patch('stats.calc_median_std')
+    @patch('clistats.calc_median_std')
     def test_create_tx_csv(self, m_calc_median_std, m_open):
         self.parser.tx = {
             'tx_hash': TxStats(1, 'node-0', 'tx_hash'),
