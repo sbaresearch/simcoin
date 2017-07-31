@@ -20,6 +20,7 @@ class Parser:
             self.block_reconstructed_parser,
             self.tx_creation_parser,
             self.tx_received_parser,
+            self.peer_logic_validation_parse,
         ]
 
     def execute(self):
@@ -68,12 +69,17 @@ class Parser:
 
     def tip_updated_parser(self, line):
         update_tip = parse_update_tip(line)
-        create_new_block = self.nodes_create_blocks[update_tip.node]
 
+        create_new_block = self.nodes_create_blocks[update_tip.node]
         if create_new_block is not None:
-            block_stats = BlockStats(create_new_block.timestamp, create_new_block.node, update_tip.block_hash,
-                                     update_tip.height, create_new_block.total_size, create_new_block.txs)
-            self.blocks[block_stats.block_hash] = block_stats
+
+            if update_tip.block_hash in self.blocks:
+                block_stats = self.blocks[update_tip.block_hash]
+                block_stats.height = update_tip.height
+            else:
+                block_stats = BlockStats(create_new_block.timestamp, create_new_block.node, update_tip.block_hash,
+                                         create_new_block.total_size, create_new_block.txs)
+                self.blocks[update_tip.block_hash] = block_stats
             self.nodes_create_blocks[update_tip.node] = None
 
     def block_received_parser(self, line):
@@ -101,6 +107,17 @@ class Parser:
 
         tx_stats = self.tx[log_line_with_hash.obj_hash]
         tx_stats.receiving_timestamps = np.append(tx_stats.receiving_timestamps, log_line_with_hash.timestamp)
+
+    def peer_logic_validation_parse(self, line):
+        log_line_with_hash = parse_peer_logic_validation(line)
+        create_new_block = self.nodes_create_blocks[log_line_with_hash.node]
+
+        if create_new_block is not None:
+
+            block_stats = BlockStats(create_new_block.timestamp, create_new_block.node, log_line_with_hash.obj_hash,
+                                     create_new_block.total_size, create_new_block.txs)
+            self.blocks[block_stats.block_hash] = block_stats
+            self.nodes_create_blocks[log_line_with_hash.node] = None
 
     def check_if_in_consensus_chain(self, block_hash):
         if block_hash in self.consensus_chain:
@@ -251,13 +268,13 @@ class LogLineWithHash(LogLine):
 
 
 class BlockStats:
-    def __init__(self, timestamp, node, block_hash, height, total_size, txs):
+    def __init__(self, timestamp, node, block_hash, total_size, txs):
         self.timestamp = timestamp
         self.node = node
         self.block_hash = block_hash
-        self.height = height
         self.total_size = total_size
         self.txs = txs
+        self.height = -1
         self.receiving_timestamps = np.array([])
 
 

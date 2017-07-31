@@ -107,13 +107,24 @@ class TestParse(TestCase):
 
         self.assertTrue(self.parser.nodes_create_blocks['node-0'])
 
-    @patch('parse.parse_update_tip', lambda a: UpdateTip(None, 'node-0', None, None, None))
+    @patch('parse.parse_update_tip', lambda a: UpdateTip(None, 'node-0', 'block_hash', None, None))
     def test_update_tip_parser_with_previous_create_new_block(self):
         self.parser.nodes_create_blocks['node-0'] = CreateNewBlock(None, None, None, None)
 
         self.parser.tip_updated_parser('line')
 
         self.assertEqual(len(self.parser.blocks), 1)
+        self.assertEqual(self.parser.nodes_create_blocks['node-0'], None)
+
+    @patch('parse.parse_update_tip', lambda a: UpdateTip(None, 'node-0', 'block_hash', 45, None))
+    def test_update_tip_parser_with_block_stats_already_set(self):
+        self.parser.nodes_create_blocks['node-0'] = CreateNewBlock(None, None, None, None)
+        self.parser.blocks['block_hash'] = BlockStats(None, None, None, None, None)
+
+        self.parser.tip_updated_parser('line')
+
+        self.assertEqual(len(self.parser.blocks), 1)
+        self.assertEqual(self.parser.blocks['block_hash'].height, 45)
         self.assertEqual(self.parser.nodes_create_blocks['node-0'], None)
 
     @patch('parse.parse_update_tip', lambda a: UpdateTip(None, 'node-0', None, None, None))
@@ -148,7 +159,7 @@ class TestParse(TestCase):
     def test_received_block_parser(self, m_parse_received_block):
         m_parse_received_block.return_value = LogLineWithHash(123, None, 'block_hash')
 
-        self.parser.blocks['block_hash'] = BlockStats(None, None, None, None, None, None)
+        self.parser.blocks['block_hash'] = BlockStats(None, None, None, None, None)
 
         self.parser.block_received_parser('line')
 
@@ -157,8 +168,10 @@ class TestParse(TestCase):
     @patch('builtins.open', new_callable=mock_open)
     @patch('clistats.calc_median_std')
     def test_create_block_csv(self, m_calc_median_std, m_open):
+        block_stats = BlockStats(1, 'node-0', 'block_hash', 3, 4)
+        block_stats.height = 2
         self.parser.blocks = {
-            'block_hash': BlockStats(1, 'node-0', 'block_hash', 2, 3, 4),
+            'block_hash': block_stats,
         }
         m_calc_median_std.return_value = {'len': 5, 'median': 6, 'std': 7}
 
@@ -260,3 +273,18 @@ class TestParse(TestCase):
         self.assertEqual(log_line_with_hash.timestamp, datetime(2017, 7, 31, 16, 9, 28, 663985).timestamp())
         self.assertEqual(log_line_with_hash.node, 'node-0')
         self.assertEqual(log_line_with_hash.obj_hash, '107692460326feaa6f0c6c35bb218bdb3ff2adbc0d10a3a36b8252acf54e0c03')
+
+    @patch('parse.parse_peer_logic_validation', lambda a: LogLineWithHash(None, 'node-0', 'block_hash'))
+    def test_peer_logic_validation_parse(self):
+        self.parser.nodes_create_blocks['node-0'] = CreateNewBlock(None, None, None, None)
+
+        self.parser.peer_logic_validation_parse('line')
+
+        self.assertEqual(len(self.parser.blocks), 1)
+        self.assertEqual(self.parser.nodes_create_blocks['node-0'], None)
+
+    @patch('parse.parse_peer_logic_validation', lambda a: UpdateTip(None, 'node-0', None, None, None))
+    def test_update_tip_parser_with_previous_no_create_new_block(self):
+        self.parser.peer_logic_validation_parse('line')
+
+        self.assertEqual(len(self.parser.blocks), 0)
