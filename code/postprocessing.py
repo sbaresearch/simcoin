@@ -1,4 +1,4 @@
-from stats import Stats
+from clistats import CliStats
 from parse import Parser
 import config
 import bash
@@ -13,10 +13,10 @@ class PostProcessing:
         aggregate_logs([node for node in self.executor.all_nodes.values()])
         cut_log()
 
-        stats = Stats(self.executor)
-        stats.save_consensus_chain()
-        stats.save_chains()
-        stats.node_stats()
+        cli_stats = CliStats(self.executor)
+        cli_stats.save_consensus_chain()
+        cli_stats.save_chains()
+        cli_stats.node_stats()
 
         parser = Parser(self.executor.all_bitcoin_nodes.values())
         parser.execute()

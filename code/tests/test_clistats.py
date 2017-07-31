@@ -1,21 +1,21 @@
 from unittest import TestCase
 from mock import patch
 from mock import mock_open
-from stats import Stats
+from clistats import CliStats
 from mock import MagicMock
 import config
-import stats
+import clistats
 import numpy as np
 
 
-class TestStats(TestCase):
+class TestCliStats(TestCase):
 
     def __init__(self, *args, **kwargs):
-        super(TestStats, self).__init__(*args, **kwargs)
+        super(TestCliStats, self).__init__(*args, **kwargs)
 
     def setUp(self):
         self.executor = MagicMock()
-        self.stats = Stats(self.executor)
+        self.cli_stats = CliStats(self.executor)
 
     @patch('builtins.open', new_callable=mock_open)
     def test_save_consensus_chain_first_node_no_block(self, mock):
@@ -24,7 +24,7 @@ class TestStats(TestCase):
         self.executor.first_block_height = 10
         self.executor.all_bitcoin_nodes = {'0': node_0}
 
-        self.stats.save_consensus_chain()
+        self.cli_stats.save_consensus_chain()
 
         mock.assert_called_with(config.consensus_chain_csv, 'w')
         handle = mock()
@@ -39,7 +39,7 @@ class TestStats(TestCase):
         self.executor.first_block_height = 10
         self.executor.all_bitcoin_nodes = {'0': node_0}
 
-        self.stats.save_consensus_chain()
+        self.cli_stats.save_consensus_chain()
 
         handle = mock()
         self.assertEqual(handle.write.call_count, 2)
@@ -58,7 +58,7 @@ class TestStats(TestCase):
         self.executor.first_block_height = 10
         self.executor.all_bitcoin_nodes = {'0': node_0, '1': node_1}
 
-        self.stats.save_consensus_chain()
+        self.cli_stats.save_consensus_chain()
 
         handle = mock()
         lines = [line[0][0] for line in handle.write.call_args_list]
@@ -78,7 +78,7 @@ class TestStats(TestCase):
         self.executor.first_block_height = 10
         self.executor.all_bitcoin_nodes = {'0': node_0, '1': node_1}
 
-        self.stats.save_consensus_chain()
+        self.cli_stats.save_consensus_chain()
 
         handle = mock()
         lines = [line[0][0] for line in handle.write.call_args_list]
@@ -87,7 +87,7 @@ class TestStats(TestCase):
 
     @patch('builtins.open', new_callable=mock_open)
     def test_save_chains(self, mock):
-        self.stats.save_chains()
+        self.cli_stats.save_chains()
 
         mock.assert_called_with(config.chains_csv, 'w')
         handle = mock()
@@ -106,7 +106,7 @@ class TestStats(TestCase):
         self.executor.first_block_height = 5
         self.executor.all_bitcoin_nodes = {'0': node_0, '1': node_1}
 
-        self.stats.save_chains()
+        self.cli_stats.save_chains()
 
         handle = mock()
         lines = [line[0][0] for line in handle.write.call_args_list]
@@ -126,7 +126,7 @@ class TestStats(TestCase):
                                           'valid-headers': {'len': 11, 'median': 22, 'std': 33},
                                           'valid-fork': {'len': 111, 'median': 222, 'std': 333},
                                           'headers-only': {'len': 1111, 'median': 2222, 'std': 3333,}}
-        self.stats.node_stats()
+        self.cli_stats.node_stats()
 
         m_open.assert_called_with(config.nodes_csv, 'w')
         handle = m_open()

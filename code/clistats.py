@@ -1,12 +1,10 @@
 import config
-import bash
-import re
 import utils
 import json
 import numpy as np
 
 
-class Stats:
+class CliStats:
     def __init__(self, _executor):
         self.executor = _executor
         self.consensus_chain = []

@@ -3,7 +3,7 @@ import re
 from datetime import datetime
 import logging
 import numpy as np
-import stats
+import clistats
 
 
 class Parser:
@@ -42,7 +42,7 @@ class Parser:
             file.write('block_hash;node;timestamp;height;total_size;txs;'
                        'total_received;median_propagation;std_propagation\n')
             for block in self.blocks.values():
-                propagation_stats = stats.calc_median_std(block.receiving_timestamps)
+                propagation_stats = clistats.calc_median_std(block.receiving_timestamps)
 
                 file.write('{};{};{};{};{};{};{};{};{}\n'.format(
                     block.block_hash, block.node, block.timestamp, block.height, block.total_size, block.txs,
@@ -53,7 +53,7 @@ class Parser:
             file.write('tx_hash;node;timestamp;total_accepted;median_propagation;std_propagation\n')
 
             for tx in self.tx.values():
-                propagation_stats = stats.calc_median_std(tx.receiving_timestamps)
+                propagation_stats = clistats.calc_median_std(tx.receiving_timestamps)
 
                 file.write('{};{};{};{};{};{}\n'.format(
                     tx.tx_hash, tx.node, tx.timestamp,
