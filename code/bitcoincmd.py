@@ -1,10 +1,10 @@
 import dockercmd
+import config
 
 daemon = 'bitcoind '
-guest_dir = '/data'
 args = {
     'regtest':            '-regtest',  # activate regtest mode
-    'datadir':            '-datadir=' + guest_dir,  # change the datadir
+    'datadir':            '-datadir=' + config.bitcoin_data_dir,  # change the datadir
     'debug':              '-debug',  # log all events
     # 'printblocktree':     '-printblocktree', # removed (would print tree on startup)
     # 'printtoconsole':     '-printtoconsole', # print the log to stdout instead of a file
@@ -48,7 +48,7 @@ def stop(node):
 
 
 def rm_peers(node):
-    return dockercmd.exec_cmd(node, 'rm -f {}/regtest/peers.dat'.format(guest_dir))
+    return dockercmd.exec_cmd(node, 'rm -f {}/regtest/peers.dat'.format(config.bitcoin_data_dir))
 
 
 def get_best_block_hash(node):
@@ -107,5 +107,5 @@ def exec_cli(node, command):
     return dockercmd.exec_cmd(node,
                               'bitcoin-cli'
                               ' -regtest'
-                              ' -datadir=' + guest_dir +
+                              ' -datadir=' + config.bitcoin_data_dir +
                               ' ' + command)

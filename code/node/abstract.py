@@ -26,7 +26,7 @@ class PublicNode:
 
 
 class BitcoinNode(Node):
-    log_file = bitcoincmd.guest_dir + '/regtest/debug.log'
+    log_file = config.bitcoin_data_dir + '/regtest/debug.log'
 
     def __init__(self, name, ip):
         super().__init__(name, ip)

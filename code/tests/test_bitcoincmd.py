@@ -1,6 +1,8 @@
 from unittest import TestCase
 import bitcoincmd
 from mock import MagicMock
+import config
+
 
 class TestBitcoincmd(TestCase):
 
@@ -19,7 +21,7 @@ class TestBitcoincmd(TestCase):
         cmd = bitcoincmd.rm_peers('node')
 
         self.assertTrue('  ' not in cmd)
-        self.assertEqual(cmd, 'docker exec simcoin-node rm -f {}/regtest/peers.dat'.format(bitcoincmd.guest_dir))
+        self.assertEqual(cmd, 'docker exec simcoin-node rm -f {}/regtest/peers.dat'.format(config.bitcoin_data_dir))
 
     def test_get_best_block(self):
         cmd = bitcoincmd.get_best_block_hash('node')
@@ -91,4 +93,4 @@ class TestBitcoincmd(TestCase):
         cmd = bitcoincmd.exec_cli('node', 'cmd')
 
         self.assertTrue('  ' not in cmd)
-        self.assertTrue('bitcoin-cli -regtest -datadir={} cmd'.format(bitcoincmd.guest_dir) in cmd)
+        self.assertTrue('bitcoin-cli -regtest -datadir={} cmd'.format(config.bitcoin_data_dir) in cmd)

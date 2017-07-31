@@ -10,7 +10,7 @@ def run_node(node, cmd):
             ' --ip=' + str(node.ip) +
             ' --name=' + config.prefix + node.name +  # container name
             ' --hostname=' + config.prefix + node.name +
-            ' --volume $PWD/' + config.host_dir(node) + ':' + bitcoincmd.guest_dir +
+            ' --volume $PWD/' + config.host_dir(node) + ':' + config.bitcoin_data_dir +
             ' ' + config.node_image +  # image name # src: https://hub.docker.com/r/abrkn/bitcoind/
             ' bash -c "' + cmd + '"')
 
