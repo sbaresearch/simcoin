@@ -118,7 +118,7 @@ class TestEvent(TestCase):
         node.name = 'node-1'
 
         event.generate_tx(node, 'address')
-        self.assertTrue(node.generate_tx.called)
+        self.assertTrue(node.generate_tx_rpc.called)
 
     def test_generate_tx_with_exception(self):
         node = Mock()

@@ -56,6 +56,9 @@ class BitcoinNode(Node):
     def generate_tx(self, address):
         return bash.check_output(bitcoincmd.send_to_address(self.name, address, '0.001'))
 
+    def generate_tx_rpc(self, address):
+        return self.rpc_connection.sendtoaddress(address, '0.001')
+
     def get_new_address(self):
         return bash.check_output(bitcoincmd.get_new_address(self.name))
 
