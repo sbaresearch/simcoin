@@ -56,9 +56,6 @@ class BitcoinNode(Node):
     def generate_tx(self, address):
         return bash.check_output(bitcoincmd.send_to_address(self.name, address, '0.001'))
 
-    def generate_block_rpc(self, amount=1):
-        return self.rpc_connection.generate(amount)
-
     def get_new_address(self):
         return bash.check_output(bitcoincmd.get_new_address(self.name))
 
@@ -73,6 +70,9 @@ class BitcoinNode(Node):
 
     def generate_block(self, amount=1):
         return bash.check_output(bitcoincmd.generate_block(self.name, amount))
+
+    def generate_block_rpc(self, amount=1):
+        return self.rpc_connection.generate(amount)
 
     def get_chain_tips(self):
         return bash.check_output(bitcoincmd.get_chain_tips(self.name))
