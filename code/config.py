@@ -52,6 +52,7 @@ log_line_sim_end = 'SIMULATION END'
 
 bitcoin_data_dir = '/data'
 bitcoin_regtest_dir = '/regtest'
+client_dir = bitcoin_data_dir + bitcoin_regtest_dir
 
 
 def host_dir(node):
