@@ -16,8 +16,9 @@ class Event:
         with open(config.ticks_csv, 'r') as file:
 
             for line in file.readlines():
-
                 start_time = time.time()
+
+                line = line.rstrip()
                 cmds = line.split(';')
                 for cmd in cmds:
                     execute_cmd(cmd, self.executor.all_bitcoin_nodes)
@@ -35,7 +36,7 @@ class Event:
 
 def execute_cmd(cmd, nodes):
     cmd_parts = cmd.split(' ')
-    node = nodes[cmd_parts[1].rstrip()]
+    node = nodes[cmd_parts[1]]
     if cmd_parts[0] == 'block':
         block_hash = node.generate_block_rpc()
         logging.info('Created block with hash={}'.format(block_hash))
