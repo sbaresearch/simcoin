@@ -36,12 +36,15 @@ class Event:
 
 def execute_cmd(cmd, nodes):
     cmd_parts = cmd.split(' ')
-    node = nodes[cmd_parts[1]]
     if cmd_parts[0] == 'tx':
+        node = nodes[cmd_parts[1]]
         generate_tx(node, node.spent_to_address)
     elif cmd_parts[0] == 'block':
+        node = nodes[cmd_parts[1]]
         block_hash = node.generate_block_rpc()
         logging.info('Created block with hash={}'.format(block_hash))
+    elif len(cmd) == 0:
+        pass
     else:
         raise Exception('Unknown cmd={} in {}-file'.format(cmd_parts[0], config.ticks_csv))
 

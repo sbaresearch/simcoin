@@ -92,6 +92,15 @@ class TestEvent(TestCase):
         self.assertTrue(node_1.generate_block_rpc.called)
 
     @patch('event.generate_tx')
+    def test_execute_cmd_with_block_cmd(self, m_generate_tx):
+        node_1 = Mock()
+
+        event.execute_cmd('', {})
+
+        self.assertFalse(node_1.generate_block_rpc.called)
+        self.assertFalse(m_generate_tx.called)
+
+    @patch('event.generate_tx')
     def test_execute_cmd_with_tx_tmd(self, m_generate_tx):
         node = Mock()
         node.spent_to_address = 'address'
