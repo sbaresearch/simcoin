@@ -47,7 +47,7 @@ def execute_cmd(cmd, nodes):
 
 
 def generate_tx(node, address):
-    # generate_tx is not always successful. eg. miner has not enough money or tx fee calculation fails
+    # generate_tx_rpc is not always successful. eg. miner has not enough money or tx fee calculation fails
     try:
         tx_hash = node.generate_tx_rpc(address)
         logging.info('Created tx with hash={}'.format(tx_hash))
