@@ -16,7 +16,7 @@ def parse():
 
     parser.add_argument('--tick-duration'
                         , default=1
-                        , type=checkargs.check_positive_int
+                        , type=checkargs.check_positive_float
                         , help='Duration of ticks.')
 
     parser.add_argument('--verbose'
