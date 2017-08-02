@@ -5,6 +5,7 @@ from mock import mock_open
 from textwrap import dedent
 from nodesconfig import NodeConfig
 
+
 class TestNetworktopology(TestCase):
 
     def test_create_header(self, ):
