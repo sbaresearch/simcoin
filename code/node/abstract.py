@@ -4,9 +4,7 @@ import config
 import bash
 from datetime import datetime
 import re
-import utils
 from bitcoinrpc.authproxy import AuthServiceProxy
-import logging
 
 
 class Node:
