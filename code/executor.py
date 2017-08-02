@@ -77,12 +77,12 @@ class Executor:
                 node.connect(node.outgoing_ips)
             utils.sleep(4 + len(self.all_nodes) * 0.2)
 
-            for node in self.all_public_nodes.values():
-                node.add_latency()
-
             for node in self.all_bitcoin_nodes.values():
                 node.spent_to_address = node.get_new_address()
                 node.rpc_connect()
+
+            for node in self.all_public_nodes.values():
+                node.add_latency()
 
             logging.info(config.log_line_sim_start)
             self.event.execute()
