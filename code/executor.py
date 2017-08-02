@@ -1,5 +1,4 @@
 import dockercmd
-import ipaddress
 import config
 from node.bitcoinnode import PublicBitcoinNode
 from node.selfishnode import SelfishPrivateNode
@@ -10,6 +9,7 @@ import prepare
 import utils
 import networktopology
 import nodesconfig
+from zone import Zone
 
 
 class Executor:
@@ -17,20 +17,19 @@ class Executor:
         self.count = 0
         self.post_processing = None
         self.event = None
+        zone = Zone()
 
         config_nodes = nodesconfig.read()
         nodes = [node for node in config_nodes if node.node_type == 'bitcoin']
         selfish_nodes = [node for node in config_nodes if node.node_type == 'selfish']
-        ip_addresses = ipaddress.ip_network(config.ip_range).hosts()
-        next(ip_addresses)  # skipping first ip address (docker fails with error "is in use")
 
-        self.nodes = {node.name: PublicBitcoinNode(node.name, next(ip_addresses), node.latency) for node in nodes}
+        self.nodes = {node.name: PublicBitcoinNode(node.name, zone.get_ip(node.latency), node.latency) for node in nodes}
 
         self.selfish_node_private_nodes = {}
         self.selfish_node_proxies = {}
         for node in selfish_nodes:
-            ip_private_node = next(ip_addresses)
-            ip_proxy = next(ip_addresses)
+            ip_private_node = zone.get_ip(node.latency)
+            ip_proxy = zone.get_ip(node.latency)
             self.selfish_node_private_nodes[node.name] = SelfishPrivateNode(node.name, ip_private_node)
 
             self.selfish_node_proxies[node.name_proxy] = \
