@@ -39,6 +39,7 @@ def create():
     check_if_share_sum_is_1(nodes)
 
     print('Creating {}...'.format(config.nodes_json))
+    print(json.dumps([node.__dict__ for node in nodes], indent=4))
 
     with open(config.nodes_json, 'w') as file:
         file.write(json.dumps([node.__dict__ for node in nodes], indent=4))
