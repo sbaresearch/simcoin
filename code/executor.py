@@ -10,8 +10,6 @@ import prepare
 import utils
 import networktopology
 import nodesconfig
-from parse import Parser
-import parse
 
 
 class Executor:
