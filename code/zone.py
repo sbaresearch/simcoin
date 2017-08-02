@@ -7,11 +7,15 @@ class Zone:
         self.counter = 0
 
     def get_ip(self, latency):
-        if latency in self.zones:
-            return next(self.zones[latency])
-        else:
+        if latency not in self.zones:
             self.counter += 1
 
-            hosts = ipaddress.ip_network('240.{}.0.0/16'.format(self.counter)).hosts()
-            self.zones[latency] = hosts
-            return next(hosts)
+            self.zones[latency] = ZoneConfig(ipaddress.ip_network('240.{}.0.0/16'.format(self.counter)), latency)
+        return next(self.zones[latency].hosts)
+
+
+class ZoneConfig:
+    def __init__(self, network, latency):
+        self.network = network
+        self.hosts = network.hosts()
+        self.latency = latency
