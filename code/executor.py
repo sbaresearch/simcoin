@@ -17,19 +17,19 @@ class Executor:
         self.count = 0
         self.post_processing = None
         self.event = None
-        zone = Zone()
+        self.zone = Zone()
 
         config_nodes = nodesconfig.read()
         nodes = [node for node in config_nodes if node.node_type == 'bitcoin']
         selfish_nodes = [node for node in config_nodes if node.node_type == 'selfish']
 
-        self.nodes = {node.name: PublicBitcoinNode(node.name, zone.get_ip(node.latency), node.latency) for node in nodes}
+        self.nodes = {node.name: PublicBitcoinNode(node.name, self.zone.get_ip(node.latency), node.latency) for node in nodes}
 
         self.selfish_node_private_nodes = {}
         self.selfish_node_proxies = {}
         for node in selfish_nodes:
-            ip_private_node = zone.get_ip(node.latency)
-            ip_proxy = zone.get_ip(node.latency)
+            ip_private_node = self.zone.get_ip(node.latency)
+            ip_proxy = self.zone.get_ip(node.latency)
             self.selfish_node_private_nodes[node.name] = SelfishPrivateNode(node.name, ip_private_node)
 
             self.selfish_node_proxies[node.name_proxy] = \
@@ -79,7 +79,7 @@ class Executor:
                 node.rpc_connect()
 
             for node in self.all_public_nodes.values():
-                node.add_latency()
+                node.add_latency(self.zone.zones)
 
             logging.info(config.log_line_sim_start)
             self.event.execute()

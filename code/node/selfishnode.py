@@ -40,7 +40,6 @@ class ProxyNode(Node, PublicNode):
     def grep_log_for_errors(self):
         return bash.check_output(dockercmd.exec_cmd(self.name, config.log_error_grep.format(ProxyNode.log_file)))
 
-    def add_latency(self):
-        if self.latency > 0:
-            for cmd in tccmd.add_except_ip(self.name, self.latency, self.private_ip):
-                bash.check_output(cmd)
+    def add_latency(self, zones):
+        for cmd in tccmd.create(self.name, zones, self.latency):
+            bash.check_output(cmd)

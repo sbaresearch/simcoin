@@ -9,6 +9,6 @@ class PublicBitcoinNode(BitcoinNode, PublicNode):
         BitcoinNode.__init__(self, name, ip)
         PublicNode.__init__(self, latency)
 
-    def add_latency(self):
-        if self.latency > 0:
-            return bash.check_output(tccmd.add(self.name, self.latency))
+    def add_latency(self, zones):
+        for cmd in tccmd.create(self.name, zones, self.latency):
+            bash.check_output(cmd)
