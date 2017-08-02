@@ -117,12 +117,3 @@ def get_timestamp(node_name, grep_cmd):
     line = bash.check_output(cmd)
     matched = re.match(config.log_prefix_timestamp, line)
     return datetime.strptime(matched.group(0), config.log_time_format).timestamp()
-
-
-def create_config(node):
-    latency = utils.get_non_negative_int('What should be the latency of this node? [ms]\n> ')
-    node.latency = latency
-
-    share = utils.get_percentage('What should be the computational share? [0,1]\n> ')
-    node.share = share
-    return node
