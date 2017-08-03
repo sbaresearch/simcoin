@@ -7,6 +7,7 @@ import sys
 import argparse
 import simulation
 import config
+import os
 
 sys.tracebacklimit = None
 
@@ -53,4 +54,8 @@ if __name__ == '__main__':
         parser.print_help()
         exit(1)
     # use dispatch pattern to invoke method with same name
+
+    if not os.path.exists(config.data_dir):
+        os.makedirs(config.data_dir)
+
     commands[args.command]()
