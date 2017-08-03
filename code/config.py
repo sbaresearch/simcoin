@@ -18,9 +18,12 @@ selfish_node_proxy_name = selfish_node_name + selfish_node_proxy_postfix
 
 data_dir = '../data/'
 sim_dir = '{}run-{}/'.format(data_dir, time.time())
-network_csv = data_dir + 'network.csv'
-ticks_csv = data_dir + 'ticks.csv'
-nodes_json = data_dir + 'nodes.json'
+network_csv_file_name = 'network.csv'
+ticks_csv_file_name = 'ticks.csv'
+nodes_json_file_name = 'nodes.json'
+network_csv = data_dir + network_csv_file_name
+ticks_csv = data_dir + ticks_csv_file_name
+nodes_json = data_dir + nodes_json_file_name
 aggregated_log = data_dir + sim_dir + 'aggregated.log'
 aggregated_sim_log = data_dir + sim_dir + 'aggregated_simulation.log'
 log_file = data_dir + 'debug.log'

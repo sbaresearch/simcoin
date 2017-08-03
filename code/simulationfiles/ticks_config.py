@@ -11,7 +11,7 @@ import sys
 np.set_printoptions(precision=2, suppress=True)
 
 
-def parse():
+def create_parser():
     parser = argparse.ArgumentParser()
 
     parser.add_argument('--amount-of-ticks'
@@ -36,18 +36,20 @@ def parse():
                         , type=checkargs.check_positive_int
                         , help='Set the seed.'
                         )
-
-    args = parser.parse_known_args(sys.argv[2:])
-    print("arguments called with: {}".format(sys.argv))
-    print("parsed arguments: {}\n".format(args))
-    return args
+    return parser
 
 
-def create():
+def create(unkown_arguments=False):
     print('Called ticks config')
     nodes = nodes_config.read()
 
-    args = parse()[0]
+    parser = create_parser()
+    if unkown_arguments:
+        args = parser.parse_known_args(sys.argv[2:])[0]
+    else:
+        args = parser.parse_args(sys.argv[2:])
+    print("arguments called with: {}".format(sys.argv))
+    print("parsed arguments: {}\n".format(args))
 
     random.seed(args.seed)
     np.random.seed(args.seed)

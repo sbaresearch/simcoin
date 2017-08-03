@@ -11,7 +11,7 @@ node_groups = [
     ]
 
 
-def parse():
+def create_parser():
     parser = argparse.ArgumentParser()
 
     for node_group in node_groups:
@@ -20,16 +20,19 @@ def parse():
                             , nargs='+'
                             , help='{}. Pass [node_type] [amount] [share] [latency]'.format(node_group['variable'])
                             )
+    return parser
 
-    args = parser.parse_known_args(sys.argv[2:])
+
+def create(unkown_arguments=False):
+    print('Called nodes config')
+
+    parser = create_parser()
+    if unkown_arguments:
+        args = parser.parse_known_args(sys.argv[2:])[0]
+    else:
+        args = parser.parse_args(sys.argv[2:])
     print("arguments called with: {}".format(sys.argv))
     print("parsed arguments: {}\n".format(args))
-    return args
-
-
-def create():
-    print('Called nodes config')
-    args = parse()[0]
 
     nodes = []
     for index, node_group in enumerate(node_groups):
