@@ -64,22 +64,10 @@ class CliStats:
                            '{};{};{};'
                            '{};{};{}\n'
                            .format(node.name,
-                                   total['len'], total['median'], total['std'],
-                                   headers['len'], headers['median'], headers['std'],
-                                   fork['len'], fork['median'], fork['std'],
-                                   headers_only['len'], headers_only['median'], headers_only['std']))
-
-
-def calc_median_std(values):
-    stats = {'len': len(values), 'values': values}
-    if stats['len'] == 0:
-        stats['median'] = float('nan')
-        stats['std'] = float('nan')
-    else:
-        stats['median'] = np.median(values)
-        stats['std'] = np.std(values)
-
-    return stats
+                                   total.count, total.median, total.std,
+                                   headers.count, headers.median, headers.std,
+                                   fork.count, fork.median, fork.std,
+                                   headers_only.count, headers_only.median, headers_only.std))
 
 
 def tips_statistics(tips):
@@ -100,7 +88,26 @@ def tips_statistics(tips):
         else:
             raise Exception('Unknown tip type={}'.format(tip['status']))
 
-    return {'valid-headers': calc_median_std(np.array(valid_headers)),
-            'valid-fork': calc_median_std(np.array(valid_fork)),
-            'headers-only': calc_median_std(np.array(headers_only)),
-            'total': calc_median_std(np.array(valid_fork + valid_headers))}
+    return {'valid-headers': Stats.from_array(np.array(valid_headers)),
+            'valid-fork': Stats.from_array(np.array(valid_fork)),
+            'headers-only': Stats.from_array(np.array(headers_only)),
+            'total': Stats.from_array(np.array(valid_fork + valid_headers))}
+
+
+class Stats:
+
+    def __init__(self, count, median, std):
+        self.count = count
+        self.median = median
+        self.std = std
+
+    @classmethod
+    def from_array(cls, array):
+        count = len(array)
+        if count == 0:
+            median = float('nan')
+            std = float('nan')
+        else:
+            median = np.median(array)
+            std = np.std(array)
+        return cls(count, median, std)

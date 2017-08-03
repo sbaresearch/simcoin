@@ -2,6 +2,7 @@ from unittest import TestCase
 from mock import patch
 from mock import mock_open
 from clistats import CliStats
+from clistats import Stats
 from mock import MagicMock
 import config
 import clistats
@@ -108,17 +109,19 @@ class TestCliStats(TestCase):
         self.assertTrue('node-0;hash1;hash2\n' in lines)
 
     @patch('builtins.open', new_callable=mock_open)
-    @patch('json.loads')
     @patch('clistats.tips_statistics')
-    def test_node_stats(self, m_calc_tips_stats, _, m_open):
+    def test_node_stats(self, m_tips_statistics, m_open):
         node_0 = MagicMock()
         node_0.name = 'name'
-        node_0.mined_blocks = 45
         self.executor.all_bitcoin_nodes = {'0': node_0}
-        m_calc_tips_stats.return_value = {'total': {'len': 1, 'median': 2, 'std': 3},
-                                          'valid-headers': {'len': 11, 'median': 22, 'std': 33},
-                                          'valid-fork': {'len': 111, 'median': 222, 'std': 333},
-                                          'headers-only': {'len': 1111, 'median': 2222, 'std': 3333,}}
+        m_tips_statistics.return_value = \
+            {
+                'total': Stats(1, 2, 3),
+                'valid-headers': Stats(11,  22, 33),
+                'valid-fork': Stats(111, 222, 333),
+                'headers-only': Stats(1111, 2222, 3333,)
+            }
+
         self.cli_stats.node_stats()
 
         m_open.assert_called_with(config.nodes_csv, 'w')
@@ -132,39 +135,35 @@ class TestCliStats(TestCase):
                          'headers_only;headers_only_median_branchlen;headers_only_std_branchlen;\n')
         self.assertEqual(handle.write.call_args_list[1][0][0], 'name;1;2;3;11;22;33;111;222;333;1111;2222;3333\n')
 
-    @patch('clistats.calc_median_std')
-    def test_tips_statistics_unknown_status(self, mock):
+    def test_tips_statistics_unknown_status(self):
         tips = [{'status': 'unknown'}]
         with self.assertRaises(Exception) as context:
             clistats.tips_statistics(tips)
 
         self.assertTrue('Unknown tip type=unknown' in str(context.exception))
 
-    @patch('clistats.calc_median_std')
-    def test_tips_statistics_both(self, mock):
+    def test_tips_statistics_both(self):
         tips = [{'status': 'active'}, {'status': 'valid-headers', 'branchlen': 2},
                 {'status': 'valid-fork', 'branchlen': 3}, {'status': 'headers-only', 'branchlen': 4}]
-        clistats.tips_statistics(tips)
+        stats = clistats.tips_statistics(tips)
 
-        self.assertEqual(mock.call_args_list[0][0][0], [2])
-        self.assertEqual(mock.call_args_list[1][0][0], [3])
-        self.assertEqual(mock.call_args_list[2][0][0], [4])
-        self.assertTrue(item in [2, 3, 4] for item in mock.call_args_list[3][0][0])
+        self.assertEqual(stats['valid-headers'].median, [2])
+        self.assertEqual(stats['valid-fork'].median, [3])
+        self.assertEqual(stats['headers-only'].median, [4])
+        self.assertTrue(item in [2, 3, 4] for item in stats)
 
     def test_calc_median_std_no_values(self):
         array = np.array([])
-        statistics = clistats.calc_median_std(array)
+        statistics = Stats.from_array(array)
 
-        self.assertTrue(np.isnan(statistics['median']))
-        self.assertTrue(np.isnan(statistics['std']))
-        self.assertEqual(statistics['len'], 0)
-        self.assertTrue((statistics['values'] == array).all())
+        self.assertTrue(np.isnan(statistics.median))
+        self.assertTrue(np.isnan(statistics.std))
+        self.assertEqual(statistics.count, 0)
 
     def test_calc_median_std(self):
         array = np.array([1, 2])
-        statistics = clistats.calc_median_std(array)
+        statistics = Stats.from_array(array)
 
-        self.assertEqual(statistics['median'], 1.5)
-        self.assertEqual(statistics['std'], 0.5)
-        self.assertEqual(statistics['len'], 2)
-        self.assertTrue((statistics['values'] == array).all())
+        self.assertEqual(statistics.median, 1.5)
+        self.assertEqual(statistics.std, 0.5)
+        self.assertEqual(statistics.count, 2)

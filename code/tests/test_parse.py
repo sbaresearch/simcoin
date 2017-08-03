@@ -166,16 +166,14 @@ class TestParse(TestCase):
         self.assertEqual(self.parser.blocks['block_hash'].receiving_timestamps, np.array([123]))
 
     @patch('builtins.open', new_callable=mock_open)
-    @patch('clistats.calc_median_std')
-    def test_create_block_csv(self, m_calc_median_std, m_open):
+    def test_create_block_csv(self, m_open):
         block_stats = BlockStats(1, 'node-0', 'block_hash', 3, 4)
         block_stats.height = 2
         self.parser.blocks = {
             'block_hash': block_stats,
         }
-        m_calc_median_std.return_value = {'len': 5, 'median': 6, 'std': 7}
 
-        self.parser.blocks['block_hash'].receiving_timestamps = np.array([1, 10])
+        self.parser.blocks['block_hash'].receiving_timestamps = np.array([5, 7])
         self.parser.check_if_in_consensus_chain = Mock()
         self.parser.check_if_in_consensus_chain.return_value = True
 
@@ -187,7 +185,7 @@ class TestParse(TestCase):
         self.assertEqual(handle.write.call_args_list[0][0][0], 'block_hash;node;timestamp;stale;height;total_size;'
                                                                'txs;total_received;'
                                                                'median_propagation;std_propagation\n')
-        self.assertEqual(handle.write.call_args_list[1][0][0], 'block_hash;node-0;1;True;2;3;4;5;6;7\n')
+        self.assertEqual(handle.write.call_args_list[1][0][0], 'block_hash;node-0;1;True;2;3;4;2;6.0;1.0\n')
 
     def test_parse_add_to_wallet(self):
         log_line = '2017-07-30 07:48:48.337577 node-1 AddToWallet' \
@@ -231,14 +229,12 @@ class TestParse(TestCase):
         self.assertTrue(self.parser.tx['tx_hash'].tx_hash, 'tx_hash')
 
     @patch('builtins.open', new_callable=mock_open)
-    @patch('clistats.calc_median_std')
-    def test_create_tx_csv(self, m_calc_median_std, m_open):
+    def test_create_tx_csv(self, m_open):
         self.parser.tx = {
             'tx_hash': TxStats(1, 'node-0', 'tx_hash'),
         }
-        m_calc_median_std.return_value = {'len': 2, 'median': 3, 'std': 4}
 
-        self.parser.tx['tx_hash'].receiving_timestamps = np.array([1, 10])
+        self.parser.tx['tx_hash'].receiving_timestamps = np.array([5, 7])
 
         self.parser.create_tx_csv()
 
@@ -247,7 +243,7 @@ class TestParse(TestCase):
         self.assertEqual(handle.write.call_count, 2)
         self.assertEqual(handle.write.call_args_list[0][0][0], 'tx_hash;node;timestamp;'
                                                                'total_accepted;median_propagation;std_propagation\n')
-        self.assertEqual(handle.write.call_args_list[1][0][0], 'tx_hash;node-0;1;2;3;4\n')
+        self.assertEqual(handle.write.call_args_list[1][0][0], 'tx_hash;node-0;1;2;6.0;1.0\n')
 
     def test_check_if_in_consensus_chain_stale(self):
         self.parser.consensus_chain = ['hash_1', 'hash_2']
