@@ -1,4 +1,5 @@
 import ipaddress
+import config
 
 
 class Zone:
@@ -10,7 +11,7 @@ class Zone:
         if latency not in self.zones:
             self.counter += 1
 
-            self.zones[latency] = ZoneConfig(ipaddress.ip_network('240.{}.0.0/16'.format(self.counter)), latency)
+            self.zones[latency] = ZoneConfig(ipaddress.ip_network(config.ip_zones.format(self.counter)), latency)
         return next(self.zones[latency].hosts)
 
 

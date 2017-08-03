@@ -3,6 +3,7 @@ import time
 # IP range from RFC6890 - IP range for future use
 # it does not conflict with https://github.com/bitcoin/bitcoin/blob/master/src/netbase.h
 ip_range = "240.0.0.0/4"
+ip_zones = '240.{}.0.0/16'
 
 network_name = 'simcoin-network'
 node_image = 'btn/base:v3'
