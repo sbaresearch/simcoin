@@ -11,6 +11,7 @@ build for reproducibility
 others can build up on this framework and don't have to replicate complicated setups
 
 technologies involved
+
 * docker images
 * TODO docker compose/machine/swarm (kubernetes)
 * netfilter/iptables 
@@ -20,13 +21,11 @@ steps to run a standard simulation
 setup on Ubuntu 16.06 LTS
 -------------------------
 
-generate node image `docker build --tag btn/base:v1 - < docker/baseimage` build
-
-run infrastructure
-
-1. checkout this projects source code from `github`
-4. run `docker build --tag btn/base:v3 - < code/docker/baseimage` to build the docker image 
-5. run `main.py` to run the simulation
+* checkout repostiory
+* make install
+* make build-image
+* make test
+* make run
 
 usage
 --------------
