@@ -13,10 +13,10 @@ import sys
 def parse():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--interval-duration'
+    parser.add_argument('--tick-duration'
                         , default=1
                         , type=checkargs.check_positive_int
-                        , help='Duration of intervals.')
+                        , help='Duration of ticks.')
 
     parser.add_argument('--verbose'
                         , default=False
@@ -40,7 +40,7 @@ def run():
     stats = Stats(executor)
     executor.stats = stats
 
-    event = Event(executor, args.interval_duration)
+    event = Event(executor, args.tick_duration)
     executor.event = event
 
     start = time.time()

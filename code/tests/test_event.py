@@ -73,7 +73,7 @@ class TestEvent(TestCase):
 
             with self.assertRaises(Exception) as context:
                 e.execute()
-            self.assertTrue('Consider to raise the interval_duration' in str(context.exception))
+            self.assertTrue('Consider to raise the tick_duration' in str(context.exception))
 
     @patch('queue.Queue')
     @patch('utils.check_for_file', lambda file: None)
