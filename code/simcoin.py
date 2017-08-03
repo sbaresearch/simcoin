@@ -7,6 +7,8 @@ import sys
 import argparse
 import simulation
 
+sys.tracebacklimit=None
+
 
 def run():
     nodes_config.create()
