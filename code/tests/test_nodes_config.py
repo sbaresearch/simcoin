@@ -1,6 +1,6 @@
 from unittest import TestCase
-import nodes_config
-from nodes_config import NodeConfig
+from simulationfiles import nodes_config
+from simulationfiles.nodes_config import NodeConfig
 
 
 class TestNodesConfig(TestCase):

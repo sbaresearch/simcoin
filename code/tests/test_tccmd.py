@@ -1,7 +1,7 @@
 from unittest import TestCase
 import ipaddress
 import tccmd
-from zone import ZoneConfig
+from simulationfiles.zone import ZoneConfig
 
 
 class TestTccmd(TestCase):

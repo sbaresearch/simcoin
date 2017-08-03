@@ -7,9 +7,9 @@ import logging
 import bash
 import prepare
 import utils
-import network_config
-import nodes_config
-from zone import Zone
+from simulationfiles import network_config
+from simulationfiles import nodes_config
+from simulationfiles.zone import Zone
 
 
 class Executor:

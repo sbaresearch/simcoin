@@ -1,9 +1,9 @@
 from unittest import TestCase
-import network_config
+from simulationfiles import network_config
 from mock import patch
 from mock import mock_open
 from textwrap import dedent
-from nodes_config import NodeConfig
+from simulationfiles.nodes_config import NodeConfig
 
 
 class TestNetworkConfig(TestCase):

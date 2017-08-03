@@ -1,7 +1,7 @@
 from unittest import TestCase
 from mock import patch
-import ticks_config
-from nodes_config import NodeConfig
+from simulationfiles import ticks_config
+from simulationfiles.nodes_config import NodeConfig
 
 
 class TestTicksConfig(TestCase):
@@ -59,8 +59,8 @@ class TestTicksConfig(TestCase):
 
         self.assertEqual(len(block_events), 10)
 
-    @patch('ticks.calc_expected_events', lambda a, b: 5)
-    @patch('ticks.create_block_series', lambda a, b, c: [10, 11, 9])
+    @patch('simulationfiles.ticks_config.calc_expected_events', lambda a, b: 5)
+    @patch('simulationfiles.ticks_config.create_block_series', lambda a, b, c: [10, 11, 9])
     def test_create_block_events(self):
         nodes = [NodeConfig('type', 'node-0', 0.5, 0), NodeConfig('type', 'node-1', 0.5, 0)]
         amount_of_ticks = 10

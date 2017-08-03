@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import nodes_config
-import ticks_config
-import network_config
+from simulationfiles import nodes_config
+from simulationfiles import ticks_config
+from simulationfiles import network_config
 import sys
 import argparse
 import simulation
