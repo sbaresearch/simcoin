@@ -3,7 +3,7 @@ import random
 import pandas
 import numpy as np
 import config
-import nodesconfig
+import nodes_config
 import argparse
 import checkargs
 import sys
@@ -44,7 +44,7 @@ def parse():
 
 
 def create():
-    nodes = nodesconfig.read()
+    nodes = nodes_config.read()
 
     args = parse()[0]
 

@@ -1,23 +1,23 @@
 from unittest import TestCase
 from mock import patch
-import ticks
-from nodesconfig import NodeConfig
+import ticks_config
+from nodes_config import NodeConfig
 
 
-class TestIntervals(TestCase):
+class TestTicksConfig(TestCase):
 
     def test_calc_expected_events_two_events_per_tick(self):
-        expected_events = ticks.calc_expected_events(10, 0.5)
+        expected_events = ticks_config.calc_expected_events(10, 0.5)
 
         self.assertEqual(expected_events, 70)
 
     def test_calc_expected_events_one_event_every_two_tick(self):
-        expected_events = ticks.calc_expected_events(10, 2)
+        expected_events = ticks_config.calc_expected_events(10, 2)
 
         self.assertEqual(expected_events, 25)
 
     def test_calc_expected_events_one_event_per_tick(self):
-        expected_events = ticks.calc_expected_events(10, 1)
+        expected_events = ticks_config.calc_expected_events(10, 1)
 
         self.assertEqual(expected_events, 40)
 
@@ -29,7 +29,7 @@ class TestIntervals(TestCase):
         nodes = [node_0, node_1]
         block_events = {'node-0': [0.5, 2.1, end], 'node-1': [0.5, 2.1, end]}
 
-        event_ticks = ticks.create_ticks(nodes, block_events, tx_per_tick, end)
+        event_ticks = ticks_config.create_ticks(nodes, block_events, tx_per_tick, end)
 
         self.assertEqual(len(event_ticks), 4)
         self.assertEqual(len(event_ticks[0]), 4)
@@ -51,11 +51,11 @@ class TestIntervals(TestCase):
         block_events = {'node-0': [0.5, 0.6, end]}
 
         with self.assertRaises(Exception) as context:
-            ticks.create_ticks([node_0], block_events, 0, end)
+            ticks_config.create_ticks([node_0], block_events, 0, end)
         self.assertTrue('Intervals per block is too low.' in str(context.exception))
 
     def test_create_block_series(self):
-        block_events = ticks.create_block_series(0.5, 5, 10)
+        block_events = ticks_config.create_block_series(0.5, 5, 10)
 
         self.assertEqual(len(block_events), 10)
 
@@ -66,7 +66,7 @@ class TestIntervals(TestCase):
         amount_of_ticks = 10
         ticks_per_block = 2
 
-        block_events = ticks.create_block_events(nodes, amount_of_ticks, ticks_per_block)
+        block_events = ticks_config.create_block_events(nodes, amount_of_ticks, ticks_per_block)
         self.assertEqual(len(block_events), 2)
         for block_events in block_events.values():
             self.assertEqual(block_events, [10, 11, 9])

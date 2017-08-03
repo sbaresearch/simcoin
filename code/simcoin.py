@@ -1,26 +1,26 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import nodesconfig
-import ticks
-import network
+import nodes_config
+import ticks_config
+import network_config
 import sys
 import argparse
 import simulation
 
 
 def run():
-    nodesconfig.create()
+    nodes_config.create()
 
-    ticks.create()
+    ticks_config.create()
 
-    network.create()
+    network_config.create()
 
     simulation.run()
 
 commands = {
-    'nodes':        nodesconfig.create,
-    'network':      network.create,
-    'ticks':    ticks.create,
+    'nodes':        nodes_config.create,
+    'network':      network_config.create,
+    'ticks':    ticks_config.create,
     'simulate':     simulation.run,
     'run':          run,
 }

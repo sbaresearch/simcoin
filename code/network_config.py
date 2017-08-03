@@ -2,7 +2,7 @@ import csv
 import random
 import pandas
 import config
-import nodesconfig
+import nodes_config
 import argparse
 import checkargs
 import sys
@@ -33,7 +33,7 @@ def parse():
 def create():
     args = parse()[0]
 
-    nodes = nodesconfig.read()
+    nodes = nodes_config.read()
 
     random.seed(args.seed)
 

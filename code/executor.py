@@ -7,8 +7,8 @@ import logging
 import bash
 import prepare
 import utils
-import network
-import nodesconfig
+import network_config
+import nodes_config
 from zone import Zone
 
 
@@ -19,7 +19,7 @@ class Executor:
         self.event = None
         self.zone = Zone()
 
-        config_nodes = nodesconfig.read()
+        config_nodes = nodes_config.read()
         nodes = [node for node in config_nodes if node.node_type == 'bitcoin']
         selfish_nodes = [node for node in config_nodes if node.node_type == 'selfish']
 
@@ -42,7 +42,7 @@ class Executor:
 
         self.one_normal_node = next(iter(self.nodes.values()))
 
-        connections = network.read_connections()
+        connections = network_config.read_connections()
         for node in self.all_public_nodes.values():
             node.outgoing_ips = [str(self.all_public_nodes[connection].ip) for connection in connections[node.name]]
 
