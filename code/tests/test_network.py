@@ -1,15 +1,15 @@
 from unittest import TestCase
-import networktopology
+import network
 from mock import patch
 from mock import mock_open
 from textwrap import dedent
 from nodesconfig import NodeConfig
 
 
-class TestNetworktopology(TestCase):
+class TestNetwork(TestCase):
 
     def test_create_header(self, ):
-        header = networktopology.create_header([NodeConfig('type', 'node-1', 0, 0), NodeConfig('type','node-2', 0, 0)])
+        header = network.create_header([NodeConfig('type', 'node-1', 0, 0), NodeConfig('type', 'node-2', 0, 0)])
 
         self.assertEqual(len(header), 3)
         self.assertEqual(header, ['', 'node-1', 'node-2'])
@@ -18,7 +18,7 @@ class TestNetworktopology(TestCase):
         header = ['', 'node-0', 'node-1', 'node-2']
         connectivity = 1
 
-        matrix = networktopology.create_matrix(header, connectivity)
+        matrix = network.create_matrix(header, connectivity)
         for i in range(1, len(header)):
             for j in range(1, len(header)):
                 if i != j:
@@ -28,7 +28,7 @@ class TestNetworktopology(TestCase):
         header = ['', 'node-0', 'node-1', 'node-2']
         connectivity = 0
 
-        matrix = networktopology.create_matrix(header, connectivity)
+        matrix = network.create_matrix(header, connectivity)
         for i in range(1, len(matrix)):
             for j in range(1, len(matrix)):
                 if i != j:
@@ -44,7 +44,7 @@ class TestNetworktopology(TestCase):
     @patch("builtins.open", mock_open(read_data=DATA_1))
     @patch('utils.check_for_file', lambda file: None)
     def test_read_connections(self):
-        connections = networktopology.read_connections()
+        connections = network.read_connections()
 
         self.assertEqual(len(connections.keys()), 3)
 
@@ -58,7 +58,7 @@ class TestNetworktopology(TestCase):
             ['node-0',  1,          0],
             ['node-1',  0,          1]
         ]
-        fully_connected = networktopology.check_if_fully_connected(matrix)
+        fully_connected = network.check_if_fully_connected(matrix)
 
         self.assertFalse(fully_connected)
 
@@ -68,7 +68,7 @@ class TestNetworktopology(TestCase):
             ['node-0',  1,          1],
             ['node-1',  1,          1]
         ]
-        fully_connected = networktopology.check_if_fully_connected(matrix)
+        fully_connected = network.check_if_fully_connected(matrix)
 
         self.assertTrue(fully_connected)
 
@@ -79,7 +79,7 @@ class TestNetworktopology(TestCase):
             ['node-1',  0,          1,          1],
             ['node-2',  1,          1,          1]
         ]
-        fully_connected = networktopology.check_if_fully_connected(matrix)
+        fully_connected = network.check_if_fully_connected(matrix)
 
         self.assertTrue(fully_connected)
 
@@ -90,7 +90,7 @@ class TestNetworktopology(TestCase):
             ['node-1',  0,          1,          0],
             ['node-2',  1,          0,          1]
         ]
-        fully_connected = networktopology.check_if_fully_connected(matrix)
+        fully_connected = network.check_if_fully_connected(matrix)
 
         self.assertFalse(fully_connected)
 
@@ -103,7 +103,7 @@ class TestNetworktopology(TestCase):
             ['node-3',  1,          0,          0,          1],
 
         ]
-        fully_connected = networktopology.check_if_fully_connected(matrix)
+        fully_connected = network.check_if_fully_connected(matrix)
 
         self.assertFalse(fully_connected)
 
@@ -116,6 +116,6 @@ class TestNetworktopology(TestCase):
             ['node-3',  0,          0,          0,          1],
 
         ]
-        fully_connected = networktopology.check_if_fully_connected(matrix)
+        fully_connected = network.check_if_fully_connected(matrix)
 
         self.assertFalse(fully_connected)

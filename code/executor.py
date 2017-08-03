@@ -7,7 +7,7 @@ import logging
 import bash
 import prepare
 import utils
-import networktopology
+import network
 import nodesconfig
 from zone import Zone
 
@@ -42,7 +42,7 @@ class Executor:
 
         self.one_normal_node = next(iter(self.nodes.values()))
 
-        connections = networktopology.read_connections()
+        connections = network.read_connections()
         for node in self.all_public_nodes.values():
             node.outgoing_ips = [str(self.all_public_nodes[connection].ip) for connection in connections[node.name]]
 

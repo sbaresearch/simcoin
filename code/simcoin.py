@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import nodesconfig
 import ticks
-import networktopology
+import network
 import sys
 import argparse
 import simulation
@@ -13,13 +13,13 @@ def run():
 
     ticks.create()
 
-    networktopology.create()
+    network.create()
 
     simulation.run()
 
 commands = {
     'nodes':        nodesconfig.create,
-    'network':      networktopology.create,
+    'network':      network.create,
     'ticks':    ticks.create,
     'simulate':     simulation.run,
     'run':          run,
