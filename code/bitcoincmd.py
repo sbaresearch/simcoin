@@ -6,8 +6,6 @@ args = {
     'regtest':            '-regtest',  # activate regtest mode
     'datadir':            '-datadir=' + config.bitcoin_data_dir,  # change the datadir
     'debug':              '-debug',  # log all events
-    # 'printblocktree':     '-printblocktree', # removed (would print tree on startup)
-    # 'printtoconsole':     '-printtoconsole', # print the log to stdout instead of a file
     'logips':             '-logips',  # enable ip loging
     'logtimemicros':      '-logtimemicros',  # add microseconds to logging flag: DEFAULT_LOGTIMEMICROS
     'listen':             '-listen',  # ensure listening even if 'connect' is given
