@@ -42,7 +42,7 @@ def create_rpc_connection_string(ip):
 reference_node = 'node-0'
 
 warmup_blocks = 100
-start_blocks_per_node = 2
+start_blocks_per_node = 5
 
 log_prefix_timestamp = r'^([0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}.[0-9]{6})'
 log_prefix_full = log_prefix_timestamp + ' ([a-zA-Z0-9]+-[0-9]+) '
