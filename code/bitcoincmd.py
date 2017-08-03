@@ -1,4 +1,3 @@
-import config
 import dockercmd
 
 daemon = 'bitcoind '

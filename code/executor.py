@@ -2,9 +2,9 @@ import dockercmd
 import bitcoincmd
 import ipaddress
 import config
-from node import PublicBitcoinNode
-from node import SelfishPrivateNode
-from node import ProxyNode
+from node.bitcoinnode import PublicBitcoinNode
+from node.selfishnode import SelfishPrivateNode
+from node.selfishnode import ProxyNode
 import logging
 import json
 import bash
@@ -12,33 +12,32 @@ import prepare
 import utils
 import networktopology
 import subprocess
+import nodesconfig
 
 
 class Executor:
-    def __init__(self, args):
+    def __init__(self):
         self.count = 0
         self.stats = None
         self.event = None
 
-        nodes, selfish_nodes = networktopology.read_amount_of_nodes()
+        config_nodes = nodesconfig.read()
+        nodes = [node for node in config_nodes if node.node_type == 'bitcoin']
+        selfish_nodes = [node for node in config_nodes if node.node_type == 'selfish']
         ip_addresses = ipaddress.ip_network(config.ip_range).hosts()
         next(ip_addresses)  # skipping first ip address (docker fails with error "is in use")
 
-        self.nodes = {config.node_name.format(str(i)):
-                      PublicBitcoinNode(config.node_name.format(str(i)), next(ip_addresses))
-                      for i in range(nodes)}
+        self.nodes = {node.name: PublicBitcoinNode(node.name, next(ip_addresses), node.latency) for node in nodes}
 
         self.selfish_node_private_nodes = {}
         self.selfish_node_proxies = {}
-        for i in range(selfish_nodes):
+        for node in selfish_nodes:
             ip_private_node = next(ip_addresses)
             ip_proxy = next(ip_addresses)
-            self.selfish_node_private_nodes[config.selfish_node_name.format(str(i))] = \
-                SelfishPrivateNode(config.selfish_node_name.format(str(i)), ip_private_node)
+            self.selfish_node_private_nodes[node.name] = SelfishPrivateNode(node.name, ip_private_node)
 
-            self.selfish_node_proxies[config.selfish_node_proxy_name.format(str(i))] = \
-                ProxyNode(config.selfish_node_proxy_name.format(str(i)),
-                          ip_proxy, ip_private_node, args.selfish_nodes_args)
+            self.selfish_node_proxies[node.name_proxy] = \
+                ProxyNode(node.name_proxy, ip_proxy, ip_private_node, node.selfish_nodes_args, node.latency)
 
         self.all_bitcoin_nodes = dict(self.nodes, **self.selfish_node_private_nodes)
 
@@ -50,10 +49,6 @@ class Executor:
         connections = networktopology.read_connections()
         for node in self.all_public_nodes.values():
             node.outgoing_ips = [str(self.all_public_nodes[connection].ip) for connection in connections[node.name]]
-
-        latencies = networktopology.read_latencies()
-        for node in latencies.keys():
-            self.all_public_nodes[node].latency = latencies[node]
 
         self.first_block_height = config.warmup_blocks + config.start_blocks_per_node * len(self.all_bitcoin_nodes)
 

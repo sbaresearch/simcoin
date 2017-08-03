@@ -32,7 +32,7 @@ class TestPrepare(TestCase):
 
         prepare.prepare_simulation_dir()
 
-        self.assertEqual(m_makedirs.call_count, 2)
+        self.assertEqual(m_makedirs.call_count, 1)
         self.assertEqual(m_check_output.call_count, 2)
 
         self.assertEqual(m_open.call_count, 2)

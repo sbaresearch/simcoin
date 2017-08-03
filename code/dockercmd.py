@@ -1,6 +1,5 @@
 import config
 import bitcoincmd
-import tccmd
 
 
 def run_node(node, cmd):

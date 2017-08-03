@@ -1,6 +1,6 @@
 from unittest import TestCase
 from mock import patch
-import node
+from node import abstract
 from datetime import datetime
 import config
 
@@ -14,7 +14,7 @@ class TestNode(TestCase):
         m_call_silent.return_value = 0
         m_check_output.return_value = '2017-07-07 09:13:46.344211 UpdateTip: new best=hash height=111'
 
-        received = node.get_timestamp('node-0', 'hash')
+        received = abstract.get_timestamp('node-0', 'hash')
 
         self.assertEqual(received, datetime.strptime('2017-07-07 09:13:46.344211', config.log_time_format).timestamp())
 
@@ -25,7 +25,7 @@ class TestNode(TestCase):
         m_call_silent.return_value = 1
         m_check_output.return_value = ''
 
-        received = node.get_timestamp('node-0', 'hash')
+        received = abstract.get_timestamp('node-0', 'hash')
 
         self.assertEqual(received, -1)
 
