@@ -59,6 +59,7 @@ class Executor:
 
             for node in self.all_bitcoin_nodes.values():
                 node.run()
+            utils.sleep(4 + len(self.all_bitcoin_nodes) * 0.2)
 
             for node in self.all_bitcoin_nodes.values():
                 prepare.wait_until_height_reached(node, self.first_block_height)
