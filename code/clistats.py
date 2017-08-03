@@ -1,6 +1,5 @@
 import config
 import utils
-import json
 import numpy as np
 
 

@@ -1,8 +1,8 @@
 import dockercmd
 import config
-from node.bitcoinnode import PublicBitcoinNode
-from node.selfishnode import SelfishPrivateNode
-from node.selfishnode import ProxyNode
+from node import PublicBitcoinNode
+from node import SelfishPrivateNode
+from node import ProxyNode
 import logging
 import bash
 import prepare

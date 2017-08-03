@@ -1,6 +1,6 @@
 from unittest import TestCase
 import dockercmd
-from node.abstract import Node
+from node import Node
 import ipaddress
 import config
 
