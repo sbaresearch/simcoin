@@ -6,6 +6,7 @@ from simulationfiles import network_config
 import sys
 import argparse
 import simulation
+import config
 
 sys.tracebacklimit = None
 
@@ -30,15 +31,18 @@ commands = {
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description='Simcoin a cryptocurrency simulator.',
-        usage='''git <command> [<args>]
+        usage='''<command> [<args>]
 
         The commands are:
-        network
-        ticks
-        nodes
-        simulate
-        run
-        ''')
+        nodes       creates the {} for a simulation
+        network     creates the {} for a simulation
+        ticks       creates the {} for a simulation
+        simulate    executes a simulation based on the {}, {} and {}
+        run         runs all above commands
+        '''.format(
+            config.nodes_json_file_name, config.network_csv_file_name, config.ticks_csv_file_name,
+            config.nodes_json_file_name, config.network_csv_file_name, config.ticks_csv_file_name,
+        ))
 
     parser.add_argument('command', help='Subcommand to run')
     # parse_args defaults to [1:] for args, but you need to
