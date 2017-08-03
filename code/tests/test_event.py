@@ -62,9 +62,9 @@ class TestEvent(TestCase):
 
             m_time.side_effect = [0, 1, 10]
 
-            with self.assertRaises(Exception) as context:
+            with self.assertRaises(SystemExit) as context:
                 e.execute()
-            self.assertTrue('Consider to raise the tick_duration' in str(context.exception))
+            self.assertEqual(context.exception.code, -1)
 
     @patch('utils.check_for_file', lambda file: None)
     @patch('event.execute_cmd')

@@ -29,9 +29,10 @@ class Event:
                     logging.info('Sleep {} seconds for next tick.'.format(difference))
                     utils.sleep(difference)
                 else:
-                    raise Exception('Current_time={} is higher then next_tick={}.'
-                                    ' Consider to raise the tick_duration which is currently {}s.'
-                                    .format(current_time, next_tick, self.tick_duration))
+                    logging.error('Current_time={} is higher then next_tick={}.'
+                                  ' Consider to raise the tick_duration which is currently {}s.'
+                                  .format(current_time, next_tick, self.tick_duration))
+                    exit(-1)
 
 
 def execute_cmd(cmd, nodes):
