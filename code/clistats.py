@@ -1,6 +1,8 @@
 import config
 import utils
-import numpy as np
+import operator
+import logging
+from utils import Values
 
 
 class CliStats:
@@ -45,69 +47,46 @@ class CliStats:
     def node_stats(self):
         with open(config.nodes_csv, 'w') as file:
             file.write('name;'
+                       'headers_only;headers_only_median_branchlen;headers_only_std_branchlen;'
                        'total_tips;total_tips_median_branchlen;tips_std_branchlen;'
-                       'valid_headers;valid_headers_median_branchlen;valid_headers_std_branchlen;'
                        'valid_fork;valid_fork_median_branchlen;valid_fork_std_branchlen;'
-                       'headers_only;headers_only_median_branchlen;headers_only_std_branchlen;\n')
+                       'valid_headers;valid_headers_median_branchlen;valid_headers_std_branchlen;\n')
             for node in self.executor.all_bitcoin_nodes.values():
+                file.write('{}'.format(node.name))
+
                 tips = node.execute_rpc('getchaintips')
-
                 tips_stats = tips_statistics(tips)
+                sorted_tips_stats = sorted(tips_stats.items(), key=operator.itemgetter(0))
 
-                total = tips_stats['total']
-                headers = tips_stats['valid-headers']
-                fork = tips_stats['valid-fork']
-                headers_only = tips_stats['headers-only']
-                file.write('{};'
-                           '{};{};{};'
-                           '{};{};{};'
-                           '{};{};{};'
-                           '{};{};{}\n'
-                           .format(node.name,
-                                   total.count, total.median, total.std,
-                                   headers.count, headers.median, headers.std,
-                                   fork.count, fork.median, fork.std,
-                                   headers_only.count, headers_only.median, headers_only.std))
+                for tip_stats_tuple in sorted_tips_stats:
+                    tip_stats = tip_stats_tuple[1]
+                    file.write(';{};{};{}'.format(tip_stats.stats.count, tip_stats.stats.median, tip_stats.stats.std))
+                file.write('\n')
+
+
+tip_types = ['headers-only', 'valid-fork', 'valid-headers']
 
 
 def tips_statistics(tips):
-    valid_headers = []
-    valid_fork = []
-    headers_only = []
+    tip_stats = {tip_type: Values() for tip_type in tip_types}
 
     for tip in tips:
-        if tip['status'] == 'valid-headers':
-            valid_headers.append(tip['branchlen'])
-        elif tip['status'] == 'valid-fork':
-            valid_fork.append(tip['branchlen'])
-        elif tip['status'] == 'headers-only':
-            headers_only.append(tip['branchlen'])
-        elif tip['status'] == 'active':
+        if tip['status'] == 'active':
             # omit active tip
             pass
         else:
-            raise Exception('Unknown tip type={}'.format(tip['status']))
+            try:
+                tip_stats[tip['status']].values.append(tip['branchlen'])
+            except KeyError:
+                logging.error('Unknown tip type={}'.format(tip['status']))
+                exit(-1)
 
-    return {'valid-headers': Stats.from_array(np.array(valid_headers)),
-            'valid-fork': Stats.from_array(np.array(valid_fork)),
-            'headers-only': Stats.from_array(np.array(headers_only)),
-            'total': Stats.from_array(np.array(valid_fork + valid_headers))}
+    all_values = []
+    for _, tip_stat in tip_stats.items():
+        all_values.extend(tip_stat.values)
+    tip_stats['total'] = Values.from_array(all_values)
 
+    for _, tip_stat in tip_stats.items():
+        tip_stat.calc()
 
-class Stats:
-
-    def __init__(self, count, median, std):
-        self.count = count
-        self.median = median
-        self.std = std
-
-    @classmethod
-    def from_array(cls, array):
-        count = len(array)
-        if count == 0:
-            median = float('nan')
-            std = float('nan')
-        else:
-            median = np.median(array)
-            std = np.std(array)
-        return cls(count, median, std)
+    return tip_stats

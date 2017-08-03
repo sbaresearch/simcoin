@@ -2,7 +2,8 @@ from unittest import TestCase
 from mock import patch
 from mock import mock_open
 from clistats import CliStats
-from clistats import Stats
+from utils import Stats
+from utils import Values
 from mock import MagicMock
 import config
 import clistats
@@ -114,42 +115,52 @@ class TestCliStats(TestCase):
         node_0 = MagicMock()
         node_0.name = 'name'
         self.executor.all_bitcoin_nodes = {'0': node_0}
-        m_tips_statistics.return_value = \
-            {
-                'total': Stats(1, 2, 3),
-                'valid-headers': Stats(11,  22, 33),
-                'valid-fork': Stats(111, 222, 333),
-                'headers-only': Stats(1111, 2222, 3333,)
-            }
+
+        tips_stats = {
+            'headers-only': Values.from_array([1, 3]),
+            'total': Values.from_array([1, 5]),
+            'valid-fork': Values.from_array([1, 7]),
+            'valid-headers': Values.from_array([1, 9]),
+        }
+        for _, tip_stats in tips_stats.items():
+            tip_stats.calc()
+
+        m_tips_statistics.return_value = tips_stats
 
         self.cli_stats.node_stats()
 
         m_open.assert_called_with(config.nodes_csv, 'w')
         handle = m_open()
-        self.assertEqual(handle.write.call_count, 2)
+        self.assertEqual(handle.write.call_count, 7)
         self.assertEqual(handle.write.call_args_list[0][0][0],
                          'name;'
+                         'headers_only;headers_only_median_branchlen;headers_only_std_branchlen;'
                          'total_tips;total_tips_median_branchlen;tips_std_branchlen;'
-                         'valid_headers;valid_headers_median_branchlen;valid_headers_std_branchlen;'
                          'valid_fork;valid_fork_median_branchlen;valid_fork_std_branchlen;'
-                         'headers_only;headers_only_median_branchlen;headers_only_std_branchlen;\n')
-        self.assertEqual(handle.write.call_args_list[1][0][0], 'name;1;2;3;11;22;33;111;222;333;1111;2222;3333\n')
+                         'valid_headers;valid_headers_median_branchlen;valid_headers_std_branchlen;\n')
+
+        self.assertEqual(handle.write.call_args_list[1][0][0], 'name')
+        self.assertEqual(handle.write.call_args_list[2][0][0], ';2;2.0;1.0')
+        self.assertEqual(handle.write.call_args_list[3][0][0], ';2;3.0;2.0')
+        self.assertEqual(handle.write.call_args_list[4][0][0], ';2;4.0;3.0')
+        self.assertEqual(handle.write.call_args_list[5][0][0], ';2;5.0;4.0')
+        self.assertEqual(handle.write.call_args_list[6][0][0], '\n')
 
     def test_tips_statistics_unknown_status(self):
         tips = [{'status': 'unknown'}]
-        with self.assertRaises(Exception) as context:
+        with self.assertRaises(SystemExit) as context:
             clistats.tips_statistics(tips)
 
-        self.assertTrue('Unknown tip type=unknown' in str(context.exception))
+        self.assertEqual(context.exception.code, -1)
 
     def test_tips_statistics_both(self):
         tips = [{'status': 'active'}, {'status': 'valid-headers', 'branchlen': 2},
                 {'status': 'valid-fork', 'branchlen': 3}, {'status': 'headers-only', 'branchlen': 4}]
         stats = clistats.tips_statistics(tips)
 
-        self.assertEqual(stats['valid-headers'].median, [2])
-        self.assertEqual(stats['valid-fork'].median, [3])
-        self.assertEqual(stats['headers-only'].median, [4])
+        self.assertEqual(stats['valid-headers'].stats.median, [2])
+        self.assertEqual(stats['valid-fork'].stats.median, [3])
+        self.assertEqual(stats['headers-only'].stats.median, [4])
         self.assertTrue(item in [2, 3, 4] for item in stats)
 
     def test_calc_median_std_no_values(self):
