@@ -12,13 +12,13 @@ sys.tracebacklimit = None
 
 
 def run():
-    nodes_config.create()
+    nodes_config.create(unkown_arguments=True)
 
-    ticks_config.create()
+    ticks_config.create(unkown_arguments=True)
 
-    network_config.create()
+    network_config.create(unkown_arguments=True)
 
-    simulation.run()
+    simulation.run(unkown_arguments=True)
 
 commands = {
     'nodes':        nodes_config.create,

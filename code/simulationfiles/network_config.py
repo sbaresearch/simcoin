@@ -9,7 +9,7 @@ import sys
 import utils
 
 
-def parse():
+def create_parser():
     parser = argparse.ArgumentParser()
 
     parser.add_argument('--seed'
@@ -24,15 +24,19 @@ def parse():
                         , help='Connectivity between nodes.'
                         )
 
-    args = parser.parse_known_args(sys.argv[2:])
+    return parser
+
+
+def create(unkown_arguments=False):
+    print('Called network config')
+
+    parser = create_parser()
+    if unkown_arguments:
+        args = parser.parse_known_args(sys.argv[2:])[0]
+    else:
+        args = parser.parse_args(sys.argv[2:])
     print("arguments called with: {}".format(sys.argv))
     print("parsed arguments: {}\n".format(args))
-    return args
-
-
-def create():
-    print('Called network config')
-    args = parse()[0]
 
     nodes = nodes_config.read()
 

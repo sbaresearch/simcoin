@@ -11,7 +11,7 @@ import config
 import bash
 
 
-def parse():
+def create_parser():
     parser = argparse.ArgumentParser()
 
     parser.add_argument('--tick-duration'
@@ -25,15 +25,18 @@ def parse():
                         , help='Verbose log.'
                         )
 
-    args = parser.parse_known_args(sys.argv[2:])
+    return parser
+
+
+def run(unkown_arguments=False):
+
+    parser = create_parser()
+    if unkown_arguments:
+        args = parser.parse_known_args(sys.argv[2:])[0]
+    else:
+        args = parser.parse_args(sys.argv[2:])
     print("arguments called with: {}".format(sys.argv))
-    print("parsed arguments: {}".format(args))
-    return args
-
-
-def run():
-    args = parse()[0]
-
+    print("parsed arguments: {}\n".format(args))
     utils.config_logger(args.verbose)
 
     executor = Executor()
