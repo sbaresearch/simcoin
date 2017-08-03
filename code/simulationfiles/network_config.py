@@ -26,11 +26,12 @@ def parse():
 
     args = parser.parse_known_args(sys.argv[2:])
     print("arguments called with: {}".format(sys.argv))
-    print("parsed arguments: {}".format(args))
+    print("parsed arguments: {}\n".format(args))
     return args
 
 
 def create():
+    print('Called network config')
     args = parse()[0]
 
     nodes = nodes_config.read()
@@ -44,12 +45,13 @@ def create():
     if check_if_fully_connected(matrix) is not True:
         raise Exception("Not all nodes a reachable. Consider to raise the connectivity.")
 
-    print('Creating {}...'.format(config.network_csv))
+    print('Created {}:'.format(config.network_csv))
     print(pandas.DataFrame(matrix))
 
     with open(config.network_csv, "w") as file:
         writer = csv.writer(file, delimiter=';')
         writer.writerows(matrix)
+    print('End network config\n\n')
 
 
 def create_header(nodes):

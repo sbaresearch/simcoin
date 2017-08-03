@@ -23,11 +23,12 @@ def parse():
 
     args = parser.parse_known_args(sys.argv[2:])
     print("arguments called with: {}".format(sys.argv))
-    print("parsed arguments: {}".format(args))
+    print("parsed arguments: {}\n".format(args))
     return args
 
 
 def create():
+    print('Called nodes config')
     args = parse()[0]
 
     nodes = []
@@ -38,11 +39,12 @@ def create():
 
     check_if_share_sum_is_1(nodes)
 
-    print('Creating {}...'.format(config.nodes_json))
+    print('Created {}:'.format(config.nodes_json))
     print(json.dumps([node.__dict__ for node in nodes], indent=4))
 
     with open(config.nodes_json, 'w') as file:
         file.write(json.dumps([node.__dict__ for node in nodes], indent=4))
+    print('End nodes config\n\n')
 
 
 def read():
