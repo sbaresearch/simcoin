@@ -44,6 +44,7 @@ def create():
     if check_if_fully_connected(matrix) is not True:
         raise Exception("Not all nodes a reachable. Consider to raise the connectivity.")
 
+    print('Creating {}...'.format(config.network_csv))
     print(pandas.DataFrame(matrix))
 
     with open(config.network_csv, "w") as file:

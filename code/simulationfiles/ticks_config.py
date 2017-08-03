@@ -55,6 +55,7 @@ def create():
 
     ticks = create_ticks(nodes, block_events, args.tx_per_tick, args.amount_of_ticks)
 
+    print('Creating {}...'.format(config.ticks_csv))
     print(pandas.DataFrame(ticks))
 
     with open(config.ticks_csv, "w") as file:
