@@ -22,9 +22,9 @@ class CliStats:
             while True:
                 blocks = []
                 for node in nodes:
-                    if node.get_block_hash_silent(height) != 0:
+                    if node.execute_rpc('getblockhash', height) != 0:
                         break
-                    blocks.append(node.get_block_hash(height))
+                    blocks.append(node.execute_rpc('getblockhash', height))
                 if len(blocks) == len(nodes) and utils.check_equal(blocks):
                     self.consensus_chain.append(blocks[0])
                     file.write('{};{}\n'.format(height, blocks[0]))
@@ -36,10 +36,10 @@ class CliStats:
         with open(config.chains_csv, 'w') as file:
             file.write("node;block_hashes\n")
             for node in self.executor.all_bitcoin_nodes.values():
-                height = int(node.get_block_count())
+                height = int(node.execute_rpc('getblockcount'))
                 hashes = []
                 while self.executor.first_block_height <= height:
-                    hashes.append(str(node.get_block_hash(height)))
+                    hashes.append(str(node.execute_rpc('getblockhash', height)))
                     height -= 1
                 file.write('{};{}\n'.format(node.name, ';'.join(hashes)))
 
@@ -51,7 +51,7 @@ class CliStats:
                        'valid_fork;valid_fork_median_branchlen;valid_fork_std_branchlen;'
                        'headers_only;headers_only_median_branchlen;headers_only_std_branchlen;\n')
             for node in self.executor.all_bitcoin_nodes.values():
-                tips = json.loads(node.get_chain_tips())
+                tips = node.execute_rpc('getchaintips')
 
                 tips_stats = tips_statistics(tips)
 

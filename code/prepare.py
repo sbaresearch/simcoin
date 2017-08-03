@@ -12,12 +12,13 @@ def give_nodes_spendable_coins(nodes):
     run_nodes(nodes)
 
     for i, node in enumerate(nodes):
-        node.connect([str(node.ip) for node in nodes[max(0, i - 5):i]])
+        for node_to_be_connected in nodes[max(0, i - 5):i]:
+            node.execute_rpc('addnode', str(node_to_be_connected.ip), 'add')
         wait_until_height_reached(node, i * config.start_blocks_per_node)
-        node.generate_block(config.start_blocks_per_node)
+        node.execute_rpc('generate', config.start_blocks_per_node)
 
-    wait_until_height_reached(nodes[0], len(nodes))
-    nodes[0].generate_block(config.warmup_blocks)
+    wait_until_height_reached(nodes[0], config.start_blocks_per_node * len(nodes))
+    nodes[0].execute_rpc('generate', config.warmup_blocks)
 
     for node in nodes:
         wait_until_height_reached(node, config.warmup_blocks + config.start_blocks_per_node * len(nodes))
@@ -30,7 +31,7 @@ def give_nodes_spendable_coins(nodes):
 def delete_nodes(nodes):
     for node in nodes:
         node.delete_peers_file()
-        node.stop()
+        node.execute_rpc('stop')
         node.rm()
 
 
@@ -69,6 +70,6 @@ def recreate_network():
 
 
 def wait_until_height_reached(node, height):
-    while int(node.get_block_count()) < height:
+    while int(node.execute_rpc('getblockcount')) < height:
         logging.debug('Waiting until height={} is reached...'.format(str(height)))
         utils.sleep(0.2)

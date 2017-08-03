@@ -61,23 +61,22 @@ class Executor:
                 node.run()
             utils.sleep(4 + len(self.all_bitcoin_nodes) * 0.2)
 
-            for node in self.all_bitcoin_nodes.values():
-                prepare.wait_until_height_reached(node, self.first_block_height)
+            # for node in self.all_bitcoin_nodes.values():
+            #     prepare.wait_until_height_reached(node, self.first_block_height)
 
-            start_hash = self.one_normal_node.get_best_block_hash()
+            start_hash = self.one_normal_node.execute_rpc('getbestblockhash')
             for node in self.selfish_node_proxies.values():
                 node.run(start_hash)
             utils.sleep(2)
             for node in self.selfish_node_proxies.values():
                 node.wait_for_highest_tip_of_node(self.one_normal_node)
 
-            for node in self.nodes.values():
-                node.connect(node.outgoing_ips)
-            utils.sleep(4 + len(self.all_nodes) * 0.2)
+            # for node in self.nodes.values():
+            #     node.connect(node.outgoing_ips)
+            # utils.sleep(4 + len(self.all_nodes) * 0.2)
 
             for node in self.all_bitcoin_nodes.values():
-                node.spent_to_address = node.get_new_address()
-                node.rpc_connect()
+                node.spent_to_address = node.execute_rpc('getnewaddress')
 
             for node in self.all_public_nodes.values():
                 node.add_latency(self.zone.zones)
@@ -90,7 +89,7 @@ class Executor:
             while utils.check_equal(array) is False:
                 logging.debug('Waiting for blocks to spread...')
                 utils.sleep(0.2)
-                array = [int(node.get_block_count()) for node in self.nodes.values()]
+                array = [int(node.execute_rpc('getblockcount')) for node in self.nodes.values()]
             logging.info(config.log_line_sim_end)
 
             bash.check_output(dockercmd.fix_data_dirs_permissions())
