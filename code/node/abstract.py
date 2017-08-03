@@ -51,11 +51,9 @@ class BitcoinNode(Node):
     def rpc_connect(self):
         self.rpc_connection = AuthServiceProxy(config.create_rpc_connection_string(self.ip))
 
-    def generate_tx(self, address):
-        return bash.check_output(bitcoincmd.send_to_address(self.name, address, '0.001'))
-
-    def generate_tx_rpc(self, address):
-        return self.rpc_connection.sendtoaddress(address, '0.001')
+    def execute_rpc(self,  *args):
+        method_to_call = getattr(self.rpc_connection, args[0])
+        return method_to_call(*args[1:])
 
     def get_new_address(self):
         return bash.check_output(bitcoincmd.get_new_address(self.name))
@@ -98,22 +96,3 @@ class BitcoinNode(Node):
 
     def cat_log_cmd(self):
         return dockercmd.exec_cmd(self.name, 'cat {}'.format(BitcoinNode.log_file))
-
-    def tx_created(self, tx_hash):
-        return get_timestamp(self.name, 'Relaying wtx {}'.format(tx_hash))
-
-    def tx_received(self, tx_hash):
-        return get_timestamp(self.name, 'accepted {}'.format(tx_hash))
-
-    def block_is_new_tip(self, block_hash):
-        return get_timestamp(self.name, 'best={}'.format(block_hash))
-
-
-def get_timestamp(node_name, grep_cmd):
-    cmd = dockercmd.exec_cmd(node_name, 'cat {} | grep "{}"'.format(BitcoinNode.log_file, grep_cmd))
-    return_value = bash.call_silent(cmd)
-    if return_value != 0:
-        return -1
-    line = bash.check_output(cmd)
-    matched = re.match(config.log_prefix_timestamp, line)
-    return datetime.strptime(matched.group(0), config.log_time_format).timestamp()

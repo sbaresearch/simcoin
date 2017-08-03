@@ -53,7 +53,7 @@ def execute_cmd(cmd, nodes):
 def generate_tx(node, address):
     # generate_tx_rpc is not always successful. eg. miner has not enough money or tx fee calculation fails
     try:
-        tx_hash = node.generate_tx_rpc(address)
+        tx_hash = node.execute_rpc('sendtoaddress', address, '0.001')
         logging.info('Created tx with hash={}'.format(tx_hash))
     except JSONRPCException:
         logging.info('Could not generate tx for node {}'.format(node.name))
