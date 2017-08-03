@@ -1,8 +1,8 @@
 import config
 import utils
-import numpy as np
 import operator
 import logging
+from utils import Values
 
 
 class CliStats:
@@ -90,39 +90,3 @@ def tips_statistics(tips):
         tip_stat.calc()
 
     return tip_stats
-
-
-class Values:
-    def __init__(self):
-        self.values = []
-        self.np_values = None
-        self.stats = None
-
-    @classmethod
-    def from_array(cls, array):
-        obj = cls()
-        obj.values = array
-        return obj
-
-    def calc(self):
-        self.np_values = np.array(self.values)
-        self.stats = Stats.from_array(self.np_values)
-
-
-class Stats:
-
-    def __init__(self, count, median, std):
-        self.count = count
-        self.median = median
-        self.std = std
-
-    @classmethod
-    def from_array(cls, array):
-        count = len(array)
-        if count == 0:
-            median = float('nan')
-            std = float('nan')
-        else:
-            median = np.median(array)
-            std = np.std(array)
-        return cls(count, median, std)

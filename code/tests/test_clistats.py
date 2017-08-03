@@ -2,8 +2,8 @@ from unittest import TestCase
 from mock import patch
 from mock import mock_open
 from clistats import CliStats
-from clistats import Stats
-from clistats import Values
+from utils import Stats
+from utils import Values
 from mock import MagicMock
 import config
 import clistats
