@@ -22,7 +22,7 @@ def run():
 commands = {
     'nodes':        nodes_config.create,
     'network':      network_config.create,
-    'ticks':    ticks_config.create,
+    'ticks':        ticks_config.create,
     'simulate':     simulation.run,
     'run':          run,
 }
