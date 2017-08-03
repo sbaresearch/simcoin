@@ -20,8 +20,7 @@ def create_parser():
                         , help='Duration of ticks.')
 
     parser.add_argument('--verbose'
-                        , default=False
-                        , type=bool
+                        , action="store_true"
                         , help='Verbose log.'
                         )
 
