@@ -1,18 +1,17 @@
 import dockercmd
-import bitcoincmd
 import ipaddress
 import config
 from node.bitcoinnode import PublicBitcoinNode
 from node.selfishnode import SelfishPrivateNode
 from node.selfishnode import ProxyNode
 import logging
-import json
 import bash
 import prepare
 import utils
 import networktopology
-import subprocess
 import nodesconfig
+from parse import Parser
+import parse
 
 
 class Executor:
@@ -84,6 +83,7 @@ class Executor:
             for node in self.all_bitcoin_nodes.values():
                 node.spent_to_address = node.get_new_address()
 
+            logging.info(config.log_line_sim_start)
             self.event.execute()
 
             # only use regular nodes since selfish nodes can trail back
@@ -92,15 +92,19 @@ class Executor:
                 logging.debug('Waiting for blocks to spread...')
                 utils.sleep(0.2)
                 array = [int(node.get_block_count()) for node in self.nodes.values()]
+            logging.info(config.log_line_sim_end)
 
             bash.check_output(dockercmd.fix_data_dirs_permissions())
 
             self.stats.save_consensus_chain()
-            self.stats.update_blocks_csv()
+            self.stats.aggregate_logs()
+            parser = Parser([node.name for node in self.all_bitcoin_nodes.values()])
+            parse.cut_log()
+            parser.parse_aggregated_sim_log()
+            parser.create_block_csv()
             self.stats.update_tx_csv()
             self.stats.save_chains()
             self.stats.node_stats()
-            self.stats.aggregate_logs()
 
             for node in self.all_nodes.values():
                 node.grep_log_for_errors()
@@ -113,20 +117,3 @@ class Executor:
             utils.sleep(3 + len(self.all_nodes) * 0.2)
 
             bash.call_silent(dockercmd.rm_network())
-
-    def generate_block_and_save_creator(self, node, amount):
-        blocks_string = bash.check_output(bitcoincmd.generate_block(node, amount))
-        blocks = json.loads(blocks_string)
-        with open(config.blocks_csv, 'a') as file:
-            for block in blocks:
-                file.write('{};{}\n'.format(node, block))
-        self.all_bitcoin_nodes[node].mined_blocks += 1
-
-
-def generate_tx_and_save_creator(node, address):
-    try:
-        tx_hash = node.generate_tx(address)
-        with open(config.tx_csv, 'a') as file:
-            file.write('{};{}\n'.format(node.name, tx_hash))
-    except subprocess.CalledProcessError:
-        logging.info('Could not generate tx for node {}'.format(node.name))

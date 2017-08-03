@@ -95,18 +95,14 @@ class TestEvent(TestCase):
                 e.execute()
             self.assertTrue('One or more exception occurred during the execution of' in str(context.exception))
 
-
-
-
-    @patch('event.generate_block_and_save_creator')
-    def test_execute_cmd_with_block_cmd(self, m_generate_block_and_save_creator):
-        nodes = {'node-1': 'mock'}
+    def test_execute_cmd_with_block_cmd(self):
+        node_1 = Mock()
+        nodes = {'node-1': node_1}
         cmd = 'block node-1'
 
         event.execute_cmd(cmd, nodes, None)
 
-        self.assertTrue(m_generate_block_and_save_creator.called)
-        self.assertEqual(m_generate_block_and_save_creator.call_args[0][0], 'mock')
+        self.assertTrue(node_1.generate_block.called)
 
     @patch('event.generate_tx_and_save_creator')
     def test_execute_cmd_with_tx_tmd(self, m_generate_tx_and_save_creator):
@@ -139,22 +135,6 @@ class TestEvent(TestCase):
 
         self.assertEqual(type(queue.put.call_args[0][0]), Exception)
         self.assertTrue('Unknown cmd' in str(queue.put.call_args[0][0]))
-
-    @patch('builtins.open', new_callable=mock_open)
-    @patch('json.loads')
-    def test_generate_block_and_save_creator(self, m_json_loads, m_open):
-        m_json_loads.return_value = ['block_hash']
-        node = Mock()
-        node.mined_blocks = 44
-        node.name = 'node-1'
-        node.generate_block.return_value = 'mock'
-
-        event.generate_block_and_save_creator(node)
-
-        m_open.assert_called_with(config.blocks_csv, 'a')
-        handle = m_open()
-        self.assertEqual(handle.write.call_args[0][0], 'node-1;block_hash\n')
-        self.assertEqual(node.mined_blocks, 45)
 
     @patch('builtins.open', new_callable=mock_open)
     def test_generate_tx_and_save_creator(self, m_open):
