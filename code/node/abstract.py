@@ -4,7 +4,7 @@ import config
 import bash
 from datetime import datetime
 import re
-import utils
+from bitcoinrpc.authproxy import AuthServiceProxy
 
 
 class Node:
@@ -26,13 +26,14 @@ class PublicNode:
 
 
 class BitcoinNode(Node):
-    log_file = bitcoincmd.guest_dir + '/regtest/debug.log'
+    log_file = config.client_dir + '/debug.log'
 
     def __init__(self, name, ip):
         super().__init__(name, ip)
         self.name = name
         self.ip = ip
         self.spent_to_address = ''
+        self.rpc_connection = None
 
     def run(self):
         return bash.check_output(bitcoincmd.start(self))
@@ -47,8 +48,14 @@ class BitcoinNode(Node):
         for ip in ips:
             bash.check_output(bitcoincmd.connect(self.name, ip))
 
+    def rpc_connect(self):
+        self.rpc_connection = AuthServiceProxy(config.create_rpc_connection_string(self.ip))
+
     def generate_tx(self, address):
         return bash.check_output(bitcoincmd.send_to_address(self.name, address, '0.001'))
+
+    def generate_tx_rpc(self, address):
+        return self.rpc_connection.sendtoaddress(address, '0.001')
 
     def get_new_address(self):
         return bash.check_output(bitcoincmd.get_new_address(self.name))
@@ -64,6 +71,9 @@ class BitcoinNode(Node):
 
     def generate_block(self, amount=1):
         return bash.check_output(bitcoincmd.generate_block(self.name, amount))
+
+    def generate_block_rpc(self, amount=1):
+        return self.rpc_connection.generate(amount)
 
     def get_chain_tips(self):
         return bash.check_output(bitcoincmd.get_chain_tips(self.name))
@@ -107,12 +117,3 @@ def get_timestamp(node_name, grep_cmd):
     line = bash.check_output(cmd)
     matched = re.match(config.log_prefix_timestamp, line)
     return datetime.strptime(matched.group(0), config.log_time_format).timestamp()
-
-
-def create_config(node):
-    latency = utils.get_non_negative_int('What should be the latency of this node? [ms]\n> ')
-    node.latency = latency
-
-    share = utils.get_percentage('What should be the computational share? [0,1]\n> ')
-    node.share = share
-    return node

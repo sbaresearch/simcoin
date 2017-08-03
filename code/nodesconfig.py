@@ -31,14 +31,15 @@ def create():
     args = parse()[0]
 
     nodes = []
-    for node_group in node_groups:
+    for index, node_group in enumerate(node_groups):
         node_args = getattr(args, node_group['variable'])
         if node_args:
-            nodes.extend(create_node_group(node_args))
+            nodes.extend(create_node_group(node_args, index + 1))
 
     check_if_share_sum_is_1(nodes)
 
     print('Creating {}...'.format(config.nodes_json))
+    print(json.dumps([node.__dict__ for node in nodes], indent=4))
 
     with open(config.nodes_json, 'w') as file:
         file.write(json.dumps([node.__dict__ for node in nodes], indent=4))
@@ -67,7 +68,7 @@ def check_if_share_sum_is_1(nodes):
         return True
 
 
-def create_node_group(node_args):
+def create_node_group(node_args, index):
     node_type = str(node_args[0])
     amount = int(node_args[1])
     share = float(node_args[2])
@@ -75,7 +76,7 @@ def create_node_group(node_args):
 
     nodes = []
     for i in range(amount):
-        nodes.append(NodeConfig(node_type, config.node_name.format(i + 1), share/amount, latency))
+        nodes.append(NodeConfig(node_type, config.node_name.format(index, i + 1), share/amount, latency))
     return nodes
 
 

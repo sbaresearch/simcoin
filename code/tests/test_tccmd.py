@@ -1,19 +1,25 @@
 from unittest import TestCase
 import ipaddress
 import tccmd
+from zone import ZoneConfig
 
 
 class TestTccmd(TestCase):
 
-    def test_add(self):
-        cmd = tccmd.add('node', 200)
+    def test_create(self):
+        zones = {
+            0: ZoneConfig(ipaddress.ip_network('240.1.0.0/16'), 0),
+            100: ZoneConfig(ipaddress.ip_network('240.2.0.0/16'), 100),
+            200: ZoneConfig(ipaddress.ip_network('240.3.0.0/16'), 200),
+        }
 
-        self.assertTrue('  ' not in cmd)
-        self.assertTrue('200' in cmd)
+        cmds = tccmd.create('node-0', zones, 100)
 
-    def test_add_except_ip(self):
-        cmds = tccmd.add_except_ip('node', 200, ipaddress.ip_address('192.168.0.1'))
-
-        self.assertEqual(len(cmds), 5)
-        for cmd in cmds:
-            self.assertTrue('  ' not in cmd)
+        self.assertTrue('add dev eth0' in cmds[0])
+        self.assertTrue('u32 match ip dst 240.1.0.0/16 flowid 1:2' in cmds[1])
+        self.assertTrue('u32 match ip dst 240.2.0.0/16 flowid 1:3' in cmds[2])
+        self.assertTrue('u32 match ip dst 240.3.0.0/16 flowid 1:4' in cmds[3])
+        self.assertTrue('1:1 handle 10: netem delay 0ms' in cmds[4])
+        self.assertTrue('1:2 handle 20: netem delay 100ms' in cmds[5])
+        self.assertTrue('1:3 handle 30: netem delay 100ms' in cmds[6])
+        self.assertTrue('1:4 handle 40: netem delay 300ms' in cmds[7])

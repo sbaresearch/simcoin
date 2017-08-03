@@ -1,5 +1,4 @@
 import dockercmd
-import ipaddress
 import config
 from node.bitcoinnode import PublicBitcoinNode
 from node.selfishnode import SelfishPrivateNode
@@ -10,29 +9,27 @@ import prepare
 import utils
 import networktopology
 import nodesconfig
-from parse import Parser
-import parse
+from zone import Zone
 
 
 class Executor:
     def __init__(self):
         self.count = 0
-        self.stats = None
+        self.post_processing = None
         self.event = None
+        self.zone = Zone()
 
         config_nodes = nodesconfig.read()
         nodes = [node for node in config_nodes if node.node_type == 'bitcoin']
         selfish_nodes = [node for node in config_nodes if node.node_type == 'selfish']
-        ip_addresses = ipaddress.ip_network(config.ip_range).hosts()
-        next(ip_addresses)  # skipping first ip address (docker fails with error "is in use")
 
-        self.nodes = {node.name: PublicBitcoinNode(node.name, next(ip_addresses), node.latency) for node in nodes}
+        self.nodes = {node.name: PublicBitcoinNode(node.name, self.zone.get_ip(node.latency), node.latency) for node in nodes}
 
         self.selfish_node_private_nodes = {}
         self.selfish_node_proxies = {}
         for node in selfish_nodes:
-            ip_private_node = next(ip_addresses)
-            ip_proxy = next(ip_addresses)
+            ip_private_node = self.zone.get_ip(node.latency)
+            ip_proxy = self.zone.get_ip(node.latency)
             self.selfish_node_private_nodes[node.name] = SelfishPrivateNode(node.name, ip_private_node)
 
             self.selfish_node_proxies[node.name_proxy] = \
@@ -77,11 +74,12 @@ class Executor:
                 node.connect(node.outgoing_ips)
             utils.sleep(4 + len(self.all_nodes) * 0.2)
 
-            for node in self.all_public_nodes.values():
-                node.add_latency()
-
             for node in self.all_bitcoin_nodes.values():
                 node.spent_to_address = node.get_new_address()
+                node.rpc_connect()
+
+            for node in self.all_public_nodes.values():
+                node.add_latency(self.zone.zones)
 
             logging.info(config.log_line_sim_start)
             self.event.execute()
@@ -96,15 +94,7 @@ class Executor:
 
             bash.check_output(dockercmd.fix_data_dirs_permissions())
 
-            self.stats.save_consensus_chain()
-            self.stats.aggregate_logs()
-            parser = Parser([node.name for node in self.all_bitcoin_nodes.values()])
-            parse.cut_log()
-            parser.parse_aggregated_sim_log()
-            parser.create_block_csv()
-            self.stats.update_tx_csv()
-            self.stats.save_chains()
-            self.stats.node_stats()
+            self.post_processing.execute()
 
             for node in self.all_nodes.values():
                 node.grep_log_for_errors()

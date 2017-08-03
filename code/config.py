@@ -3,13 +3,14 @@ import time
 # IP range from RFC6890 - IP range for future use
 # it does not conflict with https://github.com/bitcoin/bitcoin/blob/master/src/netbase.h
 ip_range = "240.0.0.0/4"
+ip_zones = '240.{}.0.0/16'
 
 network_name = 'simcoin-network'
 node_image = 'btn/base:v3'
 prefix = 'simcoin-'
 selfish_node_image = 'proxy'
 node_prefix = 'node-'
-node_name = node_prefix + '{}'
+node_name = node_prefix + '{}.{}'
 selfish_node_prefix = 'selfish-node-'
 selfish_node_proxy_postfix = '-proxy'
 selfish_node_name = selfish_node_prefix + '{}'
@@ -30,6 +31,14 @@ consensus_chain_csv = data_dir + sim_dir + 'consensus_chain.csv'
 nodes_csv = data_dir + sim_dir + 'nodes.csv'
 tx_csv = data_dir + sim_dir + 'tx.csv'
 
+rpc_user = 'admin'
+rpc_password = 'admin'
+rpc_port = 18332
+
+
+def create_rpc_connection_string(ip):
+    return 'http://{}:{}@{}:{}'.format(rpc_user, rpc_password, ip, rpc_port)
+
 reference_node = 'node-0'
 
 warmup_blocks = 100
@@ -42,6 +51,10 @@ log_time_format = '%Y-%m-%d %H:%M:%S.%f'
 log_line_sim_start = 'SIMULATION START'
 log_line_sim_end = 'SIMULATION END'
 
+bitcoin_data_dir = '/data'
+bitcoin_regtest_dir = '/regtest'
+client_dir = bitcoin_data_dir + bitcoin_regtest_dir
+
 
 def host_dir(node):
-    return sim_dir + node.name
+    return sim_dir + node.name + bitcoin_regtest_dir

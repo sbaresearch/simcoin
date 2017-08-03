@@ -1,12 +1,14 @@
 from executor import Executor
 import logging
 import time
-from stats import Stats
+from postprocessing import PostProcessing
 from event import Event
 import utils
 import argparse
 import checkargs
 import sys
+import config
+import bash
 
 
 def parse():
@@ -14,7 +16,7 @@ def parse():
 
     parser.add_argument('--tick-duration'
                         , default=1
-                        , type=checkargs.check_positive_int
+                        , type=checkargs.check_positive_float
                         , help='Duration of ticks.')
 
     parser.add_argument('--verbose'
@@ -36,8 +38,8 @@ def run():
 
     executor = Executor()
 
-    stats = Stats(executor)
-    executor.stats = stats
+    post_processing = PostProcessing(executor)
+    executor.post_processing = post_processing
 
     event = Event(executor, args.tick_duration)
     executor.event = event
@@ -47,3 +49,4 @@ def run():
     executor.execute()
 
     logging.info("the duration of the experiment was {} seconds".format(str(time.time() - start)))
+    bash.check_output('cp {} {}'.format(config.log_file, config.sim_dir))

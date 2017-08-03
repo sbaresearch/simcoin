@@ -1,11 +1,8 @@
 import config
 import logging
 import time
-import json
 import utils
 import subprocess
-import threading
-import queue
 
 
 class Event:
@@ -16,27 +13,15 @@ class Event:
 
     def execute(self):
         utils.check_for_file(config.ticks_csv)
-        exce_queue = queue.Queue()
         with open(config.ticks_csv, 'r') as file:
 
             for line in file.readlines():
-
                 start_time = time.time()
+
+                line = line.rstrip()
                 cmds = line.split(';')
-                threads = []
                 for cmd in cmds:
-                    thread = self.create_thread(cmd, exce_queue)
-
-                    thread.daemon = True
-                    thread.start()
-                    threads.append(thread)
-
-                for thread in threads:
-                    thread.join()
-
-                if exce_queue.empty() is False:
-                    raise Exception('One or more exception occurred during the execution of line {}'.format(line))
-
+                    execute_cmd(cmd, self.executor.all_bitcoin_nodes)
                 next_tick = start_time + self.tick_duration
                 current_time = time.time()
                 if current_time < next_tick:
@@ -48,28 +33,26 @@ class Event:
                                     ' Consider to raise the tick_duration which is currently {}s.'
                                     .format(current_time, next_tick, self.tick_duration))
 
-    def create_thread(self, cmd, exce_queue):
-        return threading.Thread(target=execute_cmd, args=(cmd, self.executor.all_bitcoin_nodes, exce_queue))
+
+def execute_cmd(cmd, nodes):
+    cmd_parts = cmd.split(' ')
+    if cmd_parts[0] == 'tx':
+        node = nodes[cmd_parts[1]]
+        generate_tx(node, node.spent_to_address)
+    elif cmd_parts[0] == 'block':
+        node = nodes[cmd_parts[1]]
+        block_hash = node.generate_block_rpc()
+        logging.info('Created block with hash={}'.format(block_hash))
+    elif len(cmd) == 0:
+        pass
+    else:
+        raise Exception('Unknown cmd={} in {}-file'.format(cmd_parts[0], config.ticks_csv))
 
 
-def execute_cmd(cmd, nodes, exce_queue):
+def generate_tx(node, address):
+    # generate_tx_rpc is not always successful. eg. miner has not enough money or tx fee calculation fails
     try:
-        cmd_parts = cmd.split(' ')
-        node = nodes[cmd_parts[1].rstrip()]
-        if cmd_parts[0] == 'block':
-            node.generate_block()
-        elif cmd_parts[0] == 'tx':
-            generate_tx_and_save_creator(node, node.spent_to_address)
-        else:
-            exce_queue.put(Exception('Unknown cmd={} in {}-file'.format(cmd_parts[0], config.ticks_csv)))
-    except Exception as exception:
-        exce_queue.put(exception)
-
-
-def generate_tx_and_save_creator(node, address):
-    try:
-        tx_hash = node.generate_tx(address)
-        with open(config.tx_csv, 'a') as file:
-            file.write('{};{}\n'.format(node.name, tx_hash))
+        tx_hash = node.generate_tx_rpc(address)
+        logging.info('Created tx with hash={}'.format(tx_hash))
     except subprocess.CalledProcessError:
         logging.info('Could not generate tx for node {}'.format(node.name))
