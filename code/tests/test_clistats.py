@@ -33,8 +33,7 @@ class TestCliStats(TestCase):
     @patch('builtins.open', new_callable=mock_open)
     def test_save_consensus_chain_one_node(self, mock):
         node_0 = MagicMock()
-        node_0.get_block_hash_silent.side_effect = [0, -1]
-        node_0.get_block_hash.return_value = 'hash'
+        node_0.execute_rpc.side_effect = [0, 'hash', -1]
 
         self.executor.first_block_height = 10
         self.executor.all_bitcoin_nodes = {'0': node_0}
@@ -49,11 +48,9 @@ class TestCliStats(TestCase):
     @patch('builtins.open', new_callable=mock_open)
     def test_save_consensus_chain_multiple_nodes(self, mock):
         node_0 = MagicMock()
-        node_0.get_block_hash_silent.side_effect = [0, 0, 1]
-        node_0.get_block_hash.side_effect = ['hash1', 'hash2']
+        node_0.execute_rpc.side_effect = [0, 'hash1', 0, 'hash2', 1]
         node_1 = MagicMock()
-        node_1.get_block_hash_silent.side_effect = [0, 0, 1]
-        node_1.get_block_hash.side_effect = ['hash1', 'hash2']
+        node_1.execute_rpc.side_effect = [0, 'hash1', 0, 'hash2', 1]
 
         self.executor.first_block_height = 10
         self.executor.all_bitcoin_nodes = {'0': node_0, '1': node_1}
@@ -69,11 +66,9 @@ class TestCliStats(TestCase):
     @patch('builtins.open', new_callable=mock_open)
     def test_save_consensus_chain_one_node_trailing_back(self, mock):
         node_0 = MagicMock()
-        node_0.get_block_hash_silent.side_effect = [0, 0]
-        node_0.get_block_hash.side_effect = ['hash1', 'hash2']
+        node_0.execute_rpc.side_effect = [0, 'hash1', 0, 'hash2']
         node_1 = MagicMock()
-        node_1.get_block_hash_silent.side_effect = [0, 1]
-        node_1.get_block_hash.side_effect = ['hash1']
+        node_1.execute_rpc.side_effect = [0, 'hash1', 1]
 
         self.executor.first_block_height = 10
         self.executor.all_bitcoin_nodes = {'0': node_0, '1': node_1}
@@ -97,12 +92,10 @@ class TestCliStats(TestCase):
     def test_save_chains_with_nodes(self, mock):
         node_0 = MagicMock()
         node_0.name = 'node-0'
-        node_0.get_block_count.return_value = 6
-        node_0.get_block_hash.side_effect = ['hash1', 'hash2']
+        node_0.execute_rpc.side_effect = [6, 'hash1', 'hash2']
         node_1 = MagicMock()
         node_1.name = 'node-1'
-        node_1.get_block_count.return_value = 7
-        node_1.get_block_hash.side_effect = ['hash11', 'hash22', 'hash33']
+        node_1.execute_rpc.side_effect = [7, 'hash11', 'hash22', 'hash33']
         self.executor.first_block_height = 5
         self.executor.all_bitcoin_nodes = {'0': node_0, '1': node_1}
 

@@ -42,7 +42,7 @@ def execute_cmd(cmd, nodes):
         generate_tx(node, node.spent_to_address)
     elif cmd_parts[0] == 'block':
         node = nodes[cmd_parts[1]]
-        block_hash = node.generate_block_rpc()
+        block_hash = node.execute_rpc('generate', 1)
         logging.info('Created block with hash={}'.format(block_hash))
     elif len(cmd) == 0:
         pass
