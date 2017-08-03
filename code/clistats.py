@@ -2,6 +2,7 @@ import config
 import utils
 import numpy as np
 import operator
+import logging
 
 
 class CliStats:
@@ -77,7 +78,8 @@ def tips_statistics(tips):
             try:
                 tip_stats[tip['status']].values.append(tip['branchlen'])
             except KeyError:
-                raise Exception('Unknown tip type={}'.format(tip['status']))
+                logging.error('Unknown tip type={}'.format(tip['status']))
+                exit(-1)
 
     all_values = []
     for _, tip_stat in tip_stats.items():

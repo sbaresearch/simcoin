@@ -148,10 +148,10 @@ class TestCliStats(TestCase):
 
     def test_tips_statistics_unknown_status(self):
         tips = [{'status': 'unknown'}]
-        with self.assertRaises(Exception) as context:
+        with self.assertRaises(SystemExit) as context:
             clistats.tips_statistics(tips)
 
-        self.assertTrue('Unknown tip type=unknown' in str(context.exception))
+        self.assertEqual(context.exception.code, -1)
 
     def test_tips_statistics_both(self):
         tips = [{'status': 'active'}, {'status': 'valid-headers', 'branchlen': 2},
