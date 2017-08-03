@@ -2,7 +2,7 @@ import config
 import logging
 import time
 import utils
-import subprocess
+from bitcoinrpc.authproxy import JSONRPCException
 
 
 class Event:
@@ -54,5 +54,5 @@ def generate_tx(node, address):
     try:
         tx_hash = node.generate_tx_rpc(address)
         logging.info('Created tx with hash={}'.format(tx_hash))
-    except subprocess.CalledProcessError:
+    except JSONRPCException:
         logging.info('Could not generate tx for node {}'.format(node.name))

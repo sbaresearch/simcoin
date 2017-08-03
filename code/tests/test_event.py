@@ -4,8 +4,7 @@ from event import Event
 from unittest.mock import patch
 from unittest.mock import Mock
 from unittest.mock import mock_open
-import config
-from subprocess import CalledProcessError
+from bitcoinrpc.authproxy import JSONRPCException
 from textwrap import dedent
 
 
@@ -131,6 +130,6 @@ class TestEvent(TestCase):
 
     def test_generate_tx_with_exception(self):
         node = Mock()
-        node.generate_tx.side_effect = CalledProcessError(None, None)
+        node.generate_tx.side_effect = JSONRPCException({})
 
         event.generate_tx(node, None)
