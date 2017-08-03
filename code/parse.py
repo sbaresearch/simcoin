@@ -3,7 +3,7 @@ import re
 from datetime import datetime
 import logging
 import numpy as np
-from clistats import Stats
+from utils import Stats
 
 
 class Parser:
