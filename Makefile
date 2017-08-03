@@ -3,13 +3,10 @@ all:
 
 smoke:
 	cd code; \
-		python3 ./main.py \
-			--tick-duration 10
-			# dryRun
+		python3 ./simcoin.py nodes
 
 install:
-	cd code; pip install -r requirements.txt
-
+	cd code; pip3 install -r requirements.txt
 
 .PHONY : test
 test:
