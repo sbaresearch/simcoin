@@ -3,7 +3,7 @@ import random
 import pandas
 import numpy as np
 import config
-import nodesconfig
+from simulationfiles import nodes_config
 import argparse
 import checkargs
 import sys
@@ -39,12 +39,13 @@ def parse():
 
     args = parser.parse_known_args(sys.argv[2:])
     print("arguments called with: {}".format(sys.argv))
-    print("parsed arguments: {}".format(args))
+    print("parsed arguments: {}\n".format(args))
     return args
 
 
 def create():
-    nodes = nodesconfig.read()
+    print('Called ticks config')
+    nodes = nodes_config.read()
 
     args = parse()[0]
 
@@ -55,11 +56,13 @@ def create():
 
     ticks = create_ticks(nodes, block_events, args.tx_per_tick, args.amount_of_ticks)
 
+    print('Created {}:'.format(config.ticks_csv))
     print(pandas.DataFrame(ticks))
 
     with open(config.ticks_csv, "w") as file:
         writer = csv.writer(file, delimiter=';')
         writer.writerows(ticks)
+    print('End ticks config\n\n')
 
 
 def calc_expected_events(number_of_ticks, events_per_tick):

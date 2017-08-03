@@ -1,6 +1,6 @@
 from unittest import TestCase
 import ipaddress
-from zone import Zone
+from simulationfiles.zone import Zone
 
 
 class TestZone(TestCase):
