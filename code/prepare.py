@@ -4,6 +4,7 @@ import bash
 import dockercmd
 import os
 import utils
+from bitcoin.wallet import CBitcoinSecret
 
 
 def give_nodes_spendable_coins(nodes):
@@ -52,7 +53,7 @@ def get_coinbase_variables(nodes):
 
         node.current_unspent_tx = unspent_tx["txid"]
         node.address = unspent_tx["address"]
-        node.private_key = node.execute_rpc('dumpprivkey', node.address)
+        node.private_key = CBitcoinSecret(node.execute_rpc('dumpprivkey', node.address))
 
 
 def delete_nodes(nodes):

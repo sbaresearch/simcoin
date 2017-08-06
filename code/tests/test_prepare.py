@@ -4,9 +4,14 @@ from mock import patch
 from mock import mock_open
 import prepare
 import config
+import bitcoin
+from bitcoin.wallet import CBitcoinSecret
 
 
 class TestPrepare(TestCase):
+
+    def setUp(self):
+        bitcoin.SelectParams('regtest')
 
     @patch('prepare.wait_until_height_reached')
     @patch('utils.sleep', lambda time: None)
@@ -100,14 +105,17 @@ class TestPrepare(TestCase):
     def test_get_coinbase_variables(self):
         node_1 = MagicMock()
 
-        node_1.execute_rpc.side_effect = [[{"txid": 'tx_hash', 'address': 'address_hash'}], 'private_key']
+        node_1.execute_rpc.side_effect = [
+            [{"txid": 'tx_hash', 'address': 'address_hash'}],
+            'cTCrrgVLfBqEZ1dxmCnEwmiEWzeZHU8uw3CNvLVvbT4CrBeDdTqc'
+        ]
 
         prepare.get_coinbase_variables([node_1])
 
         self.assertEqual(node_1.execute_rpc.call_count, 2)
         self.assertEqual(node_1.current_unspent_tx, 'tx_hash')
         self.assertEqual(node_1.address, 'address_hash')
-        self.assertEqual(node_1.private_key, 'private_key')
+        self.assertEqual(node_1.private_key,  CBitcoinSecret('cTCrrgVLfBqEZ1dxmCnEwmiEWzeZHU8uw3CNvLVvbT4CrBeDdTqc'))
 
     def test_transfer_coinbase_to_normal_tx(self):
         node_1 = MagicMock()
