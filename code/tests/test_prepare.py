@@ -11,6 +11,7 @@ class TestPrepare(TestCase):
     @patch('prepare.wait_until_height_reached')
     @patch('utils.sleep', lambda time: None)
     @patch('prepare.delete_nodes', lambda nodes: None)
+    @patch('prepare.get_coinbase_variables', lambda nodes: None)
     @patch('prepare.get_new_second_address', lambda nodes: None)
     def test_warmup_block_generation(self, m_wait_until_height_reached):
         node_0 = MagicMock()
@@ -94,6 +95,18 @@ class TestPrepare(TestCase):
         prepare.wait_until_height_reached(node, 10)
 
         self.assertFalse(m_sleep.called)
+
+    def test_get_coinbase_variables(self):
+        node_1 = MagicMock()
+
+        node_1.execute_rpc.side_effect = [[{"txid": 'tx_hash', 'address': 'address_hash'}], 'private_key']
+
+        prepare.get_coinbase_variables([node_1])
+
+        self.assertEqual(node_1.execute_rpc.call_count, 2)
+        self.assertEqual(node_1.current_unspent_tx, 'tx_hash')
+        self.assertEqual(node_1.address, 'address_hash')
+        self.assertEqual(node_1.private_key, 'private_key')
 
     def test_create_second_address(self):
         node_1 = MagicMock()
