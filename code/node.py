@@ -36,6 +36,7 @@ class BitcoinNode(Node):
         self.ip = ip
         self.spent_to_address = ''
         self.rpc_connection = None
+        self.second_address = None
 
     def run(self):
         bash.check_output(bitcoincmd.start(self))
