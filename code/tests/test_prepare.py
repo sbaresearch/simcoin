@@ -12,6 +12,7 @@ class TestPrepare(TestCase):
     @patch('prepare.wait_until_height_reached')
     @patch('utils.sleep')
     @patch('prepare.delete_nodes')
+    @patch('prepare.get_new_second_address', lambda nodes: None)
     def test_warmup_block_generation(self, __, _, m_wait_until_height_reached):
         node_0 = MagicMock()
         node_1 = MagicMock()
@@ -94,3 +95,21 @@ class TestPrepare(TestCase):
         prepare.wait_until_height_reached(node, 10)
 
         self.assertFalse(m_sleep.called)
+
+    def test_create_second_address(self):
+        node_1 = MagicMock()
+        node_1.execute_rpc.return_value = 'second_address'
+
+        prepare.get_new_second_address([node_1])
+
+        self.assertEqual(node_1.second_address, 'second_address')
+
+    def test_create_second_address(self):
+        node_1 = MagicMock()
+        node_2 = MagicMock()
+        nodes = [node_1, node_2]
+
+        prepare.get_new_second_address(nodes)
+
+        for node in nodes:
+            self.assertEqual(node.execute_rpc.call_count, 1)

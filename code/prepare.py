@@ -23,10 +23,16 @@ def give_nodes_spendable_coins(nodes):
     for node in nodes:
         wait_until_height_reached(node, config.warmup_blocks + config.start_blocks_per_node * len(nodes))
 
+    get_new_second_address(nodes)
+
     delete_nodes(nodes)
 
     logging.info('End of warmup')
 
+
+def get_new_second_address(nodes):
+    for node in nodes:
+        node.second_address = node.execute_rpc('getnewaddress')
 
 def delete_nodes(nodes):
     for node in nodes:
