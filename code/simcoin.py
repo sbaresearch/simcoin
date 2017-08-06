@@ -8,6 +8,8 @@ import argparse
 import simulation
 import config
 import os
+import bitcoin
+
 
 sys.tracebacklimit = None
 
@@ -57,5 +59,7 @@ if __name__ == '__main__':
 
     if not os.path.exists(config.data_dir):
         os.makedirs(config.data_dir)
+
+    bitcoin.SelectParams('regtest')
 
     commands[args.command]()
