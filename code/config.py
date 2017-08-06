@@ -61,3 +61,7 @@ client_dir = bitcoin_data_dir + bitcoin_regtest_dir
 
 def host_dir(node):
     return sim_dir + node.name + bitcoin_regtest_dir
+
+
+smallest_amount = 0.00000001
+coinbase_amount = 50
