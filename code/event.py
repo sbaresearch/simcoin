@@ -39,7 +39,7 @@ def execute_cmd(cmd, nodes):
     cmd_parts = cmd.split(' ')
     if cmd_parts[0] == 'tx':
         node = nodes[cmd_parts[1]]
-        generate_tx(node, node.spent_to_address)
+        generate_tx(node)
     elif cmd_parts[0] == 'block':
         node = nodes[cmd_parts[1]]
         block_hash = node.execute_rpc('generate', 1)
@@ -50,10 +50,10 @@ def execute_cmd(cmd, nodes):
         raise Exception('Unknown cmd={} in {}-file'.format(cmd_parts[0], config.ticks_csv))
 
 
-def generate_tx(node, address):
+def generate_tx(node):
     # generate_tx_rpc is not always successful. eg. miner has not enough money or tx fee calculation fails
     try:
-        tx_hash = node.execute_rpc('sendtoaddress', address, '0.001')
+        tx_hash = node.execute_rpc('sendtoaddress', node.address, '0.001')
         logging.info('Created tx with hash={}'.format(tx_hash))
     except JSONRPCException:
         logging.info('Could not generate tx for node {}'.format(node.name))
