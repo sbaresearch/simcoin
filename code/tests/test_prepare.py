@@ -9,10 +9,10 @@ import config
 class TestPrepare(TestCase):
 
     @patch('prepare.wait_until_height_reached')
-    @patch('utils.sleep')
-    @patch('prepare.delete_nodes')
+    @patch('utils.sleep', lambda time: None)
+    @patch('prepare.delete_nodes', lambda nodes: None)
     @patch('prepare.get_new_second_address', lambda nodes: None)
-    def test_warmup_block_generation(self, __, _, m_wait_until_height_reached):
+    def test_warmup_block_generation(self, m_wait_until_height_reached):
         node_0 = MagicMock()
         node_1 = MagicMock()
         nodes = [node_0, node_1]
