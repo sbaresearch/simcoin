@@ -61,8 +61,8 @@ class Executor:
                 node.run()
             utils.sleep(4 + len(self.all_bitcoin_nodes) * 0.2)
 
-            # for node in self.all_bitcoin_nodes.values():
-            #     prepare.wait_until_height_reached(node, self.first_block_height)
+            for node in self.all_bitcoin_nodes.values():
+                prepare.wait_until_height_reached(node, self.first_block_height)
 
             start_hash = self.one_normal_node.execute_rpc('getbestblockhash')
             for node in self.selfish_node_proxies.values():
@@ -71,9 +71,9 @@ class Executor:
             for node in self.selfish_node_proxies.values():
                 node.wait_for_highest_tip_of_node(self.one_normal_node)
 
-            # for node in self.nodes.values():
-            #     node.connect(node.outgoing_ips)
-            # utils.sleep(4 + len(self.all_nodes) * 0.2)
+            for node in self.nodes.values():
+                node.connect(node.outgoing_ips)
+            utils.sleep(4 + len(self.all_nodes) * 0.2)
 
             for node in self.all_bitcoin_nodes.values():
                 node.spent_to_address = node.execute_rpc('getnewaddress')
