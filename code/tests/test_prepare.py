@@ -13,7 +13,7 @@ class TestPrepare(TestCase):
     @patch('prepare.delete_nodes', lambda nodes: None)
     @patch('prepare.get_coinbase_variables', lambda nodes: None)
     @patch('prepare.transfer_coinbase_to_normal_tx', lambda nodes: None)
-    @patch('prepare.get_new_second_address', lambda nodes: None)
+    @patch('prepare.get_spent_to_address', lambda nodes: None)
     def test_warmup_block_generation(self, m_wait_until_height_reached):
         node_0 = MagicMock()
         node_1 = MagicMock()
@@ -121,20 +121,20 @@ class TestPrepare(TestCase):
         self.assertEqual(node_1.execute_rpc.call_args_list[0][0][1], 'raw_transaction')
         self.assertEqual(node_1.execute_rpc.call_args_list[1][0][1], 'signed_raw_transaction')
 
-    def test_create_second_address(self):
+    def test_create_spent_to_address(self):
         node_1 = MagicMock()
-        node_1.execute_rpc.return_value = 'second_address'
+        node_1.execute_rpc.return_value = 'spent_to_address'
 
-        prepare.get_new_second_address([node_1])
+        prepare.get_spent_to_address([node_1])
 
-        self.assertEqual(node_1.second_address, 'second_address')
+        self.assertEqual(node_1.spent_to_address, 'spent_to_address')
 
-    def test_create_second_address_multiple_nodes(self):
+    def test_create_spent_to_address_multiple_nodes(self):
         node_1 = MagicMock()
         node_2 = MagicMock()
         nodes = [node_1, node_2]
 
-        prepare.get_new_second_address(nodes)
+        prepare.get_spent_to_address(nodes)
 
         for node in nodes:
             self.assertEqual(node.execute_rpc.call_count, 1)

@@ -23,7 +23,7 @@ def give_nodes_spendable_coins(nodes):
     for node in nodes:
         wait_until_height_reached(node, config.warmup_blocks + config.start_blocks_per_node * len(nodes))
 
-    get_new_second_address(nodes)
+    get_spent_to_address(nodes)
 
     get_coinbase_variables(nodes)
 
@@ -34,9 +34,9 @@ def give_nodes_spendable_coins(nodes):
     logging.info('End of warmup')
 
 
-def get_new_second_address(nodes):
+def get_spent_to_address(nodes):
     for node in nodes:
-        node.second_address = node.execute_rpc('getnewaddress')
+        node.spent_to_address = node.execute_rpc('getnewaddress')
 
 
 def transfer_coinbase_to_normal_tx(nodes):
