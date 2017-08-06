@@ -102,7 +102,6 @@ class TestEvent(TestCase):
     @patch('event.generate_tx')
     def test_execute_cmd_with_tx_tmd(self, m_generate_tx):
         node = Mock()
-        node.spent_to_address = 'address'
         nodes = {'node-1': node}
         cmd = 'tx node-1'
 
@@ -110,7 +109,6 @@ class TestEvent(TestCase):
 
         self.assertTrue(m_generate_tx.called)
         self.assertEqual(m_generate_tx.call_args[0][0], node)
-        self.assertEqual(m_generate_tx.call_args[0][1], 'address')
 
     def test_execute_cmd_with_unknown_cmd(self):
         nodes = {'node-1': {}}
@@ -124,12 +122,13 @@ class TestEvent(TestCase):
     def test_generate_tx(self):
         node = Mock()
         node.name = 'node-1'
+        node.spent_to_address = 'address_hash'
 
-        event.generate_tx(node, 'address')
+        event.generate_tx(node)
         self.assertTrue(node.execute_rpc.called)
 
     def test_generate_tx_with_exception(self):
         node = Mock()
         node.generate_tx.side_effect = JSONRPCException({})
 
-        event.generate_tx(node, None)
+        event.generate_tx(node)
