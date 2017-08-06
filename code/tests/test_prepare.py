@@ -129,7 +129,7 @@ class TestPrepare(TestCase):
 
         self.assertEqual(node_1.second_address, 'second_address')
 
-    def test_create_second_address(self):
+    def test_create_second_address_multiple_nodes(self):
         node_1 = MagicMock()
         node_2 = MagicMock()
         nodes = [node_1, node_2]
