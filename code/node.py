@@ -34,12 +34,11 @@ class BitcoinNode(Node):
         super().__init__(name, ip)
         self.name = name
         self.ip = ip
-        self.spent_to_address = ''
+        self.spent_to_address = None
         self.rpc_connection = None
         self.current_unspent_tx = None
         self.address = None
         self.private_key = None
-        self.second_address = None
         self.available_coins = config.coinbase_amount
 
     def run(self):
@@ -76,8 +75,8 @@ class BitcoinNode(Node):
                                 'vout':    0,
                               }],
                               {
-                                self.second_address:   config.smallest_amount,
-                                self.address:          self.available_coins
+                                self.spent_to_address:   config.smallest_amount,
+                                self.address:            self.available_coins
                               }
                               )
         return tx
