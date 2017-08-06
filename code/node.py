@@ -36,6 +36,9 @@ class BitcoinNode(Node):
         self.ip = ip
         self.spent_to_address = ''
         self.rpc_connection = None
+        self.current_unspent_tx = None
+        self.address = None
+        self.private_key = None
         self.second_address = None
 
     def run(self):

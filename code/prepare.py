@@ -25,6 +25,8 @@ def give_nodes_spendable_coins(nodes):
 
     get_new_second_address(nodes)
 
+    get_coinbase_variables(nodes)
+
     delete_nodes(nodes)
 
     logging.info('End of warmup')
@@ -33,6 +35,16 @@ def give_nodes_spendable_coins(nodes):
 def get_new_second_address(nodes):
     for node in nodes:
         node.second_address = node.execute_rpc('getnewaddress')
+
+
+def get_coinbase_variables(nodes):
+    for node in nodes:
+        unspent_tx = node.execute_rpc('listunspent')[0]
+
+        node.current_unspent_tx = unspent_tx["txid"]
+        node.address = unspent_tx["address"]
+        node.private_key = node.execute_rpc('dumpprivkey', node.address)
+
 
 def delete_nodes(nodes):
     for node in nodes:
