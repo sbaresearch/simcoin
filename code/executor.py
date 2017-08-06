@@ -75,9 +75,6 @@ class Executor:
                 node.connect()
             utils.sleep(4 + len(self.all_nodes) * 0.2)
 
-            for node in self.all_bitcoin_nodes.values():
-                node.spent_to_address = node.execute_rpc('getnewaddress')
-
             for node in self.all_public_nodes.values():
                 node.add_latency(self.zone.zones)
 
