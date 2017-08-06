@@ -72,7 +72,7 @@ class Executor:
                 node.wait_for_highest_tip_of_node(self.one_normal_node)
 
             for node in self.nodes.values():
-                node.connect(node.outgoing_ips)
+                node.connect()
             utils.sleep(4 + len(self.all_nodes) * 0.2)
 
             for node in self.all_bitcoin_nodes.values():
