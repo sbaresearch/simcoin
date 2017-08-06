@@ -27,6 +27,8 @@ def give_nodes_spendable_coins(nodes):
 
     get_coinbase_variables(nodes)
 
+    transfer_coinbase_to_normal_tx(nodes)
+
     delete_nodes(nodes)
 
     logging.info('End of warmup')
@@ -35,6 +37,13 @@ def give_nodes_spendable_coins(nodes):
 def get_new_second_address(nodes):
     for node in nodes:
         node.second_address = node.execute_rpc('getnewaddress')
+
+
+def transfer_coinbase_to_normal_tx(nodes):
+    for node in nodes:
+        raw_transaction = node.create_coinbase_transfer_tx()
+        signed_raw_transaction = node.execute_rpc('signrawtransaction', raw_transaction)['hex']
+        node.current_unspent_tx = node.execute_rpc('sendrawtransaction', signed_raw_transaction)
 
 
 def get_coinbase_variables(nodes):
