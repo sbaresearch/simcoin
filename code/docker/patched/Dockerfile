@@ -1,4 +1,4 @@
-FROM simcoin/base:latest
+FROM simcoin/base:v1
 
 RUN git clone https://github.com/simonmulser/bitcoin.git
 WORKDIR "/bitcoin"
