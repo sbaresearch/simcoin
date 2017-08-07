@@ -3,3 +3,4 @@ mock
 pandas
 fire
 python-bitcoinrpc
+python-bitcoinlib
