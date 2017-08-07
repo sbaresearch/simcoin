@@ -82,6 +82,7 @@ def prepare_simulation_dir():
 
     bash.check_output('cp {} {}'.format(config.network_csv, config.sim_dir))
     bash.check_output('cp {} {}'.format(config.ticks_csv, config.sim_dir))
+    bash.check_output('cp {} {}'.format(config.nodes_json, config.sim_dir))
 
 
 def remove_old_containers_if_exists():
