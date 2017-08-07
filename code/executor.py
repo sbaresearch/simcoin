@@ -23,17 +23,20 @@ class Executor:
         nodes = [node for node in config_nodes if node.node_type == 'bitcoin']
         selfish_nodes = [node for node in config_nodes if node.node_type == 'selfish']
 
-        self.nodes = {node.name: PublicBitcoinNode(node.name, self.zone.get_ip(node.latency), node.latency) for node in nodes}
+        self.nodes = {node.name: PublicBitcoinNode(node.name, self.zone.get_ip(node.latency),
+                                                   node.latency, node.docker_image) for node in nodes}
 
         self.selfish_node_private_nodes = {}
         self.selfish_node_proxies = {}
         for node in selfish_nodes:
             ip_private_node = self.zone.get_ip(node.latency)
             ip_proxy = self.zone.get_ip(node.latency)
-            self.selfish_node_private_nodes[node.name] = SelfishPrivateNode(node.name, ip_private_node)
+            self.selfish_node_private_nodes[node.name] = SelfishPrivateNode(node.name,
+                                                                            ip_private_node, node.docker_image)
 
             self.selfish_node_proxies[node.name_proxy] = \
-                ProxyNode(node.name_proxy, ip_proxy, ip_private_node, node.selfish_nodes_args, node.latency)
+                ProxyNode(node.name_proxy, ip_proxy, ip_private_node, node.selfish_nodes_args,
+                          node.latency, node.docker_image)
 
         self.all_bitcoin_nodes = dict(self.nodes, **self.selfish_node_private_nodes)
 
@@ -91,7 +94,7 @@ class Executor:
                 array = [int(node.execute_rpc('getblockcount')) for node in self.nodes.values()]
             logging.info(config.log_line_sim_end)
 
-            bash.check_output(dockercmd.fix_data_dirs_permissions())
+            # bash.check_output(dockercmd.fix_data_dirs_permissions())
 
             self.post_processing.execute()
 

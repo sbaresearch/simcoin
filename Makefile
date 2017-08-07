@@ -19,7 +19,7 @@ demo1:
 	cd code; \
 		python3 simcoin.py \
 			run \
-				--node-group-a bitcoin 3 1 0 \
+				--node-group-a bitcoin 3 1 0 simcoin/normal:v3\
 				--amount-of-ticks 1 \
 				--tx-per-tick 90
 
@@ -27,7 +27,7 @@ demo2:
 	cd code; \
 		python3 simcoin.py \
 			run \
-				--node-group-a bitcoin 50 1 0 \
+				--node-group-a bitcoin 50 1 0 simcoin/normal:v3\
 				--amount-of-ticks 100 \
 				--tx-per-tick 9
 
@@ -35,11 +35,25 @@ install:
 	cd code; pip3 install -r requirements.txt
 
 build-image:
-	cd ./code/docker/base; \
-		docker build --tag btn/base:v3 .
+	cd ./code/docker/normal; \
+		docker build --tag simcoin/normal:v3 .
 
-remove-image:
-	docker rmi btn/base:v3
+rm-image:
+	docker rmi simcoin/normal:v3
+
+build-patched-image : build-base-image
+	cd ./code/docker/patched; \
+	docker build --tag simcoin/patched:v1 .
+
+rm-patched-image:
+	docker rmi simcoin/patched:v1
+
+build-base-image:
+	cd ./code/docker/base; \
+	docker build --tag simcoin/base:v1 .
+
+rm-base-image:
+	docker rmi simcoin/base:v1
 
 .PHONY : test
 test:

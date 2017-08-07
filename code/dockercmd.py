@@ -10,7 +10,7 @@ def run_node(node, cmd):
             ' --name=' + config.prefix + node.name +  # container name
             ' --hostname=' + config.prefix + node.name +
             ' --volume $PWD/' + config.host_dir(node) + ':' + config.client_dir +
-            ' ' + config.node_image +  # image name # src: https://hub.docker.com/r/abrkn/bitcoind/
+            ' ' + node.docker_image +
             ' bash -c "' + cmd + '"')
 
 
@@ -23,7 +23,7 @@ def run_selfish_proxy(node, cmd):
                 ' --ip=' + str(node.ip) +
                 ' --name=' + config.prefix + node.name +
                 ' --hostname=' + config.prefix + node.name +
-                ' ' + config.selfish_node_image +
+                ' ' + node.docker_image +
                 ' bash -c "' + cmd + '"')
 
 
@@ -40,10 +40,11 @@ def rm_network():
         return 'docker network rm {}'.format(config.network_name)
 
 
+# TODO fix this
 def fix_data_dirs_permissions():
         return ('docker run '
                 ' --rm --volume $PWD/{}:/mnt {}'
-                ' chmod a+rwx --recursive /mnt'.format(config.sim_dir, config.node_image))
+                ' chmod a+rwx --recursive /mnt'.format(config.sim_dir, 'stub'))
 
 
 def rm_container(name):
@@ -60,3 +61,7 @@ def remove_all_containers():
 
 def inspect_network():
         return 'docker network inspect {}'.format(config.network_name)
+
+
+def inspect_image(image):
+        return 'docker inspect {}'.format(image)

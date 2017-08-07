@@ -7,7 +7,7 @@ from mock import MagicMock
 class TestNode(TestCase):
 
     def setUp(self):
-        self.node = BitcoinNode('node-1', 'ip')
+        self.node = BitcoinNode('node-1', 'ip', 'image')
 
     def test_create_coinbase_transfer_tx(self):
         self.node.execute_rpc = MagicMock(return_value='raw_tx')

@@ -3,11 +3,17 @@ import config
 import argparse
 import sys
 import utils
+import bash
+import dockercmd
 
 
 node_groups = [
-    {'argparse': '--node-group-a', 'variable': 'node_group_a', 'default': ['bitcoin', 10, 1, 200]},
-    {'argparse': '--node-group-b', 'variable': 'node_group_b', 'default': None},
+        {'argparse': '--node-group-a', 'variable': 'node_group_a', 'default':
+            ['bitcoin', 10, 1, 200, config.standard_image]},
+        {'argparse': '--node-group-b', 'variable': 'node_group_b', 'default': None},
+        {'argparse': '--node-group-c', 'variable': 'node_group_c', 'default': None},
+        {'argparse': '--node-group-d', 'variable': 'node_group_d', 'default': None},
+        {'argparse': '--node-group-e', 'variable': 'node_group_e', 'default': None},
     ]
 
 
@@ -18,7 +24,7 @@ def create_parser():
         parser.add_argument(node_group['argparse']
                             , default=node_group['default']
                             , nargs='+'
-                            , help='{}. Pass [node_type] [amount] [share] [latency]'.format(node_group['variable'])
+                            , help='{}. Pass [node_type] [amount] [share] [latency] [docker-image]'.format(node_group['variable'])
                             )
     return parser
 
@@ -38,6 +44,8 @@ def create(unkown_arguments=False):
     for index, node_group in enumerate(node_groups):
         node_args = getattr(args, node_group['variable'])
         if node_args:
+            check_if_image_exists(node_args)
+
             nodes.extend(create_node_group(node_args, index + 1))
 
     check_if_share_sum_is_1(nodes)
@@ -58,7 +66,17 @@ def read():
 
 
 def object_decoder(obj):
-    return NodeConfig(obj['node_type'], obj['name'], obj['share'], obj['latency'])
+    return NodeConfig(obj['node_type'], obj['name'], obj['share'], obj['latency'], obj['docker_image'])
+
+
+def check_if_image_exists(node_args):
+    docker_image = str(node_args[4])
+
+    return_value = bash.call_silent(dockercmd.inspect_image(docker_image))
+    if return_value != 0:
+        print("Image {} doesn't exist. Check `docker images` for available images and"
+              " consult the Makefile for how wo create the image.".format(docker_image))
+        exit(-1)
 
 
 def check_if_share_sum_is_1(nodes):
@@ -78,16 +96,18 @@ def create_node_group(node_args, index):
     amount = int(node_args[1])
     share = float(node_args[2])
     latency = int(node_args[3])
+    docker_image = str(node_args[4])
 
     nodes = []
     for i in range(amount):
-        nodes.append(NodeConfig(node_type, config.node_name.format(index, i + 1), share/amount, latency))
+        nodes.append(NodeConfig(node_type, config.node_name.format(index, i + 1), share/amount, latency, docker_image))
     return nodes
 
 
 class NodeConfig:
-    def __init__(self, node_type, name, share, latency):
+    def __init__(self, node_type, name, share, latency, docker_image):
         self.node_type = node_type
         self.name = name
         self.share = share
         self.latency = latency
+        self.docker_image = docker_image
