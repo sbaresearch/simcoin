@@ -60,3 +60,7 @@ def remove_all_containers():
 
 def inspect_network():
         return 'docker network inspect {}'.format(config.network_name)
+
+
+def inspect_image(image):
+        return 'docker inspect {}'.format(image)
