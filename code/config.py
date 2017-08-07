@@ -6,9 +6,7 @@ ip_range = "240.0.0.0/4"
 ip_zones = '240.{}.0.0/16'
 
 network_name = 'simcoin-network'
-node_image = 'btn/base:v3'
 prefix = 'simcoin-'
-selfish_node_image = 'proxy'
 node_prefix = 'node-'
 node_name = node_prefix + '{}.{}'
 selfish_node_prefix = 'selfish-node-'

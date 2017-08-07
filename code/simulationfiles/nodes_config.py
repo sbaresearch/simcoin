@@ -6,7 +6,7 @@ import utils
 
 
 node_groups = [
-    {'argparse': '--node-group-a', 'variable': 'node_group_a', 'default': ['bitcoin', 10, 1, 200]},
+    {'argparse': '--node-group-a', 'variable': 'node_group_a', 'default': ['bitcoin', 10, 1, 200, 'btn/base:v3']},
     {'argparse': '--node-group-b', 'variable': 'node_group_b', 'default': None},
     ]
 
@@ -18,7 +18,7 @@ def create_parser():
         parser.add_argument(node_group['argparse']
                             , default=node_group['default']
                             , nargs='+'
-                            , help='{}. Pass [node_type] [amount] [share] [latency]'.format(node_group['variable'])
+                            , help='{}. Pass [node_type] [amount] [share] [latency] [docker-image]'.format(node_group['variable'])
                             )
     return parser
 
@@ -58,7 +58,7 @@ def read():
 
 
 def object_decoder(obj):
-    return NodeConfig(obj['node_type'], obj['name'], obj['share'], obj['latency'])
+    return NodeConfig(obj['node_type'], obj['name'], obj['share'], obj['latency'], obj['docker_image'])
 
 
 def check_if_share_sum_is_1(nodes):
@@ -78,16 +78,18 @@ def create_node_group(node_args, index):
     amount = int(node_args[1])
     share = float(node_args[2])
     latency = int(node_args[3])
+    docker_image = str(node_args[4])
 
     nodes = []
     for i in range(amount):
-        nodes.append(NodeConfig(node_type, config.node_name.format(index, i + 1), share/amount, latency))
+        nodes.append(NodeConfig(node_type, config.node_name.format(index, i + 1), share/amount, latency, docker_image))
     return nodes
 
 
 class NodeConfig:
-    def __init__(self, node_type, name, share, latency):
+    def __init__(self, node_type, name, share, latency, docker_image):
         self.node_type = node_type
         self.name = name
         self.share = share
         self.latency = latency
+        self.docker_image = docker_image

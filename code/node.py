@@ -10,9 +10,10 @@ import utils
 
 
 class Node:
-    def __init__(self, name, ip):
+    def __init__(self, name, ip, docker_image):
         self.name = name
         self.ip = ip
+        self.docker_image = docker_image
 
     def rm(self):
         return bash.check_output(dockercmd.rm_container(self.name))
@@ -30,8 +31,8 @@ class PublicNode:
 class BitcoinNode(Node):
     log_file = config.client_dir + '/debug.log'
 
-    def __init__(self, name, ip):
-        super().__init__(name, ip)
+    def __init__(self, name, ip, docker_image):
+        super().__init__(name, ip, docker_image)
         self.name = name
         self.ip = ip
         self.spent_to_address = None
@@ -83,8 +84,8 @@ class BitcoinNode(Node):
 
 
 class PublicBitcoinNode(BitcoinNode, PublicNode):
-    def __init__(self, name, ip, latency):
-        BitcoinNode.__init__(self, name, ip)
+    def __init__(self, name, ip, latency, docker_image):
+        BitcoinNode.__init__(self, name, ip, docker_image)
         PublicNode.__init__(self, latency)
 
     def add_latency(self, zones):
@@ -93,15 +94,15 @@ class PublicBitcoinNode(BitcoinNode, PublicNode):
 
 
 class SelfishPrivateNode(BitcoinNode):
-    def __init__(self, name, ip):
-        super().__init__(name, ip)
+    def __init__(self, name, ip, docker_image):
+        super().__init__(name, ip, docker_image)
 
 
 class ProxyNode(Node, PublicNode):
     log_file = '/tmp/selfish_proxy.log'
 
-    def __init__(self, name, ip, private_ip, args, latency):
-        Node.__init__(self, name, ip)
+    def __init__(self, name, ip, private_ip, args, latency, docker_image):
+        Node.__init__(self, name, ip, docker_image)
         PublicNode.__init__(self, latency)
         self.private_ip = private_ip
         self.args = args

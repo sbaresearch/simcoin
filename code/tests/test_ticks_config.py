@@ -24,8 +24,8 @@ class TestTicksConfig(TestCase):
     def test_create_ticks(self):
         end = 4
         tx_per_tick = 2
-        node_0 = NodeConfig('type', 'node-0', 0, 0)
-        node_1 = NodeConfig('type', 'node-1', 0, 0)
+        node_0 = NodeConfig('type', 'node-0', 0, 0, None)
+        node_1 = NodeConfig('type', 'node-1', 0, 0, None)
         nodes = [node_0, node_1]
         block_events = {'node-0': [0.5, 2.1, end], 'node-1': [0.5, 2.1, end]}
 
@@ -47,7 +47,7 @@ class TestTicksConfig(TestCase):
 
     def test_create_ticks_with_multiple_blocks_in_one_tick(self):
         end = 4
-        node_0 = NodeConfig('type', 'node-0', 0, 0)
+        node_0 = NodeConfig('type', 'node-0', 0, 0, None)
         block_events = {'node-0': [0.5, 0.6, end]}
 
         with self.assertRaises(Exception) as context:
@@ -62,7 +62,7 @@ class TestTicksConfig(TestCase):
     @patch('simulationfiles.ticks_config.calc_expected_events', lambda a, b: 5)
     @patch('simulationfiles.ticks_config.create_block_series', lambda a, b, c: [10, 11, 9])
     def test_create_block_events(self):
-        nodes = [NodeConfig('type', 'node-0', 0.5, 0), NodeConfig('type', 'node-1', 0.5, 0)]
+        nodes = [NodeConfig('type', 'node-0', 0.5, 0, None), NodeConfig('type', 'node-1', 0.5, 0, None)]
         amount_of_ticks = 10
         ticks_per_block = 2
 
