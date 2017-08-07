@@ -46,7 +46,9 @@ class Executor:
         for node in self.all_public_nodes.values():
             node.outgoing_ips = [str(self.all_public_nodes[connection].ip) for connection in connections[node.name]]
 
-        self.first_block_height = config.warmup_blocks + config.start_blocks_per_node * len(self.all_bitcoin_nodes)
+        self.first_block_height = config.warmup_blocks + \
+                                  config.start_blocks_per_node * len(self.all_bitcoin_nodes) + \
+                                  len(self.all_bitcoin_nodes)
 
     def execute(self):
         try:
@@ -72,11 +74,8 @@ class Executor:
                 node.wait_for_highest_tip_of_node(self.one_normal_node)
 
             for node in self.nodes.values():
-                node.connect(node.outgoing_ips)
+                node.connect()
             utils.sleep(4 + len(self.all_nodes) * 0.2)
-
-            for node in self.all_bitcoin_nodes.values():
-                node.spent_to_address = node.execute_rpc('getnewaddress')
 
             for node in self.all_public_nodes.values():
                 node.add_latency(self.zone.zones)
