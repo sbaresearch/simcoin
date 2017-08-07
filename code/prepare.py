@@ -30,6 +30,13 @@ def give_nodes_spendable_coins(nodes):
 
     transfer_coinbase_to_normal_tx(nodes)
 
+    for i, node in enumerate(nodes):
+        wait_until_height_reached(node, config.warmup_blocks + config.start_blocks_per_node * len(nodes) + i)
+        node.execute_rpc('generate', 1)
+
+    for node in nodes:
+        wait_until_height_reached(node, config.warmup_blocks + config.start_blocks_per_node * len(nodes) + len(nodes))
+
     delete_nodes(nodes)
 
     logging.info('End of warmup')

@@ -26,9 +26,9 @@ class TestPrepare(TestCase):
 
         prepare.give_nodes_spendable_coins(nodes)
 
-        self.assertEqual(m_wait_until_height_reached.call_count, len(nodes) * 2 + 1)
-        self.assertEqual(node_0.execute_rpc.call_count, 2)
-        self.assertEqual(node_1.execute_rpc.call_count, 2)
+        self.assertEqual(m_wait_until_height_reached.call_count, len(nodes) * 4 + 1)
+        self.assertEqual(node_0.execute_rpc.call_count, 3)
+        self.assertEqual(node_1.execute_rpc.call_count, 3)
 
     @patch('os.path.exists')
     @patch('os.makedirs')
