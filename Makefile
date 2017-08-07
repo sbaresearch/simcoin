@@ -28,7 +28,7 @@ install:
 
 build-image:
 	cd ./code/docker/base; \
-		docker build --tag btn/base:v3
+		docker build --tag btn/base:v3 .
 
 remove-image:
 	docker rmi btn/base:v3
