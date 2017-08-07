@@ -30,21 +30,21 @@ build-image:
 	cd ./code/docker/normal; \
 		docker build --tag simcoin/normal:v3 .
 
-remove-image:
+rm-image:
 	docker rmi simcoin/normal:v3
 
 build-patched-image : build-base-image
 	cd ./code/docker/patched; \
 	docker build --tag simcoin/patched:v1 .
 
-remove-patched-image:
+rm-patched-image:
 	docker rmi simcoin/patched:v1
 
 build-base-image:
 	cd ./code/docker/base; \
 	docker build --tag simcoin/base:v1 .
 
-remove-base-image:
+rm-base-image:
 	docker rmi simcoin/base:v1
 
 .PHONY : test
