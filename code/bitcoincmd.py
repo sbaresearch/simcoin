@@ -18,6 +18,12 @@ args = {
     'mintxfee':           '-mintxfee=0.00000001',
     'minrelaytxfee':      '-minrelatxfee=0.00000001',
     'blockmintxfee':      '-blockmintxfee=0.00000001',
+
+    # multiple tx in one node are forming a long chain, settings to allow this chain in mempool
+    'limitancestorcount': '-limitancestorcount=1000',
+    'limitancestorsize':  '-limitancestorsize=1000',
+    'limitdescendantcount': '-limitdescendantcount=1000',
+    'limitdescendantsize':  '-limitdescendantsize=1000',
 }
 
 
