@@ -115,7 +115,7 @@ class TestPrepare(TestCase):
         self.assertEqual(node_1.execute_rpc.call_count, 2)
         self.assertEqual(node_1.current_unspent_tx, 'tx_hash')
         self.assertEqual(node_1.address, 'address_hash')
-        self.assertEqual(node_1.private_key,  CBitcoinSecret('cTCrrgVLfBqEZ1dxmCnEwmiEWzeZHU8uw3CNvLVvbT4CrBeDdTqc'))
+        self.assertEqual(node_1.seckey,  CBitcoinSecret('cTCrrgVLfBqEZ1dxmCnEwmiEWzeZHU8uw3CNvLVvbT4CrBeDdTqc'))
 
     def test_transfer_coinbase_to_normal_tx(self):
         node_1 = MagicMock()

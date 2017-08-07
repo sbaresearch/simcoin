@@ -60,7 +60,7 @@ def get_coinbase_variables(nodes):
 
         node.current_unspent_tx = unspent_tx["txid"]
         node.address = unspent_tx["address"]
-        node.private_key = CBitcoinSecret(node.execute_rpc('dumpprivkey', node.address))
+        node.seckey = CBitcoinSecret(node.execute_rpc('dumpprivkey', node.address))
 
 
 def delete_nodes(nodes):
