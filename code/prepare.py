@@ -4,6 +4,7 @@ import bash
 import dockercmd
 import os
 import utils
+from bitcoin.wallet import CBitcoinSecret
 
 
 def give_nodes_spendable_coins(nodes):
@@ -23,9 +24,43 @@ def give_nodes_spendable_coins(nodes):
     for node in nodes:
         wait_until_height_reached(node, config.warmup_blocks + config.start_blocks_per_node * len(nodes))
 
+    get_spent_to_address(nodes)
+
+    get_coinbase_variables(nodes)
+
+    transfer_coinbase_to_normal_tx(nodes)
+
+    for i, node in enumerate(nodes):
+        wait_until_height_reached(node, config.warmup_blocks + config.start_blocks_per_node * len(nodes) + i)
+        node.execute_rpc('generate', 1)
+
+    for node in nodes:
+        wait_until_height_reached(node, config.warmup_blocks + config.start_blocks_per_node * len(nodes) + len(nodes))
+
     delete_nodes(nodes)
 
     logging.info('End of warmup')
+
+
+def get_spent_to_address(nodes):
+    for node in nodes:
+        node.spent_to_address = node.execute_rpc('getnewaddress')
+
+
+def transfer_coinbase_to_normal_tx(nodes):
+    for node in nodes:
+        raw_transaction = node.create_coinbase_transfer_tx()
+        signed_raw_transaction = node.execute_rpc('signrawtransaction', raw_transaction)['hex']
+        node.current_unspent_tx = node.execute_rpc('sendrawtransaction', signed_raw_transaction)
+
+
+def get_coinbase_variables(nodes):
+    for node in nodes:
+        unspent_tx = node.execute_rpc('listunspent')[0]
+
+        node.current_unspent_tx = unspent_tx["txid"]
+        node.address = unspent_tx["address"]
+        node.seckey = CBitcoinSecret(node.execute_rpc('dumpprivkey', node.address))
 
 
 def delete_nodes(nodes):

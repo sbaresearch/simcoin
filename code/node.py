@@ -34,12 +34,20 @@ class BitcoinNode(Node):
         super().__init__(name, ip)
         self.name = name
         self.ip = ip
-        self.spent_to_address = ''
+        self.spent_to_address = None
         self.rpc_connection = None
+        self.current_unspent_tx = None
+        self.address = None
+        self.seckey = None
+        self.available_coins = config.coinbase_amount
 
     def run(self):
         bash.check_output(bitcoincmd.start(self))
         self.rpc_connection = AuthServiceProxy(config.create_rpc_connection_string(self.ip))
+
+    def connect(self):
+        for ip in self.outgoing_ips:
+            self.execute_rpc('addnode', str(ip), 'add')
 
     def delete_peers_file(self):
         return bash.check_output(bitcoincmd.rm_peers(self.name))
@@ -58,6 +66,20 @@ class BitcoinNode(Node):
 
     def cat_log_cmd(self):
         return dockercmd.exec_cmd(self.name, 'cat {}'.format(BitcoinNode.log_file))
+
+    def create_coinbase_transfer_tx(self):
+        self.available_coins -= config.transaction_fee + config.smallest_amount
+        tx = self.execute_rpc('createrawtransaction',
+                              [{
+                                'txid':    self.current_unspent_tx,
+                                'vout':    0,
+                              }],
+                              {
+                                self.address:            self.available_coins,
+                                self.spent_to_address:   config.smallest_amount,
+                              }
+                              )
+        return tx
 
 
 class PublicBitcoinNode(BitcoinNode, PublicNode):
