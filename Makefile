@@ -23,6 +23,14 @@ demo1:
 				--amount-of-ticks 1 \
 				--tx-per-tick 90
 
+demo2:
+	cd code; \
+		python3 simcoin.py \
+			run \
+				--node-group-a bitcoin 50 1 0 \
+				--amount-of-ticks 100 \
+				--tx-per-tick 9
+
 install:
 	cd code; pip3 install -r requirements.txt
 
