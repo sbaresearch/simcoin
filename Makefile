@@ -50,7 +50,7 @@ save-base : build-base
 	docker save --output base.tar simcoin-base
 
 remove-base-image:
-	docker rmi simcoin-base-manual
+	docker rmi simcoin-base
 
 .PHONY : test
 test:
