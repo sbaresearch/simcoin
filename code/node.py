@@ -38,7 +38,7 @@ class BitcoinNode(Node):
         self.rpc_connection = None
         self.current_unspent_tx = None
         self.address = None
-        self.private_key = None
+        self.seckey = None
         self.available_coins = config.coinbase_amount
 
     def run(self):
