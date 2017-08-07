@@ -42,10 +42,10 @@ remove-patched-image:
 
 build-base-image:
 	cd ./code/docker/base; \
-	docker build --tag simcoin-base .
+	docker build --tag simcoin/base .
 
 remove-base-image:
-	docker rmi simcoin-base
+	docker rmi simcoin/base
 
 .PHONY : test
 test:
