@@ -83,13 +83,6 @@ def prepare_simulation_dir():
     bash.check_output('cp {} {}'.format(config.network_csv, config.sim_dir))
     bash.check_output('cp {} {}'.format(config.ticks_csv, config.sim_dir))
 
-    with open(config.blocks_csv, 'a') as file:
-        file.write('node;block;mine_time;stale_block;size;number_of_tx;'
-                   'number_of_reached_nodes;propagation_median;propagation_std\n')
-
-    with open(config.tx_csv, 'a') as file:
-        file.write('node;tx;number_of_reached_nodes;propagation_median;propagation_std\n')
-
 
 def remove_old_containers_if_exists():
     containers = bash.check_output(dockercmd.ps_containers())
