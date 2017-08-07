@@ -6,7 +6,7 @@ import utils
 
 
 node_groups = [
-    {'argparse': '--node-group-a', 'variable': 'node_group_a', 'default': ['bitcoin', 10, 1, 200, 'btn/base:v3']},
+    {'argparse': '--node-group-a', 'variable': 'node_group_a', 'default': ['bitcoin', 10, 1, 200, config.standard_image]},
     {'argparse': '--node-group-b', 'variable': 'node_group_b', 'default': None},
     ]
 

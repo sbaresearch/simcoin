@@ -28,10 +28,10 @@ install:
 
 build-image:
 	cd ./code/docker/base; \
-		docker build --tag btn/base:v3
+		docker build --tag simcoin/base:v3
 
 remove-image:
-	docker rmi btn/base:v3
+	docker rmi simcoin/base:v3
 
 build-image-patched:
 	docker load < ./code/docker/base-manual/base-manual.tar; \
