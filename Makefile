@@ -19,7 +19,7 @@ demo1:
 	cd code; \
 		python3 simcoin.py \
 			run \
-				--node-group-a bitcoin 3 1 0 \
+				--node-group-a bitcoin 3 1 0 simcoin/base:v3\
 				--amount-of-ticks 1 \
 				--tx-per-tick 90
 
