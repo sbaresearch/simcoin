@@ -5,7 +5,7 @@ import time
 ip_range = "240.0.0.0/4"
 ip_zones = '240.{}.0.0/16'
 
-standard_image = 'simcoin/base:v3'
+standard_image = 'simcoin/normal:v3'
 
 network_name = 'simcoin-network'
 prefix = 'simcoin-'

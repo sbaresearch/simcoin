@@ -1,0 +1,13 @@
+FROM library/ubuntu:xenial-20160706
+RUN \
+     apt-get update &&\
+     apt-get install -y software-properties-common &&\
+     add-apt-repository ppa:bitcoin/bitcoin && \
+     apt-get update && \
+     apt-get install -y bitcoind iproute2 jq
+RUN mkdir /data
+COPY bitcoin.conf /data
+
+# adapted from https://hub.docker.com/r/abrkn/bitcoind/~/dockerfile/
+
+EXPOSE 18332
