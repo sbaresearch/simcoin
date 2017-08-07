@@ -118,17 +118,3 @@ class TestEvent(TestCase):
             event.execute_cmd(cmd, nodes)
 
         self.assertTrue('Unknown cmd' in str(context.exception))
-
-    def test_generate_tx(self):
-        node = Mock()
-        node.name = 'node-1'
-        node.spent_to_address = 'address_hash'
-
-        event.generate_tx(node)
-        self.assertTrue(node.execute_rpc.called)
-
-    def test_generate_tx_with_exception(self):
-        node = Mock()
-        node.generate_tx.side_effect = JSONRPCException({})
-
-        event.generate_tx(node)
