@@ -13,6 +13,9 @@ args = {
     'onlynet':            '-onlynet=ipv4',  # disable ipv6
     'reindex':            '-reindex',
     'paytxfee':           '-paytxfee=0.00001',
+    'mintxfee':           '-mintxfee=0.00000001',
+    'minrelaytxfee':      '-minrelatxfee=0.00000001',
+    'blockmintxfee':      '-blockmintxfee=0.00000001',
 }
 
 
