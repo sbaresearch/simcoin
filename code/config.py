@@ -65,3 +65,4 @@ def host_dir(node):
 
 smallest_amount = 0.00000001
 coinbase_amount = 50
+transaction_fee = 0.00001

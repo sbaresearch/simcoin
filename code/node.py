@@ -68,15 +68,15 @@ class BitcoinNode(Node):
         return dockercmd.exec_cmd(self.name, 'cat {}'.format(BitcoinNode.log_file))
 
     def create_coinbase_transfer_tx(self):
-        self.available_coins -= 2 * config.smallest_amount
+        self.available_coins -= config.transaction_fee + config.smallest_amount
         tx = self.execute_rpc('createrawtransaction',
                               [{
                                 'txid':    self.current_unspent_tx,
                                 'vout':    0,
                               }],
                               {
+                                self.address:            self.available_coins,
                                 self.spent_to_address:   config.smallest_amount,
-                                self.address:            self.available_coins
                               }
                               )
         return tx
