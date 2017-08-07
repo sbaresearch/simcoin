@@ -33,8 +33,7 @@ build-image:
 remove-image:
 	docker rmi simcoin/normal:v3
 
-build-patched-image:
-	docker load < ./code/docker/base-manual/base-manual.tar; \
+build-patched-image : build-base-image
 	cd ./code/docker/patched; \
 	docker build --tag simcoin/patched .
 
@@ -44,10 +43,6 @@ remove-patched-image:
 build-base-image:
 	cd ./code/docker/base; \
 	docker build --tag simcoin-base .
-
-save-base : build-base
-	cd ./code/docker/base; \
-	docker save --output base.tar simcoin-base
 
 remove-base-image:
 	docker rmi simcoin-base
