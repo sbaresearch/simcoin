@@ -38,6 +38,9 @@ build-image-patched:
 	cd ./code/docker/patched; \
 	docker build --tag simcoin/patched .
 
+remove-image-patched:
+	docker rmi simcoin/patched
+
 build-base-manual:
 	cd ./code/docker/base-manual; \
 	docker build --tag simcoin-base-manual .
