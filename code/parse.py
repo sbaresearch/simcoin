@@ -28,6 +28,8 @@ class Parser:
         self.create_block_csv()
         self.create_tx_csv()
 
+        logging.info('Executed parser')
+
     def parse_aggregated_sim_log(self):
         with open(config.aggregated_sim_log, 'r') as file:
             lines = file.readlines()

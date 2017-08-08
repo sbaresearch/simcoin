@@ -3,6 +3,7 @@ from parse import Parser
 import config
 import bash
 import re
+import logging
 
 
 class PostProcessing:
@@ -12,12 +13,14 @@ class PostProcessing:
     def execute(self):
         aggregate_logs([node for node in self.executor.all_nodes.values()])
         cut_log()
+        logging.info('Aggregated logs')
 
         cli_stats = CliStats(self.executor)
         cli_stats.execute()
 
         parser = Parser(self.executor.all_bitcoin_nodes.values(), cli_stats.consensus_chain)
         parser.execute()
+        logging.info('Executed post processing')
 
 
 def aggregate_logs(nodes):

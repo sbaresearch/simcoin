@@ -15,6 +15,8 @@ class CliStats:
         self.save_chains()
         self.node_stats()
 
+        logging.info('Executed cli stats')
+
     def save_consensus_chain(self):
         with open(config.consensus_chain_csv, 'w') as file:
             file.write("height;block_hash\n")
