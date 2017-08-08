@@ -72,6 +72,6 @@ def generate_tx(node):
 
         tx_hash = node.execute_rpc('sendrawtransaction', b2x(tx.serialize()))
         node.current_unspent_tx = tx_hash
-        logging.info('Created tx with hash={}'.format(tx_hash))
+        logging.info('{} sendrawtransaction, which got tx_hash={}'.format(node.name, tx_hash))
     except JSONRPCException as exce:
         logging.info('Could not generate tx for node {}. Exception={}'.format(node.name, exce.message))
