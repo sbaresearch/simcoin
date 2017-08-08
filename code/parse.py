@@ -89,14 +89,16 @@ class Parser:
 
         block_stats = self.blocks[received_block.obj_hash]
 
-        block_stats.receiving_timestamps = np.append(block_stats.receiving_timestamps, received_block.timestamp)
+        block_stats.receiving_timestamps = np.append(block_stats.receiving_timestamps,
+                                                     received_block.timestamp - block_stats.timestamp)
 
     def block_reconstructed_parser(self, line):
         received_block = parse_successfully_reconstructed_block(line)
 
         block_stats = self.blocks[received_block.obj_hash]
 
-        block_stats.receiving_timestamps = np.append(block_stats.receiving_timestamps, received_block.timestamp)
+        block_stats.receiving_timestamps = np.append(block_stats.receiving_timestamps,
+                                                     received_block.timestamp - block_stats.timestamp)
 
     def tx_creation_parser(self, line):
         log_line_with_hash = parse_add_to_wallet(line)
@@ -108,7 +110,8 @@ class Parser:
         log_line_with_hash = parse_accept_to_memory_pool(line)
 
         tx_stats = self.tx[log_line_with_hash.obj_hash]
-        tx_stats.receiving_timestamps = np.append(tx_stats.receiving_timestamps, log_line_with_hash.timestamp)
+        tx_stats.receiving_timestamps = np.append(tx_stats.receiving_timestamps,
+                                                  log_line_with_hash.timestamp - tx_stats.timestamp)
 
     def peer_logic_validation_parse(self, line):
         log_line_with_hash = parse_peer_logic_validation(line)

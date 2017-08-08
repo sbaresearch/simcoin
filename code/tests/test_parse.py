@@ -157,13 +157,33 @@ class TestParse(TestCase):
 
     @patch('parse.parse_received_block')
     def test_received_block_parser(self, m_parse_received_block):
-        m_parse_received_block.return_value = LogLineWithHash(123, None, 'block_hash')
+        m_parse_received_block.return_value = LogLineWithHash(10, None, 'block_hash')
 
-        self.parser.blocks['block_hash'] = BlockStats(None, None, None, None, None)
+        self.parser.blocks['block_hash'] = BlockStats(1, None, None, None, None)
 
         self.parser.block_received_parser('line')
 
-        self.assertEqual(self.parser.blocks['block_hash'].receiving_timestamps, np.array([123]))
+        self.assertEqual(self.parser.blocks['block_hash'].receiving_timestamps, np.array([9]))
+
+    @patch('parse.parse_successfully_reconstructed_block')
+    def test_block_reconstructed_parser(self, m_parse_successfully_reconstructed_block):
+        m_parse_successfully_reconstructed_block.return_value = LogLineWithHash(10, None, 'block_hash')
+
+        self.parser.blocks['block_hash'] = BlockStats(1, None, None, None, None)
+
+        self.parser.block_reconstructed_parser('line')
+
+        self.assertEqual(self.parser.blocks['block_hash'].receiving_timestamps, np.array([9]))
+
+    @patch('parse.parse_accept_to_memory_pool')
+    def test_tx_received_parser(self, m_parse_accept_to_memory_pool):
+        m_parse_accept_to_memory_pool.return_value = LogLineWithHash(10, None, 'tx_hash')
+
+        self.parser.tx['tx_hash'] = TxStats(1, None, None)
+
+        self.parser.tx_received_parser('line')
+
+        self.assertEqual(self.parser.tx['tx_hash'].receiving_timestamps, np.array([9]))
 
     @patch('builtins.open', new_callable=mock_open)
     def test_create_block_csv(self, m_open):
