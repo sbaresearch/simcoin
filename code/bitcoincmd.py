@@ -16,7 +16,7 @@ args = {
     # try to keep fees as low as possible
     'paytxfee':           '-paytxfee=0.00001',
     'mintxfee':           '-mintxfee=0.00000001',
-    'minrelaytxfee':      '-minrelatxfee=0.00000001',
+    'minrelaytxfee':      '-minrelaytxfee=0.00000001',
     'blockmintxfee':      '-blockmintxfee=0.00000001',
 
     # multiple tx in one node are forming a long chain, settings to allow this chain in mempool
