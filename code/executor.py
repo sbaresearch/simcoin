@@ -94,7 +94,7 @@ class Executor:
                 array = [int(node.execute_rpc('getblockcount')) for node in self.nodes.values()]
             logging.info(config.log_line_sim_end)
 
-            # bash.check_output(dockercmd.fix_data_dirs_permissions())
+            bash.check_output(dockercmd.fix_data_dirs_permissions())
 
             self.post_processing.execute()
 

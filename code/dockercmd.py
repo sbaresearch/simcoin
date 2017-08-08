@@ -40,11 +40,10 @@ def rm_network():
         return 'docker network rm {}'.format(config.network_name)
 
 
-# TODO fix this
 def fix_data_dirs_permissions():
         return ('docker run '
-                ' --rm --volume $PWD/{}:/mnt {}'
-                ' chmod a+rwx --recursive /mnt'.format(config.sim_dir, 'stub'))
+                ' --rm --volume $PWD/{}:/mnt ubuntu'
+                ' chmod a+rwx --recursive /mnt'.format(config.sim_dir))
 
 
 def rm_container(name):
