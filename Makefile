@@ -65,4 +65,3 @@ test:
 .PHONY : clean
 clean:
 	rm -rf data/*
-	#TODO fix Permission denied
