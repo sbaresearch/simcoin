@@ -55,12 +55,7 @@ class Runner:
 
     def run(self):
         try:
-            prepare.prepare_simulation_dir()
-            prepare.remove_old_containers_if_exists()
-            prepare.recreate_network()
-            utils.sleep(4)
-
-            prepare.give_nodes_spendable_coins(list(self.all_bitcoin_nodes.values()))
+            prepare.execute(list(self.all_bitcoin_nodes.values()))
 
             for node in self.all_bitcoin_nodes.values():
                 node.run()

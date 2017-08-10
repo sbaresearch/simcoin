@@ -7,6 +7,16 @@ import utils
 from bitcoin.wallet import CBitcoinSecret
 
 
+def execute(nodes):
+    prepare_simulation_dir()
+    remove_old_containers_if_exists()
+    recreate_network()
+
+    utils.sleep(4)
+
+    give_nodes_spendable_coins(nodes)
+
+
 def give_nodes_spendable_coins(nodes):
     logging.info('Begin warmup')
 
