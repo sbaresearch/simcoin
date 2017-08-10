@@ -7,6 +7,7 @@ import logging
 import tccmd
 import proxycmd
 import utils
+import errno
 
 
 class Node:
@@ -44,6 +45,9 @@ class BitcoinNode(Node):
 
     def run(self):
         bash.check_output(bitcoincmd.start(self))
+        self.connect_to_rpc()
+
+    def connect_to_rpc(self):
         self.rpc_connection = AuthServiceProxy(config.create_rpc_connection_string(self.ip))
 
     def connect(self):
@@ -54,13 +58,24 @@ class BitcoinNode(Node):
         return bash.check_output(bitcoincmd.rm_peers(self.name))
 
     def execute_rpc(self,  *args):
-        method_to_call = getattr(self.rpc_connection, args[0])
+        retry = 1
+        while retry >= 0:
+            logging.debug("try {}".format(retry))
+            try:
+                method_to_call = getattr(self.rpc_connection, args[0])
 
-        logging.info('{} {}'.format(self.name, args))
-        return_value = method_to_call(*args[1:])
-        logging.info(return_value)
+                logging.info('{} {}'.format(self.name, args))
+                return_value = method_to_call(*args[1:])
+                logging.info(return_value)
+                return return_value
+            except IOError as error:
+                if error.errno == errno.EPIPE:
+                    retry -= 1
+                    self.connect_to_rpc()
+                    logging.debug('Error={} occurred. Reconnecting RPC and retrying.'.format(error))
 
-        return return_value
+        logging.error("Could'nt execute rpc-call={} on node {}".format(args[0], self.name))
+        exit(-1)
 
     def grep_log_for_errors(self):
         return bash.check_output(dockercmd.exec_cmd(self.name, config.log_error_grep.format(BitcoinNode.log_file)))
