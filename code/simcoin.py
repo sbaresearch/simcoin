@@ -9,6 +9,7 @@ import simulation
 import config
 import os
 import bitcoin
+import utils
 
 
 sys.tracebacklimit = None
@@ -31,8 +32,20 @@ commands = {
     'run':          run,
 }
 
+
+def config_logger():
+    argument_parser = argparse.ArgumentParser()
+
+    argument_parser.add_argument('--verbose'
+                                 , action="store_true"
+                                 , help='Verbose log.'
+                                 )
+
+    args = argument_parser.parse_known_args(sys.argv[2:])[0]
+    utils.config_logger(args.verbose)
+
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(
+    cmd_parser = argparse.ArgumentParser(
         description='Simcoin a cryptocurrency simulator.',
         usage='''<command> [<args>]
 
@@ -47,13 +60,14 @@ if __name__ == '__main__':
             config.nodes_json_file_name, config.network_csv_file_name, config.ticks_csv_file_name,
         ))
 
-    parser.add_argument('command', help='Subcommand to run')
+    cmd_parser.add_argument('command', help='Subcommand to run')
+
     # parse_args defaults to [1:] for args, but you need to
     # exclude the rest of the args too, or validation will fail
-    args = parser.parse_args(sys.argv[1:2])
+    args = cmd_parser.parse_args(sys.argv[1:2])
     if args.command not in commands:
         print('Unrecognized command')
-        parser.print_help()
+        cmd_parser.print_help()
         exit(1)
     # use dispatch pattern to invoke method with same name
 
@@ -61,5 +75,6 @@ if __name__ == '__main__':
         os.makedirs(config.data_dir)
 
     bitcoin.SelectParams('regtest')
+    config_logger()
 
     commands[args.command]()
