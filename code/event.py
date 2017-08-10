@@ -10,8 +10,8 @@ from bitcoin.wallet import CBitcoinAddress
 
 class Event:
 
-    def __init__(self, executor, tick_duration):
-        self.executor = executor
+    def __init__(self, runner, tick_duration):
+        self.runner = runner
         self.tick_duration = tick_duration
 
     def execute(self):
@@ -24,7 +24,7 @@ class Event:
                 line = line.rstrip()
                 cmds = line.split(';')
                 for cmd in cmds:
-                    execute_cmd(cmd, self.executor.all_bitcoin_nodes)
+                    execute_cmd(cmd, self.runner.all_bitcoin_nodes)
                 next_tick = start_time + self.tick_duration
                 current_time = time.time()
                 if current_time < next_tick:

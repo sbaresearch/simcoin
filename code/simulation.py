@@ -1,4 +1,4 @@
-from executor import Executor
+from runner import Runner
 import logging
 import time
 from postprocessing import PostProcessing
@@ -30,17 +30,17 @@ def run(unknown_arguments=False):
     print("arguments called with: {}".format(sys.argv))
     print("parsed arguments: {}\n".format(args))
 
-    executor = Executor()
+    runner = Runner()
 
-    post_processing = PostProcessing(executor)
-    executor.post_processing = post_processing
+    post_processing = PostProcessing(runner)
+    runner.post_processing = post_processing
 
-    event = Event(executor, args.tick_duration)
-    executor.event = event
+    event = Event(runner, args.tick_duration)
+    runner.event = event
 
     start = time.time()
 
-    executor.execute()
+    runner.run()
 
     logging.info("the duration of the experiment was {} seconds".format(str(time.time() - start)))
     bash.check_output('cp {} {}'.format(config.log_file, config.sim_dir))

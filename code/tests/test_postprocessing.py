@@ -10,8 +10,8 @@ from textwrap import dedent
 
 class TestPostProcessing(TestCase):
     def setUp(self):
-        self.executor = MagicMock()
-        self.postprocessing = PostProcessing(self.executor)
+        self.runners = MagicMock()
+        self.postprocessing = PostProcessing(self.runners)
 
     @patch('builtins.open', new_callable=mock_open)
     @patch('bash.check_output_without_log')

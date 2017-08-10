@@ -12,7 +12,7 @@ from simulationfiles import nodes_config
 from simulationfiles.zone import Zone
 
 
-class Executor:
+class Runner:
     def __init__(self):
         self.count = 0
         self.post_processing = None
@@ -53,7 +53,7 @@ class Executor:
                                   config.start_blocks_per_node * len(self.all_bitcoin_nodes) + \
                                   len(self.all_bitcoin_nodes)
 
-    def execute(self):
+    def run(self):
         try:
             prepare.prepare_simulation_dir()
             prepare.remove_old_containers_if_exists()

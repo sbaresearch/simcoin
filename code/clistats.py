@@ -6,8 +6,8 @@ from utils import Values
 
 
 class CliStats:
-    def __init__(self, _executor):
-        self.executor = _executor
+    def __init__(self, runner):
+        self.runner = runner
         self.consensus_chain = []
 
     def execute(self):
@@ -20,8 +20,8 @@ class CliStats:
     def save_consensus_chain(self):
         with open(config.consensus_chain_csv, 'w') as file:
             file.write("height;block_hash\n")
-            height = self.executor.first_block_height
-            nodes = self.executor.all_bitcoin_nodes.values()
+            height = self.runner.first_block_height
+            nodes = self.runner.all_bitcoin_nodes.values()
             while True:
                 blocks = []
                 for node in nodes:
@@ -38,10 +38,10 @@ class CliStats:
     def save_chains(self):
         with open(config.chains_csv, 'w') as file:
             file.write("node;block_hashes\n")
-            for node in self.executor.all_bitcoin_nodes.values():
+            for node in self.runner.all_bitcoin_nodes.values():
                 height = int(node.execute_rpc('getblockcount'))
                 hashes = []
-                while self.executor.first_block_height <= height:
+                while self.runner.first_block_height <= height:
                     hashes.append(str(node.execute_rpc('getblockhash', height)))
                     height -= 1
                 file.write('{};{}\n'.format(node.name, ';'.join(hashes)))
@@ -53,7 +53,7 @@ class CliStats:
                        'total_tips;total_tips_median_branchlen;tips_std_branchlen;'
                        'valid_fork;valid_fork_median_branchlen;valid_fork_std_branchlen;'
                        'valid_headers;valid_headers_median_branchlen;valid_headers_std_branchlen;\n')
-            for node in self.executor.all_bitcoin_nodes.values():
+            for node in self.runner.all_bitcoin_nodes.values():
                 file.write('{}'.format(node.name))
 
                 tips = node.execute_rpc('getchaintips')

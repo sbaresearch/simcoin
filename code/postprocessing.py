@@ -7,18 +7,18 @@ import logging
 
 
 class PostProcessing:
-    def __init__(self, executor):
-        self.executor = executor
+    def __init__(self, runner):
+        self.runner = runner
 
     def execute(self):
-        aggregate_logs([node for node in self.executor.all_nodes.values()])
+        aggregate_logs([node for node in self.runner.all_nodes.values()])
         cut_log()
         logging.info('Aggregated logs')
 
-        cli_stats = CliStats(self.executor)
+        cli_stats = CliStats(self.runner)
         cli_stats.execute()
 
-        parser = Parser(self.executor.all_bitcoin_nodes.values(), cli_stats.consensus_chain)
+        parser = Parser(self.runner.all_bitcoin_nodes.values(), cli_stats.consensus_chain)
         parser.execute()
         logging.info('Executed post processing')
 
