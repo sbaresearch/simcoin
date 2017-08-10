@@ -55,9 +55,9 @@ class Executor:
 
     def execute(self):
         try:
+            prepare.prepare_simulation_dir()
             prepare.remove_old_containers_if_exists()
             prepare.recreate_network()
-            prepare.prepare_simulation_dir()
             utils.sleep(4)
 
             prepare.give_nodes_spendable_coins(list(self.all_bitcoin_nodes.values()))
@@ -94,13 +94,13 @@ class Executor:
                 array = [int(node.execute_rpc('getblockcount')) for node in self.nodes.values()]
             logging.info(config.log_line_sim_end)
 
-            bash.check_output(dockercmd.fix_data_dirs_permissions())
-
             self.post_processing.execute()
 
             for node in self.all_nodes.values():
                 node.grep_log_for_errors()
         finally:
+            bash.check_output(dockercmd.fix_data_dirs_permissions())
+
             # remove proxies first. if not proxies could be already stopped when trying to remove
             for node in self.selfish_node_proxies.values():
                 node.rm_silent()
