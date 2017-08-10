@@ -31,6 +31,14 @@ demo2:
 				--amount-of-ticks 100 \
 				--tx-per-tick 9
 
+demo3:
+	cd code; \
+		python3 simcoin.py \
+			run \
+				--node-group-a bitcoin 2 1 0 simcoin/normal:v3\
+				--amount-of-ticks 100 \
+				--tx-per-tick 1
+
 install:
 	cd code; pip3 install -r requirements.txt
 
@@ -65,3 +73,11 @@ test:
 .PHONY : clean
 clean:
 	rm -rf data/*
+
+.PHONY : report
+RCMD = 'library(rmarkdown);rmarkdown::render("report.Rmd", "pdf_document")'
+report:
+	cd $(shell ls -td -- data/*/ | head -n 1); \
+		cp ../../code/reporter/report.Rmd .  ; \
+		R -e $(RCMD) ;\
+		mv report.pdf ./..
