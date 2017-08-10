@@ -60,7 +60,6 @@ class BitcoinNode(Node):
     def execute_rpc(self,  *args):
         retry = 1
         while retry >= 0:
-            logging.debug("try {}".format(retry))
             try:
                 method_to_call = getattr(self.rpc_connection, args[0])
 
