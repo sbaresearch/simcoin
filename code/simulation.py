@@ -20,10 +20,10 @@ def create_parser():
     return parser
 
 
-def run(unkown_arguments=False):
+def run(unknown_arguments=False):
 
     parser = create_parser()
-    if unkown_arguments:
+    if unknown_arguments:
         args = parser.parse_known_args(sys.argv[2:])[0]
     else:
         args = parser.parse_args(sys.argv[2:])
