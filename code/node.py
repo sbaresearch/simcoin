@@ -63,10 +63,7 @@ class BitcoinNode(Node):
             try:
                 method_to_call = getattr(self.rpc_connection, args[0])
 
-                logging.info('{} {}'.format(self.name, args))
-                return_value = method_to_call(*args[1:])
-                logging.info(return_value)
-                return return_value
+                return method_to_call(*args[1:])
             except IOError as error:
                 if error.errno == errno.EPIPE:
                     retry -= 1
