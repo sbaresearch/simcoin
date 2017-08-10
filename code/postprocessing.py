@@ -4,6 +4,7 @@ import config
 import bash
 import re
 import logging
+from analyze import Analyzer
 
 
 class PostProcessing:
@@ -18,8 +19,14 @@ class PostProcessing:
         cli_stats = CliStats(self.runner)
         cli_stats.execute()
 
-        parser = Parser(self.runner.all_bitcoin_nodes.values(), cli_stats.consensus_chain)
+        parser = Parser(self.runner.all_bitcoin_nodes.values())
         parser.execute()
+        logging.info('Executed parsing')
+
+        analyzer = Analyzer(parser.blocks, cli_stats.consensus_chain, parser.tx)
+        analyzer.execute()
+        logging.info('Executed analyzing')
+
         logging.info('Executed post processing')
 
 

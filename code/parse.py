@@ -7,9 +7,8 @@ from utils import Stats
 
 
 class Parser:
-    def __init__(self, nodes, consensus_chain):
+    def __init__(self, nodes):
         self.nodes_create_blocks = {node.name: None for node in nodes}
-        self.consensus_chain = consensus_chain
         self.blocks = {}
         self.tx = {}
 
@@ -24,13 +23,6 @@ class Parser:
         ]
 
     def execute(self):
-        self.parse_aggregated_sim_log()
-        self.create_block_csv()
-        self.create_tx_csv()
-
-        logging.info('Executed parser')
-
-    def parse_aggregated_sim_log(self):
         with open(config.aggregated_sim_log, 'r') as file:
             lines = file.readlines()
             for line in lines:
@@ -40,29 +32,7 @@ class Parser:
                         break
                     except ParseException:
                         logging.debug("Parsers couldn't parse line")
-
-    def create_block_csv(self):
-        with open(config.blocks_csv, 'w') as file:
-            file.write('block_hash;node;timestamp;stale;height;total_size;txs;'
-                       'total_received;median_propagation;std_propagation\n')
-            for block in self.blocks.values():
-
-                propagation_stats = Stats.from_array(block.receiving_timestamps)
-                stale = self.check_if_in_consensus_chain(block.block_hash)
-                file.write('{};{};{};{};{};{};{};{};{};{}\n'.format(
-                    block.block_hash, block.node, block.timestamp, stale, block.height, block.total_size, block.txs,
-                    propagation_stats.count, propagation_stats.median, propagation_stats.std))
-
-    def create_tx_csv(self):
-        with open(config.tx_csv, 'w') as file:
-            file.write('tx_hash;node;timestamp;total_accepted;median_propagation;std_propagation\n')
-
-            for tx in self.tx.values():
-                propagation_stats = Stats.from_array(tx.receiving_timestamps)
-
-                file.write('{};{};{};{};{};{}\n'.format(
-                    tx.tx_hash, tx.node, tx.timestamp,
-                    propagation_stats.count, propagation_stats.median, propagation_stats.std))
+        logging.info('Executed parser')
 
     def block_creation_parser(self, line):
         create_new_block = parse_create_new_block(line)
@@ -123,12 +93,6 @@ class Parser:
                                      create_new_block.total_size, create_new_block.txs)
             self.blocks[block_stats.block_hash] = block_stats
             self.nodes_create_blocks[log_line_with_hash.node] = None
-
-    def check_if_in_consensus_chain(self, block_hash):
-        if block_hash in self.consensus_chain:
-            return False
-        else:
-            return True
 
 
 def parse_create_new_block(line):

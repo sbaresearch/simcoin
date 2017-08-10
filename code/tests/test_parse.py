@@ -78,7 +78,7 @@ class TestParse(TestCase):
         self.parser.parsers = [m_parser_1, m_parser_2]
 
         with patch('builtins.open', mock_open(read_data=data)):
-            self.parser.parse_aggregated_sim_log()
+            self.parser.execute()
 
             self.assertEqual(m_parser_1.call_count, 3)
             self.assertEqual(m_parser_2.call_count, 0)
@@ -95,7 +95,7 @@ class TestParse(TestCase):
         self.parser.parsers = [m_parser_1, m_parser_2]
 
         with patch('builtins.open', mock_open(read_data=data)):
-            self.parser.parse_aggregated_sim_log()
+            self.parser.execute()
 
             self.assertEqual(m_parser_1.call_count, 1)
             self.assertEqual(m_parser_2.call_count, 1)
@@ -185,28 +185,6 @@ class TestParse(TestCase):
 
         self.assertEqual(self.parser.tx['tx_hash'].receiving_timestamps, np.array([9]))
 
-    @patch('builtins.open', new_callable=mock_open)
-    def test_create_block_csv(self, m_open):
-        block_stats = BlockStats(1, 'node-0', 'block_hash', 3, 4)
-        block_stats.height = 2
-        self.parser.blocks = {
-            'block_hash': block_stats,
-        }
-
-        self.parser.blocks['block_hash'].receiving_timestamps = np.array([5, 7])
-        self.parser.check_if_in_consensus_chain = Mock()
-        self.parser.check_if_in_consensus_chain.return_value = True
-
-        self.parser.create_block_csv()
-
-        m_open.assert_called_with(config.blocks_csv, 'w')
-        handle = m_open()
-        self.assertEqual(handle.write.call_count, 2)
-        self.assertEqual(handle.write.call_args_list[0][0][0], 'block_hash;node;timestamp;stale;height;total_size;'
-                                                               'txs;total_received;'
-                                                               'median_propagation;std_propagation\n')
-        self.assertEqual(handle.write.call_args_list[1][0][0], 'block_hash;node-0;1;True;2;3;4;2;6.0;1.0\n')
-
     def test_parse_add_to_wallet(self):
         log_line = '2017-07-30 07:48:48.337577 node-1 AddToWallet' \
                    ' 2e1b05f9248ae5f29b2234ac0eb86e0fccbacc084ed91937eee7eea248fc9a6a  new'
@@ -247,37 +225,6 @@ class TestParse(TestCase):
         self.assertTrue(self.parser.tx['tx_hash'])
 
         self.assertTrue(self.parser.tx['tx_hash'].tx_hash, 'tx_hash')
-
-    @patch('builtins.open', new_callable=mock_open)
-    def test_create_tx_csv(self, m_open):
-        self.parser.tx = {
-            'tx_hash': TxStats(1, 'node-0', 'tx_hash'),
-        }
-
-        self.parser.tx['tx_hash'].receiving_timestamps = np.array([5, 7])
-
-        self.parser.create_tx_csv()
-
-        m_open.assert_called_with(config.tx_csv, 'w')
-        handle = m_open()
-        self.assertEqual(handle.write.call_count, 2)
-        self.assertEqual(handle.write.call_args_list[0][0][0], 'tx_hash;node;timestamp;'
-                                                               'total_accepted;median_propagation;std_propagation\n')
-        self.assertEqual(handle.write.call_args_list[1][0][0], 'tx_hash;node-0;1;2;6.0;1.0\n')
-
-    def test_check_if_in_consensus_chain_stale(self):
-        self.parser.consensus_chain = ['hash_1', 'hash_2']
-
-        stale = self.parser.check_if_in_consensus_chain('hash')
-
-        self.assertTrue(stale)
-
-    def test_check_if_in_consensus_chain_in_consensus_chain(self):
-        self.parser.consensus_chain = ['hash_1', 'hash_2']
-
-        stale = self.parser.check_if_in_consensus_chain('hash_1')
-
-        self.assertFalse(stale)
 
     def test_parse_peer_logic_validation(self):
         log_line = '2017-07-31 16:09:28.663985 node-0 PeerLogicValidation::NewPoWValidBlock' \
