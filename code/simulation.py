@@ -3,7 +3,6 @@ import logging
 import time
 from postprocessing import PostProcessing
 from event import Event
-import utils
 import argparse
 import checkargs
 import sys
@@ -18,12 +17,6 @@ def create_parser():
                         , default=1
                         , type=checkargs.check_positive_float
                         , help='Duration of ticks.')
-
-    parser.add_argument('--verbose'
-                        , action="store_true"
-                        , help='Verbose log.'
-                        )
-
     return parser
 
 
@@ -36,7 +29,6 @@ def run(unkown_arguments=False):
         args = parser.parse_args(sys.argv[2:])
     print("arguments called with: {}".format(sys.argv))
     print("parsed arguments: {}\n".format(args))
-    utils.config_logger(args.verbose)
 
     executor = Executor()
 

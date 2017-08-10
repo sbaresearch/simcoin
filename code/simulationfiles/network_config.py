@@ -27,11 +27,11 @@ def create_parser():
     return parser
 
 
-def create(unkown_arguments=False):
+def create(unknown_arguments=False):
     print('Called network config')
 
     parser = create_parser()
-    if unkown_arguments:
+    if unknown_arguments:
         args = parser.parse_known_args(sys.argv[2:])[0]
     else:
         args = parser.parse_args(sys.argv[2:])
