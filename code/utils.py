@@ -5,6 +5,7 @@ import sys
 import os
 import re
 import numpy as np
+import json
 
 
 def sleep(seconds):
@@ -42,6 +43,19 @@ def check_for_file(file):
         print("{} file not found. Please generate this with the command `python3 simcoin.py {} [args]."
               .format(file, command))
         exit(-1)
+
+
+def update_args_json(args):
+    raw_data = {}
+    if os.path.isfile(config.args_json):
+        with open(config.args_json, 'r') as file:
+            raw_data = json.load(file)
+
+    raw_data.update(vars(args))
+    data = {k: v for k, v in raw_data.items() if v is not None}
+
+    with open(config.args_json, 'w') as file:
+        json.dump(data, file)
 
 
 class Values:

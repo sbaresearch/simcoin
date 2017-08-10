@@ -1,6 +1,8 @@
 from unittest import TestCase
 import utils
 from mock import patch
+from mock import mock_open
+import argparse
 
 
 class TestUtils(TestCase):
@@ -47,3 +49,33 @@ class TestUtils(TestCase):
         utils.check_for_file('file.txt')
 
         self.assertFalse(m_exit.called)
+
+    @patch('os.path.isfile')
+    @patch('builtins.open', new_callable=mock_open)
+    @patch('json.load')
+    @patch('json.dump')
+    def test_update_args_json_update_args(self, m_dump, m_load, m_open, m_is_file):
+        m_is_file.return_value = True
+        args = argparse.Namespace()
+        args.test = 1
+
+        m_load.return_value = {'test': 0}
+
+        utils.update_args_json(args)
+
+        self.assertEqual(m_dump.call_args[0][0], {'test': 1})
+
+    @patch('os.path.isfile')
+    @patch('builtins.open', new_callable=mock_open)
+    @patch('json.load')
+    @patch('json.dump')
+    def test_update_args_json_add_args(self, m_dump, m_load, m_open, m_is_file):
+        m_is_file.return_value = True
+        args = argparse.Namespace()
+        args.unknown_arg = 1
+
+        m_load.return_value = {'test': 0}
+
+        utils.update_args_json(args)
+
+        self.assertEqual(m_dump.call_args[0][0], {'test': 0, 'unknown_arg': 1})

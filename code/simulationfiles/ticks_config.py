@@ -7,6 +7,7 @@ from simulationfiles import nodes_config
 import argparse
 import checkargs
 import sys
+import utils
 
 np.set_printoptions(precision=2, suppress=True)
 
@@ -50,6 +51,7 @@ def create(unknown_arguments=False):
         args = parser.parse_args(sys.argv[2:])
     print("arguments called with: {}".format(sys.argv))
     print("parsed arguments: {}\n".format(args))
+    utils.update_args_json(args)
 
     random.seed(args.seed)
     np.random.seed(args.seed)

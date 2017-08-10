@@ -8,6 +8,7 @@ import checkargs
 import sys
 import config
 import bash
+import utils
 
 
 def create_parser():
@@ -29,6 +30,7 @@ def run(unknown_arguments=False):
         args = parser.parse_args(sys.argv[2:])
     print("arguments called with: {}".format(sys.argv))
     print("parsed arguments: {}\n".format(args))
+    utils.update_args_json(args)
 
     runner = Runner()
 
