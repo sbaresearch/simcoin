@@ -179,11 +179,11 @@ class TestParse(TestCase):
     def test_tx_received_parser(self, m_parse_accept_to_memory_pool):
         m_parse_accept_to_memory_pool.return_value = LogLineWithHash(10, None, 'tx_hash')
 
-        self.parser.tx['tx_hash'] = TxStats(1, None, None)
+        self.parser.txs['tx_hash'] = TxStats(1, None, None)
 
         self.parser.tx_received_parser('line')
 
-        self.assertEqual(self.parser.tx['tx_hash'].receiving_timestamps, np.array([9]))
+        self.assertEqual(self.parser.txs['tx_hash'].receiving_timestamps, np.array([9]))
 
     def test_parse_add_to_wallet(self):
         log_line = '2017-07-30 07:48:48.337577 node-1 AddToWallet' \
@@ -210,11 +210,11 @@ class TestParse(TestCase):
         2, 'node-0', 'tx_hash'
     ))
     def test_received_parser(self):
-        self.parser.tx['tx_hash'] = TxStats(0, 'node-1', 'tx_hash')
+        self.parser.txs['tx_hash'] = TxStats(0, 'node-1', 'tx_hash')
 
         self.parser.tx_received_parser('line')
 
-        self.assertEqual(self.parser.tx['tx_hash'].receiving_timestamps, np.array([2]))
+        self.assertEqual(self.parser.txs['tx_hash'].receiving_timestamps, np.array([2]))
 
     @patch('parse.parse_add_to_wallet', lambda line: LogLineWithHash(
         2, 'node-0', 'tx_hash'
@@ -222,9 +222,9 @@ class TestParse(TestCase):
     def test_received_parser(self):
         self.parser.tx_creation_parser('line')
 
-        self.assertTrue(self.parser.tx['tx_hash'])
+        self.assertTrue(self.parser.txs['tx_hash'])
 
-        self.assertTrue(self.parser.tx['tx_hash'].tx_hash, 'tx_hash')
+        self.assertTrue(self.parser.txs['tx_hash'].tx_hash, 'tx_hash')
 
     def test_parse_peer_logic_validation(self):
         log_line = '2017-07-31 16:09:28.663985 node-0 PeerLogicValidation::NewPoWValidBlock' \

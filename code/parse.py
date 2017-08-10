@@ -10,7 +10,7 @@ class Parser:
     def __init__(self, nodes):
         self.nodes_create_blocks = {node.name: None for node in nodes}
         self.blocks = {}
-        self.tx = {}
+        self.txs = {}
 
         self.parsers = [
             self.block_creation_parser,
@@ -73,13 +73,13 @@ class Parser:
     def tx_creation_parser(self, line):
         log_line_with_hash = parse_add_to_wallet(line)
 
-        self.tx[log_line_with_hash.obj_hash] = TxStats(log_line_with_hash.timestamp,
-                                                       log_line_with_hash.node, log_line_with_hash.obj_hash)
+        self.txs[log_line_with_hash.obj_hash] = TxStats(log_line_with_hash.timestamp,
+                                                        log_line_with_hash.node, log_line_with_hash.obj_hash)
 
     def tx_received_parser(self, line):
         log_line_with_hash = parse_accept_to_memory_pool(line)
 
-        tx_stats = self.tx[log_line_with_hash.obj_hash]
+        tx_stats = self.txs[log_line_with_hash.obj_hash]
         tx_stats.receiving_timestamps = np.append(tx_stats.receiving_timestamps,
                                                   log_line_with_hash.timestamp - tx_stats.timestamp)
 

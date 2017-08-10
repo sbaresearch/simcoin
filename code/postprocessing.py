@@ -23,7 +23,7 @@ class PostProcessing:
         parser.execute()
         logging.info('Executed parsing')
 
-        analyzer = Analyzer(parser.blocks, cli_stats.consensus_chain, parser.tx)
+        analyzer = Analyzer(parser.blocks, cli_stats.consensus_chain, parser.txs)
         analyzer.execute()
         logging.info('Executed analyzing')
 
