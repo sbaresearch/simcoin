@@ -44,7 +44,8 @@ def config_logger():
     args = argument_parser.parse_known_args(sys.argv[2:])[0]
     utils.config_logger(args.verbose)
 
-if __name__ == '__main__':
+
+def main():
     cmd_parser = argparse.ArgumentParser(
         description='Simcoin a cryptocurrency simulator.',
         usage='''<command> [<args>]
@@ -78,3 +79,6 @@ if __name__ == '__main__':
     config_logger()
 
     commands[args.command]()
+
+if __name__ == '__main__':
+    main()
