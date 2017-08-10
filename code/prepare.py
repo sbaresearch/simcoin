@@ -18,7 +18,7 @@ def execute(nodes):
 
 
 def give_nodes_spendable_coins(nodes):
-    logging.info('Begin warmup')
+    logging.info('Begin of preparation')
 
     run_nodes(nodes)
 
@@ -49,7 +49,7 @@ def give_nodes_spendable_coins(nodes):
 
     delete_nodes(nodes)
 
-    logging.info('End of warmup')
+    logging.info('End of preparation')
 
 
 def get_spent_to_address(nodes):
