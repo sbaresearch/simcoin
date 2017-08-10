@@ -26,7 +26,7 @@ class TestParse(TestCase):
         node_2 = Mock()
         node_2.name = 'node-2'
 
-        self.parser = Parser([node_0, node_1, node_2], [])
+        self.parser = Parser([node_0, node_1, node_2])
 
     def test_parse_create_new_block(self):
         log_line = '2017-07-27 11:01:22.173139 node-1' \
