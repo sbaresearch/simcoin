@@ -64,9 +64,9 @@ class TestTicksConfig(TestCase):
     def test_create_block_events(self):
         nodes = [NodeConfig('type', 'node-0', 0.5, 0, None), NodeConfig('type', 'node-1', 0.5, 0, None)]
         amount_of_ticks = 10
-        ticks_per_block = 2
+        blocks_per_tick = .5
 
-        block_events = ticks_config.create_block_events(nodes, amount_of_ticks, ticks_per_block)
+        block_events = ticks_config.create_block_events(nodes, amount_of_ticks, blocks_per_tick)
         self.assertEqual(len(block_events), 2)
         for block_events in block_events.values():
             self.assertEqual(block_events, [10, 11, 9])
