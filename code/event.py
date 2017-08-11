@@ -60,6 +60,7 @@ def generate_tx(node):
         txin = CMutableTxIn(COutPoint(txid, 0))
         txin_scriptPubKey = CScript([OP_DUP, OP_HASH160, Hash160(node.seckey.pub), OP_EQUALVERIFY, OP_CHECKSIG])
 
+        amount_in = node.available_coins
         node.available_coins -= config.smallest_amount + config.transaction_fee
         txout1 = CMutableTxOut(node.available_coins, CBitcoinAddress(node.address).to_scriptPubKey())
         txout2 = CMutableTxOut(config.smallest_amount, CBitcoinAddress(node.spent_to_address).to_scriptPubKey())
@@ -70,8 +71,11 @@ def generate_tx(node):
         sig = node.seckey.sign(sighash) + bytes([SIGHASH_ALL])
         txin.scriptSig = CScript([sig, node.seckey.pub])
 
-        tx_hash = node.execute_rpc('sendrawtransaction', b2x(tx.serialize()))
+        tx_serialized = tx.serialize()
+        tx_hash = node.execute_rpc('sendrawtransaction', b2x(tx_serialized))
         node.current_unspent_tx = tx_hash
-        logging.info('{} sendrawtransaction, which got tx_hash={}'.format(node.name, tx_hash))
+        logging.info('{} sendrawtransaction (in={}, out={};{} fee={} bytes={}), which got tx_hash={}'
+                     .format(node.name, amount_in, txout1.nValue, txout2.nValue,
+                             amount_in - (txout1.nValue + txout2.nValue), len(tx_serialized), tx_hash))
     except JSONRPCException as exce:
         logging.info('Could not generate tx for node {}. Exception={}'.format(node.name, exce.message))
