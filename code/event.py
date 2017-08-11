@@ -61,8 +61,8 @@ def generate_tx(node):
         txin_scriptPubKey = CScript([OP_DUP, OP_HASH160, Hash160(node.seckey.pub), OP_EQUALVERIFY, OP_CHECKSIG])
 
         node.available_coins -= config.smallest_amount + config.transaction_fee
-        txout1 = CMutableTxOut(node.available_coins*COIN, CBitcoinAddress(node.address).to_scriptPubKey())
-        txout2 = CMutableTxOut(config.smallest_amount*COIN, CBitcoinAddress(node.spent_to_address).to_scriptPubKey())
+        txout1 = CMutableTxOut(node.available_coins, CBitcoinAddress(node.address).to_scriptPubKey())
+        txout2 = CMutableTxOut(config.smallest_amount, CBitcoinAddress(node.spent_to_address).to_scriptPubKey())
 
         tx = CMutableTransaction([txin], [txout1, txout2], nVersion=2)
 

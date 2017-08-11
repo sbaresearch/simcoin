@@ -87,8 +87,8 @@ class BitcoinNode(Node):
                                 'vout':    0,
                               }],
                               {
-                                self.address:            self.available_coins,
-                                self.spent_to_address:   config.smallest_amount,
+                                self.address:            self.available_coins/100000000,
+                                self.spent_to_address:   config.smallest_amount_btc,
                               }
                               )
         return tx
