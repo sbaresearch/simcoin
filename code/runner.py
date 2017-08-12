@@ -1,15 +1,9 @@
 import dockercmd
 import config
-from node import PublicBitcoinNode
-from node import SelfishPrivateNode
-from node import ProxyNode
 import logging
 import bash
 import prepare
 import utils
-from simulationfiles import network_config
-from simulationfiles import nodes_config
-from simulationfiles.zone import Zone
 
 
 class Runner:
