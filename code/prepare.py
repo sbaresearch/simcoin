@@ -40,10 +40,11 @@ class Prepare:
             node.execute_rpc('generate', amount_of_tx_chains)
 
         wait_until_height_reached(nodes[0], amount_of_tx_chains * len(nodes))
-        nodes[0].execute_rpc('generate', config.warmup_blocks)
+        nodes[0].execute_rpc('generate', config.blocks_needed_to_make_coinbase_spendable)
+        current_height = config.blocks_needed_to_make_coinbase_spendable + amount_of_tx_chains * len(nodes)
 
         for node in nodes:
-            wait_until_height_reached(node, config.warmup_blocks + amount_of_tx_chains * len(nodes))
+            wait_until_height_reached(node, current_height)
 
         get_spent_to_address(nodes)
 
@@ -52,12 +53,13 @@ class Prepare:
         transfer_coinbase_to_normal_tx(nodes)
 
         for i, node in enumerate(nodes):
-            wait_until_height_reached(node, config.warmup_blocks + amount_of_tx_chains * len(nodes) + i)
+            wait_until_height_reached(node, current_height + i)
             node.execute_rpc('generate', 1)
 
+        current_height += len(nodes)
+        self.context.first_block_height = current_height
         for node in nodes:
-            wait_until_height_reached(node, config.warmup_blocks + amount_of_tx_chains * len(nodes) + len(nodes))
-        self.context.first_block_height(config.warmup_blocks + amount_of_tx_chains * len(nodes) + len(nodes))
+            wait_until_height_reached(node, current_height)
         delete_nodes(nodes)
 
         logging.info('End of preparation')
