@@ -8,6 +8,7 @@ import tccmd
 import proxycmd
 import utils
 import errno
+import collections
 
 
 class Node:
@@ -86,10 +87,11 @@ class BitcoinNode(Node):
                                 'txid':    self.current_unspent_tx,
                                 'vout':    0,
                               }],
-                              {
-                                self.address:            self.available_coins/100000000,
-                                self.spent_to_address:   config.smallest_amount_btc,
-                              }
+                              collections.OrderedDict(
+                                  [
+                                      (self.address, self.available_coins/100000000),
+                                      (self.spent_to_address, config.smallest_amount_btc)
+                                  ])
                               )
         return tx
 
