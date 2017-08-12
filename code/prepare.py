@@ -51,7 +51,8 @@ class Prepare:
 
         get_coinbase_variables(nodes)
 
-        transfer_coinbase_to_normal_tx(nodes)
+        for node in nodes:
+            node.transfer_coinbases_to_normal_tx()
 
         for i, node in enumerate(nodes):
             wait_until_height_reached(node, current_height + i)
@@ -69,13 +70,6 @@ class Prepare:
 def get_spent_to_address(nodes):
     for node in nodes:
         node.spent_to_address = node.execute_rpc('getnewaddress')
-
-
-def transfer_coinbase_to_normal_tx(nodes):
-    for node in nodes:
-        raw_transaction = node.create_coinbase_transfer_tx()
-        signed_raw_transaction = node.execute_rpc('signrawtransaction', raw_transaction)['hex']
-        node.current_unspent_tx = node.execute_rpc('sendrawtransaction', signed_raw_transaction)
 
 
 def get_coinbase_variables(nodes):
