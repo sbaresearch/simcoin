@@ -6,6 +6,7 @@ import prepare
 import config
 import bitcoin
 from bitcoin.wallet import CBitcoinSecret
+from mock import Mock
 
 
 class TestPrepare(TestCase):
@@ -138,3 +139,9 @@ class TestPrepare(TestCase):
 
         for node in nodes:
             self.assertEqual(node.execute_rpc.call_count, 1)
+
+    def test_calc_number_of_tx_chains(self):
+        config.max_in_mempool_ancestors = 25
+        amount = prepare.calc_number_of_tx_chains(2, 1/600, 10)
+
+        self.assertEqual(amount, 18)

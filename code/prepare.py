@@ -5,6 +5,7 @@ import dockercmd
 import os
 import utils
 from bitcoin.wallet import CBitcoinSecret
+import math
 
 
 class Prepare:
@@ -117,3 +118,13 @@ def wait_until_height_reached(node, height):
     while int(node.execute_rpc('getblockcount')) < height:
         logging.debug('Waiting until height={} is reached...'.format(str(height)))
         utils.sleep(0.2)
+
+
+def calc_number_of_tx_chains(tx_per_tick, blocks_per_tick, number_of_nodes):
+    tx_per_block = tx_per_tick/blocks_per_tick
+    tx_per_block_per_node = tx_per_block/number_of_nodes
+
+    # 3 times + 3 chains in reserve
+    needed_tx_chains = (tx_per_block_per_node / config.max_in_mempool_ancestors) * 3 + 3
+
+    return math.ceil(needed_tx_chains)
