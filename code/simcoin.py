@@ -22,7 +22,7 @@ def run():
 
     network_config.create(unknown_arguments=True)
 
-    simulation.run(unknown_arguments=True)
+    simulation.run()
 
 commands = {
     'nodes':        nodes_config.create,

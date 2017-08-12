@@ -37,6 +37,11 @@ def create_parser():
                         , type=checkargs.check_positive_int
                         , help='Set the seed.'
                         )
+
+    parser.add_argument('--tick-duration'
+                        , default=1
+                        , type=checkargs.check_positive_float
+                        , help='Duration of ticks.')
     return parser
 
 
