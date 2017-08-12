@@ -7,49 +7,53 @@ import utils
 from bitcoin.wallet import CBitcoinSecret
 
 
-def execute(nodes):
-    prepare_simulation_dir()
-    remove_old_containers_if_exists()
-    recreate_network()
+class Prepare:
+    def __init__(self, context):
+        self.context = context
 
-    utils.sleep(4)
+    def execute(self):
+        prepare_simulation_dir()
+        remove_old_containers_if_exists()
+        recreate_network()
 
-    give_nodes_spendable_coins(nodes)
+        utils.sleep(4)
 
+        self.give_nodes_spendable_coins()
 
-def give_nodes_spendable_coins(nodes):
-    logging.info('Begin of preparation')
+    def give_nodes_spendable_coins(self):
+        logging.info('Begin of preparation')
+        nodes = list(self.context.all_bitcoin_nodes.values())
 
-    run_nodes(nodes)
+        run_nodes(nodes)
 
-    for i, node in enumerate(nodes):
-        for node_to_be_connected in nodes[max(0, i - 5):i]:
-            node.execute_rpc('addnode', str(node_to_be_connected.ip), 'add')
-        wait_until_height_reached(node, i * config.start_blocks_per_node)
-        node.execute_rpc('generate', config.start_blocks_per_node)
+        for i, node in enumerate(nodes):
+            for node_to_be_connected in nodes[max(0, i - 5):i]:
+                node.execute_rpc('addnode', str(node_to_be_connected.ip), 'add')
+            wait_until_height_reached(node, i * config.start_blocks_per_node)
+            node.execute_rpc('generate', config.start_blocks_per_node)
 
-    wait_until_height_reached(nodes[0], config.start_blocks_per_node * len(nodes))
-    nodes[0].execute_rpc('generate', config.warmup_blocks)
+        wait_until_height_reached(nodes[0], config.start_blocks_per_node * len(nodes))
+        nodes[0].execute_rpc('generate', config.warmup_blocks)
 
-    for node in nodes:
-        wait_until_height_reached(node, config.warmup_blocks + config.start_blocks_per_node * len(nodes))
+        for node in nodes:
+            wait_until_height_reached(node, config.warmup_blocks + config.start_blocks_per_node * len(nodes))
 
-    get_spent_to_address(nodes)
+        get_spent_to_address(nodes)
 
-    get_coinbase_variables(nodes)
+        get_coinbase_variables(nodes)
 
-    transfer_coinbase_to_normal_tx(nodes)
+        transfer_coinbase_to_normal_tx(nodes)
 
-    for i, node in enumerate(nodes):
-        wait_until_height_reached(node, config.warmup_blocks + config.start_blocks_per_node * len(nodes) + i)
-        node.execute_rpc('generate', 1)
+        for i, node in enumerate(nodes):
+            wait_until_height_reached(node, config.warmup_blocks + config.start_blocks_per_node * len(nodes) + i)
+            node.execute_rpc('generate', 1)
 
-    for node in nodes:
-        wait_until_height_reached(node, config.warmup_blocks + config.start_blocks_per_node * len(nodes) + len(nodes))
+        for node in nodes:
+            wait_until_height_reached(node, config.warmup_blocks + config.start_blocks_per_node * len(nodes) + len(nodes))
 
-    delete_nodes(nodes)
+        delete_nodes(nodes)
 
-    logging.info('End of preparation')
+        logging.info('End of preparation')
 
 
 def get_spent_to_address(nodes):

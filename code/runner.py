@@ -9,12 +9,13 @@ import utils
 class Runner:
     def __init__(self, context):
         self.context = context
+        self.prepare = None
         self.event = None
         self.post_processing = None
 
     def run(self):
         try:
-            prepare.execute(list(self.context.all_bitcoin_nodes.values()))
+            self.prepare.execute()
 
             for node in self.context.all_bitcoin_nodes.values():
                 node.run()

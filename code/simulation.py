@@ -6,6 +6,7 @@ from event import Event
 import config
 import bash
 from context import Context
+from prepare import Prepare
 
 
 def run():
@@ -13,6 +14,9 @@ def run():
     context.create()
 
     runner = Runner(context)
+
+    prepare = Prepare(context)
+    runner.prepare = prepare
 
     post_processing = PostProcessing(context)
     runner.post_processing = post_processing
