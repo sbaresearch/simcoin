@@ -27,17 +27,23 @@ class Prepare:
 
         run_nodes(nodes)
 
+        amount_of_tx_chains = calc_number_of_tx_chains(
+            self.context.args.tx_per_tick,
+            self.context.args.blocks_per_tick,
+            len(nodes)
+        )
+
         for i, node in enumerate(nodes):
             for node_to_be_connected in nodes[max(0, i - 5):i]:
                 node.execute_rpc('addnode', str(node_to_be_connected.ip), 'add')
-            wait_until_height_reached(node, i * config.start_blocks_per_node)
-            node.execute_rpc('generate', config.start_blocks_per_node)
+            wait_until_height_reached(node, i * amount_of_tx_chains)
+            node.execute_rpc('generate', amount_of_tx_chains)
 
-        wait_until_height_reached(nodes[0], config.start_blocks_per_node * len(nodes))
+        wait_until_height_reached(nodes[0], amount_of_tx_chains * len(nodes))
         nodes[0].execute_rpc('generate', config.warmup_blocks)
 
         for node in nodes:
-            wait_until_height_reached(node, config.warmup_blocks + config.start_blocks_per_node * len(nodes))
+            wait_until_height_reached(node, config.warmup_blocks + amount_of_tx_chains * len(nodes))
 
         get_spent_to_address(nodes)
 
@@ -46,12 +52,12 @@ class Prepare:
         transfer_coinbase_to_normal_tx(nodes)
 
         for i, node in enumerate(nodes):
-            wait_until_height_reached(node, config.warmup_blocks + config.start_blocks_per_node * len(nodes) + i)
+            wait_until_height_reached(node, config.warmup_blocks + amount_of_tx_chains * len(nodes) + i)
             node.execute_rpc('generate', 1)
 
         for node in nodes:
-            wait_until_height_reached(node, config.warmup_blocks + config.start_blocks_per_node * len(nodes) + len(nodes))
-
+            wait_until_height_reached(node, config.warmup_blocks + amount_of_tx_chains * len(nodes) + len(nodes))
+        self.context.first_block_height(config.warmup_blocks + amount_of_tx_chains * len(nodes) + len(nodes))
         delete_nodes(nodes)
 
         logging.info('End of preparation')

@@ -24,6 +24,7 @@ class TestPrepare(TestCase):
     @patch('prepare.get_coinbase_variables', lambda nodes: None)
     @patch('prepare.transfer_coinbase_to_normal_tx', lambda nodes: None)
     @patch('prepare.get_spent_to_address', lambda nodes: None)
+    @patch('prepare.calc_number_of_tx_chains', lambda txs_per_tick, block_per_tick, amount_of_nodes: 5)
     def test_warmup_block_generation(self, m_wait_until_height_reached):
         node_0 = MagicMock()
         node_1 = MagicMock()
