@@ -6,6 +6,7 @@ import os
 import utils
 from bitcoin.wallet import CBitcoinSecret
 import math
+from node import TxChain
 
 
 class Prepare:
@@ -79,11 +80,12 @@ def transfer_coinbase_to_normal_tx(nodes):
 
 def get_coinbase_variables(nodes):
     for node in nodes:
-        unspent_tx = node.execute_rpc('listunspent')[0]
+        for unspent_tx in node.execute_rpc('listunspent'):
+            a = node.execute_rpc('dumpprivkey', node.address)
+            seckey = CBitcoinSecret(a)
+            tx_chain = TxChain(unspent_tx["txid"], unspent_tx["address"], seckey)
 
-        node.current_unspent_tx = unspent_tx["txid"]
-        node.address = unspent_tx["address"]
-        node.seckey = CBitcoinSecret(node.execute_rpc('dumpprivkey', node.address))
+            node.tx_chains.append(tx_chain)
 
 
 def delete_nodes(nodes):

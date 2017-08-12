@@ -39,10 +39,7 @@ class BitcoinNode(Node):
         self.ip = ip
         self.spent_to_address = None
         self.rpc_connection = None
-        self.current_unspent_tx = None
-        self.address = None
-        self.seckey = None
-        self.available_coins = config.coinbase_amount
+        self.tx_chains = []
 
     def run(self):
         bash.check_output(bitcoincmd.start(self))
@@ -140,3 +137,9 @@ class ProxyNode(Node, PublicNode):
             bash.check_output(cmd)
 
 
+class TxChain:
+    def __init__(self, current_unspent_tx, address, seckey):
+        self.current_unspent_tx = current_unspent_tx
+        self.address = address
+        self.seckey = seckey
+        self.available_coins = config.coinbase_amount

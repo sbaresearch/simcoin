@@ -103,18 +103,31 @@ class TestPrepare(TestCase):
 
     def test_get_coinbase_variables(self):
         node_1 = MagicMock()
+        node_1.tx_chains = []
 
         node_1.execute_rpc.side_effect = [
-            [{"txid": 'tx_hash', 'address': 'address_hash'}],
+            [
+                {"txid": 'tx_hash_1', 'address': 'address_hash_1'},
+                {"txid": 'tx_hash_2', 'address': 'address_hash_2'}
+            ],
+            'cTCrrgVLfBqEZ1dxmCnEwmiEWzeZHU8uw3CNvLVvbT4CrBeDdTqc',
             'cTCrrgVLfBqEZ1dxmCnEwmiEWzeZHU8uw3CNvLVvbT4CrBeDdTqc'
         ]
 
         prepare.get_coinbase_variables([node_1])
 
-        self.assertEqual(node_1.execute_rpc.call_count, 2)
-        self.assertEqual(node_1.current_unspent_tx, 'tx_hash')
-        self.assertEqual(node_1.address, 'address_hash')
-        self.assertEqual(node_1.seckey,  CBitcoinSecret('cTCrrgVLfBqEZ1dxmCnEwmiEWzeZHU8uw3CNvLVvbT4CrBeDdTqc'))
+        self.assertEqual(node_1.execute_rpc.call_count, 3)
+        self.assertEqual(len(node_1.tx_chains), 2)
+
+        chain_1 = node_1.tx_chains[0]
+        self.assertEqual(chain_1.current_unspent_tx, 'tx_hash_1')
+        self.assertEqual(chain_1.address, 'address_hash_1')
+        self.assertEqual(chain_1.seckey,  CBitcoinSecret('cTCrrgVLfBqEZ1dxmCnEwmiEWzeZHU8uw3CNvLVvbT4CrBeDdTqc'))
+
+        chain_1 = node_1.tx_chains[1]
+        self.assertEqual(chain_1.current_unspent_tx, 'tx_hash_2')
+        self.assertEqual(chain_1.address, 'address_hash_2')
+        self.assertEqual(chain_1.seckey,  CBitcoinSecret('cTCrrgVLfBqEZ1dxmCnEwmiEWzeZHU8uw3CNvLVvbT4CrBeDdTqc'))
 
     def test_transfer_coinbase_to_normal_tx(self):
         node_1 = MagicMock()
