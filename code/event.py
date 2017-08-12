@@ -55,27 +55,29 @@ def execute_cmd(cmd, nodes):
 def generate_tx(node):
     # generate_tx_rpc is not always successful. eg. miner has not enough money or tx fee calculation fails
     try:
-        txid = lx(node.current_unspent_tx)
+        tx_chain = node.get_next_tx_chain()
+        txid = lx(tx_chain.current_unspent_tx)
         txin = CMutableTxIn(COutPoint(txid, 0))
-        txin_scriptPubKey = CScript([OP_DUP, OP_HASH160, Hash160(node.seckey.pub), OP_EQUALVERIFY, OP_CHECKSIG])
+        txin_scriptPubKey = CScript([OP_DUP, OP_HASH160, Hash160(tx_chain.seckey.pub), OP_EQUALVERIFY, OP_CHECKSIG])
 
-        amount_in = node.available_coins
-        node.available_coins -= config.smallest_amount + config.transaction_fee
-        txout1 = CMutableTxOut(node.available_coins, CBitcoinAddress(node.address).to_scriptPubKey())
+        amount_in = tx_chain.available_coins
+        tx_chain.available_coins -= config.smallest_amount + config.transaction_fee
+        txout1 = CMutableTxOut(tx_chain.available_coins, CBitcoinAddress(tx_chain.address).to_scriptPubKey())
         txout2 = CMutableTxOut(config.smallest_amount, CBitcoinAddress(node.spent_to_address).to_scriptPubKey())
 
         tx = CMutableTransaction([txin], [txout1, txout2], nVersion=2)
 
         sighash = SignatureHash(txin_scriptPubKey, tx, 0, SIGHASH_ALL)
-        sig = node.seckey.sign(sighash) + bytes([SIGHASH_ALL])
-        txin.scriptSig = CScript([sig, node.seckey.pub])
+        sig = tx_chain.seckey.sign(sighash) + bytes([SIGHASH_ALL])
+        txin.scriptSig = CScript([sig, tx_chain.seckey.pub])
 
         tx_serialized = tx.serialize()
-        logging.info('{} trying to sendrawtransaction (in={}, out={};{} fee={} bytes={}'
+        logging.info('{} trying to sendrawtransaction (in={}, out={};{} fee={} bytes={}) using tx_chain number='
                      .format(node.name, amount_in, txout1.nValue, txout2.nValue,
-                             amount_in - (txout1.nValue + txout2.nValue), len(tx_serialized)))
+                             amount_in - (txout1.nValue + txout2.nValue), len(tx_serialized),
+                             node.current_tx_chain_index))
         tx_hash = node.execute_rpc('sendrawtransaction', b2x(tx_serialized))
-        node.current_unspent_tx = tx_hash
+        tx_chain.current_unspent_tx = tx_hash
         logging.info('{} sendrawtransaction (in={}, out={};{} fee={} bytes={}), which got tx_hash={}'
                      .format(node.name, amount_in, txout1.nValue, txout2.nValue,
                              amount_in - (txout1.nValue + txout2.nValue), len(tx_serialized), tx_hash))

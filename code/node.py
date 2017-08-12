@@ -40,6 +40,7 @@ class BitcoinNode(Node):
         self.ip = ip
         self.spent_to_address = None
         self.rpc_connection = None
+        self.current_tx_chain_index = 0
         self.tx_chains = []
 
     def run(self):
@@ -100,6 +101,12 @@ class BitcoinNode(Node):
             tx_chain = TxChain(unspent_tx["txid"], unspent_tx["address"], seckey)
 
             self.tx_chains.append(tx_chain)
+
+    def get_next_tx_chain(self):
+        tx_chain = self.tx_chains[self.current_tx_chain_index]
+        self.current_tx_chain_index = (self.current_tx_chain_index + 1) % len(self.tx_chains)
+
+        return tx_chain
 
 
 class PublicBitcoinNode(BitcoinNode, PublicNode):
