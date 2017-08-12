@@ -51,10 +51,6 @@ class BitcoinNode(Node):
     def connect_to_rpc(self):
         self.rpc_connection = AuthServiceProxy(config.create_rpc_connection_string(self.ip))
 
-    def connect(self):
-        for ip in self.outgoing_ips:
-            self.execute_rpc('addnode', str(ip), 'add')
-
     def delete_peers_file(self):
         return bash.check_output(bitcoincmd.rm_peers(self.name))
 
