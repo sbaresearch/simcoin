@@ -72,6 +72,9 @@ def generate_tx(node):
         txin.scriptSig = CScript([sig, node.seckey.pub])
 
         tx_serialized = tx.serialize()
+        logging.info('{} trying to sendrawtransaction (in={}, out={};{} fee={} bytes={}'
+                     .format(node.name, amount_in, txout1.nValue, txout2.nValue,
+                             amount_in - (txout1.nValue + txout2.nValue), len(tx_serialized)))
         tx_hash = node.execute_rpc('sendrawtransaction', b2x(tx_serialized))
         node.current_unspent_tx = tx_hash
         logging.info('{} sendrawtransaction (in={}, out={};{} fee={} bytes={}), which got tx_hash={}'
