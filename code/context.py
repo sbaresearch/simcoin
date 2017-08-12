@@ -59,8 +59,3 @@ class Context:
         connections = network_config.read_connections()
         for node in self.all_public_nodes.values():
             node.outgoing_ips = [str(self.all_public_nodes[connection].ip) for connection in connections[node.name]]
-
-        self.first_block_height = config.warmup_blocks + \
-                                  config.start_blocks_per_node * len(self.all_bitcoin_nodes) + \
-                                  len(self.all_bitcoin_nodes)
-
