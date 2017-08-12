@@ -17,6 +17,8 @@ class Context:
         self.args = utils.read_json_file(config.args_json)
         self.zone = Zone()
 
+        self.config_nodes = None
+
         self.nodes = None
         self.selfish_node_private_nodes = None
         self.selfish_node_proxies = None
@@ -28,9 +30,9 @@ class Context:
         self.first_block_height = None
 
     def create(self):
-        config_nodes = nodes_config.read()
-        nodes = [node for node in config_nodes if node.node_type == 'bitcoin']
-        selfish_nodes = [node for node in config_nodes if node.node_type == 'selfish']
+        self.config_nodes = nodes_config.read()
+        nodes = [node for node in self.config_nodes if node.node_type == 'bitcoin']
+        selfish_nodes = [node for node in self.config_nodes if node.node_type == 'selfish']
 
         self.nodes = {node.name: PublicBitcoinNode(node.name, self.zone.get_ip(node.latency),
                                                    node.latency, node.docker_image) for node in nodes}
