@@ -5,18 +5,19 @@ from postprocessing import PostProcessing
 from event import Event
 import config
 import bash
-import utils
+from context import Context
 
 
 def run():
-    args = utils.read_json_file(config.args_json)
+    context = Context()
+    context.create()
 
-    runner = Runner()
+    runner = Runner(context)
 
-    post_processing = PostProcessing(runner)
+    post_processing = PostProcessing(context)
     runner.post_processing = post_processing
 
-    event = Event(runner, args.tick_duration)
+    event = Event(context)
     runner.event = event
 
     start = time.time()

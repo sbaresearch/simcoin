@@ -20,7 +20,9 @@ class TestEvent(TestCase):
         """).strip()
 
         with patch('builtins.open', mock_open(read_data=data)):
-            e = Event(Mock(), 1)
+            mock = Mock()
+            mock.args.tick_duration = 1
+            e = Event(mock)
 
             m_time.return_value = 0
 
@@ -40,7 +42,9 @@ class TestEvent(TestCase):
         """).strip()
 
         with patch('builtins.open', mock_open(read_data=data)):
-            e = Event(Mock(), 1)
+            mock = Mock()
+            mock.args.tick_duration = 1
+            e = Event(mock)
 
             m_time.return_value = 0
 
@@ -58,7 +62,9 @@ class TestEvent(TestCase):
         """).strip()
 
         with patch('builtins.open', mock_open(read_data=data)):
-            e = Event(Mock(), 0)
+            mock = Mock()
+            mock.args.tick_duration = 0
+            e = Event(mock)
 
             m_time.side_effect = [0, 1, 10]
 
@@ -74,7 +80,9 @@ class TestEvent(TestCase):
         """).strip()
 
         with patch('builtins.open', mock_open(read_data=data)):
-            e = Event(Mock(), 0)
+            mock = Mock()
+            mock.args.tick_duration = 0
+            e = Event(mock)
             m_execute_cmd.side_effect = Exception('mock')
 
             with self.assertRaises(Exception) as context:

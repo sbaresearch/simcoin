@@ -10,9 +10,8 @@ from bitcoin.wallet import CBitcoinAddress
 
 class Event:
 
-    def __init__(self, runner, tick_duration):
-        self.runner = runner
-        self.tick_duration = tick_duration
+    def __init__(self, context):
+        self.context = context
 
     def execute(self):
         utils.check_for_file(config.ticks_csv)
@@ -24,8 +23,8 @@ class Event:
                 line = line.rstrip()
                 cmds = line.split(';')
                 for cmd in cmds:
-                    execute_cmd(cmd, self.runner.all_bitcoin_nodes)
-                next_tick = start_time + self.tick_duration
+                    execute_cmd(cmd, self.context.all_bitcoin_nodes)
+                next_tick = start_time + self.context.args.tick_duration
                 current_time = time.time()
                 if current_time < next_tick:
                     difference = next_tick - current_time
@@ -34,7 +33,7 @@ class Event:
                 else:
                     logging.error('Current_time={} is higher then next_tick={}.'
                                   ' Consider to raise the tick_duration which is currently {}s.'
-                                  .format(current_time, next_tick, self.tick_duration))
+                                  .format(current_time, next_tick, self.context.args.tick_duration))
                     exit(-1)
 
 
