@@ -21,8 +21,6 @@ class TestPrepare(TestCase):
     @patch('prepare.wait_until_height_reached')
     @patch('utils.sleep', lambda time: None)
     @patch('prepare.delete_nodes', lambda nodes: None)
-    @patch('prepare.get_coinbase_variables', lambda nodes: None)
-    @patch('prepare.get_spent_to_address', lambda nodes: None)
     @patch('prepare.calc_number_of_tx_chains', lambda txs_per_tick, block_per_tick, amount_of_nodes: 5)
     def test_warmup_block_generation(self, m_wait_until_height_reached):
         node_0 = MagicMock()
@@ -99,52 +97,6 @@ class TestPrepare(TestCase):
         prepare.wait_until_height_reached(node, 10)
 
         self.assertFalse(m_sleep.called)
-
-    def test_get_coinbase_variables(self):
-        node_1 = MagicMock()
-        node_1.tx_chains = []
-
-        node_1.execute_rpc.side_effect = [
-            [
-                {"txid": 'tx_hash_1', 'address': 'address_hash_1'},
-                {"txid": 'tx_hash_2', 'address': 'address_hash_2'}
-            ],
-            'cTCrrgVLfBqEZ1dxmCnEwmiEWzeZHU8uw3CNvLVvbT4CrBeDdTqc',
-            'cTCrrgVLfBqEZ1dxmCnEwmiEWzeZHU8uw3CNvLVvbT4CrBeDdTqc'
-        ]
-
-        prepare.get_coinbase_variables([node_1])
-
-        self.assertEqual(node_1.execute_rpc.call_count, 3)
-        self.assertEqual(len(node_1.tx_chains), 2)
-
-        chain_1 = node_1.tx_chains[0]
-        self.assertEqual(chain_1.current_unspent_tx, 'tx_hash_1')
-        self.assertEqual(chain_1.address, 'address_hash_1')
-        self.assertEqual(chain_1.seckey,  CBitcoinSecret('cTCrrgVLfBqEZ1dxmCnEwmiEWzeZHU8uw3CNvLVvbT4CrBeDdTqc'))
-
-        chain_1 = node_1.tx_chains[1]
-        self.assertEqual(chain_1.current_unspent_tx, 'tx_hash_2')
-        self.assertEqual(chain_1.address, 'address_hash_2')
-        self.assertEqual(chain_1.seckey,  CBitcoinSecret('cTCrrgVLfBqEZ1dxmCnEwmiEWzeZHU8uw3CNvLVvbT4CrBeDdTqc'))
-
-    def test_create_spent_to_address(self):
-        node_1 = MagicMock()
-        node_1.execute_rpc.return_value = 'spent_to_address'
-
-        prepare.get_spent_to_address([node_1])
-
-        self.assertEqual(node_1.spent_to_address, 'spent_to_address')
-
-    def test_create_spent_to_address_multiple_nodes(self):
-        node_1 = MagicMock()
-        node_2 = MagicMock()
-        nodes = [node_1, node_2]
-
-        prepare.get_spent_to_address(nodes)
-
-        for node in nodes:
-            self.assertEqual(node.execute_rpc.call_count, 1)
 
     def test_calc_number_of_tx_chains(self):
         config.max_in_mempool_ancestors = 25

@@ -4,9 +4,7 @@ import bash
 import dockercmd
 import os
 import utils
-from bitcoin.wallet import CBitcoinSecret
 import math
-from node import TxChain
 
 
 class Prepare:
@@ -47,11 +45,9 @@ class Prepare:
         for node in nodes:
             wait_until_height_reached(node, current_height)
 
-        get_spent_to_address(nodes)
-
-        get_coinbase_variables(nodes)
-
         for node in nodes:
+            node.set_spent_to_address()
+            node.create_tx_chains()
             node.transfer_coinbases_to_normal_tx()
 
         for i, node in enumerate(nodes):
@@ -65,21 +61,6 @@ class Prepare:
         delete_nodes(nodes)
 
         logging.info('End of preparation')
-
-
-def get_spent_to_address(nodes):
-    for node in nodes:
-        node.spent_to_address = node.execute_rpc('getnewaddress')
-
-
-def get_coinbase_variables(nodes):
-    for node in nodes:
-        for unspent_tx in node.execute_rpc('listunspent'):
-            a = node.execute_rpc('dumpprivkey', node.address)
-            seckey = CBitcoinSecret(a)
-            tx_chain = TxChain(unspent_tx["txid"], unspent_tx["address"], seckey)
-
-            node.tx_chains.append(tx_chain)
 
 
 def delete_nodes(nodes):

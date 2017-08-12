@@ -9,6 +9,7 @@ import proxycmd
 import utils
 import errno
 from collections import OrderedDict
+from bitcoin.wallet import CBitcoinSecret
 
 
 class Node:
@@ -89,6 +90,16 @@ class BitcoinNode(Node):
                                   )
             signed_raw_transaction = self.execute_rpc('signrawtransaction', raw_transaction)['hex']
             tx_chain.current_unspent_tx = self.execute_rpc('sendrawtransaction', signed_raw_transaction)
+
+    def set_spent_to_address(self):
+        self.spent_to_address = self.execute_rpc('getnewaddress')
+
+    def create_tx_chains(self):
+        for unspent_tx in self.execute_rpc('listunspent'):
+            seckey = CBitcoinSecret(self.execute_rpc('dumpprivkey', unspent_tx['address']))
+            tx_chain = TxChain(unspent_tx["txid"], unspent_tx["address"], seckey)
+
+            self.tx_chains.append(tx_chain)
 
 
 class PublicBitcoinNode(BitcoinNode, PublicNode):
