@@ -3,6 +3,7 @@ from mock import MagicMock
 from mock import patch
 from mock import mock_open
 import prepare
+from prepare import Prepare
 import config
 import bitcoin
 from bitcoin.wallet import CBitcoinSecret
@@ -12,6 +13,9 @@ from mock import Mock
 class TestPrepare(TestCase):
 
     def setUp(self):
+        self.context = Mock()
+        self.prepare = Prepare(self.context)
+
         bitcoin.SelectParams('regtest')
 
     @patch('prepare.wait_until_height_reached')
@@ -24,8 +28,9 @@ class TestPrepare(TestCase):
         node_0 = MagicMock()
         node_1 = MagicMock()
         nodes = [node_0, node_1]
+        self.context.all_bitcoin_nodes.values.return_value = nodes
 
-        prepare.give_nodes_spendable_coins(nodes)
+        self.prepare.give_nodes_spendable_coins()
 
         self.assertEqual(m_wait_until_height_reached.call_count, len(nodes) * 4 + 1)
         self.assertEqual(node_0.execute_rpc.call_count, 3)
