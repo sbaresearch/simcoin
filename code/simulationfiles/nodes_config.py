@@ -45,6 +45,9 @@ def create(unknown_arguments=False):
     for index, node_group in enumerate(node_groups):
         node_args = getattr(args, node_group['variable'])
         if node_args:
+            if len(node_args) != 5:
+                parser.exit(-1, 'Pass [node_type] [amount] [share] [latency] [docker-image] for {}\n'
+                            .format(node_group['variable']))
             check_if_image_exists(node_args)
 
             nodes.extend(create_node_group(node_args, index + 1))

@@ -5,7 +5,7 @@ WORKDIR "/bitcoin"
 RUN git checkout c87a0ae
 
 RUN ./autogen.sh
-RUN ./configure
+RUN ./configure --disable-hardening
 RUN make
 
 ENV PATH /bitcoin/src:$PATH

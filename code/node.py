@@ -8,6 +8,8 @@ import tccmd
 import proxycmd
 import utils
 import errno
+from collections import OrderedDict
+from bitcoin.wallet import CBitcoinSecret
 
 
 class Node:
@@ -38,10 +40,8 @@ class BitcoinNode(Node):
         self.ip = ip
         self.spent_to_address = None
         self.rpc_connection = None
-        self.current_unspent_tx = None
-        self.address = None
-        self.seckey = None
-        self.available_coins = config.coinbase_amount
+        self.current_tx_chain_index = 0
+        self.tx_chains = []
 
     def run(self):
         bash.check_output(bitcoincmd.start(self))
@@ -50,24 +50,16 @@ class BitcoinNode(Node):
     def connect_to_rpc(self):
         self.rpc_connection = AuthServiceProxy(config.create_rpc_connection_string(self.ip))
 
-    def connect(self):
-        for ip in self.outgoing_ips:
-            self.execute_rpc('addnode', str(ip), 'add')
-
     def delete_peers_file(self):
         return bash.check_output(bitcoincmd.rm_peers(self.name))
 
     def execute_rpc(self,  *args):
         retry = 1
         while retry >= 0:
-            logging.debug("try {}".format(retry))
             try:
                 method_to_call = getattr(self.rpc_connection, args[0])
 
-                logging.info('{} {}'.format(self.name, args))
-                return_value = method_to_call(*args[1:])
-                logging.info(return_value)
-                return return_value
+                return method_to_call(*args[1:])
             except IOError as error:
                 if error.errno == errno.EPIPE:
                     retry -= 1
@@ -83,19 +75,38 @@ class BitcoinNode(Node):
     def cat_log_cmd(self):
         return dockercmd.exec_cmd(self.name, 'cat {}'.format(BitcoinNode.log_file))
 
-    def create_coinbase_transfer_tx(self):
-        self.available_coins -= config.transaction_fee + config.smallest_amount
-        tx = self.execute_rpc('createrawtransaction',
-                              [{
-                                'txid':    self.current_unspent_tx,
-                                'vout':    0,
-                              }],
-                              {
-                                self.address:            self.available_coins,
-                                self.spent_to_address:   config.smallest_amount,
-                              }
-                              )
-        return tx
+    def transfer_coinbases_to_normal_tx(self):
+        for tx_chain in self.tx_chains:
+            tx_chain.available_coins -= config.transaction_fee + config.smallest_amount
+            raw_transaction = self.execute_rpc('createrawtransaction',
+                                  [{
+                                    'txid':    tx_chain.current_unspent_tx,
+                                    'vout':    0,
+                                  }],
+                                  OrderedDict(
+                                      [
+                                          (tx_chain.address, tx_chain.available_coins/100000000),
+                                          (self.spent_to_address, config.smallest_amount_btc)
+                                      ])
+                                  )
+            signed_raw_transaction = self.execute_rpc('signrawtransaction', raw_transaction)['hex']
+            tx_chain.current_unspent_tx = self.execute_rpc('sendrawtransaction', signed_raw_transaction)
+
+    def set_spent_to_address(self):
+        self.spent_to_address = self.execute_rpc('getnewaddress')
+
+    def create_tx_chains(self):
+        for unspent_tx in self.execute_rpc('listunspent'):
+            seckey = CBitcoinSecret(self.execute_rpc('dumpprivkey', unspent_tx['address']))
+            tx_chain = TxChain(unspent_tx["txid"], unspent_tx["address"], seckey)
+
+            self.tx_chains.append(tx_chain)
+
+    def get_next_tx_chain(self):
+        tx_chain = self.tx_chains[self.current_tx_chain_index]
+        self.current_tx_chain_index = (self.current_tx_chain_index + 1) % len(self.tx_chains)
+
+        return tx_chain
 
 
 class PublicBitcoinNode(BitcoinNode, PublicNode):
@@ -146,3 +157,9 @@ class ProxyNode(Node, PublicNode):
             bash.check_output(cmd)
 
 
+class TxChain:
+    def __init__(self, current_unspent_tx, address, seckey):
+        self.current_unspent_tx = current_unspent_tx
+        self.address = address
+        self.seckey = seckey
+        self.available_coins = config.coinbase_amount

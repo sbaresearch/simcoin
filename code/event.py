@@ -10,9 +10,8 @@ from bitcoin.wallet import CBitcoinAddress
 
 class Event:
 
-    def __init__(self, runner, tick_duration):
-        self.runner = runner
-        self.tick_duration = tick_duration
+    def __init__(self, context):
+        self.context = context
 
     def execute(self):
         utils.check_for_file(config.ticks_csv)
@@ -24,8 +23,8 @@ class Event:
                 line = line.rstrip()
                 cmds = line.split(';')
                 for cmd in cmds:
-                    execute_cmd(cmd, self.runner.all_bitcoin_nodes)
-                next_tick = start_time + self.tick_duration
+                    execute_cmd(cmd, self.context.all_bitcoin_nodes)
+                next_tick = start_time + self.context.args.tick_duration
                 current_time = time.time()
                 if current_time < next_tick:
                     difference = next_tick - current_time
@@ -34,7 +33,7 @@ class Event:
                 else:
                     logging.error('Current_time={} is higher then next_tick={}.'
                                   ' Consider to raise the tick_duration which is currently {}s.'
-                                  .format(current_time, next_tick, self.tick_duration))
+                                  .format(current_time, next_tick, self.context.args.tick_duration))
                     exit(-1)
 
 
@@ -56,22 +55,31 @@ def execute_cmd(cmd, nodes):
 def generate_tx(node):
     # generate_tx_rpc is not always successful. eg. miner has not enough money or tx fee calculation fails
     try:
-        txid = lx(node.current_unspent_tx)
+        tx_chain = node.get_next_tx_chain()
+        txid = lx(tx_chain.current_unspent_tx)
         txin = CMutableTxIn(COutPoint(txid, 0))
-        txin_scriptPubKey = CScript([OP_DUP, OP_HASH160, Hash160(node.seckey.pub), OP_EQUALVERIFY, OP_CHECKSIG])
+        txin_scriptPubKey = CScript([OP_DUP, OP_HASH160, Hash160(tx_chain.seckey.pub), OP_EQUALVERIFY, OP_CHECKSIG])
 
-        node.available_coins -= config.smallest_amount + config.transaction_fee
-        txout1 = CMutableTxOut(node.available_coins*COIN, CBitcoinAddress(node.address).to_scriptPubKey())
-        txout2 = CMutableTxOut(config.smallest_amount*COIN, CBitcoinAddress(node.spent_to_address).to_scriptPubKey())
+        amount_in = tx_chain.available_coins
+        tx_chain.available_coins -= config.smallest_amount + config.transaction_fee
+        txout1 = CMutableTxOut(tx_chain.available_coins, CBitcoinAddress(tx_chain.address).to_scriptPubKey())
+        txout2 = CMutableTxOut(config.smallest_amount, CBitcoinAddress(node.spent_to_address).to_scriptPubKey())
 
         tx = CMutableTransaction([txin], [txout1, txout2], nVersion=2)
 
         sighash = SignatureHash(txin_scriptPubKey, tx, 0, SIGHASH_ALL)
-        sig = node.seckey.sign(sighash) + bytes([SIGHASH_ALL])
-        txin.scriptSig = CScript([sig, node.seckey.pub])
+        sig = tx_chain.seckey.sign(sighash) + bytes([SIGHASH_ALL])
+        txin.scriptSig = CScript([sig, tx_chain.seckey.pub])
 
-        tx_hash = node.execute_rpc('sendrawtransaction', b2x(tx.serialize()))
-        node.current_unspent_tx = tx_hash
-        logging.info('{} sendrawtransaction, which got tx_hash={}'.format(node.name, tx_hash))
+        tx_serialized = tx.serialize()
+        logging.info('{} trying to sendrawtransaction (in={}, out={};{} fee={} bytes={}) using tx_chain number={}'
+                     .format(node.name, amount_in, txout1.nValue, txout2.nValue,
+                             amount_in - (txout1.nValue + txout2.nValue), len(tx_serialized),
+                             node.current_tx_chain_index))
+        tx_hash = node.execute_rpc('sendrawtransaction', b2x(tx_serialized))
+        tx_chain.current_unspent_tx = tx_hash
+        logging.info('{} sendrawtransaction (in={}, out={};{} fee={} bytes={}), which got tx_hash={}'
+                     .format(node.name, amount_in, txout1.nValue, txout2.nValue,
+                             amount_in - (txout1.nValue + txout2.nValue), len(tx_serialized), tx_hash))
     except JSONRPCException as exce:
         logging.info('Could not generate tx for node {}. Exception={}'.format(node.name, exce.message))
