@@ -245,14 +245,14 @@ class TestParse(TestCase):
     def test_peer_logic_validation_parse(self):
         self.parser.nodes_create_blocks['node-0'] = CreateNewBlockLogLine(None, None, None, None)
 
-        self.parser.peer_logic_validation_parse('line')
+        self.parser.peer_logic_validation_parser('line')
 
         self.assertEqual(len(self.context.parsed_blocks), 1)
         self.assertEqual(self.parser.nodes_create_blocks['node-0'], None)
 
     @patch('parse.parse_peer_logic_validation', lambda a: UpdateTipLogLine(None, 'node-0', None, None, None))
     def test_update_tip_parser_with_previous_no_create_new_block(self):
-        self.parser.peer_logic_validation_parse('line')
+        self.parser.peer_logic_validation_parser('line')
 
         self.assertEqual(len(self.context.parsed_blocks), 0)
 

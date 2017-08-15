@@ -19,7 +19,7 @@ class Parser:
             self.block_reconstructed_parser,
             self.tx_creation_parser,
             self.tx_received_parser,
-            self.peer_logic_validation_parse,
+            self.peer_logic_validation_parser,
         ]
 
     def execute(self):
@@ -83,7 +83,7 @@ class Parser:
         tx_stats.receiving_timestamps = np.append(tx_stats.receiving_timestamps,
                                                   log_line_with_hash.timestamp - tx_stats.timestamp)
 
-    def peer_logic_validation_parse(self, line):
+    def peer_logic_validation_parser(self, line):
         log_line_with_hash = parse_peer_logic_validation(line)
         create_new_block = self.nodes_create_blocks[log_line_with_hash.node]
 
