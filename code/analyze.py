@@ -4,11 +4,8 @@ from utils import Stats
 
 
 class Analyzer:
-    def __init__(self, blocks, consensus_chain, txs, tx_exceptions):
-        self.blocks = blocks
-        self.consensus_chain = consensus_chain
-        self.txs = txs
-        self.tx_exceptions = tx_exceptions
+    def __init__(self, context):
+        self.context = context
 
     def execute(self):
         self.create_block_csv()

@@ -10,8 +10,6 @@ class Parser:
     def __init__(self, context):
         self.context = context
         self.nodes_create_blocks = {node.name: None for node in context.all_bitcoin_nodes.values()}
-        self.blocks = {}
-        self.txs = {}
 
         self.parsers = [
             self.block_creation_parser,
@@ -46,19 +44,19 @@ class Parser:
         create_new_block = self.nodes_create_blocks[update_tip.node]
         if create_new_block is not None:
 
-            if update_tip.block_hash in self.blocks:
-                block_stats = self.blocks[update_tip.block_hash]
+            if update_tip.block_hash in self.context.parsed_blocks:
+                block_stats = self.context.parsed_blocks[update_tip.block_hash]
                 block_stats.height = update_tip.height
             else:
                 block_stats = BlockStats(create_new_block.timestamp, create_new_block.node, update_tip.block_hash,
                                          create_new_block.total_size, create_new_block.txs)
-                self.blocks[update_tip.block_hash] = block_stats
+                self.context.parsed_blocks[update_tip.block_hash] = block_stats
             self.nodes_create_blocks[update_tip.node] = None
 
     def block_received_parser(self, line):
         received_block = parse_received_block(line)
 
-        block_stats = self.blocks[received_block.obj_hash]
+        block_stats = self.context.parsed_blocks[received_block.obj_hash]
 
         block_stats.receiving_timestamps = np.append(block_stats.receiving_timestamps,
                                                      received_block.timestamp - block_stats.timestamp)
@@ -66,7 +64,7 @@ class Parser:
     def block_reconstructed_parser(self, line):
         received_block = parse_successfully_reconstructed_block(line)
 
-        block_stats = self.blocks[received_block.obj_hash]
+        block_stats = self.context.parsed_blocks[received_block.obj_hash]
 
         block_stats.receiving_timestamps = np.append(block_stats.receiving_timestamps,
                                                      received_block.timestamp - block_stats.timestamp)
@@ -74,13 +72,13 @@ class Parser:
     def tx_creation_parser(self, line):
         log_line_with_hash = parse_add_to_wallet(line)
 
-        self.txs[log_line_with_hash.obj_hash] = TxStats(log_line_with_hash.timestamp,
+        self.context.parsed_txs[log_line_with_hash.obj_hash] = TxStats(log_line_with_hash.timestamp,
                                                         log_line_with_hash.node, log_line_with_hash.obj_hash)
 
     def tx_received_parser(self, line):
         log_line_with_hash = parse_accept_to_memory_pool(line)
 
-        tx_stats = self.txs[log_line_with_hash.obj_hash]
+        tx_stats = self.context.parsed_txs[log_line_with_hash.obj_hash]
         tx_stats.receiving_timestamps = np.append(tx_stats.receiving_timestamps,
                                                   log_line_with_hash.timestamp - tx_stats.timestamp)
 
@@ -92,7 +90,7 @@ class Parser:
 
             block_stats = BlockStats(create_new_block.timestamp, create_new_block.node, log_line_with_hash.obj_hash,
                                      create_new_block.total_size, create_new_block.txs)
-            self.blocks[block_stats.block_hash] = block_stats
+            self.context.parsed_blocks[block_stats.block_hash] = block_stats
             self.nodes_create_blocks[log_line_with_hash.node] = None
 
 

@@ -19,7 +19,7 @@ class PostProcessing:
         cli_stats = CliStats(self.context)
         cli_stats.execute()
 
-        parser = Parser(self.context.all_bitcoin_nodes.values())
+        parser = Parser(self.context)
         parser.execute()
         logging.info('Executed parsing')
 
