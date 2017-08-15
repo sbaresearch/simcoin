@@ -144,4 +144,4 @@ class TestEvent(TestCase):
         e.execute_cmd('tx node-1')
 
         self.assertEqual(len(context.transaction_exceptions), 1)
-        self.assertEqual(context.transaction_exceptions[0].message, 'test_message')
+        self.assertEqual(context.transaction_exceptions[0].error_message, 'test_message')
