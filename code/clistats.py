@@ -8,7 +8,6 @@ from utils import Values
 class CliStats:
     def __init__(self, context):
         self.context = context
-        self.consensus_chain = []
 
     def execute(self):
         self.save_consensus_chain()
@@ -29,7 +28,7 @@ class CliStats:
                         break
                     blocks.append(node.execute_rpc('getblockhash', height))
                 if len(blocks) == len(nodes) and utils.check_equal(blocks):
-                    self.consensus_chain.append(blocks[0])
+                    self.context.consensus_chain.append(blocks[0])
                     file.write('{};{}\n'.format(height, blocks[0]))
                     height += 1
                 else:

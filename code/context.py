@@ -30,6 +30,7 @@ class Context:
         self.first_block_height = None
 
         self.transaction_exceptions = []
+        self.consensus_chain = []
 
     def create(self):
         self.config_nodes = nodes_config.read()
