@@ -7,6 +7,7 @@ import config
 from parse import TxStats
 from analyze import Analyzer
 from event import TransactionException
+from mock import Mock
 
 
 class TestAnalyze(TestCase):
@@ -21,7 +22,10 @@ class TestAnalyze(TestCase):
 
         blocks['block_hash'].receiving_timestamps = np.array([5, 7])
 
-        analyzer = Analyzer(blocks, ['block_hash'], None, None)
+        context = Mock()
+        context.parsed_blocks = blocks
+        context.consensus_chain = ['block_hash']
+        analyzer = Analyzer(context)
         analyzer.create_block_csv()
 
         m_open.assert_called_with(config.blocks_csv, 'w')
@@ -42,7 +46,10 @@ class TestAnalyze(TestCase):
 
         blocks['block_hash'].receiving_timestamps = np.array([5, 7])
 
-        analyzer = Analyzer(blocks, ['other_block_hash'], None, None)
+        context = Mock()
+        context.parsed_blocks = blocks
+        context.consensus_chain = []
+        analyzer = Analyzer(context)
         analyzer.create_block_csv()
 
         m_open.assert_called_with(config.blocks_csv, 'w')
@@ -57,7 +64,9 @@ class TestAnalyze(TestCase):
 
         txs['tx_hash'].receiving_timestamps = np.array([5, 7])
 
-        analyzer = Analyzer(None, None, txs, None)
+        context = Mock()
+        context.parsed_txs = txs
+        analyzer = Analyzer(context)
         analyzer.create_tx_csv()
 
         m_open.assert_called_with(config.tx_csv, 'w')
@@ -73,7 +82,9 @@ class TestAnalyze(TestCase):
             TransactionException('node-1', 'timestamp', 'error_message')
         ]
 
-        analyzer = Analyzer(None, None, None, tx_exceptions)
+        context = Mock()
+        context.tx_exceptions = tx_exceptions
+        analyzer = Analyzer(context)
         analyzer.create_tx_exceptions_csv()
 
         m_open.assert_called_with(config.tx_exceptions_csv, 'w')
