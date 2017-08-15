@@ -225,31 +225,15 @@ def parse_checking_mempool(line):
     )
 
 
-class LogLine:
-    def __init__(self, timestamp, node):
-        self.timestamp = timestamp
-        self.node = node
+LogLine = namedtuple('LogLine', 'timestamp node')
 
+CreateNewBlockLogLine = namedtuple('CreateNewBlockLogLine', 'timestamp node  total_size txs')
 
-class CreateNewBlockLogLine(LogLine):
-    def __init__(self, timestamp, node, total_size, txs):
-        super().__init__(timestamp, node)
-        self.total_size = total_size
-        self.txs = txs
+UpdateTipLogLine = namedtuple('UpdateTipLogLine', 'timestamp node block_hash height tx')
 
+LogLineWithHash = namedtuple('LogLineWithHash', 'timestamp node obj_hash')
 
-class UpdateTipLogLine(LogLine):
-    def __init__(self, timestamp, node, block_hash, height, tx):
-        super().__init__(timestamp, node)
-        self.block_hash = block_hash
-        self.height = height
-        self.tx = tx
-
-
-class LogLineWithHash(LogLine):
-    def __init__(self, timestamp, node, obj_hash):
-        super().__init__(timestamp, node)
-        self.obj_hash = obj_hash
+CheckingMempoolLogLine = namedtuple('CheckingMempoolLogLine', 'timestamp node txs inputs')
 
 
 class BlockStats:
@@ -270,8 +254,6 @@ class TxStats:
         self.node = node
         self.tx_hash = tx_hash
         self.receiving_timestamps = np.array([])
-
-CheckingMempoolLogLine = namedtuple('CheckingMempoolLogLine', 'timestamp node txs inputs')
 
 
 class ParseException(Exception):
