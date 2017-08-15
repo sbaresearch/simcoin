@@ -29,6 +29,8 @@ class Context:
 
         self.first_block_height = None
 
+        self.transaction_exceptions = []
+
     def create(self):
         self.config_nodes = nodes_config.read()
         nodes = [node for node in self.config_nodes if node.node_type == 'bitcoin']
