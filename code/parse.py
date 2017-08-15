@@ -224,6 +224,7 @@ def parse_checking_mempool(line):
         int(matched.group(4)),
     )
 
+
 class LogLine:
     def __init__(self, timestamp, node):
         self.timestamp = timestamp
