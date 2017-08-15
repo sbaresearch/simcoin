@@ -57,7 +57,7 @@ class TestParse(TestCase):
         self.assertEqual(update_tip.node, 'node-1')
         self.assertEqual(update_tip.block_hash, '1d205cac616c0344721d2552482024528883e9fdf7439bfbfc02567060c56d71')
         self.assertEqual(update_tip.height, 106)
-        self.assertEqual(update_tip.txs, 113)
+        self.assertEqual(update_tip.tx, 113)
 
     def test_parse_update_tip_with_other_log_line(self):
         with self.assertRaises(ParseException) as context:

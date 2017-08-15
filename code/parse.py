@@ -223,11 +223,11 @@ class CreateNewBlock(LogLine):
 
 
 class UpdateTip(LogLine):
-    def __init__(self, timestamp, node, block_hash, height, txs):
+    def __init__(self, timestamp, node, block_hash, height, tx):
         super().__init__(timestamp, node)
         self.block_hash = block_hash
         self.height = height
-        self.txs = txs
+        self.tx = tx
 
 
 class LogLineWithHash(LogLine):
