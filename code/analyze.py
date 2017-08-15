@@ -10,6 +10,7 @@ class Analyzer:
     def execute(self):
         self.create_block_csv()
         self.create_tx_csv()
+        self.create_tx_exceptions_csv()
 
         logging.info('Executed analyzer')
 
