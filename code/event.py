@@ -72,7 +72,7 @@ def generate_tx(node):
         txin.scriptSig = CScript([sig, tx_chain.seckey.pub])
 
         tx_serialized = tx.serialize()
-        logging.info('{} trying to sendrawtransaction (in={}, out={};{} fee={} bytes={}) using tx_chain number='
+        logging.info('{} trying to sendrawtransaction (in={}, out={};{} fee={} bytes={}) using tx_chain number={}'
                      .format(node.name, amount_in, txout1.nValue, txout2.nValue,
                              amount_in - (txout1.nValue + txout2.nValue), len(tx_serialized),
                              node.current_tx_chain_index))
