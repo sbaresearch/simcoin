@@ -7,8 +7,9 @@ from utils import Stats
 
 
 class Parser:
-    def __init__(self, nodes):
-        self.nodes_create_blocks = {node.name: None for node in nodes}
+    def __init__(self, context):
+        self.context = context
+        self.nodes_create_blocks = {node.name: None for node in context.all_bitcoin_nodes.values()}
         self.blocks = {}
         self.txs = {}
 
