@@ -255,3 +255,13 @@ class TestParse(TestCase):
         self.parser.peer_logic_validation_parse('line')
 
         self.assertEqual(len(self.context.parsed_blocks), 0)
+
+    def test_parse_checking_mempool(self):
+        log_line = '2017-07-31 16:09:28.663985 node-0 Checking mempool with 5878 transactions and 5999 inputs'
+
+        checking_mempool = parse.parse_checking_mempool(log_line)
+
+        self.assertEqual(checking_mempool.timestamp, datetime(2017, 7, 31, 16, 9, 28, 663985).timestamp())
+        self.assertEqual(checking_mempool.node, 'node-0')
+        self.assertEqual(checking_mempool.txs, 5878)
+        self.assertEqual(checking_mempool.inputs, 5999)

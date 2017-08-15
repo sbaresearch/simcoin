@@ -4,6 +4,7 @@ from datetime import datetime
 import logging
 import numpy as np
 from utils import Stats
+from collections import namedtuple
 
 
 class Parser:
@@ -208,6 +209,21 @@ def parse_peer_logic_validation(line):
     )
 
 
+def parse_checking_mempool(line):
+    regex = config.log_prefix_full + 'Checking mempool with ([0-9]+) transactions and ([0-9]+) inputs'
+
+    matched = re.match(regex, line)
+
+    if matched is None:
+        raise ParseException("Didn't matched AcceptToMemoryPool log line.")
+
+    return CheckingMempoolLogLine(
+        datetime.strptime(matched.group(1), config.log_time_format).timestamp(),
+        str(matched.group(2)),
+        int(matched.group(3)),
+        int(matched.group(4)),
+    )
+
 class LogLine:
     def __init__(self, timestamp, node):
         self.timestamp = timestamp
@@ -253,6 +269,8 @@ class TxStats:
         self.node = node
         self.tx_hash = tx_hash
         self.receiving_timestamps = np.array([])
+
+CheckingMempoolLogLine = namedtuple('CheckingMempoolLogLine', 'timestamp node txs inputs')
 
 
 class ParseException(Exception):
