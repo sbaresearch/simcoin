@@ -3,41 +3,25 @@ import logging
 import time
 from postprocessing import PostProcessing
 from event import Event
-import argparse
-import checkargs
-import sys
 import config
 import bash
-import utils
+from context import Context
+from prepare import Prepare
 
 
-def create_parser():
-    parser = argparse.ArgumentParser()
+def run():
+    context = Context()
+    context.create()
 
-    parser.add_argument('--tick-duration'
-                        , default=1
-                        , type=checkargs.check_positive_float
-                        , help='Duration of ticks.')
-    return parser
+    runner = Runner(context)
 
+    prepare = Prepare(context)
+    runner.prepare = prepare
 
-def run(unknown_arguments=False):
-
-    parser = create_parser()
-    if unknown_arguments:
-        args = parser.parse_known_args(sys.argv[2:])[0]
-    else:
-        args = parser.parse_args(sys.argv[2:])
-    print("arguments called with: {}".format(sys.argv))
-    print("parsed arguments: {}\n".format(args))
-    utils.update_args_json(args)
-
-    runner = Runner()
-
-    post_processing = PostProcessing(runner)
+    post_processing = PostProcessing(context)
     runner.post_processing = post_processing
 
-    event = Event(runner, args.tick_duration)
+    event = Event(context)
     runner.event = event
 
     start = time.time()

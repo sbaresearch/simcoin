@@ -6,6 +6,7 @@ import os
 import re
 import numpy as np
 import json
+from collections import namedtuple
 
 
 def sleep(seconds):
@@ -92,3 +93,12 @@ class Stats:
             median = np.median(array)
             std = np.std(array)
         return cls(count, median, std)
+
+
+def read_json_file(file):
+    with open(file) as file:
+        return json.loads(file.read(), object_hook=json_object_hook)
+
+
+def json_object_hook(d):
+    return namedtuple('X', d.keys())(*d.values())

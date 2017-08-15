@@ -46,8 +46,8 @@ def create_rpc_connection_string(ip):
 
 reference_node = 'node-0'
 
-warmup_blocks = 100
-start_blocks_per_node = 5
+blocks_needed_to_make_coinbase_spendable = 100
+max_in_mempool_ancestors=25
 
 log_prefix_timestamp = r'^([0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}.[0-9]{6})'
 log_prefix_full = log_prefix_timestamp + ' ([a-zA-Z0-9-\.]+) '
@@ -65,6 +65,7 @@ def host_dir(node):
     return sim_dir + node.name + bitcoin_regtest_dir
 
 
-smallest_amount = 0.00000001
-coinbase_amount = 50
-transaction_fee = 0.00001
+smallest_amount = 1
+smallest_amount_btc = 0.00000001
+coinbase_amount = 5000000000
+transaction_fee = 1000

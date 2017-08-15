@@ -2,6 +2,10 @@ from unittest import TestCase
 from node import BitcoinNode
 import config
 from mock import MagicMock
+from bitcoin.wallet import CBitcoinSecret
+import bitcoin
+
+bitcoin.SelectParams('regtest')
 
 
 class TestNode(TestCase):
@@ -9,12 +13,28 @@ class TestNode(TestCase):
     def setUp(self):
         self.node = BitcoinNode('node-1', 'ip', 'image')
 
-    def test_create_coinbase_transfer_tx(self):
-        self.node.execute_rpc = MagicMock(return_value='raw_tx')
+    def test_get_coinbase_variables(self):
+        self.node.execute_rpc = MagicMock()
+        self.node.execute_rpc.side_effect = [
+            [
+                {"txid": 'tx_hash_1', 'address': 'address_hash_1'},
+                {"txid": 'tx_hash_2', 'address': 'address_hash_2'}
+            ],
+            'cTCrrgVLfBqEZ1dxmCnEwmiEWzeZHU8uw3CNvLVvbT4CrBeDdTqc',
+            'cTCrrgVLfBqEZ1dxmCnEwmiEWzeZHU8uw3CNvLVvbT4CrBeDdTqc'
+        ]
 
-        tx = self.node.create_coinbase_transfer_tx()
+        self.node.create_tx_chains()
 
-        self.assertEqual(self.node.available_coins, config.coinbase_amount - (config.smallest_amount + config.transaction_fee))
+        self.assertEqual(self.node.execute_rpc.call_count, 3)
+        self.assertEqual(len(self.node.tx_chains), 2)
 
-        self.assertEqual(tx, 'raw_tx')
+        chain_1 = self.node.tx_chains[0]
+        self.assertEqual(chain_1.current_unspent_tx, 'tx_hash_1')
+        self.assertEqual(chain_1.address, 'address_hash_1')
+        self.assertEqual(chain_1.seckey,  CBitcoinSecret('cTCrrgVLfBqEZ1dxmCnEwmiEWzeZHU8uw3CNvLVvbT4CrBeDdTqc'))
 
+        chain_1 = self.node.tx_chains[1]
+        self.assertEqual(chain_1.current_unspent_tx, 'tx_hash_2')
+        self.assertEqual(chain_1.address, 'address_hash_2')
+        self.assertEqual(chain_1.seckey,  CBitcoinSecret('cTCrrgVLfBqEZ1dxmCnEwmiEWzeZHU8uw3CNvLVvbT4CrBeDdTqc'))

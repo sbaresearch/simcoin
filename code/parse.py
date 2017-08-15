@@ -31,7 +31,7 @@ class Parser:
                         parser(line)
                         break
                     except ParseException:
-                        logging.debug("Parsers couldn't parse line")
+                        pass
         logging.info('Executed parser')
 
     def block_creation_parser(self, line):

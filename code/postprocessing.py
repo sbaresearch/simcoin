@@ -8,18 +8,18 @@ from analyze import Analyzer
 
 
 class PostProcessing:
-    def __init__(self, runner):
-        self.runner = runner
+    def __init__(self, context):
+        self.context = context
 
     def execute(self):
-        aggregate_logs([node for node in self.runner.all_nodes.values()])
+        aggregate_logs([node for node in self.context.all_nodes.values()])
         cut_log()
         logging.info('Aggregated logs')
 
-        cli_stats = CliStats(self.runner)
+        cli_stats = CliStats(self.context)
         cli_stats.execute()
 
-        parser = Parser(self.runner.all_bitcoin_nodes.values())
+        parser = Parser(self.context.all_bitcoin_nodes.values())
         parser.execute()
         logging.info('Executed parsing')
 

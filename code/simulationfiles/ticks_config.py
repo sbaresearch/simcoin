@@ -20,16 +20,16 @@ def create_parser():
                         , type=checkargs.check_positive_int
                         , help='Amount of ticks.')
 
-    parser.add_argument('--ticks-per-block'
-                        , default=10
-                        , type=checkargs.check_positive_int
-                        , help='Ticks per block.'
+    parser.add_argument('--blocks-per-tick'
+                        , default=0.1
+                        , type=checkargs.check_positive_float
+                        , help='Blocks per tick.'
                         )
 
-    parser.add_argument('--tx-per-tick'
+    parser.add_argument('--txs-per-tick'
                         , default=1
                         , type=checkargs.check_positive_int
-                        , help='Tx per tick.'
+                        , help='Txs per tick.'
                         )
 
     parser.add_argument('--seed'
@@ -37,6 +37,11 @@ def create_parser():
                         , type=checkargs.check_positive_int
                         , help='Set the seed.'
                         )
+
+    parser.add_argument('--tick-duration'
+                        , default=1
+                        , type=checkargs.check_positive_float
+                        , help='Duration of ticks.')
     return parser
 
 
@@ -56,9 +61,9 @@ def create(unknown_arguments=False):
     random.seed(args.seed)
     np.random.seed(args.seed)
 
-    block_events = create_block_events(nodes, args.amount_of_ticks, args.ticks_per_block)
+    block_events = create_block_events(nodes, args.amount_of_ticks, args.blocks_per_tick)
 
-    ticks = create_ticks(nodes, block_events, args.tx_per_tick, args.amount_of_ticks)
+    ticks = create_ticks(nodes, block_events, args.txs_per_tick, args.amount_of_ticks)
 
     print('Created {}:'.format(config.ticks_csv))
     print(pandas.DataFrame(ticks))
@@ -74,25 +79,25 @@ def calc_expected_events(number_of_ticks, events_per_tick):
     return int(int(number_of_ticks * (1.0 / events_per_tick)) * 3) + 10
 
 
-def create_block_events(nodes, amount_of_ticks, ticks_per_block):
-    expected_blocks = calc_expected_events(amount_of_ticks, ticks_per_block)
+def create_block_events(nodes, amount_of_ticks, blocks_per_tick):
+    expected_blocks = calc_expected_events(amount_of_ticks, blocks_per_tick)
     block_events = {}
     for node in nodes:
-        block_events[node.name] = create_block_series(node.share, ticks_per_block, expected_blocks)
+        block_events[node.name] = create_block_series(node.share, blocks_per_tick, expected_blocks)
     return block_events
 
 
-def create_block_series(share, ticks_per_block, expected_blocks):
-    random_event_ticks = np.random.exponential(ticks_per_block * (1 / share), expected_blocks)
+def create_block_series(share, blocks_per_tick, expected_blocks):
+    random_event_ticks = np.random.exponential((1 / blocks_per_tick) * (1 / share), expected_blocks)
     block_events = np.cumsum(random_event_ticks)
     return block_events.tolist()
 
 
-def create_ticks(nodes, block_events, tx_per_tick, amount_of_ticks):
+def create_ticks(nodes, block_events, txs_per_tick, amount_of_ticks):
     index_tx = 0
     ticks = [[] for _ in range(amount_of_ticks)]
     for index, tick in enumerate(ticks):
-        for i in range(tx_per_tick):
+        for i in range(txs_per_tick):
             tick.append('tx ' + random.choice(nodes).name)
             index_tx += 1
 
