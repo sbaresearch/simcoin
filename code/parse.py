@@ -103,7 +103,7 @@ def parse_create_new_block(line):
     if matched is None:
         raise ParseException("Didn't matched CreateNewBlock log line.")
 
-    return CreateNewBlock(
+    return CreateNewBlockLogLine(
         datetime.strptime(matched.group(1), config.log_time_format).timestamp(),
         str(matched.group(2)),
         int(matched.group(3)),
@@ -121,7 +121,7 @@ def parse_update_tip(line):
     if matched is None:
         raise ParseException("Didn't matched CreateNewBlock log line.")
 
-    return UpdateTip(
+    return UpdateTipLogLine(
         datetime.strptime(matched.group(1), config.log_time_format).timestamp(),
         str(matched.group(2)),
         str(matched.group(3)),
@@ -230,14 +230,14 @@ class LogLine:
         self.node = node
 
 
-class CreateNewBlock(LogLine):
+class CreateNewBlockLogLine(LogLine):
     def __init__(self, timestamp, node, total_size, txs):
         super().__init__(timestamp, node)
         self.total_size = total_size
         self.txs = txs
 
 
-class UpdateTip(LogLine):
+class UpdateTipLogLine(LogLine):
     def __init__(self, timestamp, node, block_hash, height, tx):
         super().__init__(timestamp, node)
         self.block_hash = block_hash
