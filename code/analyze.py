@@ -11,6 +11,7 @@ class Analyzer:
         self.create_block_csv()
         self.create_tx_csv()
         self.create_tx_exceptions_csv()
+        self.create_mempool_snapshots_csv()
 
         logging.info('Executed analyzer')
 
@@ -47,3 +48,10 @@ class Analyzer:
 
             for exce in self.context.tx_exceptions:
                 file.write('{};{};{}\n'.format(exce.node, exce.timestamp, exce.error_message))
+
+    def create_mempool_snapshots_csv(self):
+        with open(config.mempool_snapshots_csv, 'w') as file:
+            file.write('timestamp;node;txs;inputs\n')
+
+            for snapshot in self.context.mempool_snapshots:
+                file.write('{};{};{};{}\n'.format(snapshot.timestamp, snapshot.node, snapshot.txs, snapshot.inputs))
