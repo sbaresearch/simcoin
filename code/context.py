@@ -32,7 +32,7 @@ class Context:
         self.transaction_exceptions = []
         self.consensus_chain = []
         self.parsed_blocks = {}
-        self.parsed_tx = {}
+        self.parsed_txs = {}
 
     def create(self):
         self.config_nodes = nodes_config.read()
