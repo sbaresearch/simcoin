@@ -20,6 +20,7 @@ class Parser:
             self.tx_creation_parser,
             self.tx_received_parser,
             self.peer_logic_validation_parser,
+            self.checking_mempool_parser,
         ]
 
     def execute(self):
@@ -93,6 +94,11 @@ class Parser:
                                      create_new_block.total_size, create_new_block.txs)
             self.context.parsed_blocks[block_stats.block_hash] = block_stats
             self.nodes_create_blocks[log_line_with_hash.node] = None
+
+    def checking_mempool_parser(self, line):
+        checking_mempool_log_line = parse_checking_mempool(line)
+
+        self.context.mempool_snapshots.append(checking_mempool_log_line)
 
 
 def parse_create_new_block(line):

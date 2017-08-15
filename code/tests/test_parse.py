@@ -8,10 +8,10 @@ from parse import Parser
 from mock import Mock
 from parse import CreateNewBlockLogLine
 from parse import UpdateTipLogLine
+from parse import CheckingMempoolLogLine
 from parse import LogLineWithHash
 from parse import BlockStats
 import numpy as np
-import config
 from datetime import datetime
 from parse import TxStats
 
@@ -29,6 +29,7 @@ class TestParse(TestCase):
         self.context = Mock()
         self.context.parsed_blocks = {}
         self.context.parsed_txs = {}
+        self.context.mempool_snapshots = []
         self.context.all_bitcoin_nodes.values.return_value = [node_0, node_1, node_2]
         self.parser = Parser(self.context)
 
@@ -265,3 +266,9 @@ class TestParse(TestCase):
         self.assertEqual(checking_mempool.node, 'node-0')
         self.assertEqual(checking_mempool.txs, 5878)
         self.assertEqual(checking_mempool.inputs, 5999)
+
+    @patch('parse.parse_checking_mempool', lambda a: CheckingMempoolLogLine(None, None, None, None))
+    def test_checking_mempool_parser(self):
+        self.parser.checking_mempool_parser('line')
+
+        self.assertEqual(len(self.context.mempool_snapshots), 1)
