@@ -136,12 +136,12 @@ class TestEvent(TestCase):
         m_generate_tx.side_effect = JSONRPCException({'code': -1, 'message': 'test_message'})
 
         context = Mock()
-        context.transaction_exceptions = []
+        context.tx_exceptions = []
         node = namedtuple('Node', ['name'])('node-1')
         context.all_bitcoin_nodes = {'node-1': node}
 
         e = Event(context)
         e.execute_cmd('tx node-1')
 
-        self.assertEqual(len(context.transaction_exceptions), 1)
-        self.assertEqual(context.transaction_exceptions[0].error_message, 'test_message')
+        self.assertEqual(len(context.tx_exceptions), 1)
+        self.assertEqual(context.tx_exceptions[0].error_message, 'test_message')

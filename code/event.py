@@ -44,7 +44,7 @@ class Event:
             try:
                 generate_tx(node)
             except JSONRPCException as exce:
-                self.context.transaction_exceptions.append(TransactionException(node.name, datetime.now(), exce.message))
+                self.context.tx_exceptions.append(TransactionException(node.name, datetime.now(), exce.message))
                 logging.info('Could not generate tx for node {}. Exception={}'.format(node.name, exce.message))
         elif cmd_parts[0] == 'block':
             node = self.context.all_bitcoin_nodes[cmd_parts[1]]
