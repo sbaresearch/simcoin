@@ -87,7 +87,7 @@ def generate_tx(node):
 
 
 class TransactionException:
-    def __init__(self, node, timestamp, message):
+    def __init__(self, node, timestamp, error_message):
         self.node = node
         self.timestamp = timestamp
-        self.message = message
+        self.error_message = error_message

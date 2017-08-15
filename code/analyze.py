@@ -7,10 +7,11 @@ from utils import Stats
 
 
 class Analyzer:
-    def __init__(self, blocks, consensus_chain, txs):
+    def __init__(self, blocks, consensus_chain, txs, tx_exceptions):
         self.blocks = blocks
         self.consensus_chain = consensus_chain
         self.txs = txs
+        self.tx_exceptions = tx_exceptions
 
     def execute(self):
         self.create_block_csv()
@@ -44,3 +45,10 @@ class Analyzer:
                 file.write('{};{};{};{};{};{}\n'.format(
                     tx.tx_hash, tx.node, tx.timestamp,
                     propagation_stats.count, propagation_stats.median, propagation_stats.std))
+
+    def create_tx_exceptions_csv(self):
+        with open(config.tx_exceptions_csv, 'w') as file:
+            file.write('node;timestamp;error_message\n')
+
+            for exce in self.tx_exceptions:
+                file.write('{};{};{}\n'.format(exce.node, exce.timestamp, exce.error_message))

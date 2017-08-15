@@ -35,6 +35,7 @@ chains_csv = data_dir + sim_dir + 'chains.csv'
 consensus_chain_csv = data_dir + sim_dir + 'consensus_chain.csv'
 nodes_csv = data_dir + sim_dir + 'nodes.csv'
 tx_csv = data_dir + sim_dir + 'tx.csv'
+tx_exceptions_csv = data_dir + sim_dir + 'tx_exceptions.csv'
 
 rpc_user = 'admin'
 rpc_password = 'admin'
