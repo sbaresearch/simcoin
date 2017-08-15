@@ -29,6 +29,11 @@ class Context:
 
         self.first_block_height = None
 
+        self.tx_exceptions = []
+        self.consensus_chain = []
+        self.parsed_blocks = {}
+        self.parsed_txs = {}
+
     def create(self):
         self.config_nodes = nodes_config.read()
         nodes = [node for node in self.config_nodes if node.node_type == 'bitcoin']

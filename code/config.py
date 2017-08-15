@@ -35,6 +35,7 @@ chains_csv = data_dir + sim_dir + 'chains.csv'
 consensus_chain_csv = data_dir + sim_dir + 'consensus_chain.csv'
 nodes_csv = data_dir + sim_dir + 'nodes.csv'
 tx_csv = data_dir + sim_dir + 'tx.csv'
+tx_exceptions_csv = data_dir + sim_dir + 'tx_exceptions.csv'
 
 rpc_user = 'admin'
 rpc_password = 'admin'
@@ -47,7 +48,7 @@ def create_rpc_connection_string(ip):
 reference_node = 'node-0'
 
 blocks_needed_to_make_coinbase_spendable = 100
-max_in_mempool_ancestors=25
+max_in_mempool_ancestors = 25
 
 log_prefix_timestamp = r'^([0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}.[0-9]{6})'
 log_prefix_full = log_prefix_timestamp + ' ([a-zA-Z0-9-\.]+) '

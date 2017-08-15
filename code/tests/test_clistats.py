@@ -16,15 +16,15 @@ class TestCliStats(TestCase):
         super(TestCliStats, self).__init__(*args, **kwargs)
 
     def setUp(self):
-        self.runner = MagicMock()
-        self.cli_stats = CliStats(self.runner)
+        self.context = MagicMock()
+        self.cli_stats = CliStats(self.context)
 
     @patch('builtins.open', new_callable=mock_open)
     def test_save_consensus_chain_first_node_no_block(self, mock):
         node_0 = MagicMock()
         node_0.get_block_hash_silent.return_value = -1
-        self.runner.first_block_height = 10
-        self.runner.all_bitcoin_nodes = {'0': node_0}
+        self.context.first_block_height = 10
+        self.context.all_bitcoin_nodes = {'0': node_0}
 
         self.cli_stats.save_consensus_chain()
 
@@ -37,8 +37,8 @@ class TestCliStats(TestCase):
         node_0 = MagicMock()
         node_0.execute_rpc.side_effect = [0, 'hash', -1]
 
-        self.runner.first_block_height = 10
-        self.runner.all_bitcoin_nodes = {'0': node_0}
+        self.context.first_block_height = 10
+        self.context.all_bitcoin_nodes = {'0': node_0}
 
         self.cli_stats.save_consensus_chain()
 
@@ -54,8 +54,8 @@ class TestCliStats(TestCase):
         node_1 = MagicMock()
         node_1.execute_rpc.side_effect = [0, 'hash1', 0, 'hash2', 1]
 
-        self.runner.first_block_height = 10
-        self.runner.all_bitcoin_nodes = {'0': node_0, '1': node_1}
+        self.context.first_block_height = 10
+        self.context.all_bitcoin_nodes = {'0': node_0, '1': node_1}
 
         self.cli_stats.save_consensus_chain()
 
@@ -72,8 +72,8 @@ class TestCliStats(TestCase):
         node_1 = MagicMock()
         node_1.execute_rpc.side_effect = [0, 'hash1', 1]
 
-        self.runner.first_block_height = 10
-        self.runner.all_bitcoin_nodes = {'0': node_0, '1': node_1}
+        self.context.first_block_height = 10
+        self.context.all_bitcoin_nodes = {'0': node_0, '1': node_1}
 
         self.cli_stats.save_consensus_chain()
 
@@ -98,8 +98,8 @@ class TestCliStats(TestCase):
         node_1 = MagicMock()
         node_1.name = 'node-1'
         node_1.execute_rpc.side_effect = [7, 'hash11', 'hash22', 'hash33']
-        self.runner.first_block_height = 5
-        self.runner.all_bitcoin_nodes = {'0': node_0, '1': node_1}
+        self.context.first_block_height = 5
+        self.context.all_bitcoin_nodes = {'0': node_0, '1': node_1}
 
         self.cli_stats.save_chains()
 
@@ -114,7 +114,7 @@ class TestCliStats(TestCase):
     def test_node_stats(self, m_tips_statistics, m_open):
         node_0 = MagicMock()
         node_0.name = 'name'
-        self.runner.all_bitcoin_nodes = {'0': node_0}
+        self.context.all_bitcoin_nodes = {'0': node_0}
 
         tips_stats = {
             'headers-only': Values.from_array([1, 3]),

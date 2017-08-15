@@ -26,7 +26,11 @@ class TestParse(TestCase):
         node_2 = Mock()
         node_2.name = 'node-2'
 
-        self.parser = Parser([node_0, node_1, node_2])
+        self.context = Mock()
+        self.context.parsed_blocks = {}
+        self.context.parsed_txs = {}
+        self.context.all_bitcoin_nodes.values.return_value = [node_0, node_1, node_2]
+        self.parser = Parser(self.context)
 
     def test_parse_create_new_block(self):
         log_line = '2017-07-27 11:01:22.173139 node-1' \
@@ -113,25 +117,25 @@ class TestParse(TestCase):
 
         self.parser.tip_updated_parser('line')
 
-        self.assertEqual(len(self.parser.blocks), 1)
+        self.assertEqual(len(self.context.parsed_blocks), 1)
         self.assertEqual(self.parser.nodes_create_blocks['node-0'], None)
 
     @patch('parse.parse_update_tip', lambda a: UpdateTip(None, 'node-0', 'block_hash', 45, None))
     def test_update_tip_parser_with_block_stats_already_set(self):
         self.parser.nodes_create_blocks['node-0'] = CreateNewBlock(None, None, None, None)
-        self.parser.blocks['block_hash'] = BlockStats(None, None, None, None, None)
+        self.context.parsed_blocks['block_hash'] = BlockStats(None, None, None, None, None)
 
         self.parser.tip_updated_parser('line')
 
-        self.assertEqual(len(self.parser.blocks), 1)
-        self.assertEqual(self.parser.blocks['block_hash'].height, 45)
+        self.assertEqual(len(self.context.parsed_blocks), 1)
+        self.assertEqual(self.context.parsed_blocks['block_hash'].height, 45)
         self.assertEqual(self.parser.nodes_create_blocks['node-0'], None)
 
     @patch('parse.parse_update_tip', lambda a: UpdateTip(None, 'node-0', None, None, None))
     def test_update_tip_parser_with_previous_no_create_new_block(self):
         self.parser.tip_updated_parser('line')
 
-        self.assertEqual(len(self.parser.blocks), 0)
+        self.assertEqual(len(self.context.parsed_blocks), 0)
 
     def test_parse_received_block(self):
         log_line = '2017-07-27 15:34:58.122336 node-1 received block' \
@@ -159,31 +163,31 @@ class TestParse(TestCase):
     def test_received_block_parser(self, m_parse_received_block):
         m_parse_received_block.return_value = LogLineWithHash(10, None, 'block_hash')
 
-        self.parser.blocks['block_hash'] = BlockStats(1, None, None, None, None)
+        self.context.parsed_blocks['block_hash'] = BlockStats(1, None, None, None, None)
 
         self.parser.block_received_parser('line')
 
-        self.assertEqual(self.parser.blocks['block_hash'].receiving_timestamps, np.array([9]))
+        self.assertEqual(self.context.parsed_blocks['block_hash'].receiving_timestamps, np.array([9]))
 
     @patch('parse.parse_successfully_reconstructed_block')
     def test_block_reconstructed_parser(self, m_parse_successfully_reconstructed_block):
         m_parse_successfully_reconstructed_block.return_value = LogLineWithHash(10, None, 'block_hash')
 
-        self.parser.blocks['block_hash'] = BlockStats(1, None, None, None, None)
+        self.context.parsed_blocks['block_hash'] = BlockStats(1, None, None, None, None)
 
         self.parser.block_reconstructed_parser('line')
 
-        self.assertEqual(self.parser.blocks['block_hash'].receiving_timestamps, np.array([9]))
+        self.assertEqual(self.context.parsed_blocks['block_hash'].receiving_timestamps, np.array([9]))
 
     @patch('parse.parse_accept_to_memory_pool')
     def test_tx_received_parser(self, m_parse_accept_to_memory_pool):
         m_parse_accept_to_memory_pool.return_value = LogLineWithHash(10, None, 'tx_hash')
 
-        self.parser.txs['tx_hash'] = TxStats(1, None, None)
+        self.context.parsed_txs['tx_hash'] = TxStats(1, None, None)
 
         self.parser.tx_received_parser('line')
 
-        self.assertEqual(self.parser.txs['tx_hash'].receiving_timestamps, np.array([9]))
+        self.assertEqual(self.context.parsed_txs['tx_hash'].receiving_timestamps, np.array([9]))
 
     def test_parse_add_to_wallet(self):
         log_line = '2017-07-30 07:48:48.337577 node-1 AddToWallet' \
@@ -210,11 +214,11 @@ class TestParse(TestCase):
         2, 'node-0', 'tx_hash'
     ))
     def test_received_parser(self):
-        self.parser.txs['tx_hash'] = TxStats(0, 'node-1', 'tx_hash')
+        self.context.parsed_txs['tx_hash'] = TxStats(0, 'node-1', 'tx_hash')
 
         self.parser.tx_received_parser('line')
 
-        self.assertEqual(self.parser.txs['tx_hash'].receiving_timestamps, np.array([2]))
+        self.assertEqual(self.context.parsed_txs['tx_hash'].receiving_timestamps, np.array([2]))
 
     @patch('parse.parse_add_to_wallet', lambda line: LogLineWithHash(
         2, 'node-0', 'tx_hash'
@@ -222,9 +226,9 @@ class TestParse(TestCase):
     def test_received_parser(self):
         self.parser.tx_creation_parser('line')
 
-        self.assertTrue(self.parser.txs['tx_hash'])
+        self.assertTrue(self.context.parsed_txs['tx_hash'])
 
-        self.assertTrue(self.parser.txs['tx_hash'].tx_hash, 'tx_hash')
+        self.assertTrue(self.context.parsed_txs['tx_hash'].tx_hash, 'tx_hash')
 
     def test_parse_peer_logic_validation(self):
         log_line = '2017-07-31 16:09:28.663985 node-0 PeerLogicValidation::NewPoWValidBlock' \
@@ -243,11 +247,11 @@ class TestParse(TestCase):
 
         self.parser.peer_logic_validation_parse('line')
 
-        self.assertEqual(len(self.parser.blocks), 1)
+        self.assertEqual(len(self.context.parsed_blocks), 1)
         self.assertEqual(self.parser.nodes_create_blocks['node-0'], None)
 
     @patch('parse.parse_peer_logic_validation', lambda a: UpdateTip(None, 'node-0', None, None, None))
     def test_update_tip_parser_with_previous_no_create_new_block(self):
         self.parser.peer_logic_validation_parse('line')
 
-        self.assertEqual(len(self.parser.blocks), 0)
+        self.assertEqual(len(self.context.parsed_blocks), 0)

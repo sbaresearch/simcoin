@@ -1,11 +1,11 @@
 from unittest import TestCase
-import event
 from event import Event
 from unittest.mock import patch
 from unittest.mock import Mock
 from unittest.mock import mock_open
 from bitcoinrpc.authproxy import JSONRPCException
 from textwrap import dedent
+from collections import namedtuple
 
 
 class TestEvent(TestCase):
@@ -13,8 +13,7 @@ class TestEvent(TestCase):
     @patch('time.time')
     @patch('utils.sleep')
     @patch('utils.check_for_file', lambda file: None)
-    @patch('event.execute_cmd')
-    def test_execute_multiple_cmds(self, m_execute_cmd, m_sleep, m_time):
+    def test_execute_multiple_cmds(self, m_sleep, m_time):
         data = dedent("""
             cmd1;cmd2;cmd3
         """).strip()
@@ -23,19 +22,19 @@ class TestEvent(TestCase):
             mock = Mock()
             mock.args.tick_duration = 1
             e = Event(mock)
+            e.execute_cmd = Mock()
 
             m_time.return_value = 0
 
             e.execute()
 
-            self.assertEqual(m_execute_cmd.call_count, 3)
+            self.assertEqual(e.execute_cmd.call_count, 3)
             self.assertTrue(m_sleep.called)
 
     @patch('time.time')
     @patch('utils.sleep')
     @patch('utils.check_for_file', lambda file: None)
-    @patch('event.execute_cmd')
-    def test_execute_multiple_lines(self, m_execute_cmd, m_sleep, m_time):
+    def test_execute_multiple_lines(self, m_sleep, m_time):
         data = dedent("""
             cmd1
             cmd2
@@ -45,17 +44,17 @@ class TestEvent(TestCase):
             mock = Mock()
             mock.args.tick_duration = 1
             e = Event(mock)
+            e.execute_cmd = Mock()
 
             m_time.return_value = 0
 
             e.execute()
 
-            self.assertEqual(m_execute_cmd.call_count, 2)
+            self.assertEqual(e.execute_cmd.call_count, 2)
             self.assertTrue(m_sleep.call_count, 2)
 
     @patch('time.time')
     @patch('utils.check_for_file', lambda file: None)
-    @patch('event.execute_cmd', lambda cmd, nodes: None)
     def test_execute(self, m_time):
         data = dedent("""
             cmd1;cmd2;cmd3
@@ -65,6 +64,7 @@ class TestEvent(TestCase):
             mock = Mock()
             mock.args.tick_duration = 0
             e = Event(mock)
+            e.execute_cmd = Mock()
 
             m_time.side_effect = [0, 1, 10]
 
@@ -73,8 +73,7 @@ class TestEvent(TestCase):
             self.assertEqual(context.exception.code, -1)
 
     @patch('utils.check_for_file', lambda file: None)
-    @patch('event.execute_cmd')
-    def test_execute_with_exce_execute_cmd(self, m_execute_cmd):
+    def test_execute_with_exce_execute_cmd(self):
         data = dedent("""
             cmd1
         """).strip()
@@ -83,7 +82,8 @@ class TestEvent(TestCase):
             mock = Mock()
             mock.args.tick_duration = 0
             e = Event(mock)
-            m_execute_cmd.side_effect = Exception('mock')
+            e.execute_cmd = Mock()
+            e.execute_cmd.side_effect = Exception('mock')
 
             with self.assertRaises(Exception) as context:
                 e.execute()
@@ -91,38 +91,57 @@ class TestEvent(TestCase):
 
     def test_execute_cmd_with_block_cmd(self):
         node_1 = Mock()
-        nodes = {'node-1': node_1}
         cmd = 'block node-1'
+        e = Event(Mock())
+        e.context.all_bitcoin_nodes = {'node-1': node_1}
+        e.execute_cmd(cmd)
 
-        event.execute_cmd(cmd, nodes)
+        self.assertTrue(node_1.execute_rpc.called)
 
-        self.assertTrue(node_1.generate_block_rpc.called)
-
-    @patch('event.generate_tx')
-    def test_execute_cmd_with_block_cmd(self, m_generate_tx):
+    def test_execute_cmd_with_block_cmd_with_empty_cmd(self):
         node_1 = Mock()
 
-        event.execute_cmd('', {})
+        e = Event(Mock())
+        e.generate_tx = Mock()
+        e.execute_cmd('')
 
-        self.assertFalse(node_1.generate_block_rpc.called)
-        self.assertFalse(m_generate_tx.called)
+        self.assertFalse(node_1.execute_rpc.called)
+        self.assertFalse(e.generate_tx.called)
 
     @patch('event.generate_tx')
     def test_execute_cmd_with_tx_tmd(self, m_generate_tx):
         node = Mock()
-        nodes = {'node-1': node}
         cmd = 'tx node-1'
 
-        event.execute_cmd(cmd, nodes)
+        e = Event(Mock())
+        e.generate_tx = Mock()
+        e.context.all_bitcoin_nodes = {'node-1': node}
+        e.execute_cmd(cmd)
 
         self.assertTrue(m_generate_tx.called)
         self.assertEqual(m_generate_tx.call_args[0][0], node)
 
     def test_execute_cmd_with_unknown_cmd(self):
-        nodes = {'node-1': {}}
         cmd = 'unknown node-1'
+        e = Event(Mock())
+        e.context.all_bitcoin_nodes = {'node-1': {}}
 
         with self.assertRaises(Exception) as context:
-            event.execute_cmd(cmd, nodes)
+            e.execute_cmd(cmd)
 
         self.assertTrue('Unknown cmd' in str(context.exception))
+
+    @patch('event.generate_tx')
+    def test_execute_cmd_with_exception(self, m_generate_tx):
+        m_generate_tx.side_effect = JSONRPCException({'code': -1, 'message': 'test_message'})
+
+        context = Mock()
+        context.tx_exceptions = []
+        node = namedtuple('Node', ['name'])('node-1')
+        context.all_bitcoin_nodes = {'node-1': node}
+
+        e = Event(context)
+        e.execute_cmd('tx node-1')
+
+        self.assertEqual(len(context.tx_exceptions), 1)
+        self.assertEqual(context.tx_exceptions[0].error_message, 'test_message')
