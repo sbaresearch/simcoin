@@ -167,8 +167,8 @@ class TestCliStats(TestCase):
         array = np.array([])
         statistics = Stats.from_array(array)
 
-        self.assertTrue(np.isnan(statistics.median))
-        self.assertTrue(np.isnan(statistics.std))
+        self.assertEqual(statistics.std, '')
+        self.assertEqual(statistics.median, '')
         self.assertEqual(statistics.count, 0)
 
     def test_calc_median_std(self):

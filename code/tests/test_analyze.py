@@ -70,7 +70,7 @@ class TestAnalyze(TestCase):
         analyzer = Analyzer(context)
         analyzer.create_tx_csv()
 
-        m_open.assert_called_with(config.tx_csv, 'w')
+        m_open.assert_called_with(config.txs_csv, 'w')
         handle = m_open()
         self.assertEqual(handle.write.call_count, 2)
         self.assertEqual(handle.write.call_args_list[0][0][0], 'tx_hash;node;timestamp;'

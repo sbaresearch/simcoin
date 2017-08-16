@@ -87,8 +87,8 @@ class Stats:
     def from_array(cls, array):
         count = len(array)
         if count == 0:
-            median = float('nan')
-            std = float('nan')
+            median = ''
+            std = ''
         else:
             median = np.median(array)
             std = np.std(array)

@@ -44,7 +44,7 @@ class TestPrepare(TestCase):
         prepare.prepare_simulation_dir()
 
         self.assertEqual(m_makedirs.call_count, 1)
-        self.assertEqual(m_check_output.call_count, 4)
+        self.assertEqual(m_check_output.call_count, 5)
 
 
     @patch('bash.check_output')
