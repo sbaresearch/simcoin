@@ -82,8 +82,8 @@ def prepare_simulation_dir():
     if not os.path.exists(config.sim_dir):
         os.makedirs(config.sim_dir)
 
-    if os.path.isfile(config.soft_link_to_sim_dir):
-        bash.check_output('rm {}'.format(config.soft_link_to_sim_dir))
+    if os.path.islink(config.soft_link_to_sim_dir):
+        bash.check_output('unlink {}'.format(config.soft_link_to_sim_dir))
     bash.check_output('ln -s {} {}'.format(config.sim_dir, config.soft_link_to_sim_dir))
 
     bash.check_output('cp {} {}'.format(config.network_csv, config.sim_dir))
