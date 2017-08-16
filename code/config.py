@@ -18,6 +18,7 @@ selfish_node_proxy_name = selfish_node_name + selfish_node_proxy_postfix
 
 data_dir = '../data/'
 sim_dir = '{}run-{}/'.format(data_dir, time.time())
+soft_link_to_sim_dir = '{}last_run'.format(data_dir)
 network_csv_file_name = 'network.csv'
 ticks_csv_file_name = 'ticks.csv'
 nodes_json_file_name = 'nodes.json'
