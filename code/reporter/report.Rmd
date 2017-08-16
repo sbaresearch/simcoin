@@ -99,7 +99,7 @@ Standard deviation: `r round(sd(blocks$std_propagation)*1000, 3)` ms
 hist(blocks$std_propagation)
 ```
 
-##Transactions
+## Transactions
 
 There were `r nrow(txs)` txs in this simulation.
 
