@@ -19,25 +19,29 @@ We will consider data from [Simcoin et al., Physiol Genomics 10:5&ndash;12,
 ```{r setup, include=FALSE}
 txs    <- read.csv2("tx.csv", sep=";", dec=".")
 blocks <- read.csv2("blocks.csv", sep=";", dec=".")
-
+txs_count <- nrow(txs)
+blocks_count <- nrow(blocks)
 
 ```
 
 ##  Blocks
 
-```{r summary_cross}
+There were `r blocks_count` blocks in this simulation.
+
+```{r blocks, eval=blocks_count > 0}
 hist(blocks$median_propagation)
-
-
 ```
 
 ## Transactions
 
-```{r summary_plot, fig.height=8}
+There were `r txs_count` txs in this simulation.
+
+```{r txs, eval=txs_count > 0, fig.height=8}
 hist(txs$median_propagation, breaks=10)
 hist(txs$timestamp)
 
 ```
+
 
 ### R and package versions used
 
