@@ -10,7 +10,6 @@
 library(knitr)
 opts_chunk$set(fig.width=12, fig.height=4, fig.path='RmdFigs/',
                warning=FALSE, message=FALSE)
-
 ```
 
 ### Data import
@@ -23,7 +22,6 @@ txs    <- read.csv2("tx.csv", sep=";", dec=".")
 blocks <- read.csv2("blocks.csv", sep=";", dec=".")
 txs_count <- nrow(txs)
 blocks_count <- nrow(blocks)
-
 ```
 
 ##  Blocks
@@ -41,7 +39,6 @@ There were `r txs_count` txs in this simulation.
 ```{r txs, eval=txs_count > 0, fig.height=8}
 hist(txs$median_propagation, breaks=10)
 hist(txs$timestamp)
-
 ```
 
 
