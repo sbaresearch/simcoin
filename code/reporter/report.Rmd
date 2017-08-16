@@ -32,7 +32,7 @@ hist(blocks$median_propagation)
 
 ## Transactions
 
-There were `r nrow(tx)` txs in this simulation.
+There were `r nrow(txs)` txs in this simulation.
 
 ```{r txs, eval=nrow(txs)>0, fig.height=8}
 hist(txs$median_propagation, breaks=10)
