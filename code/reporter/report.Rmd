@@ -16,7 +16,7 @@ opts_chunk$set(fig.width=12, fig.height=4, fig.path='RmdFigs/',
 We will consider data from [Simcoin et al., Physiol Genomics 10:5&ndash;12,
 2017](http://www.ncbi.nlm.nih.gov/pubmed/12118100).
 
-```{r load_tx, include=FALSE}
+```{r setup, include=FALSE}
 txs    <- read.csv2("tx.csv", sep=";", dec=".")
 blocks <- read.csv2("blocks.csv", sep=";", dec=".")
 
