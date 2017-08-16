@@ -47,7 +47,7 @@ class BitcoinNode(Node):
     def run(self):
         bash.check_output(bitcoincmd.start(self))
         # sleep small amount to avoid 'CannotSendRequest: Request-sent' in bitcoinrpc
-        utils.sleep(0.1)
+        utils.sleep(0.2)
         self.connect_to_rpc()
 
     def wait_until_rpc_ready(self):
