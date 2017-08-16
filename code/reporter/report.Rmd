@@ -21,8 +21,10 @@ We will consider data from [Simcoin et al., Physiol Genomics 10:5&ndash;12,
 2017](http://www.ncbi.nlm.nih.gov/pubmed/12118100).
 
 ```{r setup, include=FALSE}
-txs    <- read.csv2("txs.csv", sep=";", dec=".")
-blocks <- read.csv2("blocks.csv", sep=";", dec=".")
+txs    <- read.csv2("txs.csv", dec=".")
+blocks <- read.csv2("blocks.csv", dec=".")
+mempool_shots <- read.csv2("mempool_snapshots.csv", dec=".")
+tx_exces <- read.csv2("tx_exceptions.csv", dec=".")
 ```
 
 ##  Blocks
@@ -140,6 +142,44 @@ Standard deviation: `r round(sd(blocks$txs), 3)` txs
 
 ```{r txs_per_block, eval=nrow(blocks)>0}
 hist(blocks$txs)
+```
+
+## Transaction exceptions
+
+There were `r nrow(tx_exces)` mempool snapshots parsed from log file.
+
+```{r exces, eval=nrow(tx_exces)>0}
+hist(tx_exces$timestamp)
+```
+
+### Distribution
+```{r exces_node_distribution, eval=nrow(tx_exces)>0, fig.height=6}
+exces_per_node <- table(tx_exces$node)
+percentage <- round(exces_per_node/sum(exces_per_node)*100)
+labels <- paste(names(exces_per_node), ' blocks: ', exces_per_node, ', ', percentage, '%', sep='')
+pie(exces_per_node, labels)
+```
+
+### Exception error message
+```{r exces_error_message_distribution, eval=nrow(tx_exces)>0, fig.height=6}
+exces_per_node <- table(tx_exces$error_message)
+percentage <- round(exces_per_node/sum(exces_per_node)*100)
+labels <- paste(names(exces_per_node), ' blocks: ', exces_per_node, ', ', percentage, '%', sep='')
+pie(exces_per_node, labels)
+```
+
+## Mempool snapshots
+
+There were `r nrow(mempool_shots)` mempool snapshots parsed from log file.
+
+Mean: `r round(mean(mempool_shots$txs), 3)` txs
+
+Median: `r round(median(mempool_shots$txs), 3)` txs
+
+Standard deviation: `r round(sd(mempool_shots$txs), 3)` txs
+
+```{r mempool_txs, eval=nrow(mempool_shots)>0}
+hist(mempool_shots$txs)
 ```
 
 #### R and package versions used
