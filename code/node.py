@@ -10,6 +10,7 @@ import utils
 import errno
 from collections import OrderedDict
 from bitcoin.wallet import CBitcoinSecret
+from bitcoinrpc.authproxy import JSONRPCException
 
 
 class Node:
@@ -45,7 +46,19 @@ class BitcoinNode(Node):
 
     def run(self):
         bash.check_output(bitcoincmd.start(self))
+        # sleep small amount to avoid 'CannotSendRequest: Request-sent' in bitcoinrpc
+        utils.sleep(0.1)
         self.connect_to_rpc()
+
+    def wait_until_rpc_ready(self):
+        while True:
+            try:
+                self.execute_rpc('getnetworkinfo')
+                break
+            except JSONRPCException as exce:
+                logging.debug('Exception="{}" while calling RPC. Waiting until RPC of node={} is ready.'
+                              .format(exce, self.name))
+                utils.sleep(0.2)
 
     def connect_to_rpc(self):
         self.rpc_connection = AuthServiceProxy(config.create_rpc_connection_string(self.ip))

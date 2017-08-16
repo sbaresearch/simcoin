@@ -16,7 +16,7 @@ class Prepare:
         remove_old_containers_if_exists()
         recreate_network()
 
-        utils.sleep(4)
+        utils.sleep(1)
 
         self.give_nodes_spendable_coins()
 
@@ -73,7 +73,9 @@ def delete_nodes(nodes):
 def run_nodes(nodes):
     for node in nodes:
         node.run()
-    utils.sleep(4 + len(nodes) * 0.2)
+
+    for node in nodes:
+        node.wait_until_rpc_ready()
 
 
 def prepare_simulation_dir():

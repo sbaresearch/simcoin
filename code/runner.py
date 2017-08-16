@@ -19,24 +19,25 @@ class Runner:
 
             for node in self.context.all_bitcoin_nodes.values():
                 node.run()
-            utils.sleep(4 + len(self.context.all_bitcoin_nodes) * 0.2)
 
             for node in self.context.all_bitcoin_nodes.values():
+                node.wait_until_rpc_ready()
                 prepare.wait_until_height_reached(node, self.context.first_block_height)
 
             start_hash = self.context.one_normal_node.execute_rpc('getbestblockhash')
             for node in self.context.selfish_node_proxies.values():
                 node.run(start_hash)
-            utils.sleep(2)
+
             for node in self.context.selfish_node_proxies.values():
                 node.wait_for_highest_tip_of_node(self.context.one_normal_node)
 
             for node in self.context.nodes.values():
                 node.connect()
-            utils.sleep(4 + len(self.context.all_nodes) * 0.2)
 
             for node in self.context.all_public_nodes.values():
                 node.add_latency(self.context.zone.zones)
+
+            utils.sleep(3 + len(self.context.all_nodes) * 0.2)
 
             logging.info(config.log_line_sim_start)
             self.event.execute()
