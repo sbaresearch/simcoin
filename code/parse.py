@@ -4,6 +4,7 @@ from datetime import datetime
 import logging
 import numpy as np
 from utils import Stats
+from collections import namedtuple
 
 
 class Parser:
@@ -18,7 +19,8 @@ class Parser:
             self.block_reconstructed_parser,
             self.tx_creation_parser,
             self.tx_received_parser,
-            self.peer_logic_validation_parse,
+            self.peer_logic_validation_parser,
+            self.checking_mempool_parser,
         ]
 
     def execute(self):
@@ -82,7 +84,7 @@ class Parser:
         tx_stats.receiving_timestamps = np.append(tx_stats.receiving_timestamps,
                                                   log_line_with_hash.timestamp - tx_stats.timestamp)
 
-    def peer_logic_validation_parse(self, line):
+    def peer_logic_validation_parser(self, line):
         log_line_with_hash = parse_peer_logic_validation(line)
         create_new_block = self.nodes_create_blocks[log_line_with_hash.node]
 
@@ -93,6 +95,11 @@ class Parser:
             self.context.parsed_blocks[block_stats.block_hash] = block_stats
             self.nodes_create_blocks[log_line_with_hash.node] = None
 
+    def checking_mempool_parser(self, line):
+        checking_mempool_log_line = parse_checking_mempool(line)
+
+        self.context.mempool_snapshots.append(checking_mempool_log_line)
+
 
 def parse_create_new_block(line):
     regex = config.log_prefix_full + 'CreateNewBlock\(\): total size: ([0-9]+)' \
@@ -102,7 +109,7 @@ def parse_create_new_block(line):
     if matched is None:
         raise ParseException("Didn't matched CreateNewBlock log line.")
 
-    return CreateNewBlock(
+    return CreateNewBlockLogLine(
         datetime.strptime(matched.group(1), config.log_time_format).timestamp(),
         str(matched.group(2)),
         int(matched.group(3)),
@@ -120,7 +127,7 @@ def parse_update_tip(line):
     if matched is None:
         raise ParseException("Didn't matched CreateNewBlock log line.")
 
-    return UpdateTip(
+    return UpdateTipLogLine(
         datetime.strptime(matched.group(1), config.log_time_format).timestamp(),
         str(matched.group(2)),
         str(matched.group(3)),
@@ -208,31 +215,31 @@ def parse_peer_logic_validation(line):
     )
 
 
-class LogLine:
-    def __init__(self, timestamp, node):
-        self.timestamp = timestamp
-        self.node = node
+def parse_checking_mempool(line):
+    regex = config.log_prefix_full + 'Checking mempool with ([0-9]+) transactions and ([0-9]+) inputs'
+
+    matched = re.match(regex, line)
+
+    if matched is None:
+        raise ParseException("Didn't matched AcceptToMemoryPool log line.")
+
+    return CheckingMempoolLogLine(
+        datetime.strptime(matched.group(1), config.log_time_format).timestamp(),
+        str(matched.group(2)),
+        int(matched.group(3)),
+        int(matched.group(4)),
+    )
 
 
-class CreateNewBlock(LogLine):
-    def __init__(self, timestamp, node, total_size, txs):
-        super().__init__(timestamp, node)
-        self.total_size = total_size
-        self.txs = txs
+LogLine = namedtuple('LogLine', 'timestamp node')
 
+CreateNewBlockLogLine = namedtuple('CreateNewBlockLogLine', 'timestamp node  total_size txs')
 
-class UpdateTip(LogLine):
-    def __init__(self, timestamp, node, block_hash, height, tx):
-        super().__init__(timestamp, node)
-        self.block_hash = block_hash
-        self.height = height
-        self.tx = tx
+UpdateTipLogLine = namedtuple('UpdateTipLogLine', 'timestamp node block_hash height tx')
 
+LogLineWithHash = namedtuple('LogLineWithHash', 'timestamp node obj_hash')
 
-class LogLineWithHash(LogLine):
-    def __init__(self, timestamp, node, obj_hash):
-        super().__init__(timestamp, node)
-        self.obj_hash = obj_hash
+CheckingMempoolLogLine = namedtuple('CheckingMempoolLogLine', 'timestamp node txs inputs')
 
 
 class BlockStats:

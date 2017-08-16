@@ -5,6 +5,7 @@ from parse import BlockStats
 import numpy as np
 import config
 from parse import TxStats
+from parse import CheckingMempoolLogLine
 from analyze import Analyzer
 from event import TransactionException
 from mock import Mock
@@ -92,3 +93,20 @@ class TestAnalyze(TestCase):
         self.assertEqual(handle.write.call_count, 2)
         self.assertEqual(handle.write.call_args_list[0][0][0], 'node;timestamp;error_message\n')
         self.assertEqual(handle.write.call_args_list[1][0][0], 'node-1;timestamp;error_message\n')
+
+    @patch('builtins.open', new_callable=mock_open)
+    def test_create_mempool_snapshots_csv(self, m_open):
+        mempool_snapshots = [
+            CheckingMempoolLogLine('timestamp', 'node-1', 45, 36)
+        ]
+
+        context = Mock()
+        context.mempool_snapshots = mempool_snapshots
+        analyzer = Analyzer(context)
+        analyzer.create_mempool_snapshots_csv()
+
+        m_open.assert_called_with(config.mempool_snapshots_csv, 'w')
+        handle = m_open()
+        self.assertEqual(handle.write.call_count, 2)
+        self.assertEqual(handle.write.call_args_list[0][0][0], 'timestamp;node;txs;inputs\n')
+        self.assertEqual(handle.write.call_args_list[1][0][0], 'timestamp;node-1;45;36\n')
