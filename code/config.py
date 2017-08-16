@@ -34,7 +34,7 @@ blocks_csv = data_dir + sim_dir + 'blocks.csv'
 chains_csv = data_dir + sim_dir + 'chains.csv'
 consensus_chain_csv = data_dir + sim_dir + 'consensus_chain.csv'
 nodes_csv = data_dir + sim_dir + 'nodes.csv'
-tx_csv = data_dir + sim_dir + 'tx.csv'
+txs_csv = data_dir + sim_dir + 'txs.csv'
 tx_exceptions_csv = data_dir + sim_dir + 'tx_exceptions.csv'
 mempool_snapshots_csv = data_dir + sim_dir + 'mempool_snapshots.csv'
 

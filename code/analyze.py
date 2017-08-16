@@ -32,7 +32,7 @@ class Analyzer:
                     propagation_stats.count, propagation_stats.median, propagation_stats.std))
 
     def create_tx_csv(self):
-        with open(config.tx_csv, 'w') as file:
+        with open(config.txs_csv, 'w') as file:
             file.write('tx_hash;node;timestamp;total_accepted;median_propagation;std_propagation\n')
 
             for tx in self.context.parsed_txs.values():

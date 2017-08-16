@@ -18,7 +18,7 @@ We will consider data from [Simcoin et al., Physiol Genomics 10:5&ndash;12,
 2017](http://www.ncbi.nlm.nih.gov/pubmed/12118100).
 
 ```{r setup, include=FALSE}
-txs    <- read.csv2("tx.csv", sep=";", dec=".")
+txs    <- read.csv2("txs.csv", sep=";", dec=".")
 blocks <- read.csv2("blocks.csv", sep=";", dec=".")
 ```
 
