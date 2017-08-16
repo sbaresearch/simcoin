@@ -5,6 +5,7 @@ import bash
 import re
 import logging
 from analyze import Analyzer
+import rcmd
 
 
 class PostProcessing:
@@ -26,6 +27,8 @@ class PostProcessing:
         analyzer = Analyzer(self.context)
         analyzer.execute()
         logging.info('Executed analyzing')
+
+        bash.check_output(rcmd.create_report())
 
         logging.info('Executed post processing')
 
