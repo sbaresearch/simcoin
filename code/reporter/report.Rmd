@@ -1,6 +1,8 @@
 # Simulation Report
 
-* install dependecies in R with `install.packages("rmarkdown")` once
+* install dependecies in R with `install.packages("dependency")`
+    * rmarkdown
+    * devtools
 * make sure pandoc is installed (e.g. apt install pandoc)
 
 
@@ -45,13 +47,6 @@ hist(txs$timestamp)
 
 ### R and package versions used
 
-It's a a good idea to end with some information about the packages you
-used, their versions, and the version of R that you used.
-
-The `sessionInfo()` function provides this information. Even better is
-to install the [devtools](https://github.com/hadley/devtools) package
-and use `devtools::session_info()`.
-
 ```{r sessionInfo, include=TRUE, echo=TRUE, results='markup'}
-sessionInfo()
+devtools::session_info()
 ```
