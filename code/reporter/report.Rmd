@@ -10,6 +10,7 @@
 library(knitr)
 opts_chunk$set(fig.width=12, fig.height=4, fig.path='RmdFigs/',
                warning=FALSE, message=FALSE)
+knitr::opts_knit$set(root.dir = '/tmp/knitr')
 ```
 
 ### Data import
@@ -26,21 +27,120 @@ blocks <- read.csv2("blocks.csv", sep=";", dec=".")
 
 There were `r nrow(blocks)` blocks in this simulation.
 
-```{r blocks, eval=nrow(blocks)>0}
+### Distribution
+```{r blocks_distribution, eval=nrow(blocks)>0, fig.height=6}
+blocks_per_node <- table(blocks$node)
+percentage <- round(blocks_per_node/sum(blocks_per_node)*100)
+labels <- paste(names(blocks_per_node), ' blocks: ', blocks_per_node, ', ', percentage, '%', sep='')
+pie(blocks_per_node, labels)
+```
+
+### Creation time
+```{r blocks_creation_time, eval=nrow(blocks)>0}
+hist(blocks$timestamp)
+```
+
+### Stale blocks
+```{r stale, eval=nrow(blocks)>0, fig.height=6}
+stale_blocks <- table(blocks$stale)
+percentage <- round(stale_blocks/sum(stale_blocks)*100)
+labels <- paste(names(stale_blocks), ' blocks: ', stale_blocks, ', ', percentage, '%', sep='')
+pie(stale_blocks, labels)
+```
+
+### Block size
+
+Mean: `r round(mean(blocks$total_size)/1000, 3)` kB
+
+Median: `r round(median(blocks$total_size)/1000, 3)` kB
+
+Standard deviation: `r round(sd(blocks$total_size)/1000, 3)` kB
+
+```{r size, eval=nrow(blocks)>0}
+hist(blocks$total_size)
+```
+
+### Blocks received
+Mean: `r round(mean(blocks$total_received), 3)` nodes
+
+Median: `r round(median(blocks$total_received), 3)` nodes
+
+Standard deviation: `r round(sd(blocks$total_received), 3)` nodes
+
+```{r blocks_received, eval=nrow(blocks)>0}
+hist(blocks$total_received)
+```
+
+### Propagation time of blocks
+
+Mean: `r round(mean(blocks$median_propagation)*1000, 3)` ms
+
+Median: `r round(median(blocks$median_propagation)*1000, 3)` ms
+
+Standard deviation: `r round(sd(blocks$median_propagation)*1000, 3)` ms
+
+```{r blocks_propagation, eval=nrow(blocks)>0}
 hist(blocks$median_propagation)
 ```
 
-## Transactions
+### Standard deviation time of propagation time of blocks
+
+Mean: `r round(mean(blocks$std_propagation)*1000, 3)` ms
+
+Median: `r round(median(blocks$std_propagation)*1000, 3)` ms
+
+Standard deviation: `r round(sd(blocks$std_propagation)*1000, 3)` ms
+
+```{r blocks_std_propagation, eval=nrow(blocks)>0}
+hist(blocks$std_propagation)
+```
+
+##Transactions
 
 There were `r nrow(txs)` txs in this simulation.
 
-```{r txs, eval=nrow(txs)>0, fig.height=8}
-hist(txs$median_propagation, breaks=10)
+### Distribution
+```{r txs_distribution, eval=nrow(txs)>0, fig.height=6}
+txs_per_node <- table(txs$node)
+percentage <- round(txs_per_node/sum(txs_per_node)*100)
+labels <- paste(names(txs_per_node), ' blocks: ', txs_per_node, ', ', percentage, '%', sep='')
+pie(txs_per_node, labels)
+```
+
+### Creation time
+```{r txs_creation_time, eval=nrow(txs)>0}
 hist(txs$timestamp)
 ```
 
+### Txs accepted
+Mean: `r round(mean(txs$total_accepted), 3)` nodes
 
-### R and package versions used
+Median: `r round(median(txs$total_accepted), 3)` nodes
+
+Standard deviation: `r round(sd(txs$total_accepted), 3)` nodes
+
+```{r txs_accepted, eval=nrow(txs)>0}
+hist(txs$total_accepted)
+```
+
+
+### Transaction median propagation
+```{r txs_median_propagation, eval=nrow(txs)>0}
+hist(txs$median_propagation, breaks=10)
+```
+
+### Transactions per block
+Mean: `r round(mean(blocks$txs), 3)` txs
+
+Median: `r round(median(blocks$txs), 3)` txs
+
+Standard deviation: `r round(sd(blocks$txs), 3)` txs
+
+```{r txs_per_block, eval=nrow(blocks)>0}
+hist(blocks$txs)
+```
+
+#### R and package versions used
 
 ```{r sessionInfo, include=TRUE, echo=TRUE, results='markup'}
 devtools::session_info()
