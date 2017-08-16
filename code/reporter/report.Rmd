@@ -1,4 +1,4 @@
-# Test Report
+# Simulation Report
 
 * install dependecies in R with `install.packages("rmarkdown")` once
 * make sure pandoc is installed (e.g. apt install pandoc)
