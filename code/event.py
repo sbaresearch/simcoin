@@ -30,9 +30,10 @@ class Event:
                     logging.info('Sleep {} seconds for next tick.'.format(difference))
                     utils.sleep(difference)
                 else:
-                    logging.error('Current_time={} is higher then next_tick={}.'
+                    logging.error('Current_time={} is higher then next_tick={} by {}s.'
                                   ' Consider to raise the tick_duration which is currently {}s.'
-                                  .format(current_time, next_tick, self.context.args.tick_duration))
+                                  .format(current_time, next_tick, current_time - next_tick,
+                                          self.context.args.tick_duration))
                     exit(-1)
 
     def execute_cmd(self, cmd):
