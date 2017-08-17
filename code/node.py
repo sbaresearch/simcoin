@@ -15,6 +15,7 @@ from bitcoin.core import lx, b2x, COutPoint, CMutableTxOut, CMutableTxIn, CMutab
 from bitcoin.core.script import CScript, OP_DUP, OP_HASH160, OP_EQUALVERIFY, OP_CHECKSIG, SignatureHash, SIGHASH_ALL
 from bitcoin.wallet import CBitcoinAddress
 from http.client import CannotSendRequest
+from bitcoinrpc.authproxy import HTTP_TIMEOUT
 
 
 class Node:
@@ -50,7 +51,6 @@ class BitcoinNode(Node):
         bash.check_output(bitcoincmd.start(self))
         # sleep small amount to avoid 'CannotSendRequest: Request-sent' in bitcoinrpc
         utils.sleep(0.2)
-        self.connect_to_rpc()
 
     def wait_until_rpc_ready(self):
         while True:
@@ -62,8 +62,8 @@ class BitcoinNode(Node):
                               .format(exce, self.name))
                 utils.sleep(0.2)
 
-    def connect_to_rpc(self):
-        self.rpc_connection = AuthServiceProxy(config.create_rpc_connection_string(self.ip), timeout=0.1)
+    def connect_to_rpc(self, timeout=HTTP_TIMEOUT):
+        self.rpc_connection = AuthServiceProxy(config.create_rpc_connection_string(self.ip), timeout=timeout)
 
     def delete_peers_file(self):
         return bash.check_output(bitcoincmd.rm_peers(self.name))

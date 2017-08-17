@@ -29,7 +29,12 @@ class Prepare:
     def give_nodes_spendable_coins(self):
         nodes = list(self.context.all_bitcoin_nodes.values())
 
-        run_nodes(nodes)
+        for node in nodes:
+            node.run()
+            node.connect_to_rpc()
+
+        for node in nodes:
+            node.wait_until_rpc_ready()
 
         amount_of_tx_chains = calc_number_of_tx_chains(
             self.context.args.txs_per_tick,
@@ -67,9 +72,13 @@ class Prepare:
         delete_nodes(nodes)
 
     def start_nodes(self):
-        run_nodes(self.context.all_bitcoin_nodes.values())
+        nodes = self.context.all_bitcoin_nodes.values()
+        for node in nodes:
+            node.run()
+            node.connect_to_rpc(timeout=0.25)
 
-        for node in self.context.all_bitcoin_nodes.values():
+        for node in nodes:
+            node.wait_until_rpc_ready()
             wait_until_height_reached(node, self.context.first_block_height)
 
         start_hash = self.context.one_normal_node.execute_rpc('getbestblockhash')
@@ -93,14 +102,6 @@ def delete_nodes(nodes):
         node.delete_peers_file()
         node.execute_rpc('stop')
         node.rm()
-
-
-def run_nodes(nodes):
-    for node in nodes:
-        node.run()
-
-    for node in nodes:
-        node.wait_until_rpc_ready()
 
 
 def prepare_simulation_dir():
