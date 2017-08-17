@@ -14,6 +14,7 @@ from bitcoinrpc.authproxy import JSONRPCException
 from bitcoin.core import lx, b2x, COutPoint, CMutableTxOut, CMutableTxIn, CMutableTransaction, Hash160
 from bitcoin.core.script import CScript, OP_DUP, OP_HASH160, OP_EQUALVERIFY, OP_CHECKSIG, SignatureHash, SIGHASH_ALL
 from bitcoin.wallet import CBitcoinAddress
+from http.client import CannotSendRequest
 
 
 class Node:
@@ -79,6 +80,10 @@ class BitcoinNode(Node):
                     retry -= 1
                     self.connect_to_rpc()
                     logging.debug('Error={} occurred. Reconnecting RPC and retrying.'.format(error))
+            except CannotSendRequest as exce:
+                retry -= 1
+                self.connect_to_rpc()
+                logging.debug('Error={} occurred. Reconnecting RPC and retrying.'.format(exce))
 
         logging.error("Could'nt execute rpc-call={} on node {}".format(args[0], self.name))
         exit(-1)
