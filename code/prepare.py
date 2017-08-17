@@ -67,7 +67,7 @@ class Prepare:
         delete_nodes(nodes)
 
     def start_nodes(self):
-        run_nodes(self.context.all_bitcoin_nodes.values)
+        run_nodes(self.context.all_bitcoin_nodes.values())
 
         for node in self.context.all_bitcoin_nodes.values():
             wait_until_height_reached(node, self.context.first_block_height)
