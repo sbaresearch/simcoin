@@ -40,8 +40,6 @@ class BitcoinNode(Node):
 
     def __init__(self, name, ip, docker_image):
         super().__init__(name, ip, docker_image)
-        self.name = name
-        self.ip = ip
         self.spent_to_address = None
         self.rpc_connection = None
         self.current_tx_chain_index = 0
