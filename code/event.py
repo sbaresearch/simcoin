@@ -7,6 +7,7 @@ from bitcoin.core import lx, b2x, COIN, COutPoint, CMutableTxOut, CMutableTxIn, 
 from bitcoin.core.script import CScript, OP_DUP, OP_HASH160, OP_EQUALVERIFY, OP_CHECKSIG, SignatureHash, SIGHASH_NONE, SIGHASH_ALL, SIGHASH_ANYONECANPAY, SIGHASH_SINGLE
 from bitcoin.wallet import CBitcoinAddress
 from datetime import datetime
+from collections import namedtuple
 
 
 class Event:
@@ -86,8 +87,4 @@ def generate_tx(node):
                          amount_in - (txout1.nValue + txout2.nValue), len(tx_serialized), tx_hash))
 
 
-class TransactionException:
-    def __init__(self, node, timestamp, error_message):
-        self.node = node
-        self.timestamp = timestamp
-        self.error_message = error_message
+TransactionException = namedtuple('TransactionException', 'node timestamp error_message')
