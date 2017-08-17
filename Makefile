@@ -73,11 +73,3 @@ test:
 .PHONY : clean
 clean:
 	rm -rf data/*
-
-.PHONY : report
-RCMD = 'library(rmarkdown);rmarkdown::render("report.Rmd", "pdf_document")'
-report:
-	cd $(shell ls -td -- data/*/ | head -n 1); \
-		cp ../../code/reporter/report.Rmd .  ; \
-		R -e $(RCMD) ;\
-		mv report.pdf ./..
