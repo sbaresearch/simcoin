@@ -41,21 +41,22 @@ class Event:
 
         if cmd_parts[0] == 'tx':
             node = self.context.all_bitcoin_nodes[cmd_parts[1]]
-
-            # generate_tx_rpc is not always successful. eg. miner has not enough money or tx fee calculation fails
             try:
                 node.generate_tx()
             except JSONRPCException as exce:
-                self.context.tx_exceptions.append(TransactionException(node.name, datetime.now(), exce.message))
+                self.context.tx_exceptions.append(CmdException(node.name, datetime.now(), exce.message))
                 logging.info('Could not generate tx for node {}. Exception={}'.format(node.name, exce.message))
-
         elif cmd_parts[0] == 'block':
             node = self.context.all_bitcoin_nodes[cmd_parts[1]]
-            block_hash = node.execute_rpc('generate', 1)
-            logging.info('Created block with hash={}'.format(block_hash))
+            try:
+                block_hash = node.execute_rpc('generate', 1)
+                logging.info('Created block with hash={}'.format(block_hash))
+            except JSONRPCException as exce:
+                self.context.block_exceptions.append(CmdException(node.name, datetime.now(), exce.message))
+                logging.info('Could not generate block for node {}. Exception={}'.format(node.name, exce.message))
         elif len(cmd) == 0:
             pass
         else:
             raise Exception('Unknown cmd={} in {}-file'.format(cmd_parts[0], config.ticks_csv))
 
-TransactionException = namedtuple('TransactionException', 'node timestamp error_message')
+CmdException = namedtuple('CmdException', 'node timestamp error_message')

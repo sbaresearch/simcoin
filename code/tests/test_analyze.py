@@ -7,7 +7,7 @@ import config
 from parse import TxStats
 from parse import CheckingMempoolLogLine
 from analyze import Analyzer
-from event import TransactionException
+from event import CmdException
 from mock import Mock
 
 
@@ -80,7 +80,7 @@ class TestAnalyze(TestCase):
     @patch('builtins.open', new_callable=mock_open)
     def test_create_tx_exceptions_csv(self, m_open):
         tx_exceptions = [
-            TransactionException('node-1', 'timestamp', 'error_message')
+            CmdException('node-1', 'timestamp', 'error_message')
         ]
 
         context = Mock()

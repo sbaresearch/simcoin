@@ -30,6 +30,7 @@ class Context:
         self.first_block_height = None
 
         self.tx_exceptions = []
+        self.block_exceptions = []
         self.consensus_chain = []
         self.parsed_blocks = {}
         self.parsed_txs = {}
