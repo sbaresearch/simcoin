@@ -2,7 +2,7 @@
 
 * install dependecies in R with `install.packages("dependency")`
     * rmarkdown
-    * devtools
+    * devtools (if installation fails this link may help: [SO - Problems installing the devtools package](https://stackoverflow.com/questions/20923209/problems-installing-the-devtools-package))
 * make sure pandoc is installed (e.g. apt install pandoc)
 
 
@@ -23,7 +23,10 @@ We will consider data from [Simcoin et al., Physiol Genomics 10:5&ndash;12,
 ```{r setup, include=FALSE}
 txs    <- read.csv2("txs.csv", dec=".")
 blocks <- read.csv2("blocks.csv", dec=".")
-mempool_shots <- read.csv2("mempool_snapshots.csv", dec=".")
+
+mempool <- read.csv2("mempool_snapshots.csv", dec=".")
+mem$rel_timestamp = mem$timestamp - range(mem$timestamp)[1]
+
 tx_exces <- read.csv2("tx_exceptions.csv", dec=".")
 ```
 
@@ -170,16 +173,20 @@ pie(exces_per_node, labels)
 
 ## Mempool snapshots
 
-There were `r nrow(mempool_shots)` mempool snapshots parsed from log file.
+There were `r nrow(mempool)` mempool snapshots parsed from log file.
 
-Mean: `r round(mean(mempool_shots$txs), 3)` txs
+Mean: `r round(mean(mempool$txs), 3)` txs
 
-Median: `r round(median(mempool_shots$txs), 3)` txs
+Median: `r round(median(mempool$txs), 3)` txs
+
+Standard deviation: `r round(sd(mempool$txs), 3)` txs
+
+```{r mempool_txs, eval=nrow(mempool)>0}
+hist(mempool$txs)
+```
 
 Standard deviation: `r round(sd(mempool_shots$txs), 3)` txs
 
-```{r mempool_txs, eval=nrow(mempool_shots)>0}
-hist(mempool_shots$txs)
 ```
 
 #### R and package versions used
