@@ -20,6 +20,8 @@ class Prepare:
 
         self.give_nodes_spendable_coins()
 
+        self.start_nodes()
+
     def give_nodes_spendable_coins(self):
         logging.info('Begin of preparation')
         nodes = list(self.context.all_bitcoin_nodes.values())
@@ -61,6 +63,27 @@ class Prepare:
         delete_nodes(nodes)
 
         logging.info('End of preparation')
+
+    def start_nodes(self):
+        run_nodes(self.context.all_bitcoin_nodes.values)
+
+        for node in self.context.all_bitcoin_nodes.values():
+            wait_until_height_reached(node, self.context.first_block_height)
+
+        start_hash = self.context.one_normal_node.execute_rpc('getbestblockhash')
+        for node in self.context.selfish_node_proxies.values():
+            node.run(start_hash)
+
+        for node in self.context.selfish_node_proxies.values():
+            node.wait_for_highest_tip_of_node(self.context.one_normal_node)
+
+        for node in self.context.nodes.values():
+            node.connect()
+
+        for node in self.context.all_public_nodes.values():
+            node.add_latency(self.context.zone.zones)
+
+        utils.sleep(3 + len(self.context.all_nodes) * 0.2)
 
 
 def delete_nodes(nodes):

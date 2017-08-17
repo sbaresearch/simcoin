@@ -2,7 +2,6 @@ import dockercmd
 import config
 import logging
 import bash
-import prepare
 import utils
 
 
@@ -16,28 +15,6 @@ class Runner:
     def run(self):
         try:
             self.prepare.execute()
-
-            for node in self.context.all_bitcoin_nodes.values():
-                node.run()
-
-            for node in self.context.all_bitcoin_nodes.values():
-                node.wait_until_rpc_ready()
-                prepare.wait_until_height_reached(node, self.context.first_block_height)
-
-            start_hash = self.context.one_normal_node.execute_rpc('getbestblockhash')
-            for node in self.context.selfish_node_proxies.values():
-                node.run(start_hash)
-
-            for node in self.context.selfish_node_proxies.values():
-                node.wait_for_highest_tip_of_node(self.context.one_normal_node)
-
-            for node in self.context.nodes.values():
-                node.connect()
-
-            for node in self.context.all_public_nodes.values():
-                node.add_latency(self.context.zone.zones)
-
-            utils.sleep(3 + len(self.context.all_nodes) * 0.2)
 
             logging.info(config.log_line_sim_start)
             self.event.execute()
