@@ -63,7 +63,7 @@ class BitcoinNode(Node):
                 utils.sleep(0.2)
 
     def connect_to_rpc(self):
-        self.rpc_connection = AuthServiceProxy(config.create_rpc_connection_string(self.ip))
+        self.rpc_connection = AuthServiceProxy(config.create_rpc_connection_string(self.ip), timeout=0.1)
 
     def delete_peers_file(self):
         return bash.check_output(bitcoincmd.rm_peers(self.name))
