@@ -112,18 +112,19 @@ class TestParse(TestCase):
 
         self.assertTrue(self.parser.nodes_create_blocks['node-0'])
 
-    @patch('parse.parse_update_tip', lambda a: UpdateTipLogLine(None, 'node-0', 'block_hash', None, None))
+    @patch('parse.parse_update_tip', lambda a: UpdateTipLogLine(None, 'node-0', 'block_hash', 45, None))
     def test_update_tip_parser_with_previous_create_new_block(self):
         self.parser.nodes_create_blocks['node-0'] = CreateNewBlockLogLine(None, None, None, None)
 
         self.parser.tip_updated_parser('line')
 
         self.assertEqual(len(self.context.parsed_blocks), 1)
+        parsed_block = self.context.parsed_blocks['block_hash']
+        self.assertEqual(parsed_block.height, 45)
         self.assertEqual(self.parser.nodes_create_blocks['node-0'], None)
 
     @patch('parse.parse_update_tip', lambda a: UpdateTipLogLine(None, 'node-0', 'block_hash', 45, None))
     def test_update_tip_parser_with_block_stats_already_set(self):
-        self.parser.nodes_create_blocks['node-0'] = CreateNewBlockLogLine(None, None, None, None)
         self.context.parsed_blocks['block_hash'] = BlockStats(None, None, None, None, None)
 
         self.parser.tip_updated_parser('line')
