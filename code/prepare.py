@@ -12,6 +12,8 @@ class Prepare:
         self.context = context
 
     def execute(self):
+        logging.info('Begin of prepare step')
+
         prepare_simulation_dir()
         remove_old_containers_if_exists()
         recreate_network()
@@ -22,8 +24,9 @@ class Prepare:
 
         self.start_nodes()
 
+        logging.info('End of prepare step')
+
     def give_nodes_spendable_coins(self):
-        logging.info('Begin of preparation')
         nodes = list(self.context.all_bitcoin_nodes.values())
 
         run_nodes(nodes)
@@ -50,6 +53,7 @@ class Prepare:
         for node in nodes:
             node.set_spent_to_address()
             node.create_tx_chains()
+            logging.info("Transferring coinbase tx to normal tx for node={}".format(node.name))
             node.transfer_coinbases_to_normal_tx()
 
         for i, node in enumerate(nodes):
@@ -61,8 +65,6 @@ class Prepare:
         for node in nodes:
             wait_until_height_reached(node, current_height)
         delete_nodes(nodes)
-
-        logging.info('End of preparation')
 
     def start_nodes(self):
         run_nodes(self.context.all_bitcoin_nodes.values)
