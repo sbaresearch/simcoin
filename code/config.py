@@ -70,5 +70,4 @@ def host_dir(node):
 
 smallest_amount = 1
 smallest_amount_btc = 0.00000001
-coinbase_amount = 5000000000
 transaction_fee = 1000

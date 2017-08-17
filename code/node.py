@@ -11,7 +11,7 @@ import errno
 from collections import OrderedDict
 from bitcoin.wallet import CBitcoinSecret
 from bitcoinrpc.authproxy import JSONRPCException
-from bitcoin.core import lx, b2x, COIN, COutPoint, CMutableTxOut, CMutableTxIn, CMutableTransaction, Hash160
+from bitcoin.core import lx, b2x, COutPoint, CMutableTxOut, CMutableTxIn, CMutableTransaction, Hash160
 from bitcoin.core.script import CScript, OP_DUP, OP_HASH160, OP_EQUALVERIFY, OP_CHECKSIG, SignatureHash, SIGHASH_ALL
 from bitcoin.wallet import CBitcoinAddress
 
@@ -91,7 +91,7 @@ class BitcoinNode(Node):
 
     def transfer_coinbases_to_normal_tx(self):
         for tx_chain in self.tx_chains:
-            tx_chain.available_coins -= config.transaction_fee + config.smallest_amount
+            tx_chain.amount -= config.transaction_fee + config.smallest_amount
             raw_transaction = self.execute_rpc('createrawtransaction',
                                   [{
                                     'txid':    tx_chain.current_unspent_tx,
@@ -99,7 +99,7 @@ class BitcoinNode(Node):
                                   }],
                                   OrderedDict(
                                       [
-                                          (tx_chain.address, tx_chain.available_coins/100000000),
+                                          (tx_chain.address, tx_chain.amount/100000000),
                                           (self.spent_to_address, config.smallest_amount_btc)
                                       ])
                                   )
@@ -112,10 +112,10 @@ class BitcoinNode(Node):
         txin = CMutableTxIn(COutPoint(txid, 0))
         txin_scriptPubKey = CScript([OP_DUP, OP_HASH160, Hash160(tx_chain.seckey.pub), OP_EQUALVERIFY, OP_CHECKSIG])
 
-        amount_in = tx_chain.available_coins
-        tx_chain.available_coins -= config.smallest_amount + config.transaction_fee
-        txout1 = CMutableTxOut(tx_chain.available_coins, CBitcoinAddress(tx_chain.address).to_scriptPubKey())
-        txout2 = CMutableTxOut(config.smallest_amount, CBitcoinAddress(node.spent_to_address).to_scriptPubKey())
+        amount_in = tx_chain.amount
+        tx_chain.amount -= config.smallest_amount + config.transaction_fee
+        txout1 = CMutableTxOut(tx_chain.amount, CBitcoinAddress(tx_chain.address).to_scriptPubKey())
+        txout2 = CMutableTxOut(config.smallest_amount, CBitcoinAddress(self.spent_to_address).to_scriptPubKey())
 
         tx = CMutableTransaction([txin], [txout1, txout2], nVersion=2)
 
@@ -140,7 +140,7 @@ class BitcoinNode(Node):
     def create_tx_chains(self):
         for unspent_tx in self.execute_rpc('listunspent'):
             seckey = CBitcoinSecret(self.execute_rpc('dumpprivkey', unspent_tx['address']))
-            tx_chain = TxChain(unspent_tx["txid"], unspent_tx["address"], seckey)
+            tx_chain = TxChain(unspent_tx['txid'], unspent_tx['address'], seckey, unspent_tx['amount'] * 100000000)
 
             self.tx_chains.append(tx_chain)
 
@@ -200,8 +200,8 @@ class ProxyNode(Node, PublicNode):
 
 
 class TxChain:
-    def __init__(self, current_unspent_tx, address, seckey):
+    def __init__(self, current_unspent_tx, address, seckey, amount):
         self.current_unspent_tx = current_unspent_tx
         self.address = address
         self.seckey = seckey
-        self.available_coins = config.coinbase_amount
+        self.amount = amount
