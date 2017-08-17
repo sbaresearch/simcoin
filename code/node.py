@@ -11,6 +11,9 @@ import errno
 from collections import OrderedDict
 from bitcoin.wallet import CBitcoinSecret
 from bitcoinrpc.authproxy import JSONRPCException
+from bitcoin.core import lx, b2x, COIN, COutPoint, CMutableTxOut, CMutableTxIn, CMutableTransaction, Hash160
+from bitcoin.core.script import CScript, OP_DUP, OP_HASH160, OP_EQUALVERIFY, OP_CHECKSIG, SignatureHash, SIGHASH_ALL
+from bitcoin.wallet import CBitcoinAddress
 
 
 class Node:
@@ -104,6 +107,34 @@ class BitcoinNode(Node):
                                   )
             signed_raw_transaction = self.execute_rpc('signrawtransaction', raw_transaction)['hex']
             tx_chain.current_unspent_tx = self.execute_rpc('sendrawtransaction', signed_raw_transaction)
+
+    def generate_tx(self):
+        tx_chain = self.get_next_tx_chain()
+        txid = lx(tx_chain.current_unspent_tx)
+        txin = CMutableTxIn(COutPoint(txid, 0))
+        txin_scriptPubKey = CScript([OP_DUP, OP_HASH160, Hash160(tx_chain.seckey.pub), OP_EQUALVERIFY, OP_CHECKSIG])
+
+        amount_in = tx_chain.available_coins
+        tx_chain.available_coins -= config.smallest_amount + config.transaction_fee
+        txout1 = CMutableTxOut(tx_chain.available_coins, CBitcoinAddress(tx_chain.address).to_scriptPubKey())
+        txout2 = CMutableTxOut(config.smallest_amount, CBitcoinAddress(node.spent_to_address).to_scriptPubKey())
+
+        tx = CMutableTransaction([txin], [txout1, txout2], nVersion=2)
+
+        sighash = SignatureHash(txin_scriptPubKey, tx, 0, SIGHASH_ALL)
+        sig = tx_chain.seckey.sign(sighash) + bytes([SIGHASH_ALL])
+        txin.scriptSig = CScript([sig, tx_chain.seckey.pub])
+
+        tx_serialized = tx.serialize()
+        logging.info('{} trying to sendrawtransaction (in={}, out={};{} fee={} bytes={}) using tx_chain number={}'
+                     .format(self.name, amount_in, txout1.nValue, txout2.nValue,
+                             amount_in - (txout1.nValue + txout2.nValue), len(tx_serialized),
+                             self.current_tx_chain_index))
+        tx_hash = self.execute_rpc('sendrawtransaction', b2x(tx_serialized))
+        tx_chain.current_unspent_tx = tx_hash
+        logging.info('{} sendrawtransaction (in={}, out={};{} fee={} bytes={}), which got tx_hash={}'
+                     .format(self.name, amount_in, txout1.nValue, txout2.nValue,
+                             amount_in - (txout1.nValue + txout2.nValue), len(tx_serialized), tx_hash))
 
     def set_spent_to_address(self):
         self.spent_to_address = self.execute_rpc('getnewaddress')

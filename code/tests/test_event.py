@@ -5,7 +5,6 @@ from unittest.mock import Mock
 from unittest.mock import mock_open
 from bitcoinrpc.authproxy import JSONRPCException
 from textwrap import dedent
-from collections import namedtuple
 
 
 class TestEvent(TestCase):
@@ -108,8 +107,7 @@ class TestEvent(TestCase):
         self.assertFalse(node_1.execute_rpc.called)
         self.assertFalse(e.generate_tx.called)
 
-    @patch('event.generate_tx')
-    def test_execute_cmd_with_tx_tmd(self, m_generate_tx):
+    def test_execute_cmd_with_tx_tmd(self):
         node = Mock()
         cmd = 'tx node-1'
 
@@ -118,8 +116,7 @@ class TestEvent(TestCase):
         e.context.all_bitcoin_nodes = {'node-1': node}
         e.execute_cmd(cmd)
 
-        self.assertTrue(m_generate_tx.called)
-        self.assertEqual(m_generate_tx.call_args[0][0], node)
+        self.assertTrue(node.generate_tx.called)
 
     def test_execute_cmd_with_unknown_cmd(self):
         cmd = 'unknown node-1'
@@ -131,13 +128,12 @@ class TestEvent(TestCase):
 
         self.assertTrue('Unknown cmd' in str(context.exception))
 
-    @patch('event.generate_tx')
-    def test_execute_cmd_with_exception(self, m_generate_tx):
-        m_generate_tx.side_effect = JSONRPCException({'code': -1, 'message': 'test_message'})
-
+    def test_execute_cmd_with_exception(self):
         context = Mock()
         context.tx_exceptions = []
-        node = namedtuple('Node', ['name'])('node-1')
+
+        node = Mock()
+        node.generate_tx.side_effect = JSONRPCException({'code': -1, 'message': 'test_message'})
         context.all_bitcoin_nodes = {'node-1': node}
 
         e = Event(context)
