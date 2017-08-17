@@ -185,8 +185,11 @@ Standard deviation: `r round(sd(mempool$txs), 3)` txs
 hist(mempool$txs)
 ```
 
-Standard deviation: `r round(sd(mempool_shots$txs), 3)` txs
+### Txs in mempool over time
 
+```{r txs_mempool_over_time eval=nrow(mempool)>0}
+txs_in_mempool = tapply(mempool$txs, cut(mempool$rel_timestamp, pretty(mempool$rel_timestamp)), median)
+plot(txs_in_mempool, xlab='time', ylab='txs')
 ```
 
 #### R and package versions used
