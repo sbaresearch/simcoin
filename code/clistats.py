@@ -3,6 +3,7 @@ import utils
 import operator
 import logging
 from utils import Values
+from bitcoinrpc.authproxy import JSONRPCException
 
 
 class CliStats:
@@ -24,9 +25,10 @@ class CliStats:
             while True:
                 blocks = []
                 for node in nodes:
-                    if node.execute_rpc('getblockhash', height) != 0:
+                    try:
+                        blocks.append(node.execute_rpc('getblockhash', height))
+                    except JSONRPCException:
                         break
-                    blocks.append(node.execute_rpc('getblockhash', height))
                 if len(blocks) == len(nodes) and utils.check_equal(blocks):
                     self.context.consensus_chain.append(blocks[0])
                     file.write('{};{}\n'.format(height, blocks[0]))
