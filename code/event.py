@@ -40,13 +40,17 @@ class Event:
 
     def execute_cmd(self, cmd):
         cmd_parts = cmd.split(' ')
+
         if cmd_parts[0] == 'tx':
             node = self.context.all_bitcoin_nodes[cmd_parts[1]]
+
+            # generate_tx_rpc is not always successful. eg. miner has not enough money or tx fee calculation fails
             try:
                 generate_tx(node)
             except JSONRPCException as exce:
                 self.context.tx_exceptions.append(TransactionException(node.name, datetime.now(), exce.message))
                 logging.info('Could not generate tx for node {}. Exception={}'.format(node.name, exce.message))
+
         elif cmd_parts[0] == 'block':
             node = self.context.all_bitcoin_nodes[cmd_parts[1]]
             block_hash = node.execute_rpc('generate', 1)
@@ -58,7 +62,6 @@ class Event:
 
 
 def generate_tx(node):
-    # generate_tx_rpc is not always successful. eg. miner has not enough money or tx fee calculation fails
     tx_chain = node.get_next_tx_chain()
     txid = lx(tx_chain.current_unspent_tx)
     txin = CMutableTxIn(COutPoint(txid, 0))
