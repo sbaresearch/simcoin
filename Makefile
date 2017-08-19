@@ -39,6 +39,15 @@ demo3:
 				--amount-of-ticks 100 \
 				--tx-per-tick 1
 
+demo4:
+	cd code; \
+		python3 simcoin.py \
+			run \
+				--node-group-a bitcoin 3 1 0 simcoin/patched:v1\
+				--amount-of-ticks 10 \
+				--tx-per-tick 2 \
+				--blocks-per-tick 0.75
+
 install:
 	cd code; pip3 install -r requirements.txt
 
