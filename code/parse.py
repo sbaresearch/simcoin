@@ -12,16 +12,7 @@ class Parser:
         self.context = context
         self.nodes_create_blocks = {node.name: None for node in context.all_bitcoin_nodes.values()}
 
-        self.parsers = [
-            self.block_creation_parser,
-            self.tip_updated_parser,
-            self.block_received_parser,
-            self.block_reconstructed_parser,
-            self.tx_creation_parser,
-            self.tx_received_parser,
-            self.peer_logic_validation_parser,
-            self.checking_mempool_parser,
-        ]
+        self.parsers = [func for func in dir(Parser) if callable(getattr(Parser, func)) and func.endswith("_parser")]
 
     def execute(self):
         with open(config.aggregated_sim_log, 'r') as file:
@@ -29,11 +20,14 @@ class Parser:
             for line in lines:
                 for parser in self.parsers:
                     try:
-                        parser(line)
+                        self.execute_parser(parser, line)
                         break
                     except ParseException:
                         pass
         logging.info('Executed parser')
+
+    def execute_parser(self, parser, line):
+        getattr(Parser, parser)(self, line)
 
     def block_creation_parser(self, line):
         create_new_block = parse_create_new_block(line)
