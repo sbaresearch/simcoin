@@ -90,9 +90,10 @@ class Parser:
             self.nodes_create_blocks[log_line_with_hash.node] = None
 
     def checking_mempool_parser(self, line):
-        checking_mempool_log_line = parse_checking_mempool(line)
+        self.context.mempool_snapshots.append(
+            parse_checking_mempool(line)
+        )
 
-        self.context.mempool_snapshots.append(checking_mempool_log_line)
     def tick_parser(self, line):
         self.context.tick_infos.append(
             parse_tick_log_line(line)
