@@ -136,7 +136,7 @@ class TestCliStats(TestCase):
         self.assertEqual(handle.write.call_args_list[0][0][0],
                          'name;'
                          'headers_only;headers_only_median_branchlen;headers_only_std_branchlen;'
-                         'total_tips;total_tips_median_branchlen;tips_std_branchlen;'
+                         'total_tips;total_tips_median_branchlen;total_tips_std_branchlen;'
                          'valid_fork;valid_fork_median_branchlen;valid_fork_std_branchlen;'
                          'valid_headers;valid_headers_median_branchlen;valid_headers_std_branchlen;\n')
 

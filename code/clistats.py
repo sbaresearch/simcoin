@@ -56,7 +56,7 @@ class CliStats:
         with open(config.nodes_csv, 'w') as file:
             file.write('name;'
                        'headers_only;headers_only_median_branchlen;headers_only_std_branchlen;'
-                       'total_tips;total_tips_median_branchlen;tips_std_branchlen;'
+                       'total_tips;total_tips_median_branchlen;total_tips_std_branchlen;'
                        'valid_fork;valid_fork_median_branchlen;valid_fork_std_branchlen;'
                        'valid_headers;valid_headers_median_branchlen;valid_headers_std_branchlen;\n')
             for node in self.context.all_bitcoin_nodes.values():
