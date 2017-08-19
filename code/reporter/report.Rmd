@@ -12,8 +12,7 @@ library(knitr)
 opts_chunk$set(fig.width=12, fig.height=4, fig.path='RmdFigs/',
                warning=FALSE, message=FALSE)
 
-# set working directory for development
-# knitr::opts_knit$set(root.dir = '/tmp/knitr')
+# set working directory for development: knitr::opts_knit$set(root.dir = '/tmp/run')
 ```
 
 ### Data import
