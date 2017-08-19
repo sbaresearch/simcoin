@@ -269,3 +269,11 @@ class TestParse(TestCase):
         self.parser.checking_mempool_parser('line')
 
         self.assertEqual(len(self.context.mempool_snapshots), 1)
+
+    def test_parse_tick(self):
+        tick_log_line = parse.parse_tick(
+            '2017-08-19 16:05:14.609000 simcoin [MainThread  ] [INFO ]  Sleep 0.9823310375213623 seconds for next tick.'
+        )
+
+        self.assertEqual(tick_log_line.timestamp, datetime(2017, 8, 19, 16, 5, 14, 609000).timestamp())
+        self.assertEqual(tick_log_line.sleep_time, 0.9823310375213623)

@@ -225,7 +225,22 @@ def parse_checking_mempool(line):
     )
 
 
+def parse_tick(line):
+    regex = config.log_prefix_full + '\[.*\] \[.*\]  Sleep ([0-9]+\.[0-9]+) seconds for next tick.$'
+
+    matched = re.match(regex, line)
+
+    if matched is None:
+        raise ParseException("Didn't matched tick log line.")
+
+    return TickLogLine(
+        datetime.strptime(matched.group(1), config.log_time_format).timestamp(),
+        float(matched.group(3)),
+    )
+
 LogLine = namedtuple('LogLine', 'timestamp node')
+
+TickLogLine = namedtuple('TickLogLine', 'timestamp sleep_time')
 
 CreateNewBlockLogLine = namedtuple('CreateNewBlockLogLine', 'timestamp node  total_size txs')
 
