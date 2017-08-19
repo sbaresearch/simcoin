@@ -32,7 +32,11 @@ mempool$rel_timestamp = mempool$timestamp - range(mempool$timestamp)[1]
 
 nodes         <- read.csv2("nodes.csv")
 
-tx_exces  <- read.csv2("tx_exceptions.csv", dec=".")
+tx_exces      <- read.csv2("tx_exceptions.csv", dec=".")
+tx_exces$rel_timestamp = tx_exces$timestamp - range(tx_exces$timestamp)[1]
+
+block_exces   <- read.csv2("block_exceptions.csv", dec=".")
+block_exces$rel_timestamp = block_exces$timestamp - range(block_exces$timestamp)[1]
 
 library('jsonlite')
 args    <- stream_in(file('args.json'))
@@ -118,6 +122,30 @@ Standard deviation: `r round(sd(blocks$std_propagation)*1000, 3)` ms
 hist(blocks$std_propagation)
 ```
 
+## Block exceptions
+
+There were `r nrow(block_exces)` exceptions during the creation of blocks.
+
+```{r block_exces, eval=nrow(block_exces)>0}
+hist(block_exces$rel_timestamp)
+```
+
+### Distribution
+```{r block_exces_node_distribution, eval=nrow(block_exces)>0, fig.height=6}
+exces_per_node <- table(block_exces$node)
+percentage <- round(exces_per_node/sum(exces_per_node)*100)
+labels <- paste(names(exces_per_node), ' blocks: ', exces_per_node, ', ', percentage, '%', sep='')
+pie(exces_per_node, labels)
+```
+
+### Exception error message
+```{r block_exces_error_message_distribution, eval=nrow(block_exces)>0, fig.height=6}
+exces_per_node <- table(block_exces$error_message)
+percentage <- round(exces_per_node/sum(exces_per_node)*100)
+labels <- paste(names(exces_per_node), ' blocks: ', exces_per_node, ', ', percentage, '%', sep='')
+pie(exces_per_node, labels)
+```
+
 ## Transactions
 
 There were `r nrow(txs)` txs in this simulation.
@@ -165,14 +193,14 @@ hist(blocks$txs)
 
 ## Transaction exceptions
 
-There were `r nrow(tx_exces)` mempool snapshots parsed from log file.
+There were `r nrow(tx_exces)` exceptions during the creation of the transactions.
 
 ```{r tx_exces, eval=nrow(tx_exces)>0}
 hist(tx_exces$rel_timestamp)
 ```
 
 ### Distribution
-```{r exces_node_distribution, eval=nrow(tx_exces)>0, fig.height=6}
+```{r tx_exces_node_distribution, eval=nrow(tx_exces)>0, fig.height=6}
 exces_per_node <- table(tx_exces$node)
 percentage <- round(exces_per_node/sum(exces_per_node)*100)
 labels <- paste(names(exces_per_node), ' blocks: ', exces_per_node, ', ', percentage, '%', sep='')
@@ -180,7 +208,7 @@ pie(exces_per_node, labels)
 ```
 
 ### Exception error message
-```{r exces_error_message_distribution, eval=nrow(tx_exces)>0, fig.height=6}
+```{r tx_exces_error_message_distribution, eval=nrow(tx_exces)>0, fig.height=6}
 exces_per_node <- table(tx_exces$error_message)
 percentage <- round(exces_per_node/sum(exces_per_node)*100)
 labels <- paste(names(exces_per_node), ' blocks: ', exces_per_node, ', ', percentage, '%', sep='')
