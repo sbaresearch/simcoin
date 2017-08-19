@@ -25,13 +25,14 @@ class Runner:
                 logging.debug('Waiting for blocks to spread...')
                 utils.sleep(0.2)
                 array = [int(node.execute_rpc('getblockcount')) for node in self.context.nodes.values()]
+        finally:
             logging.info(config.log_line_sim_end)
 
             self.post_processing.execute()
 
             for node in self.context.all_nodes.values():
                 node.grep_log_for_errors()
-        finally:
+
             bash.check_output(dockercmd.fix_data_dirs_permissions())
 
             # remove proxies first. if not proxies could be already stopped when trying to remove
