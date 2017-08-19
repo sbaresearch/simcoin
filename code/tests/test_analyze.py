@@ -95,6 +95,24 @@ class TestAnalyze(TestCase):
         self.assertEqual(handle.write.call_args_list[1][0][0], 'node-1;timestamp;error_message\r\n')
 
     @patch('builtins.open', new_callable=mock_open)
+    def test_create_block_exceptions_csv(self, m_open):
+        block_exceptions = [
+            CmdException('node-1', 'timestamp', 'error_message')
+        ]
+
+        context = Mock()
+        context.block_exceptions = block_exceptions
+        analyzer = Analyzer(context)
+        analyzer.create_block_exceptions_csv()
+
+        m_open.assert_called_with(config.block_exceptions_csv, 'w')
+        handle = m_open()
+        self.assertEqual(handle.write.call_count, 2)
+        self.assertEqual(handle.write.call_args_list[0][0][0], 'node;timestamp;error_message\r\n')
+        self.assertEqual(handle.write.call_args_list[1][0][0], 'node-1;timestamp;error_message\r\n')
+
+
+    @patch('builtins.open', new_callable=mock_open)
     def test_create_mempool_snapshots_csv(self, m_open):
         mempool_snapshots = [
             CheckingMempoolLogLine('timestamp', 'node-1', 45, 36)
