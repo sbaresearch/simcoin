@@ -28,6 +28,7 @@ blocks    <- read.csv2("blocks.csv", dec=".")
 mempool   <- read.csv2("mempool_snapshots.csv", dec=".")
 mempool$rel_timestamp = mempool$timestamp - range(mempool$timestamp)[1]
 
+nodes     <- read.csv2("nodes.csv")
 
 tx_exces  <- read.csv2("tx_exceptions.csv", dec=".")
 args    <- stream_in(file('args.json'))
@@ -202,6 +203,55 @@ hist(mempool$txs)
 txs_in_mempool = tapply(mempool$txs, cut(mempool$rel_timestamp, pretty(mempool$rel_timestamp)), median)
 plot(txs_in_mempool, xlab='time', ylab='txs')
 ```
+
+## Nodes
+
+In this simulation were `r nrow(nodes)` nodes. In the following the statistics based on data from the RPC-call `getchaintips` are presented.
+
+### All different tips types
+
+```{r all types}
+total             <- cbind(nodes['total_tips'], nodes['total_tips_median_branchlen'], nodes['total_tips_std_branchlen'])
+total             <- rbind(total, apply(total, 2, mean))
+
+rownames(total)   <- c(as.character(unlist(nodes['name'])), '***mean***')
+
+kable(total)
+```
+
+### Valid forks
+
+```{r valid_forks}
+valid_forks             <- cbind(nodes['valid_fork'], nodes['valid_fork_median_branchlen'], nodes['valid_fork_std_branchlen'])
+valid_forks             <- rbind(valid_forks, apply(valid_forks, 2, mean))
+
+rownames(valid_forks)   <- c(as.character(unlist(nodes['name'])), '***mean***')
+
+kable(valid_forks)
+```
+
+### Headers only
+
+```{r headers_only}
+headers_only             <- cbind(nodes['headers_only'], nodes['headers_only_median_branchlen'], nodes['headers_only_std_branchlen'])
+headers_only             <- rbind(headers_only, apply(headers_only, 2, mean))
+
+rownames(headers_only)   <- c(as.character(unlist(nodes['name'])), '***mean***')
+
+kable(headers_only)
+```
+
+### Valid headers
+
+```{r valid_headers}
+valid_headers             <- cbind(nodes['valid_headers'], nodes['valid_headers_median_branchlen'], nodes['valid_headers_std_branchlen'])
+valid_headers             <- rbind(valid_headers, apply(valid_headers, 2, mean))
+
+rownames(valid_headers)   <- c(as.character(unlist(nodes['name'])), '***mean***')
+
+kable(valid_headers)
+```
+
 
 #### R and package versions used
 
