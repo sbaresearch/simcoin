@@ -31,6 +31,8 @@ mempool$rel_timestamp = mempool$timestamp - range(mempool$timestamp)[1]
 nodes     <- read.csv2("nodes.csv")
 
 tx_exces  <- read.csv2("tx_exceptions.csv", dec=".")
+
+library('jsonlite')
 args    <- stream_in(file('args.json'))
 ```
 
