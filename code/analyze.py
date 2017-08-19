@@ -59,6 +59,14 @@ class Analyzer:
             for exce in self.context.block_exceptions:
                 w.writerow([exce.node, exce.timestamp, exce.error_message])
 
+    def create_tick_infos_csv(self):
+        with open(config.tick_infos_csv, 'w') as file:
+            w = csv.writer(file, delimiter=';')
+            w.writerow(['timestamp', 'sleep_time'])
+
+            for tick in self.context.tick_infos:
+                w.writerow([tick.timestamp, tick.sleep_time])
+
     def create_mempool_snapshots_csv(self):
         with open(config.mempool_snapshots_csv, 'w') as file:
             w = csv.writer(file, delimiter=';')

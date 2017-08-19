@@ -6,6 +6,7 @@ import numpy as np
 import config
 from parse import TxStats
 from parse import CheckingMempoolLogLine
+from parse import TickLogLine
 from analyze import Analyzer
 from event import CmdException
 from mock import Mock
@@ -128,3 +129,20 @@ class TestAnalyze(TestCase):
         self.assertEqual(handle.write.call_count, 2)
         self.assertEqual(handle.write.call_args_list[0][0][0], 'timestamp;node;txs;inputs\r\n')
         self.assertEqual(handle.write.call_args_list[1][0][0], 'timestamp;node-1;45;36\r\n')
+
+    @patch('builtins.open', new_callable=mock_open)
+    def test_create_tick_infos(self, m_open):
+        mempool_snapshots = [
+            TickLogLine('timestamp', 45)
+        ]
+
+        context = Mock()
+        context.tick_infos = mempool_snapshots
+        analyzer = Analyzer(context)
+        analyzer.create_tick_infos_csv()
+
+        m_open.assert_called_with(config.tick_infos_csv, 'w')
+        handle = m_open()
+        self.assertEqual(handle.write.call_count, 2)
+        self.assertEqual(handle.write.call_args_list[0][0][0], 'timestamp;sleep_time\r\n')
+        self.assertEqual(handle.write.call_args_list[1][0][0], 'timestamp;45\r\n')
