@@ -21,13 +21,16 @@ We will consider data from [Simcoin et al., Physiol Genomics 10:5&ndash;12,
 2017](http://www.ncbi.nlm.nih.gov/pubmed/12118100).
 
 ```{r setup, include=FALSE}
-txs       <- read.csv2("txs.csv", dec=".")
-blocks    <- read.csv2("blocks.csv", dec=".")
+txs           <- read.csv2("txs.csv", dec=".")
+txs$rel_timestamp = txs$timestamp - range(txs$timestamp)[1]
 
-mempool   <- read.csv2("mempool_snapshots.csv", dec=".")
+blocks        <- read.csv2("blocks.csv", dec=".")
+blocks$rel_timestamp = blocks$timestamp - range(blocks$timestamp)[1]
+
+mempool       <- read.csv2("mempool_snapshots.csv", dec=".")
 mempool$rel_timestamp = mempool$timestamp - range(mempool$timestamp)[1]
 
-nodes     <- read.csv2("nodes.csv")
+nodes         <- read.csv2("nodes.csv")
 
 tx_exces  <- read.csv2("tx_exceptions.csv", dec=".")
 
@@ -57,7 +60,7 @@ pie(blocks_per_node, labels)
 
 ### Creation time
 ```{r blocks_creation_time, eval=nrow(blocks)>0}
-hist(blocks$timestamp)
+hist(blocks$rel_timestamp)
 ```
 
 ### Stale blocks
@@ -129,7 +132,7 @@ pie(txs_per_node, labels)
 
 ### Creation time
 ```{r txs_creation_time, eval=nrow(txs)>0}
-hist(txs$timestamp)
+hist(txs$rel_timestamp)
 ```
 
 ### Txs accepted
@@ -164,8 +167,8 @@ hist(blocks$txs)
 
 There were `r nrow(tx_exces)` mempool snapshots parsed from log file.
 
-```{r exces, eval=nrow(tx_exces)>0}
-hist(tx_exces$timestamp)
+```{r tx_exces, eval=nrow(tx_exces)>0}
+hist(tx_exces$rel_timestamp)
 ```
 
 ### Distribution
