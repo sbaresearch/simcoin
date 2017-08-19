@@ -34,10 +34,10 @@ class TestParse(TestCase):
         self.parser = Parser(self.context)
 
     def test_parse_create_new_block(self):
-        log_line = '2017-07-27 11:01:22.173139 node-1' \
-                   ' CreateNewBlock(): total size: 226 block weight: 904 txs: 1 fees: 0 sigops 400'
-
-        create_new_block = parse.parse_create_new_block(log_line)
+        create_new_block = parse.parse_create_new_block(
+            '2017-07-27 11:01:22.173139 node-1 CreateNewBlock(): total size: 226 block weight:'
+            ' 904 txs: 1 fees: 0 sigops 400'
+        )
 
         self.assertEqual(create_new_block.timestamp, datetime(2017, 7, 27, 11, 1, 22, 173139).timestamp())
         self.assertEqual(create_new_block.node, 'node-1')
@@ -51,12 +51,10 @@ class TestParse(TestCase):
         self.assertTrue("Didn't matched CreateNewBlock log line." in str(context.exception))
 
     def test_parse_update_tip(self):
-        log_line = '2017-07-27 11:01:27.183575 node-1' \
-                   ' UpdateTip: new best=1d205cac616c0344721d2552482024528883e9fdf7439bfbfc02567060c56d71' \
-                   ' height=106 version=0x20000000 log2_work=7.741467 tx=113' \
-                   ' date=\'2017-07-27 11:01:29\' progress=1.000000 cache=0.0MiB(112tx)'
-
-        update_tip = parse.parse_update_tip(log_line)
+        update_tip = parse.parse_update_tip(
+            '2017-07-27 11:01:27.183575 node-1 UpdateTip: '
+            'new best=1d205cac616c0344721d2552482024528883e9fdf7439bfbfc02567060c56d71 height=106 version=0x20000000'
+            ' log2_work=7.741467 tx=113 date=\'2017-07-27 11:01:29\' progress=1.000000 cache=0.0MiB(112tx)')
 
         self.assertEqual(update_tip.timestamp, datetime(2017, 7, 27, 11, 1, 27, 183575).timestamp())
         self.assertEqual(update_tip.node, 'node-1')
@@ -136,22 +134,22 @@ class TestParse(TestCase):
         self.assertEqual(len(self.context.parsed_blocks), 0)
 
     def test_parse_received_block(self):
-        log_line = '2017-07-27 15:34:58.122336 node-1 received block' \
-                   ' 4ec9b518b23d460c01abaf1c6e32ec46dbbfc8c81c599dd71c0c175e2367f278' \
-                   ' peer=0'
-
-        log_line_with_hash = parse.parse_received_block(log_line)
+        log_line_with_hash = parse.parse_received_block(
+            '2017-07-27 15:34:58.122336 node-1 received block'
+            ' 4ec9b518b23d460c01abaf1c6e32ec46dbbfc8c81c599dd71c0c175e2367f278'
+            ' peer=0'
+        )
 
         self.assertEqual(log_line_with_hash.timestamp, datetime(2017, 7, 27, 15, 34, 58, 122336).timestamp())
         self.assertEqual(log_line_with_hash.node, 'node-1')
         self.assertEqual(log_line_with_hash.obj_hash, '4ec9b518b23d460c01abaf1c6e32ec46dbbfc8c81c599dd71c0c175e2367f278')
 
     def test_successfully_reconstructed_block(self):
-        log_line = '2017-07-28 08:41:43.637277 node-3 Successfully reconstructed' \
-                   ' block 27ebf5f20b3860fb3a8ed82f0721300bf96c1836252fddd67b60f48d227d3a3c with 1 txn prefilled,' \
-                   ' 0 txn from mempool (incl at least 0 from extra pool) and 0 txn requested'
-
-        log_line_with_hash = parse.parse_successfully_reconstructed_block(log_line)
+        log_line_with_hash = parse.parse_successfully_reconstructed_block(
+            '2017-07-28 08:41:43.637277 node-3 Successfully reconstructed'
+            ' block 27ebf5f20b3860fb3a8ed82f0721300bf96c1836252fddd67b60f48d227d3a3c with 1 txn prefilled,'
+            ' 0 txn from mempool (incl at least 0 from extra pool) and 0 txn requested'
+        )
 
         self.assertEqual(log_line_with_hash.timestamp, datetime(2017, 7, 28, 8, 41, 43, 637277).timestamp())
         self.assertEqual(log_line_with_hash.node, 'node-3')
@@ -188,21 +186,21 @@ class TestParse(TestCase):
         self.assertEqual(self.context.parsed_txs['tx_hash'].receiving_timestamps, np.array([9]))
 
     def test_parse_add_to_wallet(self):
-        log_line = '2017-07-30 07:48:48.337577 node-1 AddToWallet' \
-                   ' 2e1b05f9248ae5f29b2234ac0eb86e0fccbacc084ed91937eee7eea248fc9a6a  new'
-
-        log_line_with_hash = parse.parse_add_to_wallet(log_line)
+        log_line_with_hash = parse.parse_add_to_wallet(
+            '2017-07-30 07:48:48.337577 node-1 AddToWallet'
+            ' 2e1b05f9248ae5f29b2234ac0eb86e0fccbacc084ed91937eee7eea248fc9a6a  new'
+        )
 
         self.assertEqual(log_line_with_hash.timestamp, datetime(2017, 7, 30, 7, 48, 48, 337577).timestamp())
         self.assertEqual(log_line_with_hash.node, 'node-1')
         self.assertEqual(log_line_with_hash.obj_hash, '2e1b05f9248ae5f29b2234ac0eb86e0fccbacc084ed91937eee7eea248fc9a6a')
 
     def test_parse_accept_to_memory_pool(self):
-        log_line = '2017-07-30 07:48:42.907223 node-2 AcceptToMemoryPool: peer=1:' \
-                   ' accepted 701cd618d630780ac19a78325f24cdd13cbf87279103c7e9cec9fb6382e90ce7' \
-                   ' (poolsz 11 txn, 13 kB)'
-
-        log_line_with_hash = parse.parse_accept_to_memory_pool(log_line)
+        log_line_with_hash = parse.parse_accept_to_memory_pool(
+            '2017-07-30 07:48:42.907223 node-2 AcceptToMemoryPool: peer=1:'
+            ' accepted 701cd618d630780ac19a78325f24cdd13cbf87279103c7e9cec9fb6382e90ce7'
+            ' (poolsz 11 txn, 13 kB)'
+        )
 
         self.assertEqual(log_line_with_hash.timestamp, datetime(2017, 7, 30, 7, 48, 42, 907223).timestamp())
         self.assertEqual(log_line_with_hash.node, 'node-2')
@@ -229,11 +227,11 @@ class TestParse(TestCase):
         self.assertTrue(self.context.parsed_txs['tx_hash'].tx_hash, 'tx_hash')
 
     def test_parse_peer_logic_validation(self):
-        log_line = '2017-07-31 16:09:28.663985 node-0 PeerLogicValidation::NewPoWValidBlock' \
-                   ' sending header-and-ids 107692460326feaa6f0c6c35bb218bdb3ff2adbc0d10a3a36b8252acf54e0c03' \
-                   ' to peer=0'
-
-        log_line_with_hash = parse.parse_peer_logic_validation(log_line)
+        log_line_with_hash = parse.parse_peer_logic_validation(
+            '2017-07-31 16:09:28.663985 node-0 PeerLogicValidation::NewPoWValidBlock'
+            ' sending header-and-ids 107692460326feaa6f0c6c35bb218bdb3ff2adbc0d10a3a36b8252acf54e0c03'
+            ' to peer=0'
+        )
 
         self.assertEqual(log_line_with_hash.timestamp, datetime(2017, 7, 31, 16, 9, 28, 663985).timestamp())
         self.assertEqual(log_line_with_hash.node, 'node-0')
@@ -255,9 +253,9 @@ class TestParse(TestCase):
         self.assertEqual(len(self.context.parsed_blocks), 0)
 
     def test_parse_checking_mempool(self):
-        log_line = '2017-07-31 16:09:28.663985 node-0 Checking mempool with 5878 transactions and 5999 inputs'
-
-        checking_mempool = parse.parse_checking_mempool(log_line)
+        checking_mempool = parse.parse_checking_mempool(
+            '2017-07-31 16:09:28.663985 node-0 Checking mempool with 5878 transactions and 5999 inputs'
+        )
 
         self.assertEqual(checking_mempool.timestamp, datetime(2017, 7, 31, 16, 9, 28, 663985).timestamp())
         self.assertEqual(checking_mempool.node, 'node-0')
