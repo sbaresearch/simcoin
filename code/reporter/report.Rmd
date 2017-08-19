@@ -40,6 +40,10 @@ block_exces$rel_timestamp = block_exces$timestamp - range(block_exces$timestamp)
 
 library('jsonlite')
 args    <- stream_in(file('args.json'))
+
+tick_infos <- read.csv2("tick_infos.csv", dec=".")
+tick_infos$rel_timestamp = tick_infos$timestamp - range(tick_infos$timestamp)[1]
+tick_infos$tick_duration = as.numeric(args['tick_duration']) - tick_infos$sleep_time
 ```
 
 
@@ -213,6 +217,25 @@ exces_per_node <- table(tx_exces$error_message)
 percentage <- round(exces_per_node/sum(exces_per_node)*100)
 labels <- paste(names(exces_per_node), ' blocks: ', exces_per_node, ', ', percentage, '%', sep='')
 pie(exces_per_node, labels)
+```
+
+## Ticks
+
+During the simulation `r nrow(tick_infos)` ticks were executed.
+
+`r tick_infos$tick_duration`
+
+Mean: `r round(mean(tick_infos$tick_duration), 3)` s
+
+Median: `r round(median(tick_infos$tick_duration), 3)` s
+
+Standard deviation: `r round(sd(tick_infos$tick_duration), 3)` s
+
+### Tick duration over time
+
+```{r tick_duration, eval=nrow(tick_infos)>0}
+tick_duration = tapply(tick_infos$tick_duration, cut(tick_infos$rel_timestamp, pretty(tick_infos$rel_timestamp)), median)
+plot(tick_duration, xlab='time', ylab='duration of tick')
 ```
 
 ## Mempool snapshots
