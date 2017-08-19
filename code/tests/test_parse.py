@@ -6,6 +6,7 @@ from mock import patch
 from mock import mock_open
 from parse import Parser
 from mock import Mock
+from parse import TickLogLine
 from parse import CreateNewBlockLogLine
 from parse import UpdateTipLogLine
 from parse import CheckingMempoolLogLine
@@ -30,6 +31,7 @@ class TestParse(TestCase):
         self.context.parsed_blocks = {}
         self.context.parsed_txs = {}
         self.context.mempool_snapshots = []
+        self.context.tick_infos = []
         self.context.all_bitcoin_nodes.values.return_value = [node_0, node_1, node_2]
         self.parser = Parser(self.context)
 
@@ -269,9 +271,15 @@ class TestParse(TestCase):
         self.assertEqual(len(self.context.mempool_snapshots), 1)
 
     def test_parse_tick(self):
-        tick_log_line = parse.parse_tick(
+        tick_log_line = parse.parse_tick_log_line(
             '2017-08-19 16:05:14.609000 simcoin [MainThread  ] [INFO ]  Sleep 0.9823310375213623 seconds for next tick.'
         )
 
         self.assertEqual(tick_log_line.timestamp, datetime(2017, 8, 19, 16, 5, 14, 609000).timestamp())
         self.assertEqual(tick_log_line.sleep_time, 0.9823310375213623)
+
+    @patch('parse.parse_tick_log_line', lambda a: TickLogLine(None, None))
+    def test_checking_mempool_parser(self):
+        self.parser.tick_parser('line')
+
+        self.assertEqual(len(self.context.tick_infos), 1)

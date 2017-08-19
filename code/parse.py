@@ -93,6 +93,10 @@ class Parser:
         checking_mempool_log_line = parse_checking_mempool(line)
 
         self.context.mempool_snapshots.append(checking_mempool_log_line)
+    def tick_parser(self, line):
+        self.context.tick_infos.append(
+            parse_tick_log_line(line)
+        )
 
 
 def parse_create_new_block(line):
@@ -225,7 +229,7 @@ def parse_checking_mempool(line):
     )
 
 
-def parse_tick(line):
+def parse_tick_log_line(line):
     regex = config.log_prefix_full + '\[.*\] \[.*\]  Sleep ([0-9]+\.[0-9]+) seconds for next tick.$'
 
     matched = re.match(regex, line)
