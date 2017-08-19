@@ -9,13 +9,12 @@ class Analyzer:
         self.context = context
 
     def execute(self):
-        self.create_block_csv()
-        self.create_tx_csv()
-        self.create_tx_exceptions_csv()
-        self.create_block_exceptions_csv()
-        self.create_mempool_snapshots_csv()
+        funcs = [func for func in dir(Analyzer) if callable(getattr(Analyzer, func)) and func.startswith('create_')]
 
-        logging.info('Executed analyzer')
+        for func in funcs:
+                getattr(Analyzer, func)(self)
+
+        logging.info('Executed {} functions during execution of analyzer'.format(len(funcs)))
 
     def create_block_csv(self):
         with open(config.blocks_csv, 'w') as file:
