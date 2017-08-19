@@ -34,8 +34,8 @@ class TestAnalyze(TestCase):
         self.assertEqual(handle.write.call_count, 2)
         self.assertEqual(handle.write.call_args_list[0][0][0], 'block_hash;node;timestamp;stale;height;total_size;'
                                                                'txs;total_received;'
-                                                               'median_propagation;std_propagation\n')
-        self.assertEqual(handle.write.call_args_list[1][0][0], 'block_hash;node-0;1;False;2;3;4;2;6.0;1.0\n')
+                                                               'median_propagation;std_propagation\r\n')
+        self.assertEqual(handle.write.call_args_list[1][0][0], 'block_hash;node-0;1;False;2;3;4;2;6.0;1.0\r\n')
 
     @patch('builtins.open', new_callable=mock_open)
     def test_create_block_csv_stale_block(self, m_open):
@@ -55,7 +55,7 @@ class TestAnalyze(TestCase):
 
         m_open.assert_called_with(config.blocks_csv, 'w')
         handle = m_open()
-        self.assertEqual(handle.write.call_args_list[1][0][0], 'block_hash;node-0;1;True;2;3;4;2;6.0;1.0\n')
+        self.assertEqual(handle.write.call_args_list[1][0][0], 'block_hash;node-0;1;True;2;3;4;2;6.0;1.0\r\n')
 
     @patch('builtins.open', new_callable=mock_open)
     def test_create_tx_csv(self, m_open):
@@ -74,8 +74,8 @@ class TestAnalyze(TestCase):
         handle = m_open()
         self.assertEqual(handle.write.call_count, 2)
         self.assertEqual(handle.write.call_args_list[0][0][0], 'tx_hash;node;timestamp;'
-                                                               'total_accepted;median_propagation;std_propagation\n')
-        self.assertEqual(handle.write.call_args_list[1][0][0], 'tx_hash;node-0;1;2;6.0;1.0\n')
+                                                               'total_accepted;median_propagation;std_propagation\r\n')
+        self.assertEqual(handle.write.call_args_list[1][0][0], 'tx_hash;node-0;1;2;6.0;1.0\r\n')
 
     @patch('builtins.open', new_callable=mock_open)
     def test_create_tx_exceptions_csv(self, m_open):
@@ -91,8 +91,8 @@ class TestAnalyze(TestCase):
         m_open.assert_called_with(config.tx_exceptions_csv, 'w')
         handle = m_open()
         self.assertEqual(handle.write.call_count, 2)
-        self.assertEqual(handle.write.call_args_list[0][0][0], 'node;timestamp;error_message\n')
-        self.assertEqual(handle.write.call_args_list[1][0][0], 'node-1;timestamp;error_message\n')
+        self.assertEqual(handle.write.call_args_list[0][0][0], 'node;timestamp;error_message\r\n')
+        self.assertEqual(handle.write.call_args_list[1][0][0], 'node-1;timestamp;error_message\r\n')
 
     @patch('builtins.open', new_callable=mock_open)
     def test_create_mempool_snapshots_csv(self, m_open):
@@ -108,5 +108,5 @@ class TestAnalyze(TestCase):
         m_open.assert_called_with(config.mempool_snapshots_csv, 'w')
         handle = m_open()
         self.assertEqual(handle.write.call_count, 2)
-        self.assertEqual(handle.write.call_args_list[0][0][0], 'timestamp;node;txs;inputs\n')
-        self.assertEqual(handle.write.call_args_list[1][0][0], 'timestamp;node-1;45;36\n')
+        self.assertEqual(handle.write.call_args_list[0][0][0], 'timestamp;node;txs;inputs\r\n')
+        self.assertEqual(handle.write.call_args_list[1][0][0], 'timestamp;node-1;45;36\r\n')

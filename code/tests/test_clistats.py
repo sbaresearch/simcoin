@@ -31,7 +31,7 @@ class TestCliStats(TestCase):
 
         mock.assert_called_with(config.consensus_chain_csv, 'w')
         handle = mock()
-        handle.write.assert_called_once_with('height;block_hash\n')
+        handle.write.assert_called_once_with('height;block_hash\r\n')
 
     @patch('builtins.open', new_callable=mock_open)
     def test_save_consensus_chain_one_node(self, mock):
@@ -45,8 +45,8 @@ class TestCliStats(TestCase):
 
         handle = mock()
         self.assertEqual(handle.write.call_count, 2)
-        self.assertEqual(handle.write.call_args_list[0][0][0], 'height;block_hash\n')
-        self.assertEqual(handle.write.call_args_list[1][0][0], '10;hash\n')
+        self.assertEqual(handle.write.call_args_list[0][0][0], 'height;block_hash\r\n')
+        self.assertEqual(handle.write.call_args_list[1][0][0], '10;hash\r\n')
 
     @patch('builtins.open', new_callable=mock_open)
     def test_save_consensus_chain_multiple_nodes(self, mock):
@@ -63,8 +63,8 @@ class TestCliStats(TestCase):
         handle = mock()
         lines = [line[0][0] for line in handle.write.call_args_list]
         self.assertEqual(len(lines), 3)
-        self.assertTrue('10;hash1\n' in lines)
-        self.assertTrue('11;hash2\n' in lines)
+        self.assertTrue('10;hash1\r\n' in lines)
+        self.assertTrue('11;hash2\r\n' in lines)
 
     @patch('builtins.open', new_callable=mock_open)
     def test_save_consensus_chain_one_node_trailing_back(self, mock):
@@ -81,7 +81,7 @@ class TestCliStats(TestCase):
         handle = mock()
         lines = [line[0][0] for line in handle.write.call_args_list]
         self.assertEqual(len(lines), 2)
-        self.assertTrue('10;hash1\n' in lines)
+        self.assertTrue('10;hash1\r\n' in lines)
 
     @patch('builtins.open', new_callable=mock_open)
     def test_save_chains(self, mock):
@@ -89,7 +89,7 @@ class TestCliStats(TestCase):
 
         mock.assert_called_with(config.chains_csv, 'w')
         handle = mock()
-        handle.write.assert_called_once_with('node;block_hashes\n')
+        handle.write.assert_called_once_with('node;block_hashes\r\n')
 
     @patch('builtins.open', new_callable=mock_open)
     def test_save_chains_with_nodes(self, mock):
@@ -107,8 +107,8 @@ class TestCliStats(TestCase):
         handle = mock()
         lines = [line[0][0] for line in handle.write.call_args_list]
         self.assertEqual(len(lines), 3)
-        self.assertTrue('node-1;hash11;hash22;hash33\n' in lines)
-        self.assertTrue('node-0;hash1;hash2\n' in lines)
+        self.assertTrue('node-1;hash11;hash22;hash33\r\n' in lines)
+        self.assertTrue('node-0;hash1;hash2\r\n' in lines)
 
     @patch('builtins.open', new_callable=mock_open)
     @patch('clistats.tips_statistics')
