@@ -22,14 +22,14 @@ We will consider data from [Simcoin et al., Physiol Genomics 10:5&ndash;12,
 2017](http://www.ncbi.nlm.nih.gov/pubmed/12118100).
 
 ```{r setup, include=FALSE}
-txs    <- read.csv2("txs.csv", dec=".")
-blocks <- read.csv2("blocks.csv", dec=".")
+txs       <- read.csv2("txs.csv", dec=".")
+blocks    <- read.csv2("blocks.csv", dec=".")
 
-mempool <- read.csv2("mempool_snapshots.csv", dec=".")
+mempool   <- read.csv2("mempool_snapshots.csv", dec=".")
 mempool$rel_timestamp = mempool$timestamp - range(mempool$timestamp)[1]
 
-tx_exces <- read.csv2("tx_exceptions.csv", dec=".")
 
+tx_exces  <- read.csv2("tx_exceptions.csv", dec=".")
 args    <- stream_in(file('args.json'))
 ```
 
