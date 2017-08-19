@@ -3,6 +3,7 @@
 * install dependecies in R with `install.packages("dependency")`
     * rmarkdown
     * devtools (if installation fails this link may help: [SO - Problems installing the devtools package](https://stackoverflow.com/questions/20923209/problems-installing-the-devtools-package))
+    * jsonlite
 * make sure pandoc is installed (e.g. apt install pandoc)
 
 
@@ -28,7 +29,17 @@ mempool <- read.csv2("mempool_snapshots.csv", dec=".")
 mempool$rel_timestamp = mempool$timestamp - range(mempool$timestamp)[1]
 
 tx_exces <- read.csv2("tx_exceptions.csv", dec=".")
+
+args    <- stream_in(file('args.json'))
 ```
+
+
+## Start arguments
+```{r read_start_arguments, echo=FALSE}
+args_transposed = as.data.frame(t(args))
+kable(as.data.frame(args_transposed), col.names = c('value'))
+```
+
 
 ##  Blocks
 
