@@ -5,6 +5,7 @@ import logging
 import numpy as np
 from utils import Stats
 from collections import namedtuple
+import logging
 
 
 class Parser:
@@ -13,6 +14,7 @@ class Parser:
         self.nodes_create_blocks = {node.name: None for node in context.all_bitcoin_nodes.values()}
 
         self.parsers = [func for func in dir(Parser) if callable(getattr(Parser, func)) and func.endswith("_parser")]
+        logging.info('Found {} log parsers'.format(len(self.parsers)))
 
     def execute(self):
         with open(config.aggregated_sim_log, 'r') as file:
