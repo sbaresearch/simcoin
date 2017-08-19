@@ -22,13 +22,13 @@ class Parser:
             for line in lines:
                 for parser in self.parsers:
                     try:
-                        self.execute_parser(parser, line)
+                        self.execute_parser_function(parser, line)
                         break
                     except ParseException:
                         pass
         logging.info('Executed parser')
 
-    def execute_parser(self, parser, line):
+    def execute_parser_function(self, parser, line):
         getattr(Parser, parser)(self, line)
 
     def block_creation_parser(self, line):
