@@ -30,7 +30,7 @@ blocks$rel_timestamp = blocks$timestamp - range(blocks$timestamp)[1]
 mempool       <- read.csv2("mempool_snapshots.csv", dec=".")
 mempool$rel_timestamp = mempool$timestamp - range(mempool$timestamp)[1]
 
-nodes         <- read.csv2("nodes.csv")
+nodes         <- read.csv2("nodes.csv", dec=".")
 
 tx_exces      <- read.csv2("tx_exceptions.csv", dec=".")
 tx_exces$rel_timestamp = tx_exces$timestamp - range(tx_exces$timestamp)[1]
