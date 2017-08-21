@@ -54,6 +54,10 @@ kable(as.data.frame(args_transposed), col.names = c('value'))
 ```
 
 
+## Simulation
+
+`r if(nrow(tick_infos) == args['amount_of_ticks']) {'All'} else {'Some'}` ticks (`r nrow(tick_infos)`/`r args['amount_of_ticks']`) of the simulation were executed.
+
 ##  Blocks
 
 There were `r nrow(blocks)` blocks in this simulation.
