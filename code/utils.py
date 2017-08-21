@@ -56,7 +56,7 @@ def update_args_json(args):
     data = {k: v for k, v in raw_data.items() if v is not None}
 
     with open(config.args_json, 'w') as file:
-        json.dump(data, file)
+        file.write('{}\n'.format(json.dumps(data)))
 
 
 class Values:
