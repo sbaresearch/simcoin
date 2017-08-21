@@ -22,28 +22,15 @@ We will consider data from [Simcoin et al., Physiol Genomics 10:5&ndash;12,
 
 ```{r setup, include=FALSE}
 txs           <- read.csv2("txs.csv", dec=".")
-txs$rel_timestamp = txs$timestamp - range(txs$timestamp)[1]
-
 blocks        <- read.csv2("blocks.csv", dec=".")
-blocks$rel_timestamp = blocks$timestamp - range(blocks$timestamp)[1]
-
 mempool       <- read.csv2("mempool_snapshots.csv", dec=".")
-mempool$rel_timestamp = mempool$timestamp - range(mempool$timestamp)[1]
-
 nodes         <- read.csv2("nodes.csv", dec=".")
-
 tx_exces      <- read.csv2("tx_exceptions.csv", dec=".")
-tx_exces$rel_timestamp = tx_exces$timestamp - range(tx_exces$timestamp)[1]
-
 block_exces   <- read.csv2("block_exceptions.csv", dec=".")
-block_exces$rel_timestamp = block_exces$timestamp - range(block_exces$timestamp)[1]
+tick_infos    <- read.csv2("tick_infos.csv", dec=".")
 
 library('jsonlite')
 args    <- stream_in(file('args.json'))
-
-tick_infos <- read.csv2("tick_infos.csv", dec=".")
-tick_infos$rel_timestamp = tick_infos$timestamp - range(tick_infos$timestamp)[1]
-tick_infos$tick_duration = as.numeric(args['tick_duration']) - tick_infos$sleep_time
 ```
 
 
@@ -64,6 +51,8 @@ There were `r nrow(blocks)` blocks in this simulation.
 
 ### Distribution
 ```{r blocks_distribution, eval=nrow(blocks)>0, fig.height=6}
+tick_infos$tick_duration = as.numeric(args['tick_duration']) - tick_infos$sleep_time
+
 blocks_per_node <- table(blocks$node)
 percentage <- round(blocks_per_node/sum(blocks_per_node)*100)
 labels <- paste(names(blocks_per_node), ' blocks: ', blocks_per_node, ', ', percentage, '%', sep='')
@@ -72,7 +61,11 @@ pie(blocks_per_node, labels)
 
 ### Creation time
 ```{r blocks_creation_time, eval=nrow(blocks)>0}
+tick_infos$rel_timestamp = tick_infos$timestamp - range(tick_infos$timestamp)[1]
+
+blocks$rel_timestamp = blocks$timestamp - range(blocks$timestamp)[1]
 hist(blocks$rel_timestamp)
+
 ```
 
 ### Stale blocks
@@ -135,6 +128,7 @@ hist(blocks$std_propagation)
 There were `r nrow(block_exces)` exceptions during the creation of blocks.
 
 ```{r block_exces, eval=nrow(block_exces)>0}
+block_exces$rel_timestamp = block_exces$timestamp - range(block_exces$timestamp)[1]
 hist(block_exces$rel_timestamp)
 ```
 
@@ -168,6 +162,7 @@ pie(txs_per_node, labels)
 
 ### Creation time
 ```{r txs_creation_time, eval=nrow(txs)>0}
+txs$rel_timestamp = txs$timestamp - range(txs$timestamp)[1]
 hist(txs$rel_timestamp)
 ```
 
@@ -204,6 +199,7 @@ hist(blocks$txs)
 There were `r nrow(tx_exces)` exceptions during the creation of the transactions.
 
 ```{r tx_exces, eval=nrow(tx_exces)>0}
+tx_exces$rel_timestamp = tx_exces$timestamp - range(tx_exces$timestamp)[1]
 hist(tx_exces$rel_timestamp)
 ```
 
@@ -259,6 +255,7 @@ hist(mempool$txs)
 ### Txs in mempool over time
 
 ```{r txs_mempool_over_time, eval=nrow(mempool)>0}
+mempool$rel_timestamp = mempool$timestamp - range(mempool$timestamp)[1]
 txs_in_mempool = tapply(mempool$txs, cut(mempool$rel_timestamp, pretty(mempool$rel_timestamp)), median)
 plot(txs_in_mempool, xlab='time', ylab='txs')
 ```
