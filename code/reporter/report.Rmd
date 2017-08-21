@@ -272,7 +272,7 @@ kable(ticks_stats,  align = c('l'), col.names = c('', 'value'))
 
 ```{r tick_duration, error=TRUE>0}
 tick_duration = tapply(tick_infos$tick_duration, cut(tick_infos$rel_timestamp, pretty(tick_infos$rel_timestamp)), median)
-plot(tick_duration, xlab='time', ylab='duration of tick')
+barplot(tick_duration, xlab='time', ylab='duration of tick')
 ```
 
 ## Mempool snapshots
@@ -299,7 +299,7 @@ hist(mempool$txs)
 ```{r txs_mempool_over_time, error=TRUE}
 mempool$rel_timestamp = mempool$timestamp - range(mempool$timestamp)[1]
 txs_in_mempool = tapply(mempool$txs, cut(mempool$rel_timestamp, pretty(mempool$rel_timestamp)), median)
-plot(txs_in_mempool, xlab='time', ylab='txs')
+barplot(txs_in_mempool, xlab='time', ylab='txs')
 ```
 
 ## Nodes
