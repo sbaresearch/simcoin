@@ -37,7 +37,7 @@ args    <- stream_in(file('args.json'))
 ## Start arguments
 ```{r read_start_arguments, echo=FALSE}
 args_transposed = as.data.frame(t(args))
-kable(as.data.frame(args_transposed), col.names = c('value'))
+kable(args_transposed, col.names = c('value'))
 ```
 
 
