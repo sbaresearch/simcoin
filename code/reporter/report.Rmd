@@ -51,8 +51,6 @@ There were `r nrow(blocks)` blocks in this simulation.
 
 ### Distribution
 ```{r blocks_distribution, error=TRUE, fig.height=6}
-tick_infos$tick_duration = as.numeric(args['tick_duration']) - tick_infos$sleep_time
-
 blocks_per_node <- table(blocks$node)
 percentage <- round(blocks_per_node/sum(blocks_per_node)*100)
 labels <- paste(names(blocks_per_node), ' blocks: ', blocks_per_node, ', ', percentage, '%', sep='')
@@ -61,6 +59,7 @@ pie(blocks_per_node, labels)
 
 ### Creation time
 ```{r blocks_creation_time, error=TRUE}
+tick_infos$tick_duration = as.numeric(args['tick_duration']) - tick_infos$sleep_time
 tick_infos$rel_timestamp = tick_infos$timestamp - range(tick_infos$timestamp)[1]
 
 blocks$rel_timestamp = blocks$timestamp - range(blocks$timestamp)[1]
