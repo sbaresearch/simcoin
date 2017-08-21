@@ -78,22 +78,33 @@ pie(stale_blocks, labels)
 
 ### Block size
 
-Mean: `r round(mean(blocks$total_size)/1000, 3)` kB
+```{r block_size_stats, eval=nrow(blocks)>0}
+block_size_stats <- data.frame(c('mean block size [kB]', 'median block size [kB]', 'std block size [kB]'))
+block_size_stats$values <- c(
+  round(mean(blocks$total_size)/1000, 3)
+  round(median(blocks$total_size)/1000, 3)
+  round(sd(blocks$total_size)/1000, 3)
+)
 
-Median: `r round(median(blocks$total_size)/1000, 3)` kB
-
-Standard deviation: `r round(sd(blocks$total_size)/1000, 3)` kB
+kable(block_size_stats,  align = c('l'), col.names = c('', 'value'))
+```
 
 ```{r size, eval=nrow(blocks)>0}
 hist(blocks$total_size)
 ```
 
 ### Blocks received
-Mean: `r round(mean(blocks$total_received), 3)` nodes
 
-Median: `r round(median(blocks$total_received), 3)` nodes
+```{r blocks_received_stats, eval=nrow(blocks)>0}
+blocks_received_stats <- data.frame(c('mean blocks received', 'median blocks received', 'std blocks received'))
+blocks_received_stats$values <- c(
+  round(mean(blocks$total_received), 3)
+  round(median(blocks$total_received), 3)
+  round(sd(blocks$total_received), 3)
+)
 
-Standard deviation: `r round(sd(blocks$total_received), 3)` nodes
+kable(blocks_received_stats,  align = c('l'), col.names = c('', 'value'))
+```
 
 ```{r blocks_received, eval=nrow(blocks)>0}
 hist(blocks$total_received)
@@ -101,11 +112,16 @@ hist(blocks$total_received)
 
 ### Propagation time of blocks
 
-Mean: `r round(mean(blocks$median_propagation)*1000, 3)` ms
+```{r block_propagation_stats, eval=nrow(blocks)>0}
+block_propagation_stats <- data.frame(c('mean block propagation [ms]', 'median block propagation [ms]', 'std block propagation [ms]'))
+block_propagation_stats$values <- c(
+  round(mean(blocks$median_propagation)*1000, 3)
+  round(median(blocks$median_propagation)*1000, 3)
+  round(sd(blocks$median_propagation)*1000, 3)
+)
 
-Median: `r round(median(blocks$median_propagation)*1000, 3)` ms
-
-Standard deviation: `r round(sd(blocks$median_propagation)*1000, 3)` ms
+kable(block_propagation_stats,  align = c('l'), col.names = c('', 'value'))
+```
 
 ```{r blocks_propagation, eval=nrow(blocks)>0}
 hist(blocks$median_propagation)
@@ -113,11 +129,16 @@ hist(blocks$median_propagation)
 
 ### Standard deviation time of propagation time of blocks
 
-Mean: `r round(mean(blocks$std_propagation)*1000, 3)` ms
+```{r block_std_propagation_stats, eval=nrow(blocks)>0}
+block_std_propagation_stats <- data.frame(c('mean of std block propagation [ms]', 'median of std block propagation [ms]', 'std of std block propagation [ms]'))
+block_std_propagation_stats$values <- c(
+  round(mean(blocks$std_propagation)*1000, 3)
+  round(median(blocks$std_propagation)*1000, 3)
+  round(sd(blocks$std_propagation)*1000, 3)
+)
 
-Median: `r round(median(blocks$std_propagation)*1000, 3)` ms
-
-Standard deviation: `r round(sd(blocks$std_propagation)*1000, 3)` ms
+kable(block_std_propagation_stats,  align = c('l'), col.names = c('', 'value'))
+```
 
 ```{r blocks_std_propagation, eval=nrow(blocks)>0}
 hist(blocks$std_propagation)
@@ -167,11 +188,17 @@ hist(txs$rel_timestamp)
 ```
 
 ### Txs accepted
-Mean: `r round(mean(txs$total_accepted), 3)` nodes
 
-Median: `r round(median(txs$total_accepted), 3)` nodes
+```{r txs_accepted_stats, eval=nrow(txs)>0}
+txs_accepted_stats <- data.frame(c('mean txs acception rate', 'median txs acception rate', 'std txs acception rate'))
+txs_accepted_stats$values <- c(
+  round(mean(txs$std_propagation), 3)
+  round(median(txs$std_propagation), 3)
+  round(sd(txs$std_propagation), 3)
+)
 
-Standard deviation: `r round(sd(txs$total_accepted), 3)` nodes
+kable(txs_accepted_stats,  align = c('l'), col.names = c('', 'value'))
+```
 
 ```{r txs_accepted, eval=nrow(txs)>0}
 hist(txs$total_accepted)
@@ -184,11 +211,16 @@ hist(txs$median_propagation, breaks=10)
 ```
 
 ### Transactions per block
-Mean: `r round(mean(blocks$txs), 3)` txs
+```{r txs_per_block_stats, eval=nrow(blocks)>0}
+txs_per_block_stats <- data.frame(c('mean txs per block', 'median txs per block', 'std txs per block'))
+txs_per_block_stats$values <- c(
+  round(mean(blocks$txs), 3)
+  round(median(blocks$txs), 3)
+  round(sd(blocks$txs), 3)
+)
 
-Median: `r round(median(blocks$txs), 3)` txs
-
-Standard deviation: `r round(sd(blocks$txs), 3)` txs
+kable(txs_per_block_stats,  align = c('l'), col.names = c('', 'value'))
+```
 
 ```{r txs_per_block, eval=nrow(blocks)>0}
 hist(blocks$txs)
@@ -221,15 +253,28 @@ pie(exces_per_node, labels)
 
 ## Ticks
 
+```{r calc_tick_duration, eval=nrow(tick_infos)>0, include=FALSE}
+tick_duration = tapply(tick_infos$tick_duration, cut(tick_infos$rel_timestamp, pretty(tick_infos$rel_timestamp)), median)
+
+```
 During the simulation `r nrow(tick_infos)` ticks were executed.
 
+
+```{r tick_duration_stats, eval=nrow(tick_infos)>0}
+
+```
 `r tick_infos$tick_duration`
 
-Mean: `r round(mean(tick_infos$tick_duration), 3)` s
+```{r ticks_stats, eval=nrow(tick_infos)>0}
+ticks_stats <- data.frame(c('mean tick duration [s]', 'median tick duration [s]', 'std tick duration [s]'))
+ticks_stats$values <- c(
+  round(mean(tick_infos$tick_duration), 3)
+  round(median(tick_infos$tick_duration), 3)
+  round(sd(tick_infos$tick_duration), 3)
+)
 
-Median: `r round(median(tick_infos$tick_duration), 3)` s
-
-Standard deviation: `r round(sd(tick_infos$tick_duration), 3)` s
+kable(ticks_stats,  align = c('l'), col.names = c('', 'value'))
+```
 
 ### Tick duration over time
 
@@ -242,11 +287,16 @@ plot(tick_duration, xlab='time', ylab='duration of tick')
 
 There were `r nrow(mempool)` mempool snapshots parsed from log file.
 
-Mean: `r round(mean(mempool$txs), 3)` txs
+```{r mempool_stats, eval=nrow(mempool)>0}
+mempool_stats <- data.frame(c('mean tick duration [s]', 'median tick duration [s]', 'std tick duration [s]'))
+mempool_stats$values <- c(
+  round(mean(mempool$txs), 3)
+  round(median(mempool$txs), 3)
+  round(sd(mempool$txs), 3)
+)
 
-Median: `r round(median(mempool$txs), 3)` txs
-
-Standard deviation: `r round(sd(mempool$txs), 3)` txs
+kable(mempool_stats,  align = c('l'), col.names = c('', 'value'))
+```
 
 ```{r mempool_txs, eval=nrow(mempool)>0}
 hist(mempool$txs)
