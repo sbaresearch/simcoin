@@ -254,15 +254,8 @@ pie(exces_per_node, labels)
 
 ```{r calc_tick_duration, error=TRUE>0, include=FALSE}
 tick_duration = tapply(tick_infos$tick_duration, cut(tick_infos$rel_timestamp, pretty(tick_infos$rel_timestamp)), median)
-
 ```
 During the simulation `r nrow(tick_infos)` ticks were executed.
-
-
-```{r tick_duration_stats, error=TRUE>0}
-
-```
-`r tick_infos$tick_duration`
 
 ```{r ticks_stats, error=TRUE>0}
 ticks_stats <- data.frame(c('mean tick duration [s]', 'median tick duration [s]', 'std tick duration [s]'))
