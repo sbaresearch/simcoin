@@ -81,8 +81,8 @@ pie(stale_blocks, labels)
 ```{r block_size_stats, eval=nrow(blocks)>0}
 block_size_stats <- data.frame(c('mean block size [kB]', 'median block size [kB]', 'std block size [kB]'))
 block_size_stats$values <- c(
-  round(mean(blocks$total_size)/1000, 3)
-  round(median(blocks$total_size)/1000, 3)
+  round(mean(blocks$total_size)/1000, 3),
+  round(median(blocks$total_size)/1000, 3),
   round(sd(blocks$total_size)/1000, 3)
 )
 
@@ -98,8 +98,8 @@ hist(blocks$total_size)
 ```{r blocks_received_stats, eval=nrow(blocks)>0}
 blocks_received_stats <- data.frame(c('mean blocks received', 'median blocks received', 'std blocks received'))
 blocks_received_stats$values <- c(
-  round(mean(blocks$total_received), 3)
-  round(median(blocks$total_received), 3)
+  round(mean(blocks$total_received), 3),
+  round(median(blocks$total_received), 3),
   round(sd(blocks$total_received), 3)
 )
 
@@ -115,8 +115,8 @@ hist(blocks$total_received)
 ```{r block_propagation_stats, eval=nrow(blocks)>0}
 block_propagation_stats <- data.frame(c('mean block propagation [ms]', 'median block propagation [ms]', 'std block propagation [ms]'))
 block_propagation_stats$values <- c(
-  round(mean(blocks$median_propagation)*1000, 3)
-  round(median(blocks$median_propagation)*1000, 3)
+  round(mean(blocks$median_propagation)*1000, 3),
+  round(median(blocks$median_propagation)*1000, 3),
   round(sd(blocks$median_propagation)*1000, 3)
 )
 
@@ -132,8 +132,8 @@ hist(blocks$median_propagation)
 ```{r block_std_propagation_stats, eval=nrow(blocks)>0}
 block_std_propagation_stats <- data.frame(c('mean of std block propagation [ms]', 'median of std block propagation [ms]', 'std of std block propagation [ms]'))
 block_std_propagation_stats$values <- c(
-  round(mean(blocks$std_propagation)*1000, 3)
-  round(median(blocks$std_propagation)*1000, 3)
+  round(mean(blocks$std_propagation)*1000, 3),
+  round(median(blocks$std_propagation)*1000, 3),
   round(sd(blocks$std_propagation)*1000, 3)
 )
 
@@ -192,8 +192,8 @@ hist(txs$rel_timestamp)
 ```{r txs_accepted_stats, eval=nrow(txs)>0}
 txs_accepted_stats <- data.frame(c('mean txs acception rate', 'median txs acception rate', 'std txs acception rate'))
 txs_accepted_stats$values <- c(
-  round(mean(txs$std_propagation), 3)
-  round(median(txs$std_propagation), 3)
+  round(mean(txs$std_propagation), 3),
+  round(median(txs$std_propagation), 3),
   round(sd(txs$std_propagation), 3)
 )
 
@@ -214,8 +214,8 @@ hist(txs$median_propagation, breaks=10)
 ```{r txs_per_block_stats, eval=nrow(blocks)>0}
 txs_per_block_stats <- data.frame(c('mean txs per block', 'median txs per block', 'std txs per block'))
 txs_per_block_stats$values <- c(
-  round(mean(blocks$txs), 3)
-  round(median(blocks$txs), 3)
+  round(mean(blocks$txs), 3),
+  round(median(blocks$txs), 3),
   round(sd(blocks$txs), 3)
 )
 
@@ -268,8 +268,8 @@ During the simulation `r nrow(tick_infos)` ticks were executed.
 ```{r ticks_stats, eval=nrow(tick_infos)>0}
 ticks_stats <- data.frame(c('mean tick duration [s]', 'median tick duration [s]', 'std tick duration [s]'))
 ticks_stats$values <- c(
-  round(mean(tick_infos$tick_duration), 3)
-  round(median(tick_infos$tick_duration), 3)
+  round(mean(tick_infos$tick_duration), 3),
+  round(median(tick_infos$tick_duration), 3),
   round(sd(tick_infos$tick_duration), 3)
 )
 
@@ -290,8 +290,8 @@ There were `r nrow(mempool)` mempool snapshots parsed from log file.
 ```{r mempool_stats, eval=nrow(mempool)>0}
 mempool_stats <- data.frame(c('mean tick duration [s]', 'median tick duration [s]', 'std tick duration [s]'))
 mempool_stats$values <- c(
-  round(mean(mempool$txs), 3)
-  round(median(mempool$txs), 3)
+  round(mean(mempool$txs), 3),
+  round(median(mempool$txs), 3),
   round(sd(mempool$txs), 3)
 )
 
