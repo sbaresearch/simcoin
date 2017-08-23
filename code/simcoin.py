@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 from simulationfiles import nodes_config
 from simulationfiles import ticks_config
