@@ -1,5 +1,5 @@
 from unittest import TestCase
-import proxycmd
+from cmd import proxycmd
 from node import ProxyNode
 import ipaddress
 

@@ -1,5 +1,5 @@
 from unittest import TestCase
-import checkargs
+from simulationfiles import checkargs
 import argparse
 
 

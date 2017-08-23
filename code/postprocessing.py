@@ -5,7 +5,7 @@ import bash
 import re
 import logging
 from analyze import Analyzer
-import rcmd
+from cmd import rcmd
 
 
 class PostProcessing:

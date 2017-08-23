@@ -4,8 +4,7 @@ import argparse
 import sys
 import utils
 import bash
-import dockercmd
-
+from cmd import dockercmd
 
 node_groups = [
         {'argparse': '--node-group-a', 'variable': 'node_group_a', 'default':

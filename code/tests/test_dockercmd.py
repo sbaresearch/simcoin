@@ -1,5 +1,5 @@
 from unittest import TestCase
-import dockercmd
+from cmd import dockercmd
 from node import Node
 import ipaddress
 import config

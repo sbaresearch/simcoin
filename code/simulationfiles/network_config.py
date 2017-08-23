@@ -4,7 +4,7 @@ import pandas
 import config
 from simulationfiles import nodes_config
 import argparse
-import checkargs
+from simulationfiles import checkargs
 import sys
 import utils
 

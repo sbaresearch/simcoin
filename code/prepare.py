@@ -1,7 +1,7 @@
 import config
 import logging
 import bash
-import dockercmd
+from cmd import dockercmd
 import os
 import utils
 import math

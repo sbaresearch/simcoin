@@ -1,4 +1,4 @@
-import dockercmd
+from cmd import dockercmd
 
 
 def run_proxy(node, start_hash):

@@ -1,11 +1,11 @@
-import dockercmd
-import bitcoincmd
+from cmd import dockercmd
+from cmd import bitcoincmd
 import config
 import bash
 from bitcoinrpc.authproxy import AuthServiceProxy
 import logging
-import tccmd
-import proxycmd
+from cmd import tccmd
+from cmd import proxycmd
 import utils
 import errno
 from collections import OrderedDict
