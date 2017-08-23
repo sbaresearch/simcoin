@@ -41,12 +41,14 @@ class Prepare:
             self.context.args.blocks_per_tick,
             len(nodes)
         )
+        logging.info('Each node receives {} tx-chains'.format(amount_of_tx_chains))
 
         for i, node in enumerate(nodes):
             for node_to_be_connected in nodes[max(0, i - 5):i]:
                 node.execute_rpc('addnode', str(node_to_be_connected.ip), 'add')
             wait_until_height_reached(node, i * amount_of_tx_chains)
             node.execute_rpc('generate', amount_of_tx_chains)
+            logging.info('Generated {} blocks for node={} for their tx-chains'.format(amount_of_tx_chains, node.name))
 
         wait_until_height_reached(nodes[0], amount_of_tx_chains * len(nodes))
         nodes[0].execute_rpc('generate', config.blocks_needed_to_make_coinbase_spendable)
@@ -58,8 +60,8 @@ class Prepare:
         for node in nodes:
             node.set_spent_to_address()
             node.create_tx_chains()
-            logging.info("Transferring coinbase tx to normal tx for node={}".format(node.name))
             node.transfer_coinbases_to_normal_tx()
+            logging.info("Transferred all coinbase-tx to normal tx for node={}".format(node.name))
 
         for i, node in enumerate(nodes):
             wait_until_height_reached(node, current_height + i)
@@ -94,6 +96,7 @@ class Prepare:
         for node in self.context.all_public_nodes.values():
             node.add_latency(self.context.zone.zones)
 
+        logging.info('All nodes for the simulation are started')
         utils.sleep(3 + len(self.context.all_nodes) * 0.2)
 
 
@@ -116,12 +119,14 @@ def prepare_simulation_dir():
     bash.check_output('cp {} {}'.format(config.ticks_csv, config.sim_dir))
     bash.check_output('cp {} {}'.format(config.nodes_json, config.sim_dir))
     bash.check_output('cp {} {}'.format(config.args_json, config.sim_dir))
+    logging.info('Simulation directory created')
 
 
 def remove_old_containers_if_exists():
     containers = bash.check_output(dockercmd.ps_containers())
     if len(containers) > 0:
         bash.check_output(dockercmd.remove_all_containers(), lvl=logging.DEBUG)
+        logging.info('Old containers removed')
 
 
 def recreate_network():
@@ -129,6 +134,7 @@ def recreate_network():
     if exit_code == 0:
         bash.check_output(dockercmd.rm_network())
     bash.check_output(dockercmd.create_network())
+    logging.info('Docker network {} created'.format(config.network_name))
 
 
 def wait_until_height_reached(node, height):
