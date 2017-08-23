@@ -3,9 +3,7 @@ import re
 from datetime import datetime
 import logging
 import numpy as np
-from utils import Stats
 from collections import namedtuple
-import logging
 
 
 class Parser:
@@ -19,13 +17,15 @@ class Parser:
     def execute(self):
         with open(config.aggregated_sim_log, 'r') as file:
             lines = file.readlines()
-            for line in lines:
+            for i, line in enumerate(lines):
                 for parser in self.parsers:
                     try:
                         self.execute_parser_function(parser, line)
                         break
                     except ParseException:
                         pass
+                if i + 1 % 1000 == 0:
+                    logging.info('Parsed {} of {} log lines'.format(i + 1, len(lines)))
         logging.info('Executed parser')
 
     def execute_parser_function(self, parser, line):
