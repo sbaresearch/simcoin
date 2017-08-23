@@ -53,7 +53,7 @@ class TestUtils(TestCase):
     @patch('os.path.isfile')
     @patch('builtins.open', new_callable=mock_open)
     @patch('json.load')
-    @patch('json.dump')
+    @patch('json.dumps')
     def test_update_args_json_update_args(self, m_dump, m_load, m_open, m_is_file):
         m_is_file.return_value = True
         args = argparse.Namespace()
@@ -68,7 +68,7 @@ class TestUtils(TestCase):
     @patch('os.path.isfile')
     @patch('builtins.open', new_callable=mock_open)
     @patch('json.load')
-    @patch('json.dump')
+    @patch('json.dumps')
     def test_update_args_json_add_args(self, m_dump, m_load, m_open, m_is_file):
         m_is_file.return_value = True
         args = argparse.Namespace()
