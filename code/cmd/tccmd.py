@@ -12,7 +12,7 @@ def create(node, zones, latency):
 
     cmds = [
         'tc qdisc add dev eth0 root handle 1: prio bands {} priomap 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0'
-        .format(len(zones) + 1)
+            .format(len(zones) + 1)
     ]
 
     for index, zone_tuple in enumerate(sorted_zones):

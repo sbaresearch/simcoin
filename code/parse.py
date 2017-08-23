@@ -71,7 +71,8 @@ class Parser:
         log_line_with_hash = parse_add_to_wallet(line)
 
         self.context.parsed_txs[log_line_with_hash.obj_hash] = TxStats(log_line_with_hash.timestamp,
-                                                        log_line_with_hash.node, log_line_with_hash.obj_hash)
+                                                                       log_line_with_hash.node,
+                                                                       log_line_with_hash.obj_hash)
 
     def tx_received_parser(self, line):
         log_line_with_hash = parse_accept_to_memory_pool(line)
@@ -104,7 +105,7 @@ class Parser:
 
 def parse_create_new_block(line):
     regex = config.log_prefix_full + 'CreateNewBlock\(\): total size: ([0-9]+)' \
-                                ' block weight: [0-9]+ txs: ([0-9]+) fees: [0-9]+ sigops [0-9]+$'
+                                     ' block weight: [0-9]+ txs: ([0-9]+) fees: [0-9]+ sigops [0-9]+$'
     matched = re.match(regex, line)
 
     if matched is None:
@@ -120,9 +121,9 @@ def parse_create_new_block(line):
 
 def parse_update_tip(line):
     regex = config.log_prefix_full + 'UpdateTip: new best=([0-9,a-z]{64}) height=([0-9]+) version=0x[0-9]{8}' \
-                                ' log2_work=[0-9]+\.?[0-9]* tx=([0-9]+)' \
-                                ' date=\'[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}\'' \
-                                ' progress=[0-9]+.[0-9]+ cache=[0-9]+\.[0-9]+[a-zA-Z]+\([0-9]+txo?\)$'
+                                     ' log2_work=[0-9]+\.?[0-9]* tx=([0-9]+)' \
+                                     ' date=\'[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}\'' \
+                                     ' progress=[0-9]+.[0-9]+ cache=[0-9]+\.[0-9]+[a-zA-Z]+\([0-9]+txo?\)$'
     matched = re.match(regex, line)
 
     if matched is None:

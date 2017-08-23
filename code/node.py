@@ -98,16 +98,16 @@ class BitcoinNode(Node):
         for tx_chain in self.tx_chains:
             tx_chain.amount -= config.transaction_fee + config.smallest_amount
             raw_transaction = self.execute_rpc('createrawtransaction',
-                                  [{
-                                    'txid':    tx_chain.current_unspent_tx,
-                                    'vout':    0,
-                                  }],
-                                  OrderedDict(
-                                      [
-                                          (tx_chain.address, tx_chain.amount/100000000),
-                                          (self.spent_to_address, config.smallest_amount_btc)
-                                      ])
-                                  )
+                                               [{
+                                                   'txid': tx_chain.current_unspent_tx,
+                                                   'vout': 0,
+                                               }],
+                                               OrderedDict(
+                                                   [
+                                                       (tx_chain.address, tx_chain.amount / 100000000),
+                                                       (self.spent_to_address, config.smallest_amount_btc)
+                                                   ])
+                                               )
             signed_raw_transaction = self.execute_rpc('signrawtransaction', raw_transaction)['hex']
             tx_chain.current_unspent_tx = self.execute_rpc('sendrawtransaction', signed_raw_transaction)
 
