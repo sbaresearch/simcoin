@@ -36,7 +36,7 @@ class TestAnalyze(TestCase):
         self.assertEqual(handle.write.call_args_list[0][0][0], 'block_hash;node;timestamp;stale;height;total_size;'
                                                                'txs;total_received;'
                                                                'median_propagation;std_propagation\r\n')
-        self.assertEqual(handle.write.call_args_list[1][0][0], 'block_hash;node-0;1;False;2;3;4;2;6.0;1.0\r\n')
+        self.assertEqual(handle.write.call_args_list[1][0][0], 'block_hash;node-0;1;Accepted;2;3;4;2;6.0;1.0\r\n')
 
     @patch('builtins.open', new_callable=mock_open)
     def test_create_block_csv_stale_block(self, m_open):
@@ -56,7 +56,7 @@ class TestAnalyze(TestCase):
 
         m_open.assert_called_with(config.blocks_csv, 'w')
         handle = m_open()
-        self.assertEqual(handle.write.call_args_list[1][0][0], 'block_hash;node-0;1;True;2;3;4;2;6.0;1.0\r\n')
+        self.assertEqual(handle.write.call_args_list[1][0][0], 'block_hash;node-0;1;Stale;2;3;4;2;6.0;1.0\r\n')
 
     @patch('builtins.open', new_callable=mock_open)
     def test_create_tx_csv(self, m_open):

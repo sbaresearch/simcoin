@@ -25,9 +25,9 @@ class Analyzer:
 
                 propagation_stats = Stats.from_array(block.receiving_timestamps)
 
-                stale = True
+                stale = 'Stale'
                 if block.block_hash in self.context.consensus_chain:
-                    stale = False
+                    stale = 'Accepted'
 
                 w.writerow([block.block_hash, block.node, block.timestamp, stale, block.height, block.total_size,
                             block.txs, propagation_stats.count, propagation_stats.median, propagation_stats.std])
