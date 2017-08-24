@@ -134,7 +134,7 @@ hist(blocks$total_received, xlab = 'Nodes')
 ```
 
 ### Propagation time of blocks
-*The `r table(blocks$total_received)['0']` blocks which were never received by another node are not included in this section*
+`r if(!is.na(table(blocks$total_received)['0'])) {paste('*The', table(blocks$total_received)['0'], 'blocks which were never received by another node are not included in this section*', sep=' ')}`
 
 ```{r block_propagation_stats, error=TRUE}
 block_propagation_stats <- data.frame(c('Mean block propagation [ms]', 'Median block propagation [ms]', 'Std block propagation [ms]', 'Min block propagation [ms]', 'Max block propagation [ms]'))
@@ -210,7 +210,7 @@ hist(txs$total_accepted, xlab = 'Nodes')
 ```
 
 ### Transaction acception time
-*The `r table(txs$total_accepted)['0']` transaction which never reached another node are not included in this section*
+`r if(!is.na(table(txs$total_accepted)['0'])) {paste('*The', table(txs$total_accepted)['0'], 'transaction which never reached another node are not included in this section*', sep=' ')}`
 
 ```{r txs_median_propagation_stats, error=TRUE}
 txs_median_propagation <- data.frame(c('Mean of median txs acception time [s]', 'Median of median txs acception time [s]', 'Std of median txs acception time [s]', 'Min of median txs acception time [s]', 'Max of median txs acception time [s]'))
