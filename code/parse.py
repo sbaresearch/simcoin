@@ -234,7 +234,7 @@ def parse_checking_mempool(line):
 
 
 def parse_tick_log_line(line):
-    regex = config.log_prefix_full + '\[.*\] \[.*\]  Sleep ([0-9]+\.[0-9]+) seconds for next tick.$'
+    regex = config.log_prefix_full + '\[.*\] \[.*\]  The tick duration was ([0-9]+\.[0-9]+)s$'
 
     matched = re.match(regex, line)
 
@@ -248,7 +248,7 @@ def parse_tick_log_line(line):
 
 LogLine = namedtuple('LogLine', 'timestamp node')
 
-TickLogLine = namedtuple('TickLogLine', 'timestamp sleep_time')
+TickLogLine = namedtuple('TickLogLine', 'timestamp duration')
 
 CreateNewBlockLogLine = namedtuple('CreateNewBlockLogLine', 'timestamp node  total_size txs')
 

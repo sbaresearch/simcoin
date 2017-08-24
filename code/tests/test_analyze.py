@@ -144,5 +144,5 @@ class TestAnalyze(TestCase):
         m_open.assert_called_with(config.tick_infos_csv, 'w')
         handle = m_open()
         self.assertEqual(handle.write.call_count, 2)
-        self.assertEqual(handle.write.call_args_list[0][0][0], 'timestamp;sleep_time\r\n')
+        self.assertEqual(handle.write.call_args_list[0][0][0], 'timestamp;duration\r\n')
         self.assertEqual(handle.write.call_args_list[1][0][0], 'timestamp;45\r\n')

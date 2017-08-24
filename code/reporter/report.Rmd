@@ -41,28 +41,27 @@ During this simulation `r if(nrow(tick_infos) == args['amount_of_ticks']) {'all'
 
 ```{r ticks, error=TRUE}
 tick_infos$rel_timestamp <- tick_infos$timestamp - range(tick_infos$timestamp)[1]
-tick_infos$tick_duration <- as.numeric(args['tick_duration']) - tick_infos$sleep_time
 ```
 
 ```{r ticks_stats, error=TRUE>0}
 ticks_stats <- data.frame(c('Mean tick duration [s]', 'Median tick duration [s]', 'Std tick duration [s]', 'Min tick duration [s]', 'Max tick duration [s]'))
 ticks_stats$values <- c(
-  round(mean(tick_infos$tick_duration), 3),
-  round(median(tick_infos$tick_duration), 3),
-  round(sd(tick_infos$tick_duration), 3),
-  round(min(tick_infos$tick_duration), 3),
-  round(max(tick_infos$tick_duration), 3)
+  round(mean(tick_infos$duration), 3),
+  round(median(tick_infos$duration), 3),
+  round(sd(tick_infos$duration), 3),
+  round(min(tick_infos$duration), 3),
+  round(max(tick_infos$duration), 3)
 )
 
 kable(ticks_stats,  align = c('l'), col.names = c('', 'value'))
 ```
 
 ### Tick duration over time
-```{r tick_duration, error=TRUE>0}
-tick_duration <- tapply(tick_infos$tick_duration, cut(tick_infos$rel_timestamp, pretty(tick_infos$rel_timestamp)), median)
-plot(tick_duration, xlab = 'Time [s]', ylab='Duration of tick [s]', xaxt='n')
-axis(1, at=1:nrow(tick_duration), labels=names(tick_duration))
-lines(tick_duration)
+```{r tick_duration_median, error=TRUE>0}
+tick_duration_median <- tapply(tick_infos$duration, cut(tick_infos$rel_timestamp, pretty(tick_infos$rel_timestamp)), median)
+plot(tick_duration_median, xlab = 'Time [s]', ylab='Duration of tick [s]', xaxt='n')
+axis(1, at=1:nrow(tick_duration_median), labels=names(tick_duration_median))
+lines(tick_duration_median)
 ```
 
 ##  Blocks

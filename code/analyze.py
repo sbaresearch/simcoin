@@ -62,10 +62,10 @@ class Analyzer:
     def create_tick_infos_csv(self):
         with open(config.tick_infos_csv, 'w') as file:
             w = csv.writer(file, delimiter=';')
-            w.writerow(['timestamp', 'sleep_time'])
+            w.writerow(['timestamp', 'duration'])
 
             for tick in self.context.tick_infos:
-                w.writerow([tick.timestamp, tick.sleep_time])
+                w.writerow([tick.timestamp, tick.duration])
 
     def create_mempool_snapshots_csv(self):
         with open(config.mempool_snapshots_csv, 'w') as file:
