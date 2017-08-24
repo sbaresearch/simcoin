@@ -34,7 +34,7 @@ class TestAnalyze(TestCase):
         handle = m_open()
         self.assertEqual(handle.write.call_count, 2)
         self.assertEqual(handle.write.call_args_list[0][0][0], 'block_hash;node;timestamp;stale;height;total_size;'
-                                                               'txs;total_received;'
+                                                               'txs;received_by;'
                                                                'median_propagation;std_propagation\r\n')
         self.assertEqual(handle.write.call_args_list[1][0][0], 'block_hash;node-0;1;Accepted;2;3;4;2;6.0;1.0\r\n')
 
@@ -75,7 +75,7 @@ class TestAnalyze(TestCase):
         handle = m_open()
         self.assertEqual(handle.write.call_count, 2)
         self.assertEqual(handle.write.call_args_list[0][0][0], 'tx_hash;node;timestamp;'
-                                                               'total_accepted;median_propagation;std_propagation\r\n')
+                                                               'accepted_by;median_propagation;std_propagation\r\n')
         self.assertEqual(handle.write.call_args_list[1][0][0], 'tx_hash;node-0;1;2;6.0;1.0\r\n')
 
     @patch('builtins.open', new_callable=mock_open)

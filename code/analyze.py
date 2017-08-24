@@ -20,7 +20,7 @@ class Analyzer:
         with open(config.blocks_csv, 'w') as file:
             w = csv.writer(file, delimiter=';')
             w.writerow(['block_hash', 'node', 'timestamp', 'stale', 'height', 'total_size', 'txs',
-                        'total_received', 'median_propagation', 'std_propagation'])
+                        'received_by', 'median_propagation', 'std_propagation'])
             for block in self.context.parsed_blocks.values():
 
                 propagation_stats = Stats.from_array(block.receiving_timestamps)
@@ -35,7 +35,7 @@ class Analyzer:
     def create_tx_csv(self):
         with open(config.txs_csv, 'w') as file:
             w = csv.writer(file, delimiter=';')
-            w.writerow(['tx_hash', 'node', 'timestamp', 'total_accepted', 'median_propagation', 'std_propagation'])
+            w.writerow(['tx_hash', 'node', 'timestamp', 'accepted_by', 'median_propagation', 'std_propagation'])
 
             for tx in self.context.parsed_txs.values():
                 propagation_stats = Stats.from_array(tx.receiving_timestamps)

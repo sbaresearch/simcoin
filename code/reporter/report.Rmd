@@ -119,22 +119,22 @@ hist(blocks$total_size_kb, xlab = 'Size [kb]')
 ```{r blocks_received_stats, error=TRUE}
 blocks_received_stats <- data.frame(c('Mean of block received', 'Median of block received', 'Std of block received', 'Min of blocks received', 'Max of blocks received'))
 blocks_received_stats$values <- c(
-  round(mean(blocks$total_received), 3),
-  round(median(blocks$total_received), 3),
-  round(sd(blocks$total_received), 3),
-  min(blocks$total_received),
-  max(blocks$total_received)
+  round(mean(blocks$received_by), 3),
+  round(median(blocks$received_by), 3),
+  round(sd(blocks$received_by), 3),
+  min(blocks$received_by),
+  max(blocks$received_by)
 )
 
 kable(blocks_received_stats,  align = c('l'), col.names = c('', 'value'))
 ```
 
 ```{r blocks_received, error=TRUE}
-hist(blocks$total_received, xlab = 'Nodes')
+hist(blocks$received_by, xlab = 'Nodes')
 ```
 
 ### Propagation time of blocks
-`r if(!is.na(table(blocks$total_received)['0'])) {paste('*The', table(blocks$total_received)['0'], 'blocks which were never received by another node are not included in this section*', sep=' ')}`
+`r if(!is.na(table(blocks$received_by)['0'])) {paste('*The', table(blocks$received_by)['0'], 'blocks which were never received by another node are not included in this section*', sep=' ')}`
 
 ```{r block_propagation_stats, error=TRUE}
 block_propagation_stats <- data.frame(c('Mean block propagation [ms]', 'Median block propagation [ms]', 'Std block propagation [ms]', 'Min block propagation [ms]', 'Max block propagation [ms]'))
@@ -172,7 +172,7 @@ hist(blocks$std_propagation, xlab = 'Sandard deviation time [ms]')
 ```
 
 ## Transactions
-There were `r nrow(txs)` transaction created in this simulation. `r table(txs$total_accepted)['0']` of `r nrow(txs)` never reached another node.
+There were `r nrow(txs)` transaction created in this simulation. `r table(txs$accepted_by)['0']` of `r nrow(txs)` never reached another node.
 
 ```{r txs, error=TRUE}
 txs$rel_timestamp <- txs$timestamp - sim_start
@@ -192,25 +192,25 @@ hist(txs$rel_timestamp, xlab = 'Time [s]')
 ```
 
 ### Transaction acception rate
-```{r txs_accepted_stats, error=TRUE}
-txs_accepted_stats <- data.frame(c('Mean txs acception rate', 'Median txs acception rate', 'Std txs acception rate', 'Min txs acception rate', 'Max txs acception rate'))
-txs_accepted_stats$values <- c(
-  round(mean(txs$total_accepted), 3),
-  round(median(txs$total_accepted), 3),
-  round(sd(txs$total_accepted), 3),
-  min(txs$total_accepted),
-  median(txs$total_accepted)
+```{r txs_accepted_by_stats, error=TRUE}
+txs_accepted_by_stats <- data.frame(c('Mean txs acception rate', 'Median txs acception rate', 'Std txs acception rate', 'Min txs acception rate', 'Max txs acception rate'))
+txs_accepted_by_stats$values <- c(
+  round(mean(txs$accepted_by), 3),
+  round(median(txs$accepted_by), 3),
+  round(sd(txs$accepted_by), 3),
+  min(txs$accepted_by),
+  median(txs$accepted_by)
 )
 
-kable(txs_accepted_stats,  align = c('l'), col.names = c('', 'value'))
+kable(txs_accepted_by_stats,  align = c('l'), col.names = c('', 'value'))
 ```
 
-```{r txs_accepted, error=TRUE}
-hist(txs$total_accepted, xlab = 'Nodes')
+```{r txs_accepted_by, error=TRUE}
+hist(txs$accepted_by, xlab = 'Nodes')
 ```
 
 ### Transaction acception time
-`r if(!is.na(table(txs$total_accepted)['0'])) {paste('*The', table(txs$total_accepted)['0'], 'transaction which never reached another node are not included in this section*', sep=' ')}`
+`r if(!is.na(table(txs$accepted_by)['0'])) {paste('*The', table(txs$accepted_by)['0'], 'transaction which never reached another node are not included in this section*', sep=' ')}`
 
 ```{r txs_median_propagation_stats, error=TRUE}
 txs_median_propagation <- data.frame(c('Mean of median txs acception time [s]', 'Median of median txs acception time [s]', 'Std of median txs acception time [s]', 'Min of median txs acception time [s]', 'Max of median txs acception time [s]'))
