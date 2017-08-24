@@ -27,6 +27,8 @@ tick_infos    <- read.csv2("tick_infos.csv", dec=".")
 
 library('jsonlite')
 args          <- stream_in(file('args.json'))
+
+sim_start     <- tick_infos$start[1]
 ```
 
 
@@ -40,7 +42,7 @@ kable(args_transposed, col.names = c('value'))
 During this simulation `r if(nrow(tick_infos) == args['amount_of_ticks']) {'all'} else {'only'}` `r nrow(tick_infos)` of `r args['amount_of_ticks']` ticks were executed.
 
 ```{r ticks, error=TRUE}
-tick_infos$rel_timestamp <- tick_infos$timestamp - range(tick_infos$timestamp)[1]
+tick_infos$rel_timestamp <- tick_infos$start - sim_start
 ```
 
 ```{r ticks_stats, error=TRUE>0}
@@ -71,7 +73,7 @@ In this simulation `r nrow(blocks)` blocks were created by `r length(unique(bloc
 blocks$total_size_kb         <- blocks$total_size/1000
 blocks$median_propagation_ms <- blocks$median_propagation * 1000
 blocks$std_propagation_ms    <- blocks$std_propagation * 1000
-blocks$rel_timestamp         <- blocks$timestamp - range(blocks$timestamp)[1]
+blocks$rel_timestamp         <- blocks$timestamp - sim_start
 ```
 
 ### Distribution of blocks over nodes
@@ -173,7 +175,7 @@ hist(blocks$std_propagation, xlab = 'Sandard deviation time [ms]')
 There were `r nrow(txs)` transaction created in this simulation. `r table(txs$total_accepted)['0']` of `r nrow(txs)` never reached another node.
 
 ```{r txs, error=TRUE}
-txs$rel_timestamp <- txs$timestamp - range(txs$timestamp)[1]
+txs$rel_timestamp <- txs$timestamp - sim_start
 ```
 
 ### Distribution
@@ -284,7 +286,7 @@ hist(mempool$txs, xlab = 'Transactions')
 
 ### Transactions in mempool over time
 ```{r txs_mempool_over_time, error=TRUE}
-mempool$rel_timestamp = mempool$timestamp - range(mempool$timestamp)[1]
+mempool$rel_timestamp = mempool$timestamp - sim_start
 txs_in_mempool = tapply(mempool$txs, cut(mempool$rel_timestamp, pretty(mempool$rel_timestamp)), median)
 plot(txs_in_mempool, xlab = 'Time [s]', ylab='Transactions', xaxt='n')
 axis(1, at=1:nrow(txs_in_mempool), labels=names(txs_in_mempool))
@@ -339,7 +341,7 @@ kable(valid_headers)
 There were `r nrow(block_exces)` exceptions catched during the execution of the RPC-call to create a block.
 
 ```{r block_exces, error=TRUE}
-block_exces$rel_timestamp = block_exces$timestamp - range(block_exces$timestamp)[1]
+block_exces$rel_timestamp = block_exces$timestamp - sim_start
 ```
 
 ```{r block_exces_hist, error=TRUE}
@@ -366,7 +368,7 @@ pie(exces_per_node, labels)
 There were `r nrow(tx_exces)` exceptions catched during the execution of the RPC-call to send a transaction.
 
 ```{r tx_exces, error=TRUE}
-tx_exces$rel_timestamp = tx_exces$timestamp - range(tx_exces$timestamp)[1]
+tx_exces$rel_timestamp = tx_exces$timestamp - sim_start
 hist(tx_exces$rel_timestamp, xlab = 'Time [s]')
 ```
 

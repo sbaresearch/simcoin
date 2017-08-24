@@ -4,6 +4,7 @@ from datetime import datetime
 import logging
 import numpy as np
 from collections import namedtuple
+import pytz
 
 
 class Parser:
@@ -112,7 +113,7 @@ def parse_create_new_block(line):
         raise ParseException("Didn't matched CreateNewBlock log line.")
 
     return CreateNewBlockLogLine(
-        datetime.strptime(matched.group(1), config.log_time_format).timestamp(),
+        parse_datetime(matched.group(1)),
         str(matched.group(2)),
         int(matched.group(3)),
         int(matched.group(4)),
@@ -130,7 +131,7 @@ def parse_update_tip(line):
         raise ParseException("Didn't matched CreateNewBlock log line.")
 
     return UpdateTipLogLine(
-        datetime.strptime(matched.group(1), config.log_time_format).timestamp(),
+        parse_datetime(matched.group(1)),
         str(matched.group(2)),
         str(matched.group(3)),
         int(matched.group(4)),
@@ -147,7 +148,7 @@ def parse_received_block(line):
         raise ParseException("Didn't matched Received block log line.")
 
     return LogLineWithHash(
-        datetime.strptime(matched.group(1), config.log_time_format).timestamp(),
+        parse_datetime(matched.group(1)),
         str(matched.group(2)),
         str(matched.group(3)),
     )
@@ -163,7 +164,7 @@ def parse_successfully_reconstructed_block(line):
         raise ParseException("Didn't matched Successfully reconstructed block log line.")
 
     return LogLineWithHash(
-        datetime.strptime(matched.group(1), config.log_time_format).timestamp(),
+        parse_datetime(matched.group(1)),
         str(matched.group(2)),
         str(matched.group(3)),
     )
@@ -178,7 +179,7 @@ def parse_add_to_wallet(line):
         raise ParseException("Didn't matched AddToWallet log line.")
 
     return LogLineWithHash(
-        datetime.strptime(matched.group(1), config.log_time_format).timestamp(),
+        parse_datetime(matched.group(1)),
         str(matched.group(2)),
         str(matched.group(3)),
     )
@@ -195,7 +196,7 @@ def parse_accept_to_memory_pool(line):
         raise ParseException("Didn't matched AcceptToMemoryPool log line.")
 
     return LogLineWithHash(
-        datetime.strptime(matched.group(1), config.log_time_format).timestamp(),
+        parse_datetime(matched.group(1)),
         str(matched.group(2)),
         str(matched.group(4)),
     )
@@ -211,7 +212,7 @@ def parse_peer_logic_validation(line):
         raise ParseException("Didn't matched AcceptToMemoryPool log line.")
 
     return LogLineWithHash(
-        datetime.strptime(matched.group(1), config.log_time_format).timestamp(),
+        parse_datetime(matched.group(1)),
         str(matched.group(2)),
         str(matched.group(3)),
     )
@@ -226,7 +227,7 @@ def parse_checking_mempool(line):
         raise ParseException("Didn't matched AcceptToMemoryPool log line.")
 
     return CheckingMempoolLogLine(
-        datetime.strptime(matched.group(1), config.log_time_format).timestamp(),
+        parse_datetime(matched.group(1)),
         str(matched.group(2)),
         int(matched.group(3)),
         int(matched.group(4)),
@@ -234,7 +235,8 @@ def parse_checking_mempool(line):
 
 
 def parse_tick_log_line(line):
-    regex = config.log_prefix_full + '\[.*\] \[.*\]  The tick duration was ([0-9]+\.[0-9]+)s$'
+    regex = config.log_prefix_full + '\[.*\] \[.*\]  The tick started at ([0-9]+\.[0-9]+)' \
+                                     ' and took ([0-9]+\.[0-9]+)s to finish$'
 
     matched = re.match(regex, line)
 
@@ -242,13 +244,19 @@ def parse_tick_log_line(line):
         raise ParseException("Didn't matched tick log line.")
 
     return TickLogLine(
-        datetime.strptime(matched.group(1), config.log_time_format).timestamp(),
+        parse_datetime(matched.group(1)),
         float(matched.group(3)),
+        float(matched.group(4)),
     )
+
+
+def parse_datetime(date_time):
+    parsed_date_time = datetime.strptime(date_time, config.log_time_format)
+    return parsed_date_time.replace(tzinfo=pytz.UTC).timestamp()
 
 LogLine = namedtuple('LogLine', 'timestamp node')
 
-TickLogLine = namedtuple('TickLogLine', 'timestamp duration')
+TickLogLine = namedtuple('TickLogLine', 'timestamp start duration')
 
 CreateNewBlockLogLine = namedtuple('CreateNewBlockLogLine', 'timestamp node  total_size txs')
 

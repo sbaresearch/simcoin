@@ -27,7 +27,7 @@ class Event:
                 next_tick = start_time + self.context.args.tick_duration
                 current_time = time.time()
                 tick_duration = current_time - start_time
-                logging.info('The tick duration was {}s'.format(tick_duration))
+                logging.info('The tick started at {} and took {}s to finish'.format(start_time, tick_duration))
 
                 if current_time < next_tick:
                     difference = next_tick - current_time

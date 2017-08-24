@@ -132,17 +132,17 @@ class TestAnalyze(TestCase):
 
     @patch('builtins.open', new_callable=mock_open)
     def test_create_tick_infos(self, m_open):
-        mempool_snapshots = [
-            TickLogLine('timestamp', 45)
+        tick_infos = [
+            TickLogLine('timestamp', 12.12, 45)
         ]
 
         context = Mock()
-        context.tick_infos = mempool_snapshots
+        context.tick_infos = tick_infos
         analyzer = Analyzer(context)
         analyzer.create_tick_infos_csv()
 
         m_open.assert_called_with(config.tick_infos_csv, 'w')
         handle = m_open()
         self.assertEqual(handle.write.call_count, 2)
-        self.assertEqual(handle.write.call_args_list[0][0][0], 'timestamp;duration\r\n')
-        self.assertEqual(handle.write.call_args_list[1][0][0], 'timestamp;45\r\n')
+        self.assertEqual(handle.write.call_args_list[0][0][0], 'timestamp;start;duration\r\n')
+        self.assertEqual(handle.write.call_args_list[1][0][0], 'timestamp;12.12;45\r\n')
