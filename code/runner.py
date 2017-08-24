@@ -26,6 +26,8 @@ class Runner:
                 utils.sleep(0.2)
                 array = [int(node.execute_rpc('getblockcount')) for node in self.context.nodes.values()]
         finally:
+            # TODO add line number to log lines.
+            utils.sleep(1)
             logging.info(config.log_line_sim_end)
 
             self.post_processing.execute()

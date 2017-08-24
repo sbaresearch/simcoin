@@ -23,11 +23,15 @@ class Event:
                 cmds = line.split(';')
                 for cmd in cmds:
                     self.execute_cmd(cmd)
+
                 next_tick = start_time + self.context.args.tick_duration
                 current_time = time.time()
+                tick_duration = current_time - start_time
+                logging.info('The tick duration was {}s'.format(tick_duration))
+
                 if current_time < next_tick:
                     difference = next_tick - current_time
-                    logging.info('Sleep {} seconds for next tick.'.format(difference))
+                    logging.info('Sleep {} seconds for next tick'.format(difference))
                     utils.sleep(difference)
                 else:
                     logging.error('Current_time={} is higher then next_tick={} by {}s.'

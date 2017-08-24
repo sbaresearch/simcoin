@@ -24,7 +24,7 @@ class Parser:
                         break
                     except ParseException:
                         pass
-                if i + 1 % 1000 == 0:
+                if (i + 1) % 10000 == 0:
                     logging.info('Parsed {} of {} log lines'.format(i + 1, len(lines)))
         logging.info('Executed parser')
 
@@ -234,7 +234,7 @@ def parse_checking_mempool(line):
 
 
 def parse_tick_log_line(line):
-    regex = config.log_prefix_full + '\[.*\] \[.*\]  Sleep ([0-9]+\.[0-9]+) seconds for next tick.$'
+    regex = config.log_prefix_full + '\[.*\] \[.*\]  The tick duration was ([0-9]+\.[0-9]+)s$'
 
     matched = re.match(regex, line)
 
@@ -248,7 +248,7 @@ def parse_tick_log_line(line):
 
 LogLine = namedtuple('LogLine', 'timestamp node')
 
-TickLogLine = namedtuple('TickLogLine', 'timestamp sleep_time')
+TickLogLine = namedtuple('TickLogLine', 'timestamp duration')
 
 CreateNewBlockLogLine = namedtuple('CreateNewBlockLogLine', 'timestamp node  total_size txs')
 
