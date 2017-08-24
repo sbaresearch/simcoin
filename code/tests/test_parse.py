@@ -15,6 +15,7 @@ from parse import BlockStats
 import numpy as np
 from datetime import datetime
 from parse import TxStats
+import pytz
 
 
 class TestParse(TestCase):
@@ -41,7 +42,7 @@ class TestParse(TestCase):
             ' 904 txs: 1 fees: 0 sigops 400'
         )
 
-        self.assertEqual(create_new_block.timestamp, datetime(2017, 7, 27, 11, 1, 22, 173139).timestamp())
+        self.assertEqual(create_new_block.timestamp, datetime(2017, 7, 27, 11, 1, 22, 173139, pytz.UTC).timestamp())
         self.assertEqual(create_new_block.node, 'node-1')
         self.assertEqual(create_new_block.total_size, 226)
         self.assertEqual(create_new_block.txs, 1)
@@ -58,7 +59,7 @@ class TestParse(TestCase):
             'new best=1d205cac616c0344721d2552482024528883e9fdf7439bfbfc02567060c56d71 height=106 version=0x20000000'
             ' log2_work=7.741467 tx=113 date=\'2017-07-27 11:01:29\' progress=1.000000 cache=0.0MiB(112tx)')
 
-        self.assertEqual(update_tip.timestamp, datetime(2017, 7, 27, 11, 1, 27, 183575).timestamp())
+        self.assertEqual(update_tip.timestamp, datetime(2017, 7, 27, 11, 1, 27, 183575, pytz.UTC).timestamp())
         self.assertEqual(update_tip.node, 'node-1')
         self.assertEqual(update_tip.block_hash, '1d205cac616c0344721d2552482024528883e9fdf7439bfbfc02567060c56d71')
         self.assertEqual(update_tip.height, 106)
@@ -142,7 +143,7 @@ class TestParse(TestCase):
             ' peer=0'
         )
 
-        self.assertEqual(log_line_with_hash.timestamp, datetime(2017, 7, 27, 15, 34, 58, 122336).timestamp())
+        self.assertEqual(log_line_with_hash.timestamp, datetime(2017, 7, 27, 15, 34, 58, 122336, pytz.UTC).timestamp())
         self.assertEqual(log_line_with_hash.node, 'node-1')
         self.assertEqual(log_line_with_hash.obj_hash, '4ec9b518b23d460c01abaf1c6e32ec46dbbfc8c81c599dd71c0c175e2367f278')
 
@@ -153,7 +154,7 @@ class TestParse(TestCase):
             ' 0 txn from mempool (incl at least 0 from extra pool) and 0 txn requested'
         )
 
-        self.assertEqual(log_line_with_hash.timestamp, datetime(2017, 7, 28, 8, 41, 43, 637277).timestamp())
+        self.assertEqual(log_line_with_hash.timestamp, datetime(2017, 7, 28, 8, 41, 43, 637277, pytz.UTC).timestamp())
         self.assertEqual(log_line_with_hash.node, 'node-3')
         self.assertEqual(log_line_with_hash.obj_hash, '27ebf5f20b3860fb3a8ed82f0721300bf96c1836252fddd67b60f48d227d3a3c')
 
@@ -193,7 +194,7 @@ class TestParse(TestCase):
             ' 2e1b05f9248ae5f29b2234ac0eb86e0fccbacc084ed91937eee7eea248fc9a6a  new'
         )
 
-        self.assertEqual(log_line_with_hash.timestamp, datetime(2017, 7, 30, 7, 48, 48, 337577).timestamp())
+        self.assertEqual(log_line_with_hash.timestamp, datetime(2017, 7, 30, 7, 48, 48, 337577, pytz.UTC).timestamp())
         self.assertEqual(log_line_with_hash.node, 'node-1')
         self.assertEqual(log_line_with_hash.obj_hash, '2e1b05f9248ae5f29b2234ac0eb86e0fccbacc084ed91937eee7eea248fc9a6a')
 
@@ -204,7 +205,7 @@ class TestParse(TestCase):
             ' (poolsz 11 txn, 13 kB)'
         )
 
-        self.assertEqual(log_line_with_hash.timestamp, datetime(2017, 7, 30, 7, 48, 42, 907223).timestamp())
+        self.assertEqual(log_line_with_hash.timestamp, datetime(2017, 7, 30, 7, 48, 42, 907223, pytz.UTC).timestamp())
         self.assertEqual(log_line_with_hash.node, 'node-2')
         self.assertEqual(log_line_with_hash.obj_hash, '701cd618d630780ac19a78325f24cdd13cbf87279103c7e9cec9fb6382e90ce7')
 
@@ -235,7 +236,7 @@ class TestParse(TestCase):
             ' to peer=0'
         )
 
-        self.assertEqual(log_line_with_hash.timestamp, datetime(2017, 7, 31, 16, 9, 28, 663985).timestamp())
+        self.assertEqual(log_line_with_hash.timestamp, datetime(2017, 7, 31, 16, 9, 28, 663985, pytz.UTC).timestamp())
         self.assertEqual(log_line_with_hash.node, 'node-0')
         self.assertEqual(log_line_with_hash.obj_hash, '107692460326feaa6f0c6c35bb218bdb3ff2adbc0d10a3a36b8252acf54e0c03')
 
@@ -259,7 +260,7 @@ class TestParse(TestCase):
             '2017-07-31 16:09:28.663985 node-0 Checking mempool with 5878 transactions and 5999 inputs'
         )
 
-        self.assertEqual(checking_mempool.timestamp, datetime(2017, 7, 31, 16, 9, 28, 663985).timestamp())
+        self.assertEqual(checking_mempool.timestamp, datetime(2017, 7, 31, 16, 9, 28, 663985, pytz.UTC).timestamp())
         self.assertEqual(checking_mempool.node, 'node-0')
         self.assertEqual(checking_mempool.txs, 5878)
         self.assertEqual(checking_mempool.inputs, 5999)
@@ -272,13 +273,15 @@ class TestParse(TestCase):
 
     def test_parse_tick(self):
         tick_log_line = parse.parse_tick_log_line(
-            '2017-08-19 16:05:14.609000 simcoin [MainThread  ] [INFO ]  The tick duration was 0.9823310375213623s'
+            '2017-08-19 16:05:14.609000 simcoin [MainThread  ] [INFO ]  The tick started at 45.12'
+            ' and took 0.9823310375213623s to finish'
         )
 
-        self.assertEqual(tick_log_line.timestamp, datetime(2017, 8, 19, 16, 5, 14, 609000).timestamp())
+        self.assertEqual(tick_log_line.timestamp, datetime(2017, 8, 19, 16, 5, 14, 609000, pytz.UTC).timestamp())
+        self.assertEqual(tick_log_line.start, 45.12)
         self.assertEqual(tick_log_line.duration, 0.9823310375213623)
 
-    @patch('parse.parse_tick_log_line', lambda a: TickLogLine(None, None))
+    @patch('parse.parse_tick_log_line', lambda a: TickLogLine(None, None, None))
     def test_checking_mempool_parser(self):
         self.parser.tick_parser('line')
 
