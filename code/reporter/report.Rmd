@@ -112,7 +112,7 @@ kable(block_size_stats,  align = c('l'), col.names = c('', 'value'))
 ```
 
 ```{r size, error=TRUE}
-hist(blocks$total_size_kb, xlab = 'size [kb]')
+hist(blocks$total_size_kb, xlab = 'Size [kb]')
 ```
 
 ### Block received by other nodes
