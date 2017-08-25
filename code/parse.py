@@ -130,13 +130,8 @@ def parse_update_tip(line):
     if matched is None:
         raise ParseException("Didn't matched CreateNewBlock log line.")
 
-    return UpdateTipLogLine(
-        parse_datetime(matched.group(1)),
-        str(matched.group(2)),
-        str(matched.group(3)),
-        int(matched.group(4)),
-        int(matched.group(5)),
-    )
+    return UpdateTipLogLine(parse_datetime(matched.group(1)), str(matched.group(2)), str(matched.group(3)),
+                            int(matched.group(4)), int(matched.group(5)))
 
 
 def parse_received_block(line):
@@ -147,11 +142,7 @@ def parse_received_block(line):
     if matched is None:
         raise ParseException("Didn't matched Received block log line.")
 
-    return LogLineWithHash(
-        parse_datetime(matched.group(1)),
-        str(matched.group(2)),
-        str(matched.group(3)),
-    )
+    return LogLineWithHash(parse_datetime(matched.group(1)), str(matched.group(2)), str(matched.group(3)))
 
 
 def parse_successfully_reconstructed_block(line):
@@ -163,11 +154,7 @@ def parse_successfully_reconstructed_block(line):
     if matched is None:
         raise ParseException("Didn't matched Successfully reconstructed block log line.")
 
-    return LogLineWithHash(
-        parse_datetime(matched.group(1)),
-        str(matched.group(2)),
-        str(matched.group(3)),
-    )
+    return LogLineWithHash(parse_datetime(matched.group(1)), str(matched.group(2)), str(matched.group(3)))
 
 
 def parse_add_to_wallet(line):
@@ -178,11 +165,7 @@ def parse_add_to_wallet(line):
     if matched is None:
         raise ParseException("Didn't matched AddToWallet log line.")
 
-    return LogLineWithHash(
-        parse_datetime(matched.group(1)),
-        str(matched.group(2)),
-        str(matched.group(3)),
-    )
+    return LogLineWithHash(parse_datetime(matched.group(1)), str(matched.group(2)), str(matched.group(3)))
 
 
 def parse_accept_to_memory_pool(line):
@@ -195,11 +178,7 @@ def parse_accept_to_memory_pool(line):
     if matched is None:
         raise ParseException("Didn't matched AcceptToMemoryPool log line.")
 
-    return LogLineWithHash(
-        parse_datetime(matched.group(1)),
-        str(matched.group(2)),
-        str(matched.group(4)),
-    )
+    return LogLineWithHash(parse_datetime(matched.group(1)), str(matched.group(2)), str(matched.group(4)))
 
 
 def parse_peer_logic_validation(line):
@@ -211,11 +190,7 @@ def parse_peer_logic_validation(line):
     if matched is None:
         raise ParseException("Didn't matched AcceptToMemoryPool log line.")
 
-    return LogLineWithHash(
-        parse_datetime(matched.group(1)),
-        str(matched.group(2)),
-        str(matched.group(3)),
-    )
+    return LogLineWithHash(parse_datetime(matched.group(1)), str(matched.group(2)), str(matched.group(3)))
 
 
 def parse_checking_mempool(line):
@@ -226,11 +201,8 @@ def parse_checking_mempool(line):
     if matched is None:
         raise ParseException("Didn't matched AcceptToMemoryPool log line.")
 
-    return CheckingMempoolLogLine(
-        parse_datetime(matched.group(1)),
-        str(matched.group(2)),
-        int(matched.group(3)),
-        int(matched.group(4)),
+    return CheckingMempoolLogLine(parse_datetime(matched.group(1)), str(matched.group(2)),
+                                  int(matched.group(3)), int(matched.group(4)),
     )
 
 
@@ -243,11 +215,7 @@ def parse_tick_log_line(line):
     if matched is None:
         raise ParseException("Didn't matched tick log line.")
 
-    return TickLogLine(
-        parse_datetime(matched.group(1)),
-        float(matched.group(3)),
-        float(matched.group(4)),
-    )
+    return TickLogLine(parse_datetime(matched.group(1)), float(matched.group(3)), float(matched.group(4)))
 
 
 def parse_datetime(date_time):
