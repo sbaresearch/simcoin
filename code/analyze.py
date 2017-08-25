@@ -46,18 +46,18 @@ class Analyzer:
     def create_tx_exceptions_csv(self):
         with open(config.tx_exceptions_csv, 'w') as file:
             w = csv.writer(file, delimiter=';')
-            w.writerow(['node', 'timestamp', 'error_message'])
+            w.writerow(['node', 'timestamp', 'exception'])
 
             for exce in self.context.tx_exceptions:
-                w.writerow([exce.node, exce.timestamp, exce.error_message])
+                w.writerow([exce.node, exce.timestamp, exce.exception])
 
     def create_block_exceptions_csv(self):
         with open(config.block_exceptions_csv, 'w') as file:
             w = csv.writer(file, delimiter=';')
-            w.writerow(['node', 'timestamp', 'error_message'])
+            w.writerow(['node', 'timestamp', 'exception'])
 
             for exce in self.context.block_exceptions:
-                w.writerow([exce.node, exce.timestamp, exce.error_message])
+                w.writerow([exce.node, exce.timestamp, exce.exception])
 
     def create_tick_infos_csv(self):
         with open(config.tick_infos_csv, 'w') as file:
@@ -74,3 +74,11 @@ class Analyzer:
 
             for snapshot in self.context.mempool_snapshots:
                 w.writerow([snapshot.timestamp, snapshot.node, snapshot.txs, snapshot.inputs])
+
+    def create_rpc_exceptions_csv(self):
+        with open(config.rpc_exceptions_csv, 'w') as file:
+            w = csv.writer(file, delimiter=';')
+            w.writerow(['timestamp', 'node', 'method', 'exception'])
+
+            for exce in self.context.rpc_exceptions:
+                w.writerow([exce.timestamp, exce.node, exce.method, exce.exception])

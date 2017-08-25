@@ -23,6 +23,7 @@ mempool       <- read.csv2("mempool_snapshots.csv", dec=".")
 nodes         <- read.csv2("nodes.csv", dec=".")
 tx_exces      <- read.csv2("tx_exceptions.csv", dec=".")
 block_exces   <- read.csv2("block_exceptions.csv", dec=".")
+rpc_exces     <- read.csv2("rpc_exceptions.csv", dec=".")
 tick_infos    <- read.csv2("tick_infos.csv", dec=".")
 
 library('jsonlite')
@@ -286,7 +287,7 @@ hist(mempool$txs, xlab = 'Transactions')
 
 ### Transactions in mempool over time
 ```{r txs_mempool_over_time, error=TRUE}
-mempool$rel_timestamp = mempool$timestamp - sim_start
+mempool$rel_timestamp <- mempool$timestamp - sim_start
 txs_in_mempool = tapply(mempool$txs, cut(mempool$rel_timestamp, pretty(mempool$rel_timestamp)), median)
 plot(txs_in_mempool, xlab = 'Time [s]', ylab='Transactions', xaxt='n')
 axis(1, at=1:nrow(txs_in_mempool), labels=names(txs_in_mempool))
@@ -341,7 +342,7 @@ kable(valid_headers)
 There were `r nrow(block_exces)` exceptions catched during the execution of the RPC-call to create a block.
 
 ```{r block_exces, error=TRUE}
-block_exces$rel_timestamp = block_exces$timestamp - sim_start
+block_exces$rel_timestamp <- block_exces$timestamp - sim_start
 ```
 
 ```{r block_exces_hist, error=TRUE}
@@ -357,8 +358,8 @@ pie(exces_per_node, labels)
 ```
 
 ### Exception error message
-```{r block_exces_error_message_distribution, error=TRUE, fig.height=6}
-exces_per_node <- table(block_exces$error_message)
+```{r block_exces_distribution, error=TRUE, fig.height=6}
+exces_per_node <- table(block_exces$exception)
 percentage     <- round(exces_per_node/sum(exces_per_node)*100)
 labels         <- paste(names(exces_per_node), ': ', exces_per_node, ', ', percentage, '%', sep='')
 pie(exces_per_node, labels)
@@ -368,7 +369,7 @@ pie(exces_per_node, labels)
 There were `r nrow(tx_exces)` exceptions catched during the execution of the RPC-call to send a transaction.
 
 ```{r tx_exces, error=TRUE}
-tx_exces$rel_timestamp = tx_exces$timestamp - sim_start
+tx_exces$rel_timestamp <- tx_exces$timestamp - sim_start
 hist(tx_exces$rel_timestamp, xlab = 'Time [s]')
 ```
 
@@ -381,8 +382,32 @@ pie(exces_per_node, labels)
 ```
 
 ### Exception error message
-```{r tx_exces_error_message_distribution, error=TRUE, fig.height=6}
-exces_per_node <- table(tx_exces$error_message)
+```{r tx_exces_distribution, error=TRUE, fig.height=6}
+exces_per_node <- table(tx_exces$exception)
+percentage     <- round(exces_per_node/sum(exces_per_node)*100)
+labels         <- paste(names(exces_per_node), ': ', exces_per_node, ', ', percentage, '%', sep='')
+pie(exces_per_node, labels)
+```
+
+## RPC exceptions
+There were `r nrow(rpc_exces)` exceptions catched during a RPC-call.
+
+```{r rpc_exces, error=TRUE}
+rpc_exces$rel_timestamp <- rpc_exces$timestamp - sim_start
+hist(rpc_exces$rel_timestamp, xlab = 'Time [s]')
+```
+
+### Distribution
+```{r rpc_exces_node_distribution, error=TRUE, fig.height=6}
+exces_per_node <- table(rpc_exces$node)
+percentage     <- round(exces_per_node/sum(exces_per_node)*100)
+labels         <- paste(names(exces_per_node), ': ', exces_per_node, ', ', percentage, '%', sep='')
+pie(exces_per_node, labels)
+```
+
+### Exception error message
+```{r rpc_exces_distribution, error=TRUE, fig.height=6}
+exces_per_node <- table(rpc_exces$exception)
 percentage     <- round(exces_per_node/sum(exces_per_node)*100)
 labels         <- paste(names(exces_per_node), ': ', exces_per_node, ', ', percentage, '%', sep='')
 pie(exces_per_node, labels)

@@ -80,13 +80,15 @@ class BitcoinNode(Node):
                 if error.errno == errno.EPIPE:
                     retry -= 1
                     self.connect_to_rpc()
-                    logging.debug('Error={} occurred. Reconnecting RPC and retrying.'.format(error))
+                    logging.warning('Node={} could not execute RPC-call={} because of error="{}".'
+                                    ' Reconnecting RPC and retrying.'.format(self.name, args[0], error))
             except CannotSendRequest as exce:
                 retry -= 1
                 self.connect_to_rpc()
-                logging.debug('Error={} occurred. Reconnecting RPC and retrying.'.format(exce))
+                logging.warning('Node={} could not execute RPC-call={} because of error="{}".'
+                                ' Reconnecting RPC and retrying.'.format(self.name, args[0], exce))
 
-        logging.error("Could'nt execute rpc-call={} on node {}".format(args[0], self.name))
+        logging.error('Could not execute RPC-call={} on node {}'.format(args[0], self.name))
         exit(-1)
 
     def grep_log_for_errors(self):
