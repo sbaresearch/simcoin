@@ -8,8 +8,8 @@ from parse import TxStats
 from parse import CheckingMempoolLogLine
 from parse import TickLogLine
 from parse import RPCExceptionLogLine
+from parse import ExceptionLogLine
 from analyze import Analyzer
-from event import CmdException
 from mock import Mock
 
 
@@ -82,7 +82,7 @@ class TestAnalyze(TestCase):
     @patch('builtins.open', new_callable=mock_open)
     def test_create_tx_exceptions_csv(self, m_open):
         tx_exceptions = [
-            CmdException('node-1', 'timestamp', 'exception')
+            ExceptionLogLine('timestamp', 'node-1', 'exception')
         ]
 
         context = Mock()
@@ -99,7 +99,7 @@ class TestAnalyze(TestCase):
     @patch('builtins.open', new_callable=mock_open)
     def test_create_block_exceptions_csv(self, m_open):
         block_exceptions = [
-            CmdException('node-1', 'timestamp', 'exception')
+            ExceptionLogLine('timestamp', 'node-1', 'exception')
         ]
 
         context = Mock()

@@ -60,5 +60,3 @@ class Event:
             pass
         else:
             raise Exception('Unknown cmd={} in {}-file'.format(cmd_parts[0], config.ticks_csv))
-
-CmdException = namedtuple('CmdException', 'node timestamp error_message')
