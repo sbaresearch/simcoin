@@ -81,7 +81,7 @@ class TestAnalyze(TestCase):
     @patch('builtins.open', new_callable=mock_open)
     def test_create_tx_exceptions_csv(self, m_open):
         tx_exceptions = [
-            CmdException('node-1', 'timestamp', 'error_message')
+            CmdException('node-1', 'timestamp', 'exception')
         ]
 
         context = Mock()
@@ -92,13 +92,13 @@ class TestAnalyze(TestCase):
         m_open.assert_called_with(config.tx_exceptions_csv, 'w')
         handle = m_open()
         self.assertEqual(handle.write.call_count, 2)
-        self.assertEqual(handle.write.call_args_list[0][0][0], 'node;timestamp;error_message\r\n')
-        self.assertEqual(handle.write.call_args_list[1][0][0], 'node-1;timestamp;error_message\r\n')
+        self.assertEqual(handle.write.call_args_list[0][0][0], 'node;timestamp;exception\r\n')
+        self.assertEqual(handle.write.call_args_list[1][0][0], 'node-1;timestamp;exception\r\n')
 
     @patch('builtins.open', new_callable=mock_open)
     def test_create_block_exceptions_csv(self, m_open):
         block_exceptions = [
-            CmdException('node-1', 'timestamp', 'error_message')
+            CmdException('node-1', 'timestamp', 'exception')
         ]
 
         context = Mock()
@@ -109,8 +109,8 @@ class TestAnalyze(TestCase):
         m_open.assert_called_with(config.block_exceptions_csv, 'w')
         handle = m_open()
         self.assertEqual(handle.write.call_count, 2)
-        self.assertEqual(handle.write.call_args_list[0][0][0], 'node;timestamp;error_message\r\n')
-        self.assertEqual(handle.write.call_args_list[1][0][0], 'node-1;timestamp;error_message\r\n')
+        self.assertEqual(handle.write.call_args_list[0][0][0], 'node;timestamp;exception\r\n')
+        self.assertEqual(handle.write.call_args_list[1][0][0], 'node-1;timestamp;exception\r\n')
 
 
     @patch('builtins.open', new_callable=mock_open)
