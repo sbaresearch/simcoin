@@ -352,7 +352,7 @@ hist(block_exces$rel_timestamp, xlab = 'Time [s]')
 ```{r block_exces_node_distribution, error=TRUE, fig.height=6}
 exces_per_node <- table(block_exces$node)
 percentage     <- round(exces_per_node/sum(exces_per_node)*100)
-labels         <- paste(names(exces_per_node), ' blocks: ', exces_per_node, ', ', percentage, '%', sep='')
+labels         <- paste(names(exces_per_node), ': ', exces_per_node, ', ', percentage, '%', sep='')
 pie(exces_per_node, labels)
 ```
 
@@ -360,7 +360,7 @@ pie(exces_per_node, labels)
 ```{r block_exces_error_message_distribution, error=TRUE, fig.height=6}
 exces_per_node <- table(block_exces$error_message)
 percentage     <- round(exces_per_node/sum(exces_per_node)*100)
-labels         <- paste(names(exces_per_node), ' blocks: ', exces_per_node, ', ', percentage, '%', sep='')
+labels         <- paste(names(exces_per_node), ': ', exces_per_node, ', ', percentage, '%', sep='')
 pie(exces_per_node, labels)
 ```
 
@@ -376,7 +376,7 @@ hist(tx_exces$rel_timestamp, xlab = 'Time [s]')
 ```{r tx_exces_node_distribution, error=TRUE, fig.height=6}
 exces_per_node <- table(tx_exces$node)
 percentage     <- round(exces_per_node/sum(exces_per_node)*100)
-labels         <- paste(names(exces_per_node), ' blocks: ', exces_per_node, ', ', percentage, '%', sep='')
+labels         <- paste(names(exces_per_node), ': ', exces_per_node, ', ', percentage, '%', sep='')
 pie(exces_per_node, labels)
 ```
 
@@ -384,7 +384,7 @@ pie(exces_per_node, labels)
 ```{r tx_exces_error_message_distribution, error=TRUE, fig.height=6}
 exces_per_node <- table(tx_exces$error_message)
 percentage     <- round(exces_per_node/sum(exces_per_node)*100)
-labels         <- paste(names(exces_per_node), ' blocks: ', exces_per_node, ', ', percentage, '%', sep='')
+labels         <- paste(names(exces_per_node), ': ', exces_per_node, ', ', percentage, '%', sep='')
 pie(exces_per_node, labels)
 ```
 
