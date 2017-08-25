@@ -113,7 +113,6 @@ class TestAnalyze(TestCase):
         self.assertEqual(handle.write.call_args_list[0][0][0], 'node;timestamp;exception\r\n')
         self.assertEqual(handle.write.call_args_list[1][0][0], 'node-1;timestamp;exception\r\n')
 
-
     @patch('builtins.open', new_callable=mock_open)
     def test_create_mempool_snapshots_csv(self, m_open):
         mempool_snapshots = [
