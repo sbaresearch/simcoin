@@ -25,7 +25,7 @@ class Parser:
                         break
                     except ParseException:
                         pass
-                if (i + 1) % 10000 == 0:
+                if (i + 1) % 100000 == 0:
                     logging.info('Parsed {} of {} log lines'.format(i + 1, len(lines)))
         logging.info('Executed parser')
 
