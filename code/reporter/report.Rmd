@@ -287,7 +287,7 @@ hist(mempool$txs, xlab = 'Transactions')
 
 ### Transactions in mempool over time
 ```{r txs_mempool_over_time, error=TRUE}
-mempool$rel_timestamp = mempool$timestamp - sim_start
+mempool$rel_timestamp <- mempool$timestamp - sim_start
 txs_in_mempool = tapply(mempool$txs, cut(mempool$rel_timestamp, pretty(mempool$rel_timestamp)), median)
 plot(txs_in_mempool, xlab = 'Time [s]', ylab='Transactions', xaxt='n')
 axis(1, at=1:nrow(txs_in_mempool), labels=names(txs_in_mempool))
@@ -342,7 +342,7 @@ kable(valid_headers)
 There were `r nrow(block_exces)` exceptions catched during the execution of the RPC-call to create a block.
 
 ```{r block_exces, error=TRUE}
-block_exces$rel_timestamp = block_exces$timestamp - sim_start
+block_exces$rel_timestamp <- block_exces$timestamp - sim_start
 ```
 
 ```{r block_exces_hist, error=TRUE}
@@ -369,7 +369,7 @@ pie(exces_per_node, labels)
 There were `r nrow(tx_exces)` exceptions catched during the execution of the RPC-call to send a transaction.
 
 ```{r tx_exces, error=TRUE}
-tx_exces$rel_timestamp = tx_exces$timestamp - sim_start
+tx_exces$rel_timestamp <- tx_exces$timestamp - sim_start
 hist(tx_exces$rel_timestamp, xlab = 'Time [s]')
 ```
 
@@ -393,7 +393,7 @@ pie(exces_per_node, labels)
 There were `r nrow(rpc_exces)` exceptions catched during a RPC-call.
 
 ```{r rpc_exces, error=TRUE}
-rpc_exces$rel_timestamp = rpc_exces$timestamp - sim_start
+rpc_exces$rel_timestamp <- rpc_exces$timestamp - sim_start
 hist(rpc_exces$rel_timestamp, xlab = 'Time [s]')
 ```
 
