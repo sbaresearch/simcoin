@@ -150,7 +150,7 @@ class TestAnalyze(TestCase):
     @patch('builtins.open', new_callable=mock_open)
     def test_create_rpc_exceptions(self, m_open):
         rpc_exceptions = [
-            RPCExceptionLogLine('timestamp', 'node-1', 'some_method', 'some_message')
+            RPCExceptionLogLine('timestamp', 'node-1', 'some_method', 'some_exception')
         ]
 
         context = Mock()
@@ -161,5 +161,5 @@ class TestAnalyze(TestCase):
         m_open.assert_called_with(config.rpc_exceptions_csv, 'w')
         handle = m_open()
         self.assertEqual(handle.write.call_count, 2)
-        self.assertEqual(handle.write.call_args_list[0][0][0], 'timestamp;node;method;error_message\r\n')
-        self.assertEqual(handle.write.call_args_list[1][0][0], 'timestamp;node-1;some_method;some_message\r\n')
+        self.assertEqual(handle.write.call_args_list[0][0][0], 'timestamp;node;method;exception\r\n')
+        self.assertEqual(handle.write.call_args_list[1][0][0], 'timestamp;node-1;some_method;some_exception\r\n')
