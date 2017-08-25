@@ -130,14 +130,9 @@ class TestEvent(TestCase):
 
     def test_execute_cmd_with_exception(self):
         context = Mock()
-        context.tx_exceptions = []
-
         node = Mock()
         node.generate_tx.side_effect = JSONRPCException({'code': -1, 'message': 'test_message'})
         context.all_bitcoin_nodes = {'node-1': node}
 
         e = Event(context)
         e.execute_cmd('tx node-1')
-
-        self.assertEqual(len(context.tx_exceptions), 1)
-        self.assertEqual(context.tx_exceptions[0].error_message, 'test_message')

@@ -286,3 +286,23 @@ class TestParse(TestCase):
         self.parser.tick_parser('line')
 
         self.assertEqual(len(self.context.tick_infos), 1)
+
+    def test_parse_tx_creation_exception(self):
+        exception_log_line = parse.parse_tx_creation_exception(
+            '2017-08-19 16:05:14.609000 simcoin [MainThread  ] [INFO ]  Could not generate tx for node=s-node-1.1.'
+            ' Exception="41: too-long-mempool-chain"'
+        )
+
+        self.assertEqual(exception_log_line.timestamp, datetime(2017, 8, 19, 16, 5, 14, 609000, pytz.UTC).timestamp())
+        self.assertEqual(exception_log_line.node, 's-node-1.1')
+        self.assertEqual(exception_log_line.exception, '41: too-long-mempool-chain')
+
+    def test_parse_block_creation_exception(self):
+        exception_log_line = parse.parse_block_creation_exception(
+            '2017-08-19 16:05:14.609000 simcoin [MainThread  ] [INFO ]  Could not generate block for node=s-node-1.2.'
+            ' Exception="41: no tx"'
+        )
+
+        self.assertEqual(exception_log_line.timestamp, datetime(2017, 8, 19, 16, 5, 14, 609000, pytz.UTC).timestamp())
+        self.assertEqual(exception_log_line.node, 's-node-1.2')
+        self.assertEqual(exception_log_line.exception, '41: no tx')

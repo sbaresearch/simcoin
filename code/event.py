@@ -48,16 +48,14 @@ class Event:
             try:
                 node.generate_tx()
             except JSONRPCException as exce:
-                self.context.tx_exceptions.append(CmdException(node.name, datetime.now(), exce.message))
-                logging.info('Could not generate tx for node {}. Exception={}'.format(node.name, exce.message))
+                logging.info('Could not generate tx for node={}. Exception="{}"'.format(node.name, exce.message))
         elif cmd_parts[0] == 'block':
             node = self.context.all_bitcoin_nodes[cmd_parts[1]]
             try:
                 block_hash = node.execute_rpc('generate', 1)
                 logging.info('Created block with hash={}'.format(block_hash))
             except JSONRPCException as exce:
-                self.context.block_exceptions.append(CmdException(node.name, datetime.now(), exce.message))
-                logging.info('Could not generate block for node {}. Exception={}'.format(node.name, exce.message))
+                logging.info('Could not generate block for node={}. Exception="{}"'.format(node.name, exce.message))
         elif len(cmd) == 0:
             pass
         else:
