@@ -7,6 +7,7 @@ import config
 from parse import TxStats
 from parse import CheckingMempoolLogLine
 from parse import TickLogLine
+from parse import RPCExceptionLogLine
 from analyze import Analyzer
 from event import CmdException
 from mock import Mock
@@ -146,3 +147,20 @@ class TestAnalyze(TestCase):
         self.assertEqual(handle.write.call_count, 2)
         self.assertEqual(handle.write.call_args_list[0][0][0], 'timestamp;start;duration\r\n')
         self.assertEqual(handle.write.call_args_list[1][0][0], 'timestamp;12.12;45\r\n')
+
+    @patch('builtins.open', new_callable=mock_open)
+    def test_create_rpc_exceptions(self, m_open):
+        rpc_exceptions = [
+            RPCExceptionLogLine('timestamp', 'node-1', 'some_method', 'some_message')
+        ]
+
+        context = Mock()
+        context.rpc_exceptions = rpc_exceptions
+        analyzer = Analyzer(context)
+        analyzer.create_rpc_exceptions_csv()
+
+        m_open.assert_called_with(config.rpc_exceptions_csv, 'w')
+        handle = m_open()
+        self.assertEqual(handle.write.call_count, 2)
+        self.assertEqual(handle.write.call_args_list[0][0][0], 'timestamp;node;method;error_message\r\n')
+        self.assertEqual(handle.write.call_args_list[1][0][0], 'timestamp;node-1;some_method;some_message\r\n')

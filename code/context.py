@@ -27,6 +27,7 @@ class Context:
 
         self.tx_exceptions = []
         self.block_exceptions = []
+        self.rpc_exceptions = []
         self.consensus_chain = []
         self.parsed_blocks = {}
         self.parsed_txs = {}

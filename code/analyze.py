@@ -74,3 +74,11 @@ class Analyzer:
 
             for snapshot in self.context.mempool_snapshots:
                 w.writerow([snapshot.timestamp, snapshot.node, snapshot.txs, snapshot.inputs])
+
+    def create_rpc_exceptions_csv(self):
+        with open(config.rpc_exceptions_csv, 'w') as file:
+            w = csv.writer(file, delimiter=';')
+            w.writerow(['timestamp', 'node', 'method', 'error_message'])
+
+            for exce in self.context.rpc_exceptions:
+                w.writerow([exce.timestamp, exce.node, exce.method, exce.exception])

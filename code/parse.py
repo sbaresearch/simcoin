@@ -113,6 +113,11 @@ class Parser:
             parse_block_creation_exception(line)
         )
 
+    def rpc_exception_parser(self, line):
+        self.context.rpc_exceptions.append(
+            parse_rpc_exception(line)
+        )
+
 
 def parse_create_new_block(line):
     regex = config.log_prefix_full + 'CreateNewBlock\(\): total size: ([0-9]+)' \
@@ -244,6 +249,18 @@ def parse_block_creation_exception(line):
     return ExceptionLogLine(parse_datetime(matched.group(1)), str(matched.group(3)), str(matched.group(4)))
 
 
+def parse_rpc_exception(line):
+    regex = config.log_prefix_full + '\[.*\] \[.*\]  Node=([a-zA-Z0-9-\.]+) could not execute RPC-call=([a-zA-Z0-9]+)' \
+                                     ' because of error="(.*)"\. Reconnecting RPC and retrying.'
+    matched = re.match(regex, line)
+
+    if matched is None:
+        raise ParseException("Didn't matched RPC exception log line.")
+
+    return RPCExceptionLogLine(parse_datetime(matched.group(1)), str(matched.group(3)), str(matched.group(4)),
+                            str(matched.group(5)))
+
+
 def parse_datetime(date_time):
     parsed_date_time = datetime.strptime(date_time, config.log_time_format)
     return parsed_date_time.replace(tzinfo=pytz.UTC).timestamp()
@@ -261,6 +278,8 @@ LogLineWithHash = namedtuple('LogLineWithHash', 'timestamp node obj_hash')
 CheckingMempoolLogLine = namedtuple('CheckingMempoolLogLine', 'timestamp node txs inputs')
 
 ExceptionLogLine = namedtuple('ExceptionLogLine', 'timestamp node exception')
+
+RPCExceptionLogLine = namedtuple('RPCExceptionLogLine', 'timestamp node method exception')
 
 
 class BlockStats:
