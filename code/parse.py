@@ -136,7 +136,6 @@ def parse_update_tip(line):
 
 def parse_received_block(line):
     regex = config.log_prefix_full + 'received block ([a-z0-9]{64}) peer=[0-9]+$'
-
     matched = re.match(regex, line)
 
     if matched is None:
@@ -159,7 +158,6 @@ def parse_successfully_reconstructed_block(line):
 
 def parse_add_to_wallet(line):
     regex = config.log_prefix_full + 'AddToWallet ([a-z0-9]{64})  new$'
-
     matched = re.match(regex, line)
 
     if matched is None:
@@ -172,7 +170,6 @@ def parse_accept_to_memory_pool(line):
     regex = config.log_prefix_full + 'AcceptToMemoryPool: peer=([0-9]+):' \
                                      ' accepted ([0-9a-z]{64}) \(poolsz ([0-9]+) txn,' \
                                      ' ([0-9]+) [a-zA-Z]+\)$'
-
     matched = re.match(regex, line)
 
     if matched is None:
@@ -195,21 +192,18 @@ def parse_peer_logic_validation(line):
 
 def parse_checking_mempool(line):
     regex = config.log_prefix_full + 'Checking mempool with ([0-9]+) transactions and ([0-9]+) inputs'
-
     matched = re.match(regex, line)
 
     if matched is None:
         raise ParseException("Didn't matched AcceptToMemoryPool log line.")
 
     return CheckingMempoolLogLine(parse_datetime(matched.group(1)), str(matched.group(2)),
-                                  int(matched.group(3)), int(matched.group(4)),
-    )
+                                  int(matched.group(3)), int(matched.group(4)))
 
 
 def parse_tick_log_line(line):
     regex = config.log_prefix_full + '\[.*\] \[.*\]  The tick started at ([0-9]+\.[0-9]+)' \
                                      ' and took ([0-9]+\.[0-9]+)s to finish$'
-
     matched = re.match(regex, line)
 
     if matched is None:
