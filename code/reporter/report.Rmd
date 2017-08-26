@@ -17,6 +17,7 @@ opts_chunk$set(fig.width=12, fig.height=4, fig.path='RmdFigs/',
 
 ### Data import
 ```{r setup}
+tick_infos    <- read.csv2("tick_infos.csv", dec=".")
 txs           <- read.csv2("txs.csv", dec=".")
 blocks        <- read.csv2("blocks.csv", dec=".")
 mempool       <- read.csv2("mempool_snapshots.csv", dec=".")
@@ -24,7 +25,8 @@ nodes         <- read.csv2("nodes.csv", dec=".")
 tx_exces      <- read.csv2("tx_exceptions.csv", dec=".")
 block_exces   <- read.csv2("block_exceptions.csv", dec=".")
 rpc_exces     <- read.csv2("rpc_exceptions.csv", dec=".")
-tick_infos    <- read.csv2("tick_infos.csv", dec=".")
+log_errors    <- readChar("log_errors.txt", file.info("log_errors.txt")$size)
+
 
 library('jsonlite')
 args          <- stream_in(file('args.json'))
@@ -411,6 +413,13 @@ exces_per_node <- table(rpc_exces$exception)
 percentage     <- round(exces_per_node/sum(exces_per_node)*100)
 labels         <- paste(names(exces_per_node), ': ', exces_per_node, ', ', percentage, '%', sep='')
 pie(exces_per_node, labels)
+```
+
+## Log errors
+Presenting all lines from the log files which matched suspicious strings like `ERROR`, `Exception` and so on.
+
+```
+`r log_errors`
 ```
 
 #### R and package versions used

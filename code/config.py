@@ -41,6 +41,7 @@ block_exceptions_csv = data_dir + sim_dir + 'block_exceptions.csv'
 rpc_exceptions_csv = data_dir + sim_dir + 'rpc_exceptions.csv'
 mempool_snapshots_csv = data_dir + sim_dir + 'mempool_snapshots.csv'
 tick_infos_csv = data_dir + sim_dir + 'tick_infos.csv'
+log_errors_txt = data_dir + sim_dir + 'log_errors.txt'
 
 rpc_user = 'admin'
 rpc_password = 'admin'

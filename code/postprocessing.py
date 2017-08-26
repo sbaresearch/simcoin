@@ -22,8 +22,7 @@ class PostProcessing:
         bash.check_output(dockercmd.fix_data_dirs_permissions())
         logging.info('Removed all nodes, deleted network and fix permissions of dirs')
 
-        for node in self.context.all_nodes.values():
-            node.grep_log_for_errors()
+        self.grep_log_for_errors()
 
         self.aggregate_logs()
         cut_log()
@@ -60,6 +59,17 @@ class PostProcessing:
             node.rm_silent()
         utils.sleep(3 + len(self.context.all_nodes) * 0.2)
         bash.check_output(dockercmd.rm_network())
+
+    def grep_log_for_errors(self):
+        with open(config.log_errors_txt, 'a') as file:
+            for node in self.context.all_nodes.values():
+                file.write('{}:\n\n'.format(node.name))
+                file.write('{}\n\n\n'.format(node.grep_log_for_errors()))
+
+            file.write('Simcoin:\n\n')
+            lines = bash.check_output_without_log(config.log_error_grep.format(config.log_file))
+            file.write('{}\n\n\n'.format(lines))
+        logging.info('Grepped all logs for errors and saved matched lines to {}'.format(config.log_errors_txt))
 
 
 def prefix_log(lines, node_name):

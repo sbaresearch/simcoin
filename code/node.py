@@ -92,7 +92,7 @@ class BitcoinNode(Node):
         exit(-1)
 
     def grep_log_for_errors(self):
-        return bash.check_output(config.log_error_grep.format(config.client_dir_on_host(self) + BitcoinNode.log_file))
+        return bash.check_output_without_log(config.log_error_grep.format(config.client_dir_on_host(self) + BitcoinNode.log_file))
 
     def cat_log_cmd(self):
         return bash.check_output_without_log('cat ' + config.client_dir_on_host(self) + BitcoinNode.log_file)
