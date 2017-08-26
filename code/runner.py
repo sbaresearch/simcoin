@@ -26,10 +26,7 @@ class Runner:
             cli_stats = CliStats(self.context)
             cli_stats.execute()
 
-            # remove proxies first. if not proxies could be already stopped when trying to remove
-            for node in self.context.selfish_node_proxies.values():
-                node.rm_silent()
-            for node in self.context.all_bitcoin_nodes.values():
+            for node in self.context.all_nodes.values():
                 node.rm_silent()
             utils.sleep(3 + len(self.context.all_nodes) * 0.2)
             logging.info('Removed all docker containers')

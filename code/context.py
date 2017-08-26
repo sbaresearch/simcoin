@@ -65,9 +65,9 @@ class Context:
         self.all_public_nodes = copy(self.nodes)
         self.all_public_nodes.update(self.selfish_node_proxies)
 
-        self.all_nodes = copy(self.nodes)
+        self.all_nodes = copy(self.selfish_node_proxies)
         self.all_nodes.update(self.selfish_node_private_nodes)
-        self.all_nodes.update(self.selfish_node_proxies)
+        self.all_nodes.update(self.nodes)
 
         self.one_normal_node = next(iter(self.nodes.values()))
 
