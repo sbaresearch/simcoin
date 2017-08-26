@@ -19,12 +19,6 @@ class Runner:
             logging.info(config.log_line_sim_start)
             self.event.execute()
 
-            # only use regular nodes since selfish nodes can trail back
-            array = False
-            while utils.check_equal(array) is False:
-                logging.debug('Waiting for blocks to spread...')
-                utils.sleep(0.2)
-                array = [int(node.execute_rpc('getblockcount')) for node in self.context.nodes.values()]
         finally:
             # TODO add line number to log lines.
             utils.sleep(1)
