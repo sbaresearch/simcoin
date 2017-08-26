@@ -44,15 +44,17 @@ class PostProcessing:
 def prefix_log(lines, node_name):
     prev_match = ''
     prefixed_lines = []
+    line_number = 1
     for line in lines:
         match = re.match(config.log_prefix_timestamp, line)
         if match:
             prefixed_lines.append(re.sub(config.log_prefix_timestamp
-                                         , r'\1 {}'.format(node_name)
+                                         , r'\1 {} {}'.format(node_name, line_number)
                                          , line))
             prev_match = match.group(0)
         else:
-            prefixed_lines.append('{} {} {}'.format(prev_match, node_name, line))
+            prefixed_lines.append('{} {} {} {}'.format(prev_match, node_name, line_number, line))
+        line_number += 1
     return prefixed_lines
 
 

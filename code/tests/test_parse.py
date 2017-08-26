@@ -38,7 +38,7 @@ class TestParse(TestCase):
 
     def test_parse_create_new_block(self):
         create_new_block = parse.parse_create_new_block(
-            '2017-07-27 11:01:22.173139 node-1 CreateNewBlock(): total size: 226 block weight:'
+            '2017-07-27 11:01:22.173139 node-1 1 CreateNewBlock(): total size: 226 block weight:'
             ' 904 txs: 1 fees: 0 sigops 400'
         )
 
@@ -55,7 +55,7 @@ class TestParse(TestCase):
 
     def test_parse_update_tip(self):
         update_tip = parse.parse_update_tip(
-            '2017-07-27 11:01:27.183575 node-1 UpdateTip: '
+            '2017-07-27 11:01:27.183575 node-1 45 UpdateTip: '
             'new best=1d205cac616c0344721d2552482024528883e9fdf7439bfbfc02567060c56d71 height=106 version=0x20000000'
             ' log2_work=7.741467 tx=113 date=\'2017-07-27 11:01:29\' progress=1.000000 cache=0.0MiB(112tx)')
 
@@ -138,7 +138,7 @@ class TestParse(TestCase):
 
     def test_parse_received_block(self):
         log_line_with_hash = parse.parse_received_block(
-            '2017-07-27 15:34:58.122336 node-1 received block'
+            '2017-07-27 15:34:58.122336 node-1 12345 received block'
             ' 4ec9b518b23d460c01abaf1c6e32ec46dbbfc8c81c599dd71c0c175e2367f278'
             ' peer=0'
         )
@@ -149,7 +149,7 @@ class TestParse(TestCase):
 
     def test_successfully_reconstructed_block(self):
         log_line_with_hash = parse.parse_successfully_reconstructed_block(
-            '2017-07-28 08:41:43.637277 node-3 Successfully reconstructed'
+            '2017-07-28 08:41:43.637277 node-3 1 Successfully reconstructed'
             ' block 27ebf5f20b3860fb3a8ed82f0721300bf96c1836252fddd67b60f48d227d3a3c with 1 txn prefilled,'
             ' 0 txn from mempool (incl at least 0 from extra pool) and 0 txn requested'
         )
@@ -190,7 +190,7 @@ class TestParse(TestCase):
 
     def test_parse_add_to_wallet(self):
         log_line_with_hash = parse.parse_add_to_wallet(
-            '2017-07-30 07:48:48.337577 node-1 AddToWallet'
+            '2017-07-30 07:48:48.337577 node-1 1234 AddToWallet'
             ' 2e1b05f9248ae5f29b2234ac0eb86e0fccbacc084ed91937eee7eea248fc9a6a  new'
         )
 
@@ -200,7 +200,7 @@ class TestParse(TestCase):
 
     def test_parse_accept_to_memory_pool(self):
         log_line_with_hash = parse.parse_accept_to_memory_pool(
-            '2017-07-30 07:48:42.907223 node-2 AcceptToMemoryPool: peer=1:'
+            '2017-07-30 07:48:42.907223 node-2 45 AcceptToMemoryPool: peer=1:'
             ' accepted 701cd618d630780ac19a78325f24cdd13cbf87279103c7e9cec9fb6382e90ce7'
             ' (poolsz 11 txn, 13 kB)'
         )
@@ -231,7 +231,7 @@ class TestParse(TestCase):
 
     def test_parse_peer_logic_validation(self):
         log_line_with_hash = parse.parse_peer_logic_validation(
-            '2017-07-31 16:09:28.663985 node-0 PeerLogicValidation::NewPoWValidBlock'
+            '2017-07-31 16:09:28.663985 node-0 1 PeerLogicValidation::NewPoWValidBlock'
             ' sending header-and-ids 107692460326feaa6f0c6c35bb218bdb3ff2adbc0d10a3a36b8252acf54e0c03'
             ' to peer=0'
         )
@@ -257,7 +257,7 @@ class TestParse(TestCase):
 
     def test_parse_checking_mempool(self):
         checking_mempool = parse.parse_checking_mempool(
-            '2017-07-31 16:09:28.663985 node-0 Checking mempool with 5878 transactions and 5999 inputs'
+            '2017-07-31 16:09:28.663985 node-0 45 Checking mempool with 5878 transactions and 5999 inputs'
         )
 
         self.assertEqual(checking_mempool.timestamp, datetime(2017, 7, 31, 16, 9, 28, 663985, pytz.UTC).timestamp())
@@ -273,7 +273,7 @@ class TestParse(TestCase):
 
     def test_parse_tick(self):
         tick_log_line = parse.parse_tick_log_line(
-            '2017-08-19 16:05:14.609000 simcoin [MainThread  ] [INFO ]  The tick started at 45.12'
+            '2017-08-19 16:05:14.609000 simcoin 1 [MainThread  ] [INFO ]  The tick started at 45.12'
             ' and took 0.9823310375213623s to finish'
         )
 
@@ -289,7 +289,7 @@ class TestParse(TestCase):
 
     def test_parse_tx_creation_exception(self):
         exception_log_line = parse.parse_tx_creation_exception(
-            '2017-08-19 16:05:14.609000 simcoin [MainThread  ] [INFO ]  Could not generate tx for node=s-node-1.1.'
+            '2017-08-19 16:05:14.609000 simcoin 12 [MainThread  ] [INFO ]  Could not generate tx for node=s-node-1.1.'
             ' Exception="41: too-long-mempool-chain"'
         )
 
@@ -299,7 +299,7 @@ class TestParse(TestCase):
 
     def test_parse_block_creation_exception(self):
         exception_log_line = parse.parse_block_creation_exception(
-            '2017-08-19 16:05:14.609000 simcoin [MainThread  ] [INFO ]  Could not generate block for node=s-node-1.2.'
+            '2017-08-19 16:05:14.609000 simcoin 1 [MainThread  ] [INFO ]  Could not generate block for node=s-node-1.2.'
             ' Exception="41: no tx"'
         )
 
@@ -309,7 +309,7 @@ class TestParse(TestCase):
 
     def test_parse_block_creation_exception(self):
         rpc_exception_log_line = parse.parse_rpc_exception(
-            '2017-08-19 16:05:14.609000 simcoin [MainThread  ] [INFO ]  Node=s-node-1.1 could not execute'
+            '2017-08-19 16:05:14.609000 simcoin 1234 [MainThread  ] [INFO ]  Node=s-node-1.1 could not execute'
             ' RPC-call=getnewaddress because of error="Connection timeout". Reconnecting RPC and retrying.'
         )
 

@@ -21,8 +21,6 @@ class Runner:
             self.event.execute()
 
         finally:
-            # TODO add line number to log lines.
-            utils.sleep(1)
             logging.info(config.log_line_sim_end)
 
             cli_stats = CliStats(self.context)
