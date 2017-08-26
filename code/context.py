@@ -6,6 +6,8 @@ import utils
 from simulationfiles import network_config
 from simulationfiles import nodes_config
 from simulationfiles.zone import Zone
+from collections import OrderedDict
+from copy import copy
 
 
 class Context:
@@ -39,25 +41,33 @@ class Context:
         nodes = [node for node in self.config_nodes if node.node_type == 'bitcoin']
         selfish_nodes = [node for node in self.config_nodes if node.node_type == 'selfish']
 
-        self.nodes = {node.name: PublicBitcoinNode(node.name, self.zone.get_ip(node.latency),
-                                                   node.latency, node.docker_image) for node in nodes}
+        self.nodes = OrderedDict([])
+        for node in nodes:
+            self.nodes.update({node.name: PublicBitcoinNode(node.name, self.zone.get_ip(node.latency),
+                                                            node.latency, node.docker_image)})
 
-        self.selfish_node_private_nodes = {}
-        self.selfish_node_proxies = {}
+        self.selfish_node_private_nodes = OrderedDict([])
+        self.selfish_node_proxies = OrderedDict([])
         for node in selfish_nodes:
             ip_private_node = self.zone.get_ip(node.latency)
             ip_proxy = self.zone.get_ip(node.latency)
-            self.selfish_node_private_nodes[node.name] = SelfishPrivateNode(node.name,
-                                                                            ip_private_node, node.docker_image)
 
-            self.selfish_node_proxies[node.name_proxy] = \
-                ProxyNode(node.name_proxy, ip_proxy, ip_private_node, node.selfish_nodes_args,
-                          node.latency, node.docker_image)
+            self.selfish_node_private_nodes.update({node.name: SelfishPrivateNode(node.name,
+                                                                                  ip_private_node, node.docker_image)})
 
-        self.all_bitcoin_nodes = dict(self.nodes, **self.selfish_node_private_nodes)
+            self.selfish_node_proxies.update({node.name_proxy: ProxyNode(node.name_proxy, ip_proxy,
+                                                                         ip_private_node, node.selfish_nodes_args,
+                                                                         node.latency, node.docker_image)})
 
-        self.all_public_nodes = dict(self.nodes, **self.selfish_node_proxies)
-        self.all_nodes = dict(self.nodes, **self.selfish_node_private_nodes, **self.selfish_node_proxies)
+        self.all_bitcoin_nodes = copy(self.nodes)
+        self.all_bitcoin_nodes.update(self.selfish_node_private_nodes)
+
+        self.all_public_nodes = copy(self.nodes)
+        self.all_public_nodes.update(self.selfish_node_proxies)
+
+        self.all_nodes = copy(self.nodes)
+        self.all_nodes.update(self.selfish_node_private_nodes)
+        self.all_nodes.update(self.selfish_node_proxies)
 
         self.one_normal_node = next(iter(self.nodes.values()))
 
