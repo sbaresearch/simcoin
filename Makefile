@@ -48,8 +48,22 @@ demo4:
 				--tx-per-tick 2 \
 				--blocks-per-tick 0.7
 
+# maxes out notebook
+
+demo5:
+	cd code; \
+		python3 simcoin.py \
+			run \
+				--node-group-a bitcoin 20 1 0 simcoin/patched:v1 \
+				--blocks-per-tick 0.0833333333333333 \
+				--amount-of-ticks 75 \
+				--txs-per-tick 100 \
+				--tick-duration 5 \
+				--verbose
+
 install:
 	cd code; pip3 install -r requirements.txt
+	R -e "install.packages(c('rmarkdown','devtools','jsonlite'), repos='https://cran.wu.ac.at')"
 
 build-image:
 	cd ./code/docker/normal; \
