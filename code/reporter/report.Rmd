@@ -18,10 +18,12 @@ opts_chunk$set(fig.width=12, fig.height=4, fig.path='RmdFigs/',
 ### Data import
 ```{r setup}
 tick_infos    <- read.csv2("tick_infos.csv", dec=".")
+
 txs           <- read.csv2("txs.csv", dec=".")
 blocks        <- read.csv2("blocks.csv", dec=".")
 mempool       <- read.csv2("mempool_snapshots.csv", dec=".")
 nodes         <- read.csv2("nodes.csv", dec=".")
+
 tx_exces      <- read.csv2("tx_exceptions.csv", dec=".")
 block_exces   <- read.csv2("block_exceptions.csv", dec=".")
 rpc_exces     <- read.csv2("rpc_exceptions.csv", dec=".")
