@@ -6,6 +6,8 @@ import re
 import logging
 from analyze import Analyzer
 from cmd import rcmd
+from cmd import dockercmd
+import utils
 
 
 class PostProcessing:
@@ -13,19 +15,27 @@ class PostProcessing:
         self.context = context
 
     def execute(self):
+        cli_stats = CliStats(self.context)
+        cli_stats.execute()
+
+        self.remove_nodes_and_network()
+        bash.check_output(dockercmd.fix_data_dirs_permissions())
+        logging.info('Removed all nodes, deleted network and fix permissions of dirs')
+
+        for node in self.context.all_nodes.values():
+            node.grep_log_for_errors()
+
         self.aggregate_logs()
         cut_log()
-        logging.info('Aggregated logs')
 
         parser = Parser(self.context)
         parser.execute()
-        logging.info('Executed parsing')
 
         analyzer = Analyzer(self.context)
         analyzer.execute()
-        logging.info('Executed analyzing')
 
         bash.check_output(rcmd.create_report())
+        logging.info('Report created')
 
         logging.info('Executed post processing')
 
@@ -44,6 +54,12 @@ class PostProcessing:
             file.write('\n'.join(lines) + '\n')
 
         bash.check_output('sort {} -o {}'.format(config.aggregated_log, config.aggregated_log))
+
+    def remove_nodes_and_network(self):
+        for node in self.context.all_nodes.values():
+            node.rm_silent()
+        utils.sleep(3 + len(self.context.all_nodes) * 0.2)
+        bash.check_output(dockercmd.rm_network())
 
 
 def prefix_log(lines, node_name):
@@ -85,3 +101,4 @@ def cut_log():
                 if config.log_line_sim_start in line:
                     aggregated_sim_log.write(line)
                     write = True
+    logging.info('Aggregated logs')
