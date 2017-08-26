@@ -67,7 +67,7 @@ bitcoin_regtest_dir = '/regtest'
 client_dir = bitcoin_data_dir + bitcoin_regtest_dir
 
 
-def host_dir(node):
+def client_dir_on_host(node):
     return sim_dir + node.name + bitcoin_regtest_dir
 
 

@@ -9,7 +9,7 @@ def run_node(node, cmd):
             ' --ip=' + str(node.ip) +
             ' --name=' + config.prefix + node.name +  # container name
             ' --hostname=' + config.prefix + node.name +
-            ' --volume $PWD/' + config.host_dir(node) + ':' + config.client_dir +
+            ' --volume $PWD/' + config.client_dir_on_host(node) + ':' + config.client_dir +
             ' ' + node.docker_image +
             ' bash -c "' + cmd + '"')
 
