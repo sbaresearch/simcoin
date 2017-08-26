@@ -75,7 +75,7 @@ def object_decoder(obj):
 def check_if_image_exists(node_args):
     docker_image = str(node_args[4])
 
-    return_value = bash.call_silent(dockercmd.inspect_image(docker_image))
+    return_value = bash.call_silent(dockercmd.inspect(docker_image))
     if return_value != 0:
         print("Image {} doesn't exist. Check `docker images` for available images and"
               " consult the Makefile for how wo create the image.".format(docker_image))

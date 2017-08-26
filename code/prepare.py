@@ -103,7 +103,6 @@ class Prepare:
 def delete_nodes(nodes):
     for node in nodes:
         node.delete_peers_file()
-        node.execute_rpc('stop')
         node.rm()
 
 

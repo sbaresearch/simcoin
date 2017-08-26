@@ -62,5 +62,9 @@ def inspect_network():
     return 'docker network inspect {}'.format(config.network_name)
 
 
-def inspect_image(image):
+def inspect(image):
     return 'docker inspect {}'.format(image)
+
+
+def check_if_running(name):
+    return 'docker inspect -f {{{{.State.Running}}}} {0}{1}'.format(config.prefix, name)
