@@ -13,12 +13,9 @@ class PostProcessing:
         self.context = context
 
     def execute(self):
-        aggregate_logs([node for node in self.context.all_nodes.values()])
+        self.aggregate_logs()
         cut_log()
         logging.info('Aggregated logs')
-
-        cli_stats = CliStats(self.context)
-        cli_stats.execute()
 
         parser = Parser(self.context)
         parser.execute()
@@ -32,18 +29,16 @@ class PostProcessing:
 
         logging.info('Executed post processing')
 
+    def aggregate_logs(self):
+        for node in self.context.all_nodes.values():
+            content = node.cat_log_cmd().splitlines()
+            content = prefix_log(content, node.name)
 
-def aggregate_logs(nodes):
-    for node in nodes:
-        content = bash.check_output_without_log(node.cat_log_cmd()).splitlines()
+            with open(config.aggregated_log, 'a') as file:
+                file.write('\n'.join(content) + '\n')
 
-        content = prefix_log(content, node.name)
-
-        with open(config.aggregated_log, 'a') as file:
-            file.write('\n'.join(content) + '\n')
-
-    bash.check_output('cat {} >> {}'.format(config.log_file, config.aggregated_log))
-    bash.check_output('sort {} -o {}'.format(config.aggregated_log, config.aggregated_log))
+        bash.check_output('cat {} >> {}'.format(config.log_file, config.aggregated_log))
+        bash.check_output('sort {} -o {}'.format(config.aggregated_log, config.aggregated_log))
 
 
 def prefix_log(lines, node_name):

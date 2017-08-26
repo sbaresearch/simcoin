@@ -39,7 +39,7 @@ class PublicNode:
 
 
 class BitcoinNode(Node):
-    log_file = config.client_dir + '/debug.log'
+    log_file = '/debug.log'
 
     def __init__(self, name, ip, docker_image):
         super().__init__(name, ip, docker_image)
@@ -92,10 +92,10 @@ class BitcoinNode(Node):
         exit(-1)
 
     def grep_log_for_errors(self):
-        return bash.check_output(dockercmd.exec_cmd(self.name, config.log_error_grep.format(BitcoinNode.log_file)))
+        return bash.check_output(config.log_error_grep.format(config.client_dir_on_host(self) + BitcoinNode.log_file))
 
     def cat_log_cmd(self):
-        return dockercmd.exec_cmd(self.name, 'cat {}'.format(BitcoinNode.log_file))
+        return bash.check_output_without_log('cat ' + config.client_dir_on_host(self) + BitcoinNode.log_file)
 
     def transfer_coinbases_to_normal_tx(self):
         for tx_chain in self.tx_chains:
@@ -201,10 +201,10 @@ class ProxyNode(Node, PublicNode):
             logging.debug('Waiting for  blocks to spread...')
 
     def cat_log_cmd(self):
-        return dockercmd.exec_cmd(self.name, 'cat {}'.format(ProxyNode.log_file))
+        raise NotImplemented('Attach proxy dir to host and then cat log.')
 
     def grep_log_for_errors(self):
-        return bash.check_output(dockercmd.exec_cmd(self.name, config.log_error_grep.format(ProxyNode.log_file)))
+        raise NotImplemented('Attach proxy dir to host and then grep for errors.')
 
     def add_latency(self, zones):
         for cmd in tccmd.create(self.name, zones, self.latency):

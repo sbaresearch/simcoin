@@ -10,23 +10,24 @@ from textwrap import dedent
 
 class TestPostProcessing(TestCase):
     def setUp(self):
-        self.runners = MagicMock()
-        self.postprocessing = PostProcessing(self.runners)
+        self.context = MagicMock()
+        self.postprocessing = PostProcessing(self.context)
 
     @patch('builtins.open', new_callable=mock_open)
     @patch('bash.check_output_without_log')
     @patch('postprocessing.prefix_log')
     def test_aggregate_logs(self, m_prefix, m_bash, m_open):
         node_0 = MagicMock()
+        self.context.all_nodes = {'node-0': node_0}
         m_prefix.return_value = ['1', '2']
 
-        postprocessing.aggregate_logs([node_0])
+        self.postprocessing.aggregate_logs()
 
         self.assertEqual(m_open.call_args[0][0], config.aggregated_log)
         handle = m_open()
         self.assertEqual(handle.write.call_args[0][0], '1\n2\n')
 
-        self.assertEqual(m_bash.call_count, 3)
+        self.assertEqual(m_bash.call_count, 2)
 
     @patch('builtins.open', new_callable=mock_open)
     @patch('bash.check_output_without_log')
@@ -35,8 +36,9 @@ class TestPostProcessing(TestCase):
         node_0 = MagicMock()
         node_1 = MagicMock()
         m_prefix.side_effect = [['1', '2'], ['11', '22']]
+        self.context.all_nodes = {'node-0': node_0, 'node-1': node_1}
 
-        postprocessing.aggregate_logs([node_0, node_1])
+        self.postprocessing.aggregate_logs()
 
         handle = m_open()
         contents = [line[0][0] for line in handle.write.call_args_list]
@@ -44,7 +46,7 @@ class TestPostProcessing(TestCase):
         self.assertTrue('1\n2\n' in contents)
         self.assertTrue('11\n22\n' in contents)
 
-        self.assertEqual(m_bash.call_count, 4)
+        self.assertEqual(m_bash.call_count, 2)
 
     def test_prefix_log_no_changes(self):
         lines = ['2017-07-05 14:33:35.324000 test', '2017-07-05 14:33:35.324000 test']

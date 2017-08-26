@@ -3,6 +3,7 @@ import config
 import logging
 import bash
 import utils
+from clistats import CliStats
 
 
 class Runner:
@@ -24,12 +25,8 @@ class Runner:
             utils.sleep(1)
             logging.info(config.log_line_sim_end)
 
-            self.post_processing.execute()
-
-            for node in self.context.all_nodes.values():
-                node.grep_log_for_errors()
-
-            bash.check_output(dockercmd.fix_data_dirs_permissions())
+            cli_stats = CliStats(self.context)
+            cli_stats.execute()
 
             # remove proxies first. if not proxies could be already stopped when trying to remove
             for node in self.context.selfish_node_proxies.values():
@@ -37,5 +34,15 @@ class Runner:
             for node in self.context.all_bitcoin_nodes.values():
                 node.rm_silent()
             utils.sleep(3 + len(self.context.all_nodes) * 0.2)
+            logging.info('Removed all docker containers')
 
             bash.call_silent(dockercmd.rm_network())
+            logging.info('Deleted docker network')
+
+            bash.check_output(dockercmd.fix_data_dirs_permissions())
+            logging.info('Fixed data permission of container folders')
+
+            for node in self.context.all_nodes.values():
+                node.grep_log_for_errors()
+
+            self.post_processing.execute()
