@@ -21,7 +21,8 @@ demo1:
 			run \
 				--node-group-a bitcoin 3 1 0 simcoin/normal:v3\
 				--amount-of-ticks 1 \
-				--tx-per-tick 90
+				--tx-per-tick 90 \
+				--verbose
 
 demo2:
 	cd code; \
@@ -29,7 +30,8 @@ demo2:
 			run \
 				--node-group-a bitcoin 50 1 0 simcoin/normal:v3\
 				--amount-of-ticks 100 \
-				--tx-per-tick 9
+				--tx-per-tick 9 \
+				--verbose
 
 demo3:
 	cd code; \
@@ -37,7 +39,8 @@ demo3:
 			run \
 				--node-group-a bitcoin 2 1 0 simcoin/normal:v3\
 				--amount-of-ticks 100 \
-				--tx-per-tick 1
+				--tx-per-tick 1 \
+				--verbose
 
 demo4:
 	cd code; \
@@ -46,7 +49,8 @@ demo4:
 				--node-group-a bitcoin 3 1 0 simcoin/patched:v1\
 				--amount-of-ticks 10 \
 				--tx-per-tick 2 \
-				--blocks-per-tick 0.7
+				--blocks-per-tick 0.7 \
+				--verbose
 
 # maxes out notebook
 
