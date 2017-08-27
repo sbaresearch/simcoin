@@ -17,3 +17,7 @@ rsync --dry-run --delete -r --verbose -e="ssh -p 2222" --filter=':- .gitignore' 
 
 // ssh command with port forwarding of cockpit
 ssh -p 2222 -L 9099:localhost:9090 simon@128.130.204.35
+
+// google perfomance tool
+https://wiki.geany.org/howtos/profiling/gperftools
+google-pprof ../patched_bitcoin_client_cpp/src/bitcoind ~/Desktop/bitcoin-1.prof
