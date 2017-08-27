@@ -52,7 +52,7 @@ demo4:
 				--blocks-per-tick 0.7 \
 				--verbose
 
-# maxes out notebook
+# maxes out notebook and server
 
 demo5:
 	cd code; \
