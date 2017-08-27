@@ -12,6 +12,7 @@ args = {
     'listenonion':        '-listenonion=0',  # disable tor
     'onlynet':            '-onlynet=ipv4',  # disable ipv6
     'reindex':            '-reindex',
+    'checkmempool':       '-checkmempool=0',
 }
 
 
