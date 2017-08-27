@@ -13,7 +13,7 @@ tc qdisc add dev eth0 parent 1:2 handle 20: netem delay 1000ms
 array=(0.5 1); for i in "${array[@]}"; do python3 main.py --tick-duration $i; done
 
 // rsync command to sync files on server
-rsync --dry-run --delete -r --verbose -e "ssh -p 2222" --filter=':- .gitignore' --exclude '.git*' ./ simon@128.130.204.35:simcoin
+rsync --dry-run --delete -r --verbose -e="ssh -p 2222" --filter=':- .gitignore' --exclude=data --exclude='.git*' ./ simon@128.130.204.35:simcoin
 
 // ssh command with port forwarding of cockpit
 ssh -p 2222 -L 9099:localhost:9090 simon@128.130.204.35
