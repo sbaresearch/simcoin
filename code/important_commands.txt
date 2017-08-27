@@ -1,11 +1,13 @@
+// docker command to test delay between to containers
 docker run -it --cap-add=NET_ADMIN ubuntu /bin/bash
 apt-get update; apt-get -y install iputils-ping; apt-get -y install net-tools; apt-get -y install iproute
 
+// tc command to simulate network delay
 tc qdisc del dev eth0 root
 tc qdisc add dev eth0 root handle 1: prio bands 2 priomap 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
 tc filter add dev eth0 protocol ip parent 1: prio 1 u32 match ip dport 240.0.0.2  flowid 1:2
 tc qdisc add dev eth0 parent 1:1 handle 10: netem delay 0ms
 tc qdisc add dev eth0 parent 1:2 handle 20: netem delay 1000ms
 
-
+// bash command to run simulation multiple times
 array=(0.5 1); for i in "${array[@]}"; do python3 main.py --tick-duration $i; done
