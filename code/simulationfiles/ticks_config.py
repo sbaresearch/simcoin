@@ -108,7 +108,6 @@ def create_ticks(nodes, block_events, txs_per_tick, amount_of_ticks):
                 block_events[node].pop(0)
                 pop_count += 1
             if pop_count > 1:
-                raise Exception("Intervals per block is too low. Only one block per node per tick is allowed. "
-                                "Raise the ticks_per_block or try a different seeed. ")
-
+                raise Exception('A tick contains multiple block events for one node. '
+                                'Please change your input arguments')
     return ticks
