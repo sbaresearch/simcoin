@@ -56,7 +56,7 @@ class PostProcessing:
 
     def remove_nodes_and_network(self):
         for node in self.context.all_nodes.values():
-            node.rm_silent()
+            node.rm()
         utils.sleep(3 + len(self.context.all_nodes) * 0.2)
         bash.check_output(dockercmd.rm_network())
 

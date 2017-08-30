@@ -28,9 +28,6 @@ class Node:
     def rm(self):
         return bash.check_output(dockercmd.rm_container(self.name))
 
-    def rm_silent(self):
-        return bash.call_silent(dockercmd.rm_container(self.name))
-
 
 class PublicNode:
     def __init__(self, latency):
