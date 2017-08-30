@@ -5,11 +5,15 @@ from cmd import dockercmd
 import os
 import utils
 import math
+from multiprocessing.dummy import Pool as ThreadPool
+import itertools
+from bitcoinrpc.authproxy import HTTP_TIMEOUT
 
 
 class Prepare:
     def __init__(self, context):
         self.context = context
+        self.pool = ThreadPool(10)
 
     def execute(self):
         logging.info('Begin of prepare step')
@@ -29,12 +33,7 @@ class Prepare:
     def give_nodes_spendable_coins(self):
         nodes = list(self.context.all_bitcoin_nodes.values())
 
-        for node in nodes:
-            node.run()
-            node.connect_to_rpc()
-
-        for node in nodes:
-            node.wait_until_rpc_ready()
+        self.pool.map(start_node, nodes)
 
         amount_of_tx_chains = calc_number_of_tx_chains(
             self.context.args.txs_per_tick,
@@ -54,14 +53,9 @@ class Prepare:
         nodes[0].execute_rpc('generate', config.blocks_needed_to_make_coinbase_spendable)
         current_height = config.blocks_needed_to_make_coinbase_spendable + amount_of_tx_chains * len(nodes)
 
-        for node in nodes:
-            wait_until_height_reached(node, current_height)
+        self.pool.starmap(wait_until_height_reached, zip(nodes, itertools.repeat(current_height)))
 
-        for node in nodes:
-            node.set_spent_to_address()
-            node.create_tx_chains()
-            node.transfer_coinbases_to_normal_tx()
-            logging.info("Transferred all coinbase-tx to normal tx for node={}".format(node.name))
+        self.pool.map(transfer_coinbase_tx_to_normal_tx, nodes)
 
         for i, node in enumerate(nodes):
             wait_until_height_reached(node, current_height + i)
@@ -69,41 +63,68 @@ class Prepare:
 
         current_height += len(nodes)
         self.context.first_block_height = current_height
-        for node in nodes:
-            wait_until_height_reached(node, current_height)
-        delete_nodes(nodes)
+
+        self.pool.starmap(wait_until_height_reached, zip(nodes, itertools.repeat(current_height)))
+
+        self.pool.map(delete_node, nodes)
 
     def start_nodes(self):
         nodes = self.context.all_bitcoin_nodes.values()
-        for node in nodes:
-            node.run()
-            node.connect_to_rpc(timeout=0.25)
 
-        for node in nodes:
-            node.wait_until_rpc_ready()
-            wait_until_height_reached(node, self.context.first_block_height)
+        self.pool.starmap(start_node, zip(
+            nodes,
+            itertools.repeat(config.rpc_simulation_timeout),
+            itertools.repeat(self.context.first_block_height)
+        ))
 
         start_hash = self.context.one_normal_node.execute_rpc('getbestblockhash')
-        for node in self.context.selfish_node_proxies.values():
-            node.run(start_hash)
+        self.pool.starmap(start_proxy_node, zip(
+            self.context.selfish_node_proxies.values(),
+            itertools.repeat(start_hash),
+            itertools.repeat(self.context.one_normal_node)
+        ))
 
-        for node in self.context.selfish_node_proxies.values():
-            node.wait_for_highest_tip_of_node(self.context.one_normal_node)
+        self.pool.map(connect, self.context.nodes.values())
 
-        for node in self.context.nodes.values():
-            node.connect()
-
-        for node in self.context.all_public_nodes.values():
-            node.add_latency(self.context.zone.zones)
+        self.pool.starmap(add_latency, zip(
+            self.context.all_public_nodes.values(),
+            itertools.repeat(self.context.zone.zones)
+        ))
 
         logging.info('All nodes for the simulation are started')
         utils.sleep(3 + len(self.context.all_nodes) * 0.2)
 
 
-def delete_nodes(nodes):
-    for node in nodes:
-        node.delete_peers_file()
-        node.rm()
+def start_node(node, timeout=HTTP_TIMEOUT, height=0):
+    node.run()
+    node.connect_to_rpc(timeout)
+    node.wait_until_rpc_ready()
+    wait_until_height_reached(node, height)
+
+
+def start_proxy_node(node, start_hash, normal_node):
+    node.run(start_hash)
+    node.wait_for_highest_tip_of_node(normal_node)
+
+
+def transfer_coinbase_tx_to_normal_tx(node):
+    node.set_spent_to_address()
+    node.create_tx_chains()
+    node.transfer_coinbases_to_normal_tx()
+    logging.info("Transferred all coinbase-tx to normal tx for node={}".format(node.name))
+
+
+def connect(node):
+    node.connect()
+
+
+def add_latency(node, zones):
+    node.add_latency(zones)
+
+
+def delete_node(node):
+    node.delete_peers_file()
+    node.rm()
 
 
 def prepare_simulation_dir():

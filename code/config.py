@@ -46,6 +46,7 @@ log_errors_txt = data_dir + sim_dir + 'log_errors.txt'
 rpc_user = 'admin'
 rpc_password = 'admin'
 rpc_port = 18332
+rpc_simulation_timeout = 0.25
 
 
 def create_rpc_connection_string(ip):
