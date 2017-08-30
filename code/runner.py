@@ -20,5 +20,5 @@ class Runner:
 
                 self.post_processing.execute()
         except Exception as exce:
-            self.post_processing.rm_nodes_and_network()
+            self.post_processing.clean_up_docker()
             logging.error('Simulation could not be started because of exception={}'.format(exce))

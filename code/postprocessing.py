@@ -19,9 +19,7 @@ class PostProcessing:
         cli_stats = CliStats(self.context)
         cli_stats.execute()
 
-        self.rm_nodes_and_network()
-        bash.check_output(dockercmd.fix_data_dirs_permissions())
-        logging.info('Removed all nodes, deleted network and fix permissions of dirs')
+        self.clean_up_docker()
 
         self.grep_log_for_errors()
 
@@ -55,14 +53,19 @@ class PostProcessing:
 
         bash.check_output('sort {} -o {}'.format(config.aggregated_log, config.aggregated_log))
 
-    def rm_nodes_and_network(self):
+    def clean_up_docker(self):
         pool = ThreadPool(10)
         pool.map(rm_node, self.context.all_nodes.values())
         pool.close()
+        logging.info('Removed all nodes')
 
         utils.sleep(3 + len(self.context.all_nodes) * 0.2)
 
         bash.check_output(dockercmd.rm_network())
+        logging.info('Deleted docker network')
+
+        bash.check_output(dockercmd.fix_data_dirs_permissions())
+        logging.info('Fixed permissions of dirs used by docker')
 
     def grep_log_for_errors(self):
         with open(config.log_errors_txt, 'a') as file:
