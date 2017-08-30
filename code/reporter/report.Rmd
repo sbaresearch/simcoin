@@ -13,6 +13,8 @@ opts_chunk$set(fig.width=12, fig.height=4, fig.path='RmdFigs/',
                warning=FALSE, message=FALSE)
 
 # set working directory for development: knitr::opts_knit$set(root.dir = '/tmp/run')
+
+knitr::opts_chunk$set(error = TRUE)
 ```
 
 ### Data import
@@ -46,11 +48,11 @@ kable(args_transposed, col.names = c('value'))
 ## Ticks
 During this simulation `r if(nrow(tick_infos) == args['amount_of_ticks']) {'all'} else {'only'}` `r nrow(tick_infos)` of `r args['amount_of_ticks']` ticks were executed.
 
-```{r ticks, error=TRUE}
+```{r ticks}
 tick_infos$rel_timestamp <- tick_infos$start - sim_start
 ```
 
-```{r ticks_stats, error=TRUE>0}
+```{r ticks_stats}
 ticks_stats <- data.frame(c('Mean tick duration [s]', 'Median tick duration [s]', 'Std tick duration [s]', 'Min tick duration [s]', 'Max tick duration [s]'))
 ticks_stats$values <- c(
   round(mean(tick_infos$duration), 3),
@@ -64,7 +66,7 @@ kable(ticks_stats,  align = c('l'), col.names = c('', 'value'))
 ```
 
 ### Tick duration over time
-```{r tick_duration_median, error=TRUE>0}
+```{r tick_duration_median}
 tick_duration_median <- tapply(tick_infos$duration, cut(tick_infos$rel_timestamp, pretty(tick_infos$rel_timestamp)), median)
 plot(tick_duration_median, xlab = 'Time [s]', ylab='Duration of tick [s]', xaxt='n')
 axis(1, at=1:nrow(tick_duration_median), labels=names(tick_duration_median))
@@ -74,7 +76,7 @@ lines(tick_duration_median)
 ##  Blocks
 In this simulation `r nrow(blocks)` blocks were created by `r length(unique(blocks$node))` different nodes.
 
-```{r blocks, error=TRUE}
+```{r blocks}
 blocks$total_size_kb         <- blocks$total_size/1000
 blocks$median_propagation_ms <- blocks$median_propagation * 1000
 blocks$std_propagation_ms    <- blocks$std_propagation * 1000
@@ -82,7 +84,7 @@ blocks$rel_timestamp         <- blocks$timestamp - sim_start
 ```
 
 ### Distribution of blocks over nodes
-```{r blocks_distribution, error=TRUE, fig.height=6}
+```{r blocks_distribution, fig.height=6}
 blocks_per_node <- table(blocks$node)
 percentage <- round(blocks_per_node/sum(blocks_per_node)*100)
 labels <- paste(names(blocks_per_node), ' blocks: ', blocks_per_node, ', ', percentage, '%', sep='')
@@ -90,12 +92,12 @@ pie(blocks_per_node, labels)
 ```
 
 ### Creation time of blocks
-```{r blocks_creation_time, error=TRUE}
+```{r blocks_creation_time}
 hist(blocks$rel_timestamp, xlab = 'Time [s]')
 ```
 
 ### Stale blocks
-```{r stale, error=TRUE, fig.height=6}
+```{r stale, fig.height=6}
 stale_blocks <- table(blocks$stale)
 percentage <- round(stale_blocks/sum(stale_blocks)*100)
 labels <- paste(names(stale_blocks), ' blocks: ', stale_blocks, ', ', percentage, '%', sep='')
@@ -103,7 +105,7 @@ pie(stale_blocks, labels)
 ```
 
 ### Size of blocks
-```{r block_size_stats, error=TRUE}
+```{r block_size_stats}
 block_size_stats <- data.frame(c('Mean block size [kB]', 'Median block size [kB]', 'Std block size [kB]', 'Min block size [kB]', 'Max block size [kB]'))
 block_size_stats$values <- c(
   round(mean(blocks$total_size_kb), 3),
@@ -116,12 +118,12 @@ block_size_stats$values <- c(
 kable(block_size_stats,  align = c('l'), col.names = c('', 'value'))
 ```
 
-```{r size, error=TRUE}
+```{r size}
 hist(blocks$total_size_kb, xlab = 'Size [kb]')
 ```
 
 ### Block received by other nodes
-```{r blocks_received_stats, error=TRUE}
+```{r blocks_received_stats}
 blocks_received_stats <- data.frame(c('Mean of block received', 'Median of block received', 'Std of block received', 'Min of blocks received', 'Max of blocks received'))
 blocks_received_stats$values <- c(
   round(mean(blocks$received_by), 3),
@@ -134,14 +136,14 @@ blocks_received_stats$values <- c(
 kable(blocks_received_stats,  align = c('l'), col.names = c('', 'value'))
 ```
 
-```{r blocks_received, error=TRUE}
+```{r blocks_received}
 hist(blocks$received_by, xlab = 'Nodes')
 ```
 
 ### Propagation time of blocks
 `r if(!is.na(table(blocks$received_by)['0'])) {paste('*The', table(blocks$received_by)['0'], 'blocks which were never received by another node are not included in this section*', sep=' ')}`
 
-```{r block_propagation_stats, error=TRUE}
+```{r block_propagation_stats}
 block_propagation_stats <- data.frame(c('Mean block propagation [ms]', 'Median block propagation [ms]', 'Std block propagation [ms]', 'Min block propagation [ms]', 'Max block propagation [ms]'))
 block_propagation_stats$values <- c(
   round(mean(blocks$median_propagation_ms, na.rm = TRUE), 3),
@@ -154,12 +156,12 @@ block_propagation_stats$values <- c(
 kable(block_propagation_stats,  align = c('l'), col.names = c('', 'value'))
 ```
 
-```{r blocks_propagation, error=TRUE}
+```{r blocks_propagation}
 hist(blocks$median_propagation, xlab = 'Median propagation time [ms]')
 ```
 
 ### Standard deviation time of propagation time of blocks
-```{r block_std_propagation_stats, error=TRUE}
+```{r block_std_propagation_stats}
 block_std_propagation_stats <- data.frame(c('Mean of std block propagation [ms]', 'Median of std block propagation [ms]', 'Std of std block propagation [ms]', 'Min of std block propagation [ms]', 'Max of std block propagation [ms]'))
 block_std_propagation_stats$values <- c(
   round(mean(blocks$std_propagation_ms, na.rm = TRUE), 3),
@@ -172,19 +174,19 @@ block_std_propagation_stats$values <- c(
 kable(block_std_propagation_stats,  align = c('l'), col.names = c('', 'value'))
 ```
 
-```{r blocks_std_propagation, error=TRUE}
+```{r blocks_std_propagation}
 hist(blocks$std_propagation, xlab = 'Sandard deviation time [ms]')
 ```
 
 ## Transactions
 There were `r nrow(txs)` transaction created in this simulation. `r table(txs$accepted_by)['0']` of `r nrow(txs)` never reached another node.
 
-```{r txs, error=TRUE}
+```{r txs}
 txs$rel_timestamp <- txs$timestamp - sim_start
 ```
 
 ### Distribution
-```{r txs_distribution, error=TRUE, fig.height=6}
+```{r txs_distribution, fig.height=6}
 txs_per_node <- table(txs$node)
 percentage <- round(txs_per_node/sum(txs_per_node)*100)
 labels <- paste(names(txs_per_node), ' blocks: ', txs_per_node, ', ', percentage, '%', sep='')
@@ -192,12 +194,12 @@ pie(txs_per_node, labels)
 ```
 
 ### Creation time
-```{r txs_creation_time, error=TRUE}
+```{r txs_creation_time}
 hist(txs$rel_timestamp, xlab = 'Time [s]')
 ```
 
 ### Transaction acception rate
-```{r txs_accepted_by_stats, error=TRUE}
+```{r txs_accepted_by_stats}
 txs_accepted_by_stats <- data.frame(c('Mean txs acception rate', 'Median txs acception rate', 'Std txs acception rate', 'Min txs acception rate', 'Max txs acception rate'))
 txs_accepted_by_stats$values <- c(
   round(mean(txs$accepted_by), 3),
@@ -210,14 +212,14 @@ txs_accepted_by_stats$values <- c(
 kable(txs_accepted_by_stats,  align = c('l'), col.names = c('', 'value'))
 ```
 
-```{r txs_accepted_by, error=TRUE}
+```{r txs_accepted_by}
 hist(txs$accepted_by, xlab = 'Nodes')
 ```
 
 ### Transaction acception time
 `r if(!is.na(table(txs$accepted_by)['0'])) {paste('*The', table(txs$accepted_by)['0'], 'transaction which never reached another node are not included in this section*', sep=' ')}`
 
-```{r txs_median_propagation_stats, error=TRUE}
+```{r txs_median_propagation_stats}
 txs_median_propagation <- data.frame(c('Mean of median txs acception time [s]', 'Median of median txs acception time [s]', 'Std of median txs acception time [s]', 'Min of median txs acception time [s]', 'Max of median txs acception time [s]'))
 txs_median_propagation$values <- c(
   round(mean(txs$median_propagation, na.rm = TRUE), 3),
@@ -230,11 +232,11 @@ txs_median_propagation$values <- c(
 kable(txs_median_propagation,  align = c('l'), col.names = c('', 'value'))
 ```
 
-```{r txs_median_propagation, error=TRUE}
+```{r txs_median_propagation}
 hist(txs$median_propagation, xlab = 'Time [s]')
 ```
 
-```{r txs_std_propagation_stats, error=TRUE}
+```{r txs_std_propagation_stats}
 txs_std_propagation <- data.frame(c('Mean of std txs acception time [s]', 'Median of std txs acception time [s]', 'Std of std txs acception time [s]', 'Min of std txs acception time [s]', 'Max of std txs acception time [s]'))
 txs_std_propagation$values <- c(
   round(mean(txs$std_propagation, na.rm = TRUE), 3),
@@ -247,12 +249,12 @@ txs_std_propagation$values <- c(
 kable(txs_std_propagation,  align = c('l'), col.names = c('', 'value'))
 ```
 
-```{r txs_std_propagation, error=TRUE}
+```{r txs_std_propagation}
 hist(txs$std_propagation, xlab = 'Time [s]')
 ```
 
 ### Transactions per block
-```{r txs_per_block_stats, error=TRUE}
+```{r txs_per_block_stats}
 txs_per_block_stats <- data.frame(c('Mean transactions per block', 'Median transactions per block', 'Std transactions per block', 'Min transactions per block', 'Max transactions per block'))
 txs_per_block_stats$values <- c(
   round(mean(blocks$txs), 3),
@@ -265,14 +267,14 @@ txs_per_block_stats$values <- c(
 kable(txs_per_block_stats,  align = c('l'), col.names = c('', 'value'))
 ```
 
-```{r txs_per_block, error=TRUE}
+```{r txs_per_block}
 hist(blocks$txs, xlab = 'Transactions')
 ```
 
 ## Mempool snapshots
 There were `r nrow(mempool)` mempool snapshots parsed from log file.
 
-```{r mempool_stats, error=TRUE}
+```{r mempool_stats}
 mempool_stats <- data.frame(c('Mean transactions in mempool', 'Median transactions in mempool', 'Std transactions in mempool', 'Min transactions in mempool', 'Max transactions in mempool'))
 mempool_stats$values <- c(
   round(mean(mempool$txs), 3),
@@ -285,12 +287,12 @@ mempool_stats$values <- c(
 kable(mempool_stats,  align = c('l'), col.names = c('', 'value'))
 ```
 
-```{r mempool_txs, error=TRUE}
+```{r mempool_txs}
 hist(mempool$txs, xlab = 'Transactions')
 ```
 
 ### Transactions in mempool over time
-```{r txs_mempool_over_time, error=TRUE}
+```{r txs_mempool_over_time}
 mempool$rel_timestamp <- mempool$timestamp - sim_start
 txs_in_mempool = tapply(mempool$txs, cut(mempool$rel_timestamp, pretty(mempool$rel_timestamp)), median)
 plot(txs_in_mempool, xlab = 'Time [s]', ylab='Transactions', xaxt='n')
@@ -345,16 +347,16 @@ kable(valid_headers)
 ## Block exceptions
 There were `r nrow(block_exces)` exceptions catched during the execution of the RPC-call to create a block.
 
-```{r block_exces, error=TRUE}
+```{r block_exces}
 block_exces$rel_timestamp <- block_exces$timestamp - sim_start
 ```
 
-```{r block_exces_hist, error=TRUE}
+```{r block_exces_hist}
 hist(block_exces$rel_timestamp, xlab = 'Time [s]')
 ```
 
 ### Distribution
-```{r block_exces_node_distribution, error=TRUE, fig.height=6}
+```{r block_exces_node_distribution, fig.height=6}
 exces_per_node <- table(block_exces$node)
 percentage     <- round(exces_per_node/sum(exces_per_node)*100)
 labels         <- paste(names(exces_per_node), ': ', exces_per_node, ', ', percentage, '%', sep='')
@@ -362,7 +364,7 @@ pie(exces_per_node, labels)
 ```
 
 ### Exception error message
-```{r block_exces_distribution, error=TRUE, fig.height=6}
+```{r block_exces_distribution, fig.height=6}
 exces_per_node <- table(block_exces$exception)
 percentage     <- round(exces_per_node/sum(exces_per_node)*100)
 labels         <- paste(names(exces_per_node), ': ', exces_per_node, ', ', percentage, '%', sep='')
@@ -372,13 +374,13 @@ pie(exces_per_node, labels)
 ## Transaction exceptions
 There were `r nrow(tx_exces)` exceptions catched during the execution of the RPC-call to send a transaction.
 
-```{r tx_exces, error=TRUE}
+```{r tx_exces}
 tx_exces$rel_timestamp <- tx_exces$timestamp - sim_start
 hist(tx_exces$rel_timestamp, xlab = 'Time [s]')
 ```
 
 ### Distribution
-```{r tx_exces_node_distribution, error=TRUE, fig.height=6}
+```{r tx_exces_node_distribution, fig.height=6}
 exces_per_node <- table(tx_exces$node)
 percentage     <- round(exces_per_node/sum(exces_per_node)*100)
 labels         <- paste(names(exces_per_node), ': ', exces_per_node, ', ', percentage, '%', sep='')
@@ -386,7 +388,7 @@ pie(exces_per_node, labels)
 ```
 
 ### Exception error message
-```{r tx_exces_distribution, error=TRUE, fig.height=6}
+```{r tx_exces_distribution, fig.height=6}
 exces_per_node <- table(tx_exces$exception)
 percentage     <- round(exces_per_node/sum(exces_per_node)*100)
 labels         <- paste(names(exces_per_node), ': ', exces_per_node, ', ', percentage, '%', sep='')
@@ -396,13 +398,13 @@ pie(exces_per_node, labels)
 ## RPC exceptions
 There were `r nrow(rpc_exces)` exceptions catched during a RPC-call.
 
-```{r rpc_exces, error=TRUE}
+```{r rpc_exces}
 rpc_exces$rel_timestamp <- rpc_exces$timestamp - sim_start
 hist(rpc_exces$rel_timestamp, xlab = 'Time [s]')
 ```
 
 ### Distribution
-```{r rpc_exces_node_distribution, error=TRUE, fig.height=6}
+```{r rpc_exces_node_distribution, fig.height=6}
 exces_per_node <- table(rpc_exces$node)
 percentage     <- round(exces_per_node/sum(exces_per_node)*100)
 labels         <- paste(names(exces_per_node), ': ', exces_per_node, ', ', percentage, '%', sep='')
@@ -410,7 +412,7 @@ pie(exces_per_node, labels)
 ```
 
 ### Exception error message
-```{r rpc_exces_distribution, error=TRUE, fig.height=6}
+```{r rpc_exces_distribution, fig.height=6}
 exces_per_node <- table(rpc_exces$exception)
 percentage     <- round(exces_per_node/sum(exces_per_node)*100)
 labels         <- paste(names(exces_per_node), ': ', exces_per_node, ', ', percentage, '%', sep='')
