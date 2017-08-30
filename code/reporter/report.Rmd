@@ -15,9 +15,9 @@ opts_chunk$set(fig.width=12, fig.height=4, fig.path='RmdFigs/',
 # set working directory for development: knitr::opts_knit$set(root.dir = '/tmp/run')
 
 knitr::opts_chunk$set(error = TRUE)
+knitr::opts_chunk$set(echo = FALSE)
 ```
 
-### Data import
 ```{r setup}
 tick_infos    <- read.csv2("tick_infos.csv", dec=".")
 
@@ -40,7 +40,7 @@ sim_start     <- tick_infos$start[1]
 
 
 ## Start arguments
-```{r read_start_arguments, echo=FALSE}
+```{r read_start_arguments}
 args_transposed <- as.data.frame(t(args))
 kable(args_transposed, col.names = c('value'))
 ```
