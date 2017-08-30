@@ -8,6 +8,7 @@ from analyze import Analyzer
 from cmd import rcmd
 from cmd import dockercmd
 import utils
+from multiprocessing.dummy import Pool as ThreadPool
 
 
 class PostProcessing:
@@ -18,7 +19,7 @@ class PostProcessing:
         cli_stats = CliStats(self.context)
         cli_stats.execute()
 
-        self.remove_nodes_and_network()
+        self.rm_nodes_and_network()
         bash.check_output(dockercmd.fix_data_dirs_permissions())
         logging.info('Removed all nodes, deleted network and fix permissions of dirs')
 
@@ -54,10 +55,13 @@ class PostProcessing:
 
         bash.check_output('sort {} -o {}'.format(config.aggregated_log, config.aggregated_log))
 
-    def remove_nodes_and_network(self):
-        for node in self.context.all_nodes.values():
-            node.rm()
+    def rm_nodes_and_network(self):
+        pool = ThreadPool(10)
+        pool.map(rm_node, self.context.all_nodes.values())
+        pool.close()
+
         utils.sleep(3 + len(self.context.all_nodes) * 0.2)
+
         bash.check_output(dockercmd.rm_network())
 
     def grep_log_for_errors(self):
@@ -70,6 +74,10 @@ class PostProcessing:
             lines = bash.check_output_without_log(config.log_error_grep.format(config.log_file))
             file.write('{}\n\n\n'.format(lines))
         logging.info('Grepped all logs for errors and saved matched lines to {}'.format(config.log_errors_txt))
+
+
+def rm_node(node):
+    node.rm()
 
 
 def prefix_log(lines, node_name):
