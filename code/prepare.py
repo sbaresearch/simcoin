@@ -68,7 +68,7 @@ class Prepare:
 
         self.pool.starmap(wait_until_height_reached, zip(nodes, itertools.repeat(current_height)))
 
-        self.pool.map(delete_node, nodes)
+        self.pool.map(rm_node, nodes)
 
     def start_nodes(self):
         nodes = self.context.all_bitcoin_nodes.values()
@@ -124,7 +124,7 @@ def add_latency(node, zones):
     node.add_latency(zones)
 
 
-def delete_node(node):
+def rm_node(node):
     node.delete_peers_file()
     node.rm()
 
