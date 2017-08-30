@@ -3,8 +3,6 @@ import logging
 import time
 import utils
 from bitcoinrpc.authproxy import JSONRPCException
-from datetime import datetime
-from collections import namedtuple
 
 
 class Event:
