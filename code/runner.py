@@ -12,11 +12,13 @@ class Runner:
     def run(self):
         try:
             self.prepare.execute()
-
             logging.info(config.log_line_sim_start)
-            self.event.execute()
+            try:
+                self.event.execute()
+            finally:
+                logging.info(config.log_line_sim_end)
 
-        finally:
-            logging.info(config.log_line_sim_end)
-
-            self.post_processing.execute()
+                self.post_processing.execute()
+        except Exception as exce:
+            self.post_processing.rm_nodes_and_network()
+            logging.error('Simulation could not be started because of exception={}'.format(exce))
