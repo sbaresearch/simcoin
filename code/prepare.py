@@ -28,6 +28,8 @@ class Prepare:
 
         self.start_nodes()
 
+        self.pool.close()
+
         logging.info('End of prepare step')
 
     def give_nodes_spendable_coins(self):
