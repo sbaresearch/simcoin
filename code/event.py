@@ -33,11 +33,11 @@ class Event:
                         logging.info('Sleep {} seconds for next tick'.format(difference))
                         utils.sleep(difference)
                     else:
-                        logging.error('Current_time={} is higher then next_tick={} by {}s.'
+                        logging.error('Events took {}s to execute.'
                                       ' Consider to raise the tick_duration which is currently {}s.'
-                                      .format(current_time, next_tick, current_time - next_tick,
+                                      .format(current_time - next_tick,
                                               self.context.args.tick_duration))
-                        raise Exception()
+                        raise SimulationException('Events took to long to execute')
         except Exception as exce:
             logging.error('Simulation could not execute all events because of exception={}'.format(exce))
 
@@ -60,4 +60,8 @@ class Event:
         elif len(cmd) == 0:
             pass
         else:
-            raise Exception('Unknown cmd={} in {}-file'.format(cmd_parts[0], config.ticks_csv))
+            raise SimulationException('Unknown cmd={} in {}-file'.format(cmd_parts[0], config.ticks_csv))
+
+
+class SimulationException(Exception):
+    pass

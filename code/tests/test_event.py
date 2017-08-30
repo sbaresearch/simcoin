@@ -54,7 +54,8 @@ class TestEvent(TestCase):
 
     @patch('time.time')
     @patch('utils.check_for_file', lambda file: None)
-    def test_execute(self, m_time):
+    @patch('logging.error')
+    def test_execute(self, m_error, m_time):
         data = dedent("""
             cmd1;cmd2;cmd3
         """).strip()
@@ -67,12 +68,12 @@ class TestEvent(TestCase):
 
             m_time.side_effect = [0, 1, 10]
 
-            with self.assertRaises(SystemExit) as context:
-                e.execute()
-            self.assertEqual(context.exception.code, -1)
+            e.execute()
+            self.assertRegex(m_error.call_args[0][0], '.*Events took to long to execute.*')
 
     @patch('utils.check_for_file', lambda file: None)
-    def test_execute_with_exce_execute_cmd(self):
+    @patch('logging.error')
+    def test_execute_with_exce_execute_cmd(self, m_error):
         data = dedent("""
             cmd1
         """).strip()
@@ -84,9 +85,8 @@ class TestEvent(TestCase):
             e.execute_cmd = Mock()
             e.execute_cmd.side_effect = Exception('mock')
 
-            with self.assertRaises(Exception) as context:
-                e.execute()
-            self.assertTrue('mock' in str(context.exception))
+            e.execute()
+            self.assertRegex(m_error.call_args[0][0], 'mock')
 
     def test_execute_cmd_with_block_cmd(self):
         node_1 = Mock()
