@@ -33,7 +33,7 @@ log_errors    <- readChar("log_errors.txt", file.info("log_errors.txt")$size)
 
 
 library('jsonlite')
-args          <- stream_in(file('args.json'))
+args          <- stream_in(file('../args.json'))
 
 sim_start     <- tick_infos$start[1]
 ```

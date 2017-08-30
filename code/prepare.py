@@ -132,6 +132,7 @@ def rm_node(node):
 def prepare_simulation_dir():
     if not os.path.exists(config.sim_dir):
         os.makedirs(config.sim_dir)
+    os.makedirs(config.postprocessing_dir)
 
     if os.path.islink(config.soft_link_to_sim_dir):
         bash.check_output('unlink {}'.format(config.soft_link_to_sim_dir))
