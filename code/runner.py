@@ -12,13 +12,12 @@ class Runner:
     def run(self):
         try:
             self.prepare.execute()
-            logging.info(config.log_line_sim_start)
-            try:
-                self.event.execute()
-            finally:
-                logging.info(config.log_line_sim_end)
 
-                self.post_processing.execute()
+            logging.info(config.log_line_sim_start)
+            self.event.execute()
+            logging.info(config.log_line_sim_end)
+
+            self.post_processing.execute()
         except Exception as exce:
             self.post_processing.clean_up_docker()
-            logging.error('Simulation could not be started because of exception={}'.format(exce))
+            logging.error('Simulation terminated because of exception={}'.format(exce))
