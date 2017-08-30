@@ -51,7 +51,7 @@ class BitcoinNode(Node):
         utils.sleep(0.2)
 
     def rm(self):
-        if dockercmd.check_if_running(self.name) == 'true':
+        if bash.check_output(dockercmd.check_if_running(self.name)) == 'true':
             self.execute_rpc('stop')
             while bash.check_output(dockercmd.check_if_running(self.name)) == 'true':
                 utils.sleep(0.4)
