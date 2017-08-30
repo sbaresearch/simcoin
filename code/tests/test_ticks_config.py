@@ -52,7 +52,7 @@ class TestTicksConfig(TestCase):
 
         with self.assertRaises(Exception) as context:
             ticks_config.create_ticks([node_0], block_events, 0, end)
-        self.assertTrue('Intervals per block is too low.' in str(context.exception))
+        self.assertTrue('multiple block events' in str(context.exception))
 
     def test_create_block_series(self):
         block_events = ticks_config.create_block_series(0.5, 5, 10)

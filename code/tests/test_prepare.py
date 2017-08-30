@@ -18,11 +18,10 @@ class TestPrepare(TestCase):
 
         bitcoin.SelectParams('regtest')
 
-    @patch('prepare.wait_until_height_reached')
+    @patch('prepare.wait_until_height_reached', lambda node, height: None)
     @patch('utils.sleep', lambda time: None)
-    @patch('prepare.delete_nodes', lambda nodes: None)
     @patch('prepare.calc_number_of_tx_chains', lambda txs_per_tick, block_per_tick, amount_of_nodes: 5)
-    def test_warmup_block_generation(self, m_wait_until_height_reached):
+    def test_warmup_block_generation(self):
         node_0 = MagicMock()
         node_1 = MagicMock()
         nodes = [node_0, node_1]
@@ -30,7 +29,6 @@ class TestPrepare(TestCase):
 
         self.prepare.give_nodes_spendable_coins()
 
-        self.assertEqual(m_wait_until_height_reached.call_count, len(nodes) * 4 + 1)
         self.assertEqual(node_0.execute_rpc.call_count, 3)
         self.assertEqual(node_1.execute_rpc.call_count, 3)
 
