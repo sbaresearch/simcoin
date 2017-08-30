@@ -51,10 +51,11 @@ class BitcoinNode(Node):
         utils.sleep(0.2)
 
     def rm(self):
-        self.execute_rpc('stop')
-        while bash.check_output(dockercmd.check_if_running(self.name)) == 'true':
-            utils.sleep(0.4)
-            logging.debug('Wait until container stops')
+        if dockercmd.check_if_running(self.name) == 'true':
+            self.execute_rpc('stop')
+            while bash.check_output(dockercmd.check_if_running(self.name)) == 'true':
+                utils.sleep(0.4)
+                logging.debug('Wait until container stops')
         super(BitcoinNode, self).rm()
 
     def wait_until_rpc_ready(self):
