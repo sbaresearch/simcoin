@@ -3,6 +3,7 @@ import logging
 from utils import Stats
 import csv
 import json
+import time
 
 
 class Analyzer:
@@ -84,7 +85,7 @@ class Analyzer:
             for exce in self.context.rpc_exceptions:
                 w.writerow([exce.timestamp, exce.node, exce.method, exce.exception])
 
-
-def create_general_infos_json(general_infos):
-    with open(config.general_infos_json, 'w') as file:
-        file.write('{}\n'.format(json.dumps(general_infos)))
+    def create_general_infos_json(self):
+        self.context.general_infos['postprocessing_end'] = time.time()
+        with open(config.general_infos_json, 'w') as file:
+            file.write('{}\n'.format(json.dumps(self.context.general_infos)))

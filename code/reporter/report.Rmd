@@ -2,6 +2,8 @@
 
 * install dependecies in R with `install.packages("dependency")`
     * rmarkdown
+    * anytime
+    * dplyr
     * devtools (if installation fails this link may help: [SO - Problems installing the devtools package](https://stackoverflow.com/questions/20923209/problems-installing-the-devtools-package))
     * jsonlite
 * make sure pandoc is installed (e.g. apt install pandoc)
@@ -19,6 +21,13 @@ knitr::opts_chunk$set(echo = FALSE)
 ```
 
 ```{r setup}
+library('jsonlite')
+library('anytime')
+library('dplyr')
+
+# general infos is needed twice to avoid exception in simulation section.
+general_infos <- fromJSON(file('general_infos.json'))
+general_info2 <- fromJSON(file('general_infos.json'))
 tick_infos    <- read.csv2("tick_infos.csv", dec=".")
 
 txs           <- read.csv2("txs.csv", dec=".")
@@ -31,10 +40,7 @@ block_exces   <- read.csv2("block_exceptions.csv", dec=".")
 rpc_exces     <- read.csv2("rpc_exceptions.csv", dec=".")
 log_errors    <- readChar("log_errors.txt", file.info("log_errors.txt")$size)
 
-
-library('jsonlite')
 args          <- stream_in(file('../args.json'))
-
 sim_start     <- tick_infos$start[1]
 ```
 
@@ -45,8 +51,25 @@ args_transposed <- as.data.frame(t(args))
 kable(args_transposed, col.names = c('value'))
 ```
 
-## Ticks
-During this simulation `r if(nrow(tick_infos) == args['amount_of_ticks']) {'all'} else {'only'}` `r nrow(tick_infos)` of `r args['amount_of_ticks']` ticks were executed.
+## Simulation
+The simulation started at `r utctime(general_info2[['preparation_start']])` and ended at `r utctime(general_info2[['postprocessing_end']])`.
+
+```{r simulation}
+general_infos           <- data.frame(t(data.frame(general_infos)))
+colnames(general_infos) <- c('timestamp')
+general_infos        <- general_infos[ order(general_infos$timestamp), , drop = FALSE]
+
+diff_steps <- data.frame(diff(as.matrix(general_infos)))
+diff_steps <- rbind(diff_steps, apply(diff_steps, 2, sum))
+diff_steps$duration_min <- diff_steps$timestamp/60
+diff_steps <- diff_steps %>% mutate_at(.vars = vars(timestamp, duration_min), .funs = funs(round(.,2)))
+rownames(diff_steps)   <- c('preparation step', 'run step', 'postprocessing step (wo. report creation)', '***total***')
+
+kable(diff_steps, align = c('ll'), col.names = c('duration [s]', 'duration [min]'))
+```
+
+### Ticks
+During the simulation `r if(nrow(tick_infos) == args['amount_of_ticks']) {'all'} else {'only'}` **`r nrow(tick_infos)` of `r args['amount_of_ticks']`** ticks were executed.
 
 ```{r ticks}
 tick_infos$rel_timestamp <- tick_infos$start - sim_start
