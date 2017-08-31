@@ -13,7 +13,7 @@ def run():
     context = Context()
     context.create()
 
-    runner = Runner(context)
+    runner = Runner()
 
     prepare = Prepare(context)
     runner.prepare = prepare
