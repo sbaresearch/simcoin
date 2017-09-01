@@ -57,8 +57,12 @@ def main():
         simulate    executes a simulation based on the {}, {} and {}
         run         runs all above commands
         '''.format(
-            config.nodes_json_file_name, config.network_csv_file_name, config.ticks_csv_file_name,
-            config.nodes_json_file_name, config.network_csv_file_name, config.ticks_csv_file_name,
+            config.nodes_json_file_name,
+            config.network_csv_file_name,
+            config.ticks_csv_file_name,
+            config.nodes_json_file_name,
+            config.network_csv_file_name,
+            config.ticks_csv_file_name,
         ))
 
     cmd_parser.add_argument('command', help='Subcommand to run')
