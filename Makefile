@@ -14,6 +14,9 @@ smoke:
 simulate:
 	cd code; \
 		python3 ./simcoin.py simulate ;
+report:
+	cd code; \
+		cp reporter/report.Rmd ../data/last_run/postprocessing/;cd ../data/last_run/postprocessing/;R -e library\(rmarkdown\)\;rmarkdown::render\(\"report.Rmd\",\"pdf_document\"\)\;q\(\);rm report.Rmd
 
 demo1:
 	cd code; \
@@ -67,7 +70,7 @@ demo5:
 
 install:
 	cd code; pip3 install -r requirements.txt
-	R -e "install.packages(c('rmarkdown','devtools','jsonlite','deplyr'), repos='https://cran.wu.ac.at')"
+	R -e "install.packages(c('rmarkdown','devtools','jsonlite','deplyr','anytime'), repos='https://cran.wu.ac.at')"
 	# https://stackoverflow.com/questions/20923209/problems-installing-the-devtools-package
 	sudo apt install pandoc
 

@@ -11,10 +11,9 @@ def create(node, zones, latency):
     sorted_zones = sorted(zones.items(), key=operator.itemgetter(0))
 
     cmds = [
-        'tc qdisc add dev eth0 '
-        'root handle 1: prio bands '
-        '{}'
-        'priomap 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0'
+        ' tc qdisc add dev eth0 '
+        ' root handle 1: prio bands {} '
+        ' priomap 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 '
         .format(len(zones) + 1)
     ]
 
@@ -22,9 +21,9 @@ def create(node, zones, latency):
         zone = zone_tuple[1]
 
         cmds.append(
-            'tc filter add dev eth0 '
-            'parent 1: protocol ip prio {} u32'
-            ' match ip dst {} flowid 1:{}'
+            ' tc filter add dev eth0 '
+            ' parent 1: protocol ip prio {} u32 '
+            '  match ip dst {} flowid 1:{} '
             .format(index + 1, zone.network, index + 2)
         )
 

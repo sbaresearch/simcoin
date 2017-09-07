@@ -1,5 +1,22 @@
 # Simulation Report
 
+---
+title: "Sample Document Report"
+output:
+  html_document:
+    toc: true
+    theme: united
+date: '`r format(Sys.time(), "%d %B, %Y")`'
+author: simcoin 
+---
+
+## Base Information
+
+Date: `date()`
+Version: `git log -1`
+Machine: `Simcoin VM`
+CPU: `?? cores AMD`
+
 
 ```{r knitr_options, include=FALSE}
 library(knitr)
@@ -61,7 +78,7 @@ kable(diff_steps, align = c('ll'), col.names = c('duration [s]', 'duration [min]
 ```
 
 ### Ticks
-During the simulation `r if(nrow(tick_infos) == args['amount_of_ticks']) {'all'} else {'only'}` **`r nrow(tick_infos)` of `r args['amount_of_ticks']`** ticks were executed.
+During the simulation `r if(nrow(tick_infos) == args['amount_of_ticks']) {'all'} else {'only'}` **`r nrow(tick_infos)` of `r args['amount_of_ticks']`** ticks were executed in time.
 
 ```{r ticks}
 tick_infos$rel_timestamp <- tick_infos$start - sim_start
