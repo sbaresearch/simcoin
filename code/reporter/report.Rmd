@@ -2,10 +2,12 @@
 
 ---
 title: "Sample Document Report"
-output:
-  html_document:
+output: 
+  pdf_document:
     toc: true
-    theme: united
+    pandoc_args: [
+      "-V", "classoption=twocolumn"
+    ]
 date: '`r format(Sys.time(), "%d %B, %Y")`'
 author: simcoin 
 ---
@@ -116,7 +118,7 @@ blocks$rel_timestamp         <- blocks$timestamp - sim_start
 ```
 
 ### Distribution of blocks over nodes
-```{r blocks_distribution, fig.height=6}
+```{r blocks_distribution, fig.height=3}
 blocks_per_node <- table(blocks$node)
 percentage <- round(blocks_per_node/sum(blocks_per_node)*100)
 labels <- paste(names(blocks_per_node), ' blocks: ', blocks_per_node, ', ', percentage, '%', sep='')

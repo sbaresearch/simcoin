@@ -61,11 +61,11 @@ demo5:
 	cd code; \
 		python3 simcoin.py \
 			run \
-				--node-group-a bitcoin 20 1 0 simcoin/patched:v1 \
+				--node-group-a bitcoin 500 1 0 simcoin/patched:v1 \
 				--blocks-per-tick 0.0833333333333333 \
-				--amount-of-ticks 75 \
+				--amount-of-ticks 5000 \
 				--txs-per-tick 100 \
-				--tick-duration 5 \
+				--tick-duration 3 \
 				--verbose
 
 install:
