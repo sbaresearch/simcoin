@@ -50,9 +50,7 @@ class TestTicksConfig(TestCase):
         node_0 = NodeConfig('type', 'node-0', 0, 0, None)
         block_events = {'node-0': [0.5, 0.6, end]}
 
-        with self.assertRaises(Exception) as context:
-            ticks_config.create_ticks([node_0], block_events, 0, end)
-        self.assertTrue('multiple block events' in str(context.exception))
+        ticks_config.create_ticks([node_0], block_events, 0, end)
 
     def test_create_block_series(self):
         block_events = ticks_config.create_block_series(0.5, 5, 10)
