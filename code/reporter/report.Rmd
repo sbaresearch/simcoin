@@ -46,6 +46,9 @@ blocks        <- read.csv2("blocks.csv", dec=".")
 mempool       <- read.csv2("mempool_snapshots.csv", dec=".")
 nodes         <- read.csv2("nodes.csv", dec=".")
 
+blocks_received         <- read.csv2("blocks_received.csv", dec=".")
+txs_received            <- read.csv2("blocks_received.csv", dec=".")
+
 tx_exces      <- read.csv2("tx_exceptions.csv", dec=".")
 block_exces   <- read.csv2("block_exceptions.csv", dec=".")
 rpc_exces     <- read.csv2("rpc_exceptions.csv", dec=".")
@@ -112,8 +115,6 @@ In this simulation `r nrow(blocks)` blocks were created by `r length(unique(bloc
 
 ```{r blocks}
 blocks$total_size_kb         <- blocks$total_size/1000
-blocks$median_propagation_ms <- blocks$median_propagation * 1000
-blocks$std_propagation_ms    <- blocks$std_propagation * 1000
 blocks$rel_timestamp         <- blocks$timestamp - sim_start
 ```
 
@@ -156,64 +157,28 @@ kable(block_size_stats,  align = c('l'), col.names = c('', 'value'))
 hist(blocks$total_size_kb, xlab = 'Size [kb]')
 ```
 
-### Block received by other nodes
-```{r blocks_received_stats}
-blocks_received_stats <- data.frame(c('Mean of block received', 'Median of block received', 'Std of block received', 'Min of blocks received', 'Max of blocks received'))
-blocks_received_stats$values <- c(
-  round(mean(blocks$received_by), 3),
-  round(median(blocks$received_by), 3),
-  round(sd(blocks$received_by), 3),
-  min(blocks$received_by),
-  max(blocks$received_by)
-)
-
-kable(blocks_received_stats,  align = c('l'), col.names = c('', 'value'))
-```
-
-```{r blocks_received}
-hist(blocks$received_by, xlab = 'Nodes')
-```
-
 ### Propagation time of blocks
-`r if(!is.na(table(blocks$received_by)['0'])) {paste('*The', table(blocks$received_by)['0'], 'blocks which were never received by another node are not included in this section*', sep=' ')}`
+*Note: Some blocks may never reached some nodes because of forks in the chain or other reasons*
+```{r blocks_received}
+blocks_received$propagation_duration_ms <- blocks_received$propagation_duration * 1000
+```
 
 ```{r block_propagation_stats}
 block_propagation_stats <- data.frame(c('Mean block propagation [ms]', 'Median block propagation [ms]', 'Std block propagation [ms]', 'Min block propagation [ms]', 'Max block propagation [ms]'))
 block_propagation_stats$values <- c(
-  round(mean(blocks$median_propagation_ms, na.rm = TRUE), 3),
-  round(median(blocks$median_propagation_ms, na.rm = TRUE), 3),
-  round(sd(blocks$median_propagation_ms, na.rm = TRUE), 3),
-  round(min(blocks$median_propagation_ms, na.rm = TRUE), 3),
-  round(max(blocks$median_propagation_ms, na.rm = TRUE), 3)
+  round(mean(blocks_received$propagation_duration_ms), 3),
+  round(median(blocks_received$propagation_duration_ms), 3),
+  round(sd(blocks_received$propagation_duration_ms), 3),
+  round(min(blocks_received$propagation_duration_ms), 3),
+  round(max(blocks_received$propagation_duration_ms), 3)
 )
 
 kable(block_propagation_stats,  align = c('l'), col.names = c('', 'value'))
 ```
 
-```{r blocks_propagation}
-hist(blocks$median_propagation, xlab = 'Median propagation time [ms]')
-```
-
-### Standard deviation time of propagation time of blocks
-```{r block_std_propagation_stats}
-block_std_propagation_stats <- data.frame(c('Mean of std block propagation [ms]', 'Median of std block propagation [ms]', 'Std of std block propagation [ms]', 'Min of std block propagation [ms]', 'Max of std block propagation [ms]'))
-block_std_propagation_stats$values <- c(
-  round(mean(blocks$std_propagation_ms, na.rm = TRUE), 3),
-  round(median(blocks$std_propagation_ms, na.rm = TRUE), 3),
-  round(sd(blocks$std_propagation_ms, na.rm = TRUE), 3),
-  round(min(blocks$std_propagation_ms, na.rm = TRUE), 3),
-  round(max(blocks$std_propagation_ms, na.rm = TRUE), 3)
-)
-
-kable(block_std_propagation_stats,  align = c('l'), col.names = c('', 'value'))
-```
-
-```{r blocks_std_propagation}
-hist(blocks$std_propagation, xlab = 'Sandard deviation time [ms]')
-```
 
 ## Transactions
-There were `r nrow(txs)` transaction created in this simulation. `r table(txs$accepted_by)['0']` of `r nrow(txs)` never reached another node.
+There were `r nrow(txs)` transaction created in this simulation.
 
 ```{r txs}
 txs$rel_timestamp <- txs$timestamp - sim_start
@@ -232,59 +197,23 @@ pie(txs_per_node, labels)
 hist(txs$rel_timestamp, xlab = 'Time [s]')
 ```
 
-### Transaction acception rate
-```{r txs_accepted_by_stats}
-txs_accepted_by_stats <- data.frame(c('Mean txs acception rate', 'Median txs acception rate', 'Std txs acception rate', 'Min txs acception rate', 'Max txs acception rate'))
-txs_accepted_by_stats$values <- c(
-  round(mean(txs$accepted_by), 3),
-  round(median(txs$accepted_by), 3),
-  round(sd(txs$accepted_by), 3),
-  min(txs$accepted_by),
-  median(txs$accepted_by)
-)
-
-kable(txs_accepted_by_stats,  align = c('l'), col.names = c('', 'value'))
-```
-
-```{r txs_accepted_by}
-hist(txs$accepted_by, xlab = 'Nodes')
-```
-
 ### Transaction acception time
-`r if(!is.na(table(txs$accepted_by)['0'])) {paste('*The', table(txs$accepted_by)['0'], 'transaction which never reached another node are not included in this section*', sep=' ')}`
+*Note: Some txs may reached other nodes included in a block. Hence they wouldn't appear in this statistics.*
+```{r txs_received}
+txs_received$propagation_duration_ms <- blocks_received$propagation_duration * 1000
+```
 
 ```{r txs_median_propagation_stats}
-txs_median_propagation <- data.frame(c('Mean of median txs acception time [s]', 'Median of median txs acception time [s]', 'Std of median txs acception time [s]', 'Min of median txs acception time [s]', 'Max of median txs acception time [s]'))
+txs_median_propagation <- data.frame(c('Mean txs acception time [ms]', 'Median txs acception time [ms]', 'Std txs acception time [ms]', 'Min txs acception time [ms]', 'Max txs acception time [ms]'))
 txs_median_propagation$values <- c(
-  round(mean(txs$median_propagation, na.rm = TRUE), 3),
-  round(median(txs$median_propagation, na.rm = TRUE), 3),
-  round(sd(txs$median_propagation, na.rm = TRUE), 3),
-  round(min(txs$median_propagation, na.rm = TRUE), 3),
-  round(median(txs$median_propagation, na.rm = TRUE), 3)
+  round(mean(txs_received$propagation_duration_ms), 3),
+  round(median(txs_received$propagation_duration_ms), 3),
+  round(sd(txs_received$propagation_duration_ms), 3),
+  round(min(txs_received$propagation_duration_ms), 3),
+  round(median(txs_received$propagation_duration_ms), 3)
 )
 
 kable(txs_median_propagation,  align = c('l'), col.names = c('', 'value'))
-```
-
-```{r txs_median_propagation}
-hist(txs$median_propagation, xlab = 'Time [s]')
-```
-
-```{r txs_std_propagation_stats}
-txs_std_propagation <- data.frame(c('Mean of std txs acception time [s]', 'Median of std txs acception time [s]', 'Std of std txs acception time [s]', 'Min of std txs acception time [s]', 'Max of std txs acception time [s]'))
-txs_std_propagation$values <- c(
-  round(mean(txs$std_propagation, na.rm = TRUE), 3),
-  round(median(txs$std_propagation, na.rm = TRUE), 3),
-  round(sd(txs$std_propagation, na.rm = TRUE), 3),
-  round(min(txs$std_propagation, na.rm = TRUE), 3),
-  round(median(txs$std_propagation, na.rm = TRUE), 3)
-)
-
-kable(txs_std_propagation,  align = c('l'), col.names = c('', 'value'))
-```
-
-```{r txs_std_propagation}
-hist(txs$std_propagation, xlab = 'Time [s]')
 ```
 
 ### Transactions per block

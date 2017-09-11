@@ -4,6 +4,7 @@ from utils import Stats
 import csv
 import json
 import time
+from parse import ReceivedEvent
 
 
 class Analyzer:
@@ -21,35 +22,30 @@ class Analyzer:
         self.create_mempool_snapshots_csv()
         self.create_rpc_exceptions_csv()
         self.create_general_infos_json()
+        write_csv(config.blocks_received_csv, ReceivedEvent.csv_header(), self.context.blocks_received)
+        write_csv(config.txs_received_csv, ReceivedEvent.csv_header(), self.context.txs_received)
 
         logging.info('Executed analyzer')
 
     def create_block_csv(self):
         with open(config.blocks_csv, 'w') as file:
             w = csv.writer(file, delimiter=';')
-            w.writerow(['block_hash', 'node', 'timestamp', 'stale', 'height', 'total_size', 'txs',
-                        'received_by', 'median_propagation', 'std_propagation'])
+            w.writerow(['block_hash', 'node', 'timestamp', 'stale', 'height', 'total_size', 'txs'])
             for block in self.context.parsed_blocks.values():
-
-                propagation_stats = Stats.from_array(block.receiving_timestamps)
-
                 stale = 'Stale'
                 if block.block_hash in self.context.consensus_chain:
                     stale = 'Accepted'
 
                 w.writerow([block.block_hash, block.node, block.timestamp, stale, block.height, block.total_size,
-                            block.txs, propagation_stats.count, propagation_stats.median, propagation_stats.std])
+                            block.txs])
 
     def create_tx_csv(self):
         with open(config.txs_csv, 'w') as file:
             w = csv.writer(file, delimiter=';')
-            w.writerow(['tx_hash', 'node', 'timestamp', 'accepted_by', 'median_propagation', 'std_propagation'])
+            w.writerow(['tx_hash', 'node', 'timestamp'])
 
             for tx in self.context.parsed_txs.values():
-                propagation_stats = Stats.from_array(tx.receiving_timestamps)
-
-                w.writerow([tx.tx_hash, tx.node, tx.timestamp,
-                            propagation_stats.count, propagation_stats.median, propagation_stats.std])
+                w.writerow([tx.tx_hash, tx.node, tx.timestamp])
 
     def create_tx_exceptions_csv(self):
         with open(config.tx_exceptions_csv, 'w') as file:
@@ -95,3 +91,12 @@ class Analyzer:
         self.context.general_infos['postprocessing_end'] = time.time()
         with open(config.general_infos_json, 'w') as file:
             file.write('{}\n'.format(json.dumps(self.context.general_infos)))
+
+
+def write_csv(file, header, elements):
+    with open(file, 'w') as file:
+        w = csv.writer(file, delimiter=';')
+        w.writerow(header)
+
+        for element in elements:
+            w.writerow(element.vars_to_array())

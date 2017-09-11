@@ -32,7 +32,9 @@ class Context:
         self.rpc_exceptions = []
         self.consensus_chain = []
         self.parsed_blocks = {}
+        self.blocks_received = []
         self.parsed_txs = {}
+        self.txs_received = []
         self.mempool_snapshots = []
         self.tick_infos = []
         self.general_infos = {}

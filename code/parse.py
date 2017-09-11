@@ -2,7 +2,6 @@ import config
 import re
 from datetime import datetime
 import logging
-import numpy as np
 from collections import namedtuple
 import pytz
 
@@ -63,20 +62,18 @@ class Parser:
                 block_stats.height = update_tip.height
 
     def block_received_parser(self, line):
-        received_block = parse_received_block(line)
+        received_event = parse_received_block(line)
+        block = self.context.parsed_blocks[received_event.obj_hash]
+        received_event.propagation_duration = received_event.timestamp - block.timestamp
 
-        block_stats = self.context.parsed_blocks[received_block.obj_hash]
-
-        block_stats.receiving_timestamps = np.append(block_stats.receiving_timestamps,
-                                                     received_block.timestamp - block_stats.timestamp)
+        self.context.blocks_received.append(received_event)
 
     def block_reconstructed_parser(self, line):
-        received_block = parse_successfully_reconstructed_block(line)
+        received_event = parse_successfully_reconstructed_block(line)
+        block = self.context.parsed_blocks[received_event.obj_hash]
+        received_event.propagation_duration = received_event.timestamp - block.timestamp
 
-        block_stats = self.context.parsed_blocks[received_block.obj_hash]
-
-        block_stats.receiving_timestamps = np.append(block_stats.receiving_timestamps,
-                                                     received_block.timestamp - block_stats.timestamp)
+        self.context.blocks_received.append(received_event)
 
     def tx_creation_parser(self, line):
         log_line_with_hash = parse_add_to_wallet(line)
@@ -86,11 +83,11 @@ class Parser:
                                                                        log_line_with_hash.obj_hash)
 
     def tx_received_parser(self, line):
-        log_line_with_hash = parse_accept_to_memory_pool(line)
+        received_event = parse_accept_to_memory_pool(line)
+        tx = self.context.parsed_txs[received_event.obj_hash]
+        received_event.propagation_duration = received_event.timestamp - tx.timestamp
 
-        tx_stats = self.context.parsed_txs[log_line_with_hash.obj_hash]
-        tx_stats.receiving_timestamps = np.append(tx_stats.receiving_timestamps,
-                                                  log_line_with_hash.timestamp - tx_stats.timestamp)
+        self.context.txs_received.append(received_event)
 
     def peer_logic_validation_parser(self, line):
         log_line_with_hash = parse_peer_logic_validation(line)
@@ -166,7 +163,7 @@ def parse_received_block(line):
     if matched is None:
         raise ParseException("Didn't matched 'Received block' log line.")
 
-    return LogLineWithHash(parse_datetime(matched.group(1)), str(matched.group(2)), str(matched.group(3)))
+    return ReceivedEvent(parse_datetime(matched.group(1)), str(matched.group(2)), str(matched.group(3)))
 
 
 def parse_successfully_reconstructed_block(line):
@@ -178,7 +175,7 @@ def parse_successfully_reconstructed_block(line):
     if matched is None:
         raise ParseException("Didn't matched 'Reconstructed block' log line.")
 
-    return LogLineWithHash(parse_datetime(matched.group(1)), str(matched.group(2)), str(matched.group(3)))
+    return ReceivedEvent(parse_datetime(matched.group(1)), str(matched.group(2)), str(matched.group(3)))
 
 
 def parse_add_to_wallet(line):
@@ -200,7 +197,7 @@ def parse_accept_to_memory_pool(line):
     if matched is None:
         raise ParseException("Didn't matched 'AcceptToMemoryPool' log line.")
 
-    return LogLineWithHash(parse_datetime(matched.group(1)), str(matched.group(2)), str(matched.group(4)))
+    return ReceivedEvent(parse_datetime(matched.group(1)), str(matched.group(2)), str(matched.group(4)))
 
 
 def parse_peer_logic_validation(line):
@@ -275,6 +272,7 @@ def parse_datetime(date_time):
     parsed_date_time = datetime.strptime(date_time, config.log_time_format)
     return parsed_date_time.replace(tzinfo=pytz.UTC).timestamp()
 
+
 LogLine = namedtuple('LogLine', 'timestamp node')
 
 TickLogLine = namedtuple('TickLogLine', 'timestamp start duration')
@@ -292,6 +290,21 @@ ExceptionLogLine = namedtuple('ExceptionLogLine', 'timestamp node exception')
 RPCExceptionLogLine = namedtuple('RPCExceptionLogLine', 'timestamp node method exception')
 
 
+class ReceivedEvent:
+    def __init__(self, timestamp, node, obj_hash):
+        self.timestamp = timestamp
+        self.node = node
+        self.obj_hash = obj_hash
+        self.propagation_duration = -1
+
+    @staticmethod
+    def csv_header():
+        return ['timestamp', 'node', 'obj_hash', 'propagation_duration']
+
+    def vars_to_array(self):
+        return [self.timestamp, self.node, self.obj_hash, self.propagation_duration]
+
+
 class BlockStats:
     def __init__(self, timestamp, node, block_hash, total_size, txs):
         self.timestamp = timestamp
@@ -300,7 +313,6 @@ class BlockStats:
         self.total_size = total_size
         self.txs = txs
         self.height = -1
-        self.receiving_timestamps = np.array([])
 
 
 class TxStats:
@@ -309,7 +321,6 @@ class TxStats:
         self.timestamp = timestamp
         self.node = node
         self.tx_hash = tx_hash
-        self.receiving_timestamps = np.array([])
 
 
 class ParseException(Exception):
