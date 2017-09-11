@@ -12,7 +12,7 @@ import bitcoin
 import utils
 
 
-sys.tracebacklimit = None
+# sys.tracebacklimit = None
 
 
 def run():
@@ -44,6 +44,20 @@ def config_logger():
     args = argument_parser.parse_known_args(sys.argv[2:])[0]
     utils.config_logger(args.verbose)
 
+def config_tag():
+    argument_parser = argparse.ArgumentParser()
+
+    argument_parser.add_argument('--tag'
+                                 , dest='tag'
+                                 , action="store"
+                                 , default='run_1'
+                                 , help='A tag that will be added to every csv file.'
+                                 )
+
+    args = argument_parser.parse_known_args(sys.argv[2:])[0]
+    print("arguments called with: {}".format(sys.argv))
+    print("parsed arguments: {}\n".format(args))
+    utils.update_args_json(args)
 
 def main():
     cmd_parser = argparse.ArgumentParser(
@@ -81,6 +95,7 @@ def main():
 
     bitcoin.SelectParams('regtest')
     config_logger()
+    config_tag()
 
     commands[args.command]()
 

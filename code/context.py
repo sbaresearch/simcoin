@@ -35,7 +35,7 @@ class Context:
         self.parsed_txs = {}
         self.mempool_snapshots = []
         self.tick_infos = []
-        self.general_infos = {}
+        self.general_infos = dict(tag=self.args.tag)
 
     def create(self):
         self.config_nodes = nodes_config.read()
