@@ -12,12 +12,18 @@ class Analyzer:
         self.tag = context.general_infos['tag']
 
     def execute(self):
-        funcs = [func for func in dir(Analyzer) if callable(getattr(Analyzer, func)) and func.startswith('create_')]
 
-        for func in funcs:
-            getattr(Analyzer, func)(self)
+        self.create_block_csv()
+        self.create_tx_csv()
+        self.create_tx_csv()
+        self.create_tx_exceptions_csv()
+        self.create_block_exceptions_csv()
+        self.create_tick_infos_csv()
+        self.create_mempool_snapshots_csv()
+        self.create_rpc_exceptions_csv()
+        self.create_general_infos_json()
 
-        logging.info('Executed {} functions during execution of analyzer'.format(len(funcs)))
+        logging.info('Executed analyzer')
 
     def create_block_csv(self):
         with open(config.blocks_csv, 'w') as file:

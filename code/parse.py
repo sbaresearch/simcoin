@@ -11,9 +11,22 @@ class Parser:
     def __init__(self, context):
         self.context = context
         self.nodes_create_blocks = {node.name: None for node in context.all_bitcoin_nodes.values()}
+        self.parsers = [
+            self.block_creation_parser,
+            self.tip_updated_parser,
+            self.block_received_parser,
+            self.block_reconstructed_parser,
+            self.tx_creation_parser,
+            self.tx_received_parser,
+            self.peer_logic_validation_parser,
+            self.checking_mempool_parser,
+            self.tick_parser,
+            self.tx_exception_parser,
+            self.block_exception_parser,
+            self.rpc_exception_parser,
+        ]
 
-        self.parsers = [func for func in dir(Parser) if callable(getattr(Parser, func)) and func.endswith("_parser")]
-        logging.info('Found {} log parsers'.format(len(self.parsers)))
+        logging.info('Created parser with {} log parsers'.format(len(self.parsers)))
 
     def execute(self):
         with open(config.aggregated_sim_log, 'r') as file:
