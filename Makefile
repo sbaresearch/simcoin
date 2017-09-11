@@ -14,6 +14,9 @@ smoke:
 simulate:
 	cd code; \
 		python3 ./simcoin.py simulate ;
+report:
+	cd code; \
+		cp reporter/report.Rmd ../data/last_run/postprocessing/;cd ../data/last_run/postprocessing/;R -e library\(rmarkdown\)\;rmarkdown::render\(\"report.Rmd\",\"pdf_document\"\)\;q\(\);rm report.Rmd
 
 demo1:
 	cd code; \
@@ -58,11 +61,11 @@ demo5:
 	cd code; \
 		python3 simcoin.py \
 			run \
-				--node-group-a bitcoin 20 1 0 simcoin/patched:v1 \
+				--node-group-a bitcoin 500 1 0 simcoin/patched:v1 \
 				--blocks-per-tick 0.0833333333333333 \
-				--amount-of-ticks 75 \
+				--amount-of-ticks 5000 \
 				--txs-per-tick 100 \
-				--tick-duration 5 \
+				--tick-duration 3 \
 				--verbose
 
 multidemo1:
@@ -79,7 +82,9 @@ multidemo1:
 
 install:
 	cd code; pip3 install -r requirements.txt
-	R -e "install.packages(c('rmarkdown','devtools','jsonlite'), repos='https://cran.wu.ac.at')"
+	R -e "install.packages(c('rmarkdown','devtools','jsonlite','deplyr','anytime'), repos='https://cran.wu.ac.at')"
+	# https://stackoverflow.com/questions/20923209/problems-installing-the-devtools-package
+	sudo apt install pandoc
 
 build-image:
 	cd ./code/docker/normal; \

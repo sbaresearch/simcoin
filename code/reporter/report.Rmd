@@ -1,12 +1,23 @@
 # Simulation Report
 
-* install dependecies in R with `install.packages("dependency")`
-    * rmarkdown
-    * anytime
-    * dplyr
-    * devtools (if installation fails this link may help: [SO - Problems installing the devtools package](https://stackoverflow.com/questions/20923209/problems-installing-the-devtools-package))
-    * jsonlite
-* make sure pandoc is installed (e.g. apt install pandoc)
+---
+title: "Sample Document Report"
+output: 
+  pdf_document:
+    toc: true
+    pandoc_args: [
+      "-V", "classoption=twocolumn"
+    ]
+date: '`r format(Sys.time(), "%d %B, %Y")`'
+author: simcoin 
+---
+
+## Base Information
+
+Date: `date()`
+Version: `git log -1`
+Machine: `Simcoin VM`
+CPU: `?? cores AMD`
 
 
 ```{r knitr_options, include=FALSE}
@@ -69,7 +80,7 @@ kable(diff_steps, align = c('ll'), col.names = c('duration [s]', 'duration [min]
 ```
 
 ### Ticks
-During the simulation `r if(nrow(tick_infos) == args['amount_of_ticks']) {'all'} else {'only'}` **`r nrow(tick_infos)` of `r args['amount_of_ticks']`** ticks were executed.
+During the simulation `r if(nrow(tick_infos) == args['amount_of_ticks']) {'all'} else {'only'}` **`r nrow(tick_infos)` of `r args['amount_of_ticks']`** ticks were executed in time.
 
 ```{r ticks}
 tick_infos$rel_timestamp <- tick_infos$start - sim_start
@@ -107,7 +118,7 @@ blocks$rel_timestamp         <- blocks$timestamp - sim_start
 ```
 
 ### Distribution of blocks over nodes
-```{r blocks_distribution, fig.height=6}
+```{r blocks_distribution, fig.height=3}
 blocks_per_node <- table(blocks$node)
 percentage <- round(blocks_per_node/sum(blocks_per_node)*100)
 labels <- paste(names(blocks_per_node), ' blocks: ', blocks_per_node, ', ', percentage, '%', sep='')
