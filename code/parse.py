@@ -34,16 +34,13 @@ class Parser:
             for i, line in enumerate(lines):
                 for parser in self.parsers:
                     try:
-                        self.execute_parser_function(parser, line)
+                        parser(line)
                         break
                     except ParseException:
                         pass
                 if (i + 1) % 100000 == 0:
                     logging.info('Parsed {} of {} log lines'.format(i + 1, len(lines)))
         logging.info('Executed parser')
-
-    def execute_parser_function(self, parser, line):
-        getattr(Parser, parser)(self, line)
 
     def block_creation_parser(self, line):
         create_new_block = parse_create_new_block(line)

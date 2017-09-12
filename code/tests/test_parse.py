@@ -78,29 +78,29 @@ class TestParse(TestCase):
             line3
         """).strip()
 
-        self.parser.parsers = ['parser_1', 'parser_2']
-        m_execute_parser_function = Mock()
-        self.parser.execute_parser_function = m_execute_parser_function
+        parser_1 = Mock()
+        parser_2 = Mock()
+        self.parser.parsers = [parser_1, parser_2]
 
         with patch('builtins.open', mock_open(read_data=data)):
             self.parser.execute()
 
-            self.assertEqual(m_execute_parser_function.call_count, 3)
+            self.assertEqual(parser_1.call_count, 3)
 
     def test_parse_aggregated_log_second_matching(self):
         data = dedent("""
             line1
         """).strip()
 
-        self.parser.parsers = ['parser_1', 'parser_2']
-        m_execute_parser_function = Mock()
-        m_execute_parser_function.side_effect = [ParseException(), None]
-        self.parser.execute_parser_function = m_execute_parser_function
+        parser_1 = Mock()
+        parser_2 = Mock()
+        self.parser.parsers = [parser_1, parser_2]
+        parser_1.side_effect = ParseException()
 
         with patch('builtins.open', mock_open(read_data=data)):
             self.parser.execute()
 
-            self.assertEqual(m_execute_parser_function.call_count, 2)
+            self.assertEqual(parser_2.call_count, 1)
 
     @patch('parse.parse_create_new_block', lambda line: CreateNewBlockLogLine(None, 'node-0', None, None))
     def test_create_new_block_parser(self):
