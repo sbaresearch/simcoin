@@ -264,8 +264,8 @@ def parse_rpc_exception(line):
     if matched is None:
         raise ParseException("Didn't matched 'RPC exception' log line.")
 
-    return RPCExceptionLogLine(parse_datetime(matched.group(1)), str(matched.group(3)), str(matched.group(4)),
-                            str(matched.group(5)))
+    return RPCException(parse_datetime(matched.group(1)), str(matched.group(3)), str(matched.group(4)),
+                        str(matched.group(5)))
 
 
 def parse_datetime(date_time):
@@ -281,8 +281,20 @@ UpdateTipLogLine = namedtuple('UpdateTipLogLine', 'timestamp node block_hash hei
 
 LogLineWithHash = namedtuple('LogLineWithHash', 'timestamp node obj_hash')
 
-RPCExceptionLogLine = namedtuple('RPCExceptionLogLine', 'timestamp node method exception')
 
+class RPCException:
+    def __init__(self, timestamp, node, method, exception):
+        self.timestamp = timestamp
+        self.node = node
+        self.method = method
+        self.exception = exception
+
+    @staticmethod
+    def csv_header():
+        return ['timestamp', 'node', 'method', 'exception']
+
+    def vars_to_array(self):
+        return [self.timestamp, self.node, self.method, self.exception]
 
 class Mempool:
     def __init__(self, timestamp, node, txs, inputs):
