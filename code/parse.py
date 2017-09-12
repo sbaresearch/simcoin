@@ -18,7 +18,6 @@ class Parser:
             self.tx_creation_parser,
             self.tx_received_parser,
             self.peer_logic_validation_parser,
-            self.checking_mempool_parser,
             self.tick_parser,
             self.tx_exception_parser,
             self.block_exception_parser,
@@ -100,11 +99,6 @@ class Parser:
             self.context.parsed_blocks[block_stats.block_hash] = block_stats
             self.nodes_create_blocks[log_line_with_hash.node] = None
 
-    def checking_mempool_parser(self, line):
-        self.context.mempool_snapshots.append(
-            parse_checking_mempool(line)
-        )
-
     def tick_parser(self, line):
         self.context.tick_infos.append(
             parse_tick_log_line(line)
@@ -134,7 +128,7 @@ def parse_create_new_block(line):
     if matched is None:
         raise ParseException("Didn't matched 'CreateNewBlock' log line.")
 
-    return CreateNewBlockLogLine(
+    return CreateNewBlockEvent(
         parse_datetime(matched.group(1)),
         str(matched.group(2)),
         int(matched.group(3)),
@@ -152,8 +146,8 @@ def parse_update_tip(line):
     if matched is None:
         raise ParseException("Didn't matched 'CreateNewBlock' log line.")
 
-    return UpdateTipLogLine(parse_datetime(matched.group(1)), str(matched.group(2)), str(matched.group(3)),
-                            int(matched.group(4)), int(matched.group(5)))
+    return UpdateTipEvent(parse_datetime(matched.group(1)), str(matched.group(2)), str(matched.group(3)),
+                          int(matched.group(4)), int(matched.group(5)))
 
 
 def parse_received_block(line):
@@ -185,7 +179,7 @@ def parse_add_to_wallet(line):
     if matched is None:
         raise ParseException("Didn't matched 'AddToWallet' log line.")
 
-    return LogLineWithHash(parse_datetime(matched.group(1)), str(matched.group(2)), str(matched.group(3)))
+    return EventWithHash(parse_datetime(matched.group(1)), str(matched.group(2)), str(matched.group(3)))
 
 
 def parse_accept_to_memory_pool(line):
@@ -209,18 +203,7 @@ def parse_peer_logic_validation(line):
     if matched is None:
         raise ParseException("Didn't matched 'PeerLogicValidation' log line.")
 
-    return LogLineWithHash(parse_datetime(matched.group(1)), str(matched.group(2)), str(matched.group(3)))
-
-
-def parse_checking_mempool(line):
-    regex = config.log_prefix_full + 'Checking mempool with ([0-9]+) transactions and ([0-9]+) inputs'
-    matched = re.match(regex, line)
-
-    if matched is None:
-        raise ParseException("Didn't matched 'Checking mempool' log line.")
-
-    return MempoolEvent(parse_datetime(matched.group(1)), str(matched.group(2)),
-                        int(matched.group(3)), int(matched.group(4)))
+    return EventWithHash(parse_datetime(matched.group(1)), str(matched.group(2)), str(matched.group(3)))
 
 
 def parse_tick_log_line(line):
@@ -273,24 +256,17 @@ def parse_datetime(date_time):
     return parsed_date_time.replace(tzinfo=pytz.UTC).timestamp()
 
 
-CreateNewBlockLogLine = namedtuple('CreateNewBlockLogLine', 'timestamp node  total_size txs')
+CreateNewBlockEvent = namedtuple('CreateNewBlockLogLine', 'timestamp node  total_size txs')
 
-UpdateTipLogLine = namedtuple('UpdateTipLogLine', 'timestamp node block_hash height tx')
+UpdateTipEvent = namedtuple('UpdateTipLogLine', 'timestamp node block_hash height tx')
 
-LogLineWithHash = namedtuple('LogLineWithHash', 'timestamp node obj_hash')
+EventWithHash = namedtuple('LogLineWithHash', 'timestamp node obj_hash')
 
 
 class Event:
     def __init__(self, timestamp, node):
         self.timestamp = timestamp
         self.node = node
-
-    @staticmethod
-    def csv_header():
-        return ['timestamp', 'node']
-
-    def vars_to_array(self):
-        return [self.timestamp, self.node]
 
 
 class RPCExceptionEvent(Event):
@@ -301,24 +277,10 @@ class RPCExceptionEvent(Event):
 
     @staticmethod
     def csv_header():
-        return Event.csv_header().extend(['method', 'exception'])
+        return ['timestamp', 'node', 'method', 'exception']
 
     def vars_to_array(self):
-        return super().csv_header().extend([self.method, self.exception])
-
-
-class MempoolEvent(Event):
-    def __init__(self, timestamp, node, txs, inputs):
-        super().__init__(timestamp, node)
-        self.txs = txs
-        self.inputs = inputs
-
-    @staticmethod
-    def csv_header():
-        return Event.csv_header().extend(['txs', 'inputs'])
-
-    def vars_to_array(self):
-        return super().csv_header().extend([self.txs, self.inputs])
+        return [self.timestamp, self.node, self.method, self.exception]
 
 
 class ExceptionEvent(Event):
@@ -328,10 +290,10 @@ class ExceptionEvent(Event):
 
     @staticmethod
     def csv_header():
-        return Event.csv_header().extend(['exception'])
+        return ['timestamp', 'node', 'exception']
 
     def vars_to_array(self):
-        return super().csv_header().extend([self.exception])
+        return [self.timestamp, self.node, self.exception]
 
 
 class ReceivedEvent(Event):
@@ -342,10 +304,10 @@ class ReceivedEvent(Event):
 
     @staticmethod
     def csv_header():
-        return Event.csv_header().extend(['obj_hash', 'propagation_duration'])
+        return ['timestamp', 'node', 'obj_hash', 'propagation_duration']
 
     def vars_to_array(self):
-        return super().csv_header().extend([self.obj_hash, self.propagation_duration])
+        return [self.timestamp, self.node, self.obj_hash, self.propagation_duration]
 
 
 class BlockEvent(Event):
@@ -359,10 +321,10 @@ class BlockEvent(Event):
 
     @staticmethod
     def csv_header():
-        return Event.csv_header().extend(['block_hash', 'stale', 'total_size', 'txs', 'height'])
+        return ['timestamp', 'node', 'block_hash', 'stale', 'total_size', 'txs', 'height']
 
     def vars_to_array(self):
-        return super().csv_header().extend([self.block_hash, self.stale, self.total_size, self.txs, self.height])
+        return [self.timestamp, self.node, self.block_hash, self.stale, self.total_size, self.txs, self.height]
 
 
 class TxEvent(Event):
@@ -373,10 +335,10 @@ class TxEvent(Event):
 
     @staticmethod
     def csv_header():
-        return Event.csv_header().extend(['tx_hash'])
+        return ['timestamp', 'node', 'tx_hash']
 
     def vars_to_array(self):
-        return super().csv_header().extend([self.tx_hash])
+        return [self.timestamp, self.node, self.tx_hash]
 
 
 class TickEvent:

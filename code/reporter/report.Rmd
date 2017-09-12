@@ -43,7 +43,6 @@ tick_infos    <- read.csv2("tick_infos.csv", dec=".")
 
 txs           <- read.csv2("txs.csv", dec=".")
 blocks        <- read.csv2("blocks.csv", dec=".")
-mempool       <- read.csv2("mempool_snapshots.csv", dec=".")
 tips          <- read.csv2("tips.csv", dec=".")
 
 blocks_received         <- read.csv2("blocks_received.csv", dec=".")
@@ -235,35 +234,6 @@ kable(txs_per_block_stats,  align = c('l'), col.names = c('', 'value'))
 
 ```{r txs_per_block}
 hist(blocks$txs, xlab = 'Transactions')
-```
-
-## Mempool snapshots
-There were `r nrow(mempool)` mempool snapshots parsed from log file.
-
-```{r mempool_stats}
-mempool_stats <- data.frame(c('Mean transactions in mempool', 'Median transactions in mempool', 'Std transactions in mempool', 'Min transactions in mempool', 'Max transactions in mempool'))
-mempool_stats$values <- c(
-  round(mean(mempool$txs), 3),
-  round(median(mempool$txs), 3),
-  round(sd(mempool$txs), 3),
-  min(mempool$txs),
-  max(mempool$txs)
-)
-
-kable(mempool_stats,  align = c('l'), col.names = c('', 'value'))
-```
-
-```{r mempool_txs}
-hist(mempool$txs, xlab = 'Transactions')
-```
-
-### Transactions in mempool over time
-```{r txs_mempool_over_time}
-mempool$rel_timestamp <- mempool$timestamp - sim_start
-txs_in_mempool = tapply(mempool$txs, cut(mempool$rel_timestamp, pretty(mempool$rel_timestamp)), median)
-plot(txs_in_mempool, xlab = 'Time [s]', ylab='Transactions', xaxt='n')
-axis(1, at=1:nrow(txs_in_mempool), labels=names(txs_in_mempool))
-lines(txs_in_mempool)
 ```
 
 ## Nodes

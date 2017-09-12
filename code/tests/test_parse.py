@@ -7,10 +7,9 @@ from mock import mock_open
 from parse import Parser
 from mock import Mock
 from parse import TickEvent
-from parse import CreateNewBlockLogLine
-from parse import UpdateTipLogLine
-from parse import MempoolEvent
-from parse import LogLineWithHash
+from parse import CreateNewBlockEvent
+from parse import UpdateTipEvent
+from parse import EventWithHash
 from parse import ReceivedEvent
 from parse import BlockEvent
 from datetime import datetime
@@ -31,7 +30,6 @@ class TestParse(TestCase):
         self.context = Mock()
         self.context.parsed_blocks = {}
         self.context.parsed_txs = {}
-        self.context.mempool_snapshots = []
         self.context.tick_infos = []
         self.context.all_bitcoin_nodes.values.return_value = [node_0, node_1, node_2]
         self.parser = Parser(self.context)
@@ -102,16 +100,16 @@ class TestParse(TestCase):
 
             self.assertEqual(parser_2.call_count, 1)
 
-    @patch('parse.parse_create_new_block', lambda line: CreateNewBlockLogLine(None, 'node-0', None, None))
+    @patch('parse.parse_create_new_block', lambda line: CreateNewBlockEvent(None, 'node-0', None, None))
     def test_create_new_block_parser(self):
 
         self.parser.block_creation_parser('line')
 
         self.assertTrue(self.parser.nodes_create_blocks['node-0'])
 
-    @patch('parse.parse_update_tip', lambda line: UpdateTipLogLine(None, 'node-0', 'block_hash', 45, None))
+    @patch('parse.parse_update_tip', lambda line: UpdateTipEvent(None, 'node-0', 'block_hash', 45, None))
     def test_update_tip_parser_with_previous_create_new_block(self):
-        self.parser.nodes_create_blocks['node-0'] = CreateNewBlockLogLine(None, None, None, None)
+        self.parser.nodes_create_blocks['node-0'] = CreateNewBlockEvent(None, None, None, None)
 
         self.parser.tip_updated_parser('line')
 
@@ -120,7 +118,7 @@ class TestParse(TestCase):
         self.assertEqual(parsed_block.height, 45)
         self.assertEqual(self.parser.nodes_create_blocks['node-0'], None)
 
-    @patch('parse.parse_update_tip', lambda line: UpdateTipLogLine(None, 'node-0', 'block_hash', 45, None))
+    @patch('parse.parse_update_tip', lambda line: UpdateTipEvent(None, 'node-0', 'block_hash', 45, None))
     def test_update_tip_parser_with_block_stats_already_set(self):
         self.context.parsed_blocks['block_hash'] = BlockEvent(None, None, None, None, None)
 
@@ -130,7 +128,7 @@ class TestParse(TestCase):
         self.assertEqual(self.context.parsed_blocks['block_hash'].height, 45)
         self.assertEqual(self.parser.nodes_create_blocks['node-0'], None)
 
-    @patch('parse.parse_update_tip', lambda line: UpdateTipLogLine(None, 'node-0', None, None, None))
+    @patch('parse.parse_update_tip', lambda line: UpdateTipEvent(None, 'node-0', None, None, None))
     def test_update_tip_parser_with_previous_no_create_new_block(self):
         self.parser.tip_updated_parser('line')
 
@@ -184,7 +182,7 @@ class TestParse(TestCase):
 
     @patch('parse.parse_accept_to_memory_pool')
     def test_tx_received_parser(self, m_parse_accept_to_memory_pool):
-        m_parse_accept_to_memory_pool.return_value = LogLineWithHash(10, None, 'tx_hash')
+        m_parse_accept_to_memory_pool.return_value = EventWithHash(10, None, 'tx_hash')
         self.context.txs_received = []
 
         self.parser.tx_received_parser('line')
@@ -225,7 +223,7 @@ class TestParse(TestCase):
         self.assertEqual(self.context.txs_received[0].timestamp, 10)
         self.assertEqual(self.context.txs_received[0].propagation_duration, 6)
 
-    @patch('parse.parse_add_to_wallet', lambda line: LogLineWithHash(2, 'node-0', 'tx_hash'))
+    @patch('parse.parse_add_to_wallet', lambda line: EventWithHash(2, 'node-0', 'tx_hash'))
     def test_tx_creation_parser(self):
         self.parser.tx_creation_parser('line')
 
@@ -244,36 +242,20 @@ class TestParse(TestCase):
         self.assertEqual(log_line_with_hash.node, 'node-0')
         self.assertEqual(log_line_with_hash.obj_hash, '107692460326feaa6f0c6c35bb218bdb3ff2adbc0d10a3a36b8252acf54e0c03')
 
-    @patch('parse.parse_peer_logic_validation', lambda line: LogLineWithHash(None, 'node-0', 'block_hash'))
+    @patch('parse.parse_peer_logic_validation', lambda line: EventWithHash(None, 'node-0', 'block_hash'))
     def test_peer_logic_validation_parse(self):
-        self.parser.nodes_create_blocks['node-0'] = CreateNewBlockLogLine(None, None, None, None)
+        self.parser.nodes_create_blocks['node-0'] = CreateNewBlockEvent(None, None, None, None)
 
         self.parser.peer_logic_validation_parser('line')
 
         self.assertEqual(len(self.context.parsed_blocks), 1)
         self.assertEqual(self.parser.nodes_create_blocks['node-0'], None)
 
-    @patch('parse.parse_peer_logic_validation', lambda line: UpdateTipLogLine(None, 'node-0', None, None, None))
+    @patch('parse.parse_peer_logic_validation', lambda line: UpdateTipEvent(None, 'node-0', None, None, None))
     def test_update_tip_parser_with_previous_no_create_new_block(self):
         self.parser.peer_logic_validation_parser('line')
 
         self.assertEqual(len(self.context.parsed_blocks), 0)
-
-    def test_parse_checking_mempool(self):
-        checking_mempool = parse.parse_checking_mempool(
-            '2017-07-31 16:09:28.663985 node-0 45 Checking mempool with 5878 transactions and 5999 inputs'
-        )
-
-        self.assertEqual(checking_mempool.timestamp, datetime(2017, 7, 31, 16, 9, 28, 663985, pytz.UTC).timestamp())
-        self.assertEqual(checking_mempool.node, 'node-0')
-        self.assertEqual(checking_mempool.txs, 5878)
-        self.assertEqual(checking_mempool.inputs, 5999)
-
-    @patch('parse.parse_checking_mempool', lambda line: MempoolEvent(None, None, None, None))
-    def test_checking_mempool_parser(self):
-        self.parser.checking_mempool_parser('line')
-
-        self.assertEqual(len(self.context.mempool_snapshots), 1)
 
     def test_parse_tick(self):
         tick_log_line = parse.parse_tick_log_line(
@@ -286,7 +268,7 @@ class TestParse(TestCase):
         self.assertEqual(tick_log_line.duration, 0.9823310375213623)
 
     @patch('parse.parse_tick_log_line', lambda line: TickEvent(None, None, None))
-    def test_checking_mempool_parser(self):
+    def test_tick_parser(self):
         self.parser.tick_parser('line')
 
         self.assertEqual(len(self.context.tick_infos), 1)
