@@ -7,6 +7,7 @@ from parse import ReceivedEvent
 from parse import BlockStats
 from parse import TxStats
 from parse import Exce
+from parse import Tick
 
 
 class Analyzer:
@@ -21,7 +22,7 @@ class Analyzer:
         write_csv(config.txs_csv, TxStats.csv_header(), self.context.parsed_txs)
         write_csv(config.tx_exceptions_csv, Exce.csv_header(), self.context.tx_exceptions)
         write_csv(config.block_exceptions_csv, Exce.csv_header(), self.context.block_exceptions)
-        self.create_tick_infos_csv()
+        write_csv(config.tick_infos_csv, Tick.csv_header(), self.context.tick_infos)
         self.create_mempool_snapshots_csv()
         self.create_rpc_exceptions_csv()
         self.create_general_infos_json()
@@ -35,14 +36,6 @@ class Analyzer:
             block.stale = 'Stale'
             if block.block_hash in self.context.consensus_chain:
                 block.stale = 'Accepted'
-
-    def create_tick_infos_csv(self):
-        with open(config.tick_infos_csv, 'w') as file:
-            w = csv.writer(file, delimiter=';')
-            w.writerow(['timestamp', 'start', 'duration'])
-
-            for tick in self.context.tick_infos:
-                w.writerow([tick.timestamp, tick.start, tick.duration])
 
     def create_mempool_snapshots_csv(self):
         with open(config.mempool_snapshots_csv, 'w') as file:

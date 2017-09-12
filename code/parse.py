@@ -231,7 +231,7 @@ def parse_tick_log_line(line):
     if matched is None:
         raise ParseException("Didn't matched 'Tick' log line.")
 
-    return TickLogLine(parse_datetime(matched.group(1)), float(matched.group(3)), float(matched.group(4)))
+    return Tick(parse_datetime(matched.group(1)), float(matched.group(3)), float(matched.group(4)))
 
 
 def parse_tx_creation_exception(line):
@@ -275,8 +275,6 @@ def parse_datetime(date_time):
 
 LogLine = namedtuple('LogLine', 'timestamp node')
 
-TickLogLine = namedtuple('TickLogLine', 'timestamp start duration')
-
 CreateNewBlockLogLine = namedtuple('CreateNewBlockLogLine', 'timestamp node  total_size txs')
 
 UpdateTipLogLine = namedtuple('UpdateTipLogLine', 'timestamp node block_hash height tx')
@@ -286,6 +284,20 @@ LogLineWithHash = namedtuple('LogLineWithHash', 'timestamp node obj_hash')
 CheckingMempoolLogLine = namedtuple('CheckingMempoolLogLine', 'timestamp node txs inputs')
 
 RPCExceptionLogLine = namedtuple('RPCExceptionLogLine', 'timestamp node method exception')
+
+
+class Tick:
+    def __init__(self, timestamp, start, duration):
+        self.timestamp = timestamp
+        self.start = start
+        self.duration = duration
+
+    @staticmethod
+    def csv_header():
+        return ['timestamp', 'start', 'duration']
+
+    def vars_to_array(self):
+        return [self.timestamp, self.start, self.duration]
 
 
 class Exce:
