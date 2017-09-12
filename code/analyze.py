@@ -40,22 +40,6 @@ class Analyzer:
             if block.block_hash in self.context.consensus_chain:
                 block.stale = 'Accepted'
 
-    def create_mempool_snapshots_csv(self):
-        with open(config.mempool_snapshots_csv, 'w') as file:
-            w = csv.writer(file, delimiter=';')
-            w.writerow(['timestamp', 'node', 'txs', 'inputs'])
-
-            for snapshot in self.context.mempool_snapshots:
-                w.writerow([snapshot.timestamp, snapshot.node, snapshot.txs, snapshot.inputs])
-
-    def create_rpc_exceptions_csv(self):
-        with open(config.rpc_exceptions_csv, 'w') as file:
-            w = csv.writer(file, delimiter=';')
-            w.writerow(['timestamp', 'node', 'method', 'exception'])
-
-            for exce in self.context.rpc_exceptions:
-                w.writerow([exce.timestamp, exce.node, exce.method, exce.exception])
-
     def create_general_infos_json(self):
         self.context.general_infos['postprocessing_end'] = time.time()
         with open(config.general_infos_json, 'w') as file:
