@@ -71,8 +71,7 @@ class CliStats:
                 for tip_stats_tuple in sorted_tips_stats:
                     tip_stats = tip_stats_tuple[1]
                     file.write(';{};{};{}'.format(tip_stats.stats.count, tip_stats.stats.median, tip_stats.stats.std))
-                file.write(';'+self.tag)
-                file.write('\n')
+                file.write(';{}\n'.format(self.tag))
 
 
 tip_types = ['headers-only', 'valid-fork', 'valid-headers']

@@ -42,6 +42,8 @@ tx_exceptions_csv = postprocessing_dir + 'tx_exceptions.csv'
 block_exceptions_csv = postprocessing_dir + 'block_exceptions.csv'
 rpc_exceptions_csv = postprocessing_dir + 'rpc_exceptions.csv'
 mempool_snapshots_csv = postprocessing_dir + 'mempool_snapshots.csv'
+blocks_received_csv = postprocessing_dir + 'blocks_received.csv'
+txs_received_csv = postprocessing_dir + 'txs_received.csv'
 tick_infos_csv = postprocessing_dir + 'tick_infos.csv'
 log_errors_txt = postprocessing_dir + 'log_errors.txt'
 
