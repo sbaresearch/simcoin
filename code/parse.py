@@ -310,9 +310,17 @@ class BlockStats:
         self.timestamp = timestamp
         self.node = node
         self.block_hash = block_hash
+        self.stale = None
         self.total_size = total_size
         self.txs = txs
         self.height = -1
+
+    @staticmethod
+    def csv_header():
+        return ['timestamp', 'node', 'block_hash', 'stale', 'total_size', 'txs', 'height']
+
+    def vars_to_array(self):
+        return [self.timestamp, self.node, self.block_hash, self.stale, self.total_size, self.txs, self.height]
 
 
 class TxStats:
