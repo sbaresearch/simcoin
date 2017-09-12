@@ -79,33 +79,6 @@ class TestCliStats(TestCase):
         self.assertEqual(len(lines), 2)
         self.assertTrue('10;hash1;test\r\n' in lines)
 
-    @patch('builtins.open', new_callable=mock_open)
-    def test_save_chains(self, mock):
-        self.cli_stats.save_chains()
-
-        mock.assert_called_with(config.chains_csv, 'w')
-        handle = mock()
-        handle.write.assert_called_once_with('node;block_hashes;tag\r\n')
-
-    @patch('builtins.open', new_callable=mock_open)
-    def test_save_chains_with_nodes(self, mock):
-        node_0 = MagicMock()
-        node_0.name = 'node-0'
-        node_0.execute_rpc.side_effect = [6, 'hash1', 'hash2']
-        node_1 = MagicMock()
-        node_1.name = 'node-1'
-        node_1.execute_rpc.side_effect = [7, 'hash11', 'hash22', 'hash33']
-        self.context.first_block_height = 5
-        self.context.all_bitcoin_nodes = {'0': node_0, '1': node_1}
-
-        self.cli_stats.save_chains()
-
-        handle = mock()
-        lines = [line[0][0] for line in handle.write.call_args_list]
-        self.assertEqual(len(lines), 3)
-        self.assertTrue('node-1;hash11;hash22;hash33;test\r\n' in lines)
-        self.assertTrue('node-0;hash1;hash2;test\r\n' in lines)
-
     def test_node_stats(self):
         node_0 = MagicMock()
         node_0.name = 'name'

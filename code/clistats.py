@@ -36,20 +36,6 @@ class CliStats:
                 else:
                     break
 
-    def save_chains(self):
-        with open(config.chains_csv, 'w') as file:
-            w = csv.writer(file, delimiter=';')
-            w.writerow(['node', 'block_hashes'])
-            for node in self.context.all_bitcoin_nodes.values():
-                height = int(node.execute_rpc('getblockcount'))
-                hashes = []
-                while self.context.first_block_height <= height:
-                    hashes.append(str(node.execute_rpc('getblockhash', height)))
-                    height -= 1
-                row = [node.name]
-                row.extend(hashes)
-                w.writerow(row)
-
     def node_stats(self):
         for node in self.context.all_bitcoin_nodes.values():
             tips = node.execute_rpc('getchaintips')
