@@ -285,13 +285,6 @@ class Event:
         self.timestamp = timestamp
         self.node = node
 
-    @staticmethod
-    def csv_header():
-        return ['timestamp', 'node']
-
-    def vars_to_array(self):
-        return [self.timestamp, self.node]
-
 
 class RPCExceptionEvent(Event):
     def __init__(self, timestamp, node, method, exception):
@@ -301,10 +294,10 @@ class RPCExceptionEvent(Event):
 
     @staticmethod
     def csv_header():
-        return Event.csv_header().extend(['method', 'exception'])
+        return ['timestamp', 'node', 'method', 'exception']
 
     def vars_to_array(self):
-        return super().csv_header().extend([self.method, self.exception])
+        return [self.timestamp, self.node, self.method, self.exception]
 
 
 class MempoolEvent(Event):
@@ -315,10 +308,10 @@ class MempoolEvent(Event):
 
     @staticmethod
     def csv_header():
-        return Event.csv_header().extend(['txs', 'inputs'])
+        return ['timestamp', 'node', 'txs', 'inputs']
 
     def vars_to_array(self):
-        return super().csv_header().extend([self.txs, self.inputs])
+        return [self.timestamp, self.node, self.txs, self.inputs]
 
 
 class ExceptionEvent(Event):
@@ -328,10 +321,10 @@ class ExceptionEvent(Event):
 
     @staticmethod
     def csv_header():
-        return Event.csv_header().extend(['exception'])
+        return ['timestamp', 'node', 'exception']
 
     def vars_to_array(self):
-        return super().csv_header().extend([self.exception])
+        return [self.timestamp, self.node, self.exception]
 
 
 class ReceivedEvent(Event):
@@ -342,10 +335,10 @@ class ReceivedEvent(Event):
 
     @staticmethod
     def csv_header():
-        return Event.csv_header().extend(['obj_hash', 'propagation_duration'])
+        return ['timestamp', 'node', 'obj_hash', 'propagation_duration']
 
     def vars_to_array(self):
-        return super().csv_header().extend([self.obj_hash, self.propagation_duration])
+        return [self.timestamp, self.node, self.obj_hash, self.propagation_duration]
 
 
 class BlockEvent(Event):
@@ -359,10 +352,10 @@ class BlockEvent(Event):
 
     @staticmethod
     def csv_header():
-        return Event.csv_header().extend(['block_hash', 'stale', 'total_size', 'txs', 'height'])
+        return ['timestamp', 'node', 'block_hash', 'stale', 'total_size', 'txs', 'height']
 
     def vars_to_array(self):
-        return super().csv_header().extend([self.block_hash, self.stale, self.total_size, self.txs, self.height])
+        return [self.timestamp, self.node, self.block_hash, self.stale, self.total_size, self.txs, self.height]
 
 
 class TxEvent(Event):
@@ -373,10 +366,10 @@ class TxEvent(Event):
 
     @staticmethod
     def csv_header():
-        return Event.csv_header().extend(['tx_hash'])
+        return ['timestamp', 'node', 'tx_hash']
 
     def vars_to_array(self):
-        return super().csv_header().extend([self.tx_hash])
+        return [self.timestamp, self.node, self.tx_hash]
 
 
 class TickEvent:

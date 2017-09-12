@@ -19,8 +19,8 @@ class FileWriter:
 
     def execute(self):
 
-        write_csv(config.blocks_csv, BlockEvent.csv_header(), self.context.parsed_blocks)
-        write_csv(config.txs_csv, TxEvent.csv_header(), self.context.parsed_txs)
+        write_csv(config.blocks_csv, BlockEvent.csv_header(), self.context.parsed_blocks.values())
+        write_csv(config.txs_csv, TxEvent.csv_header(), self.context.parsed_txs.values())
         write_csv(config.tx_exceptions_csv, ExceptionEvent.csv_header(), self.context.tx_exceptions)
         write_csv(config.block_exceptions_csv, ExceptionEvent.csv_header(), self.context.block_exceptions)
         write_csv(config.tick_infos_csv, TickEvent.csv_header(), self.context.tick_infos)
