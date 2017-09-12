@@ -6,6 +6,7 @@ import time
 from parse import ReceivedEvent
 from parse import BlockStats
 from parse import TxStats
+from parse import Exce
 
 
 class Analyzer:
@@ -18,8 +19,8 @@ class Analyzer:
         self.check_block_stale_or_accepted()
         write_csv(config.blocks_csv, BlockStats.csv_header(), self.context.parsed_blocks)
         write_csv(config.txs_csv, TxStats.csv_header(), self.context.parsed_txs)
-        self.create_tx_exceptions_csv()
-        self.create_block_exceptions_csv()
+        write_csv(config.tx_exceptions_csv, Exce.csv_header(), self.context.tx_exceptions)
+        write_csv(config.block_exceptions_csv, Exce.csv_header(), self.context.block_exceptions)
         self.create_tick_infos_csv()
         self.create_mempool_snapshots_csv()
         self.create_rpc_exceptions_csv()
@@ -34,22 +35,6 @@ class Analyzer:
             block.stale = 'Stale'
             if block.block_hash in self.context.consensus_chain:
                 block.stale = 'Accepted'
-
-    def create_tx_exceptions_csv(self):
-        with open(config.tx_exceptions_csv, 'w') as file:
-            w = csv.writer(file, delimiter=';')
-            w.writerow(['node', 'timestamp', 'exception'])
-
-            for exce in self.context.tx_exceptions:
-                w.writerow([exce.node, exce.timestamp, exce.exception])
-
-    def create_block_exceptions_csv(self):
-        with open(config.block_exceptions_csv, 'w') as file:
-            w = csv.writer(file, delimiter=';')
-            w.writerow(['node', 'timestamp', 'exception'])
-
-            for exce in self.context.block_exceptions:
-                w.writerow([exce.node, exce.timestamp, exce.exception])
 
     def create_tick_infos_csv(self):
         with open(config.tick_infos_csv, 'w') as file:

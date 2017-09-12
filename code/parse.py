@@ -242,7 +242,7 @@ def parse_tx_creation_exception(line):
     if matched is None:
         raise ParseException("Didn't matched 'Tx exception' log line.")
 
-    return ExceptionLogLine(parse_datetime(matched.group(1)), str(matched.group(3)), str(matched.group(4)))
+    return Exce(parse_datetime(matched.group(1)), str(matched.group(3)), str(matched.group(4)))
 
 
 def parse_block_creation_exception(line):
@@ -253,7 +253,7 @@ def parse_block_creation_exception(line):
     if matched is None:
         raise ParseException("Didn't matched 'Block exception' log line.")
 
-    return ExceptionLogLine(parse_datetime(matched.group(1)), str(matched.group(3)), str(matched.group(4)))
+    return Exce(parse_datetime(matched.group(1)), str(matched.group(3)), str(matched.group(4)))
 
 
 def parse_rpc_exception(line):
@@ -285,9 +285,21 @@ LogLineWithHash = namedtuple('LogLineWithHash', 'timestamp node obj_hash')
 
 CheckingMempoolLogLine = namedtuple('CheckingMempoolLogLine', 'timestamp node txs inputs')
 
-ExceptionLogLine = namedtuple('ExceptionLogLine', 'timestamp node exception')
-
 RPCExceptionLogLine = namedtuple('RPCExceptionLogLine', 'timestamp node method exception')
+
+
+class Exce:
+    def __init__(self, timestamp, node, exception):
+        self.timestamp = timestamp
+        self.node = node
+        self.exception = exception
+
+    @staticmethod
+    def csv_header():
+        return ['timestamp', 'node', 'exception']
+
+    def vars_to_array(self):
+        return [self.timestamp, self.node, self.exception]
 
 
 class ReceivedEvent:
