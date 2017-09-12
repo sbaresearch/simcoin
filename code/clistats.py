@@ -9,7 +9,6 @@ class CliStats:
 
     def execute(self):
         self.save_consensus_chain()
-        self.save_chains()
         self.node_stats()
 
         logging.info('Executed cli stats')
