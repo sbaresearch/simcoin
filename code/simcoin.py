@@ -24,6 +24,7 @@ def run():
 
     simulation.run()
 
+
 commands = {
     'nodes':        nodes_config.create,
     'network':      network_config.create,
@@ -44,6 +45,7 @@ def config_logger():
     args = argument_parser.parse_known_args(sys.argv[2:])[0]
     utils.config_logger(args.verbose)
 
+
 def config_tag():
     argument_parser = argparse.ArgumentParser()
 
@@ -58,6 +60,7 @@ def config_tag():
     print("arguments called with: {}".format(sys.argv))
     print("parsed arguments: {}\n".format(args))
     utils.update_args_json(args)
+
 
 def main():
     cmd_parser = argparse.ArgumentParser(
@@ -98,6 +101,7 @@ def main():
     config_tag()
 
     commands[args.command]()
+
 
 if __name__ == '__main__':
     main()
