@@ -102,14 +102,14 @@ class TestParse(TestCase):
 
             self.assertEqual(m_execute_parser_function.call_count, 2)
 
-    @patch('parse.parse_create_new_block', lambda a: CreateNewBlockLogLine(None, 'node-0', None, None))
+    @patch('parse.parse_create_new_block', lambda line: CreateNewBlockLogLine(None, 'node-0', None, None))
     def test_create_new_block_parser(self):
 
         self.parser.block_creation_parser('line')
 
         self.assertTrue(self.parser.nodes_create_blocks['node-0'])
 
-    @patch('parse.parse_update_tip', lambda a: UpdateTipLogLine(None, 'node-0', 'block_hash', 45, None))
+    @patch('parse.parse_update_tip', lambda line: UpdateTipLogLine(None, 'node-0', 'block_hash', 45, None))
     def test_update_tip_parser_with_previous_create_new_block(self):
         self.parser.nodes_create_blocks['node-0'] = CreateNewBlockLogLine(None, None, None, None)
 
@@ -120,7 +120,7 @@ class TestParse(TestCase):
         self.assertEqual(parsed_block.height, 45)
         self.assertEqual(self.parser.nodes_create_blocks['node-0'], None)
 
-    @patch('parse.parse_update_tip', lambda a: UpdateTipLogLine(None, 'node-0', 'block_hash', 45, None))
+    @patch('parse.parse_update_tip', lambda line: UpdateTipLogLine(None, 'node-0', 'block_hash', 45, None))
     def test_update_tip_parser_with_block_stats_already_set(self):
         self.context.parsed_blocks['block_hash'] = BlockStats(None, None, None, None, None)
 
@@ -130,7 +130,7 @@ class TestParse(TestCase):
         self.assertEqual(self.context.parsed_blocks['block_hash'].height, 45)
         self.assertEqual(self.parser.nodes_create_blocks['node-0'], None)
 
-    @patch('parse.parse_update_tip', lambda a: UpdateTipLogLine(None, 'node-0', None, None, None))
+    @patch('parse.parse_update_tip', lambda line: UpdateTipLogLine(None, 'node-0', None, None, None))
     def test_update_tip_parser_with_previous_no_create_new_block(self):
         self.parser.tip_updated_parser('line')
 
@@ -240,7 +240,7 @@ class TestParse(TestCase):
         self.assertEqual(log_line_with_hash.node, 'node-0')
         self.assertEqual(log_line_with_hash.obj_hash, '107692460326feaa6f0c6c35bb218bdb3ff2adbc0d10a3a36b8252acf54e0c03')
 
-    @patch('parse.parse_peer_logic_validation', lambda a: LogLineWithHash(None, 'node-0', 'block_hash'))
+    @patch('parse.parse_peer_logic_validation', lambda line: LogLineWithHash(None, 'node-0', 'block_hash'))
     def test_peer_logic_validation_parse(self):
         self.parser.nodes_create_blocks['node-0'] = CreateNewBlockLogLine(None, None, None, None)
 
@@ -249,7 +249,7 @@ class TestParse(TestCase):
         self.assertEqual(len(self.context.parsed_blocks), 1)
         self.assertEqual(self.parser.nodes_create_blocks['node-0'], None)
 
-    @patch('parse.parse_peer_logic_validation', lambda a: UpdateTipLogLine(None, 'node-0', None, None, None))
+    @patch('parse.parse_peer_logic_validation', lambda line: UpdateTipLogLine(None, 'node-0', None, None, None))
     def test_update_tip_parser_with_previous_no_create_new_block(self):
         self.parser.peer_logic_validation_parser('line')
 
@@ -265,7 +265,7 @@ class TestParse(TestCase):
         self.assertEqual(checking_mempool.txs, 5878)
         self.assertEqual(checking_mempool.inputs, 5999)
 
-    @patch('parse.parse_checking_mempool', lambda a: CheckingMempoolLogLine(None, None, None, None))
+    @patch('parse.parse_checking_mempool', lambda line: CheckingMempoolLogLine(None, None, None, None))
     def test_checking_mempool_parser(self):
         self.parser.checking_mempool_parser('line')
 
@@ -281,7 +281,7 @@ class TestParse(TestCase):
         self.assertEqual(tick_log_line.start, 45.12)
         self.assertEqual(tick_log_line.duration, 0.9823310375213623)
 
-    @patch('parse.parse_tick_log_line', lambda a: TickLogLine(None, None, None))
+    @patch('parse.parse_tick_log_line', lambda line: TickLogLine(None, None, None))
     def test_checking_mempool_parser(self):
         self.parser.tick_parser('line')
 
