@@ -69,10 +69,10 @@ demo5:
 				--verbose
 
 multidemo1:
-    cd code; \
-        python3 simcoin.py \
-            multi-run \
-                --repeat 3 \
+	cd code; \
+		python3 simcoin.py \
+			multi-run \
+				--repeat 3 \
 				--node-group-a bitcoin 5 1 10 simcoin/patched:v1 \
 				--blocks-per-tick 0.5 \
 				--amount-of-ticks 50 \
