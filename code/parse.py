@@ -138,7 +138,7 @@ def parse_create_new_block(line):
     matched = re.match(regex, line)
 
     if matched is None:
-        raise ParseException("Didn't matched CreateNewBlock log line.")
+        raise ParseException("Didn't matched 'CreateNewBlock' log line.")
 
     return CreateNewBlockLogLine(
         parse_datetime(matched.group(1)),
@@ -156,7 +156,7 @@ def parse_update_tip(line):
     matched = re.match(regex, line)
 
     if matched is None:
-        raise ParseException("Didn't matched CreateNewBlock log line.")
+        raise ParseException("Didn't matched 'CreateNewBlock' log line.")
 
     return UpdateTipLogLine(parse_datetime(matched.group(1)), str(matched.group(2)), str(matched.group(3)),
                             int(matched.group(4)), int(matched.group(5)))
@@ -167,7 +167,7 @@ def parse_received_block(line):
     matched = re.match(regex, line)
 
     if matched is None:
-        raise ParseException("Didn't matched Received block log line.")
+        raise ParseException("Didn't matched 'Received block' log line.")
 
     return LogLineWithHash(parse_datetime(matched.group(1)), str(matched.group(2)), str(matched.group(3)))
 
@@ -179,7 +179,7 @@ def parse_successfully_reconstructed_block(line):
     matched = re.match(regex, line)
 
     if matched is None:
-        raise ParseException("Didn't matched Successfully reconstructed block log line.")
+        raise ParseException("Didn't matched 'Reconstructed block' log line.")
 
     return LogLineWithHash(parse_datetime(matched.group(1)), str(matched.group(2)), str(matched.group(3)))
 
@@ -189,7 +189,7 @@ def parse_add_to_wallet(line):
     matched = re.match(regex, line)
 
     if matched is None:
-        raise ParseException("Didn't matched AddToWallet log line.")
+        raise ParseException("Didn't matched 'AddToWallet' log line.")
 
     return LogLineWithHash(parse_datetime(matched.group(1)), str(matched.group(2)), str(matched.group(3)))
 
@@ -201,7 +201,7 @@ def parse_accept_to_memory_pool(line):
     matched = re.match(regex, line)
 
     if matched is None:
-        raise ParseException("Didn't matched AcceptToMemoryPool log line.")
+        raise ParseException("Didn't matched 'AcceptToMemoryPool' log line.")
 
     return LogLineWithHash(parse_datetime(matched.group(1)), str(matched.group(2)), str(matched.group(4)))
 
@@ -213,7 +213,7 @@ def parse_peer_logic_validation(line):
     matched = re.match(regex, line)
 
     if matched is None:
-        raise ParseException("Didn't matched AcceptToMemoryPool log line.")
+        raise ParseException("Didn't matched 'PeerLogicValidation' log line.")
 
     return LogLineWithHash(parse_datetime(matched.group(1)), str(matched.group(2)), str(matched.group(3)))
 
@@ -223,7 +223,7 @@ def parse_checking_mempool(line):
     matched = re.match(regex, line)
 
     if matched is None:
-        raise ParseException("Didn't matched AcceptToMemoryPool log line.")
+        raise ParseException("Didn't matched 'Checking mempool' log line.")
 
     return CheckingMempoolLogLine(parse_datetime(matched.group(1)), str(matched.group(2)),
                                   int(matched.group(3)), int(matched.group(4)))
@@ -235,7 +235,7 @@ def parse_tick_log_line(line):
     matched = re.match(regex, line)
 
     if matched is None:
-        raise ParseException("Didn't matched tick log line.")
+        raise ParseException("Didn't matched 'Tick' log line.")
 
     return TickLogLine(parse_datetime(matched.group(1)), float(matched.group(3)), float(matched.group(4)))
 
@@ -246,7 +246,7 @@ def parse_tx_creation_exception(line):
     matched = re.match(regex, line)
 
     if matched is None:
-        raise ParseException("Didn't matched tx exception log line.")
+        raise ParseException("Didn't matched 'Tx exception' log line.")
 
     return ExceptionLogLine(parse_datetime(matched.group(1)), str(matched.group(3)), str(matched.group(4)))
 
@@ -257,7 +257,7 @@ def parse_block_creation_exception(line):
     matched = re.match(regex, line)
 
     if matched is None:
-        raise ParseException("Didn't matched block exception log line.")
+        raise ParseException("Didn't matched 'Block exception' log line.")
 
     return ExceptionLogLine(parse_datetime(matched.group(1)), str(matched.group(3)), str(matched.group(4)))
 
@@ -268,7 +268,7 @@ def parse_rpc_exception(line):
     matched = re.match(regex, line)
 
     if matched is None:
-        raise ParseException("Didn't matched RPC exception log line.")
+        raise ParseException("Didn't matched 'RPC exception' log line.")
 
     return RPCExceptionLogLine(parse_datetime(matched.group(1)), str(matched.group(3)), str(matched.group(4)),
                             str(matched.group(5)))
