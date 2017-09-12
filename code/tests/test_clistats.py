@@ -36,7 +36,6 @@ class TestCliStats(TestCase):
 
         self.context.first_block_height = 10
         self.context.all_bitcoin_nodes = {'0': node_0}
-        self.cli_stats.tag = 'test'
 
         self.cli_stats.save_consensus_chain()
 
@@ -54,7 +53,6 @@ class TestCliStats(TestCase):
 
         self.context.first_block_height = 10
         self.context.all_bitcoin_nodes = {'0': node_0, '1': node_1}
-        self.cli_stats.tag = 'test'
 
         self.cli_stats.save_consensus_chain()
 
@@ -73,7 +71,6 @@ class TestCliStats(TestCase):
 
         self.context.first_block_height = 10
         self.context.all_bitcoin_nodes = {'0': node_0, '1': node_1}
-        self.cli_stats.tag = 'test'
 
         self.cli_stats.save_consensus_chain()
 
@@ -100,7 +97,6 @@ class TestCliStats(TestCase):
         node_1.execute_rpc.side_effect = [7, 'hash11', 'hash22', 'hash33']
         self.context.first_block_height = 5
         self.context.all_bitcoin_nodes = {'0': node_0, '1': node_1}
-        self.cli_stats.tag = 'test'
 
         self.cli_stats.save_chains()
 
