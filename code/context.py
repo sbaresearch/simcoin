@@ -37,7 +37,7 @@ class Context:
         self.txs_received = []
         self.tick_infos = []
         self.general_infos = {}
-        self.tips = {}
+        self.tips = []
 
     def create(self):
         self.config_nodes = nodes_config.read()
