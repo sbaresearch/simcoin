@@ -1,8 +1,6 @@
 import config
 import utils
-import operator
 import logging
-from utils import Values
 from bitcoinrpc.authproxy import JSONRPCException
 import csv
 
@@ -55,49 +53,10 @@ class CliStats:
                 w.writerow(row)
 
     def node_stats(self):
-        with open(config.nodes_csv, 'w') as file:
-            file.write('name;'
-                       'headers_only;headers_only_median_branchlen;headers_only_std_branchlen;'
-                       'total_tips;total_tips_median_branchlen;total_tips_std_branchlen;'
-                       'valid_fork;valid_fork_median_branchlen;valid_fork_std_branchlen;'
-                       'valid_headers;valid_headers_median_branchlen;valid_headers_std_branchlen;tag\n')
+        with open(config.tips_csv, 'w') as file:
+            file.write('name;status;branchlen;tag\n')
             for node in self.context.all_bitcoin_nodes.values():
-                file.write('{}'.format(node.name))
-
                 tips = node.execute_rpc('getchaintips')
-                tips_stats = tips_statistics(tips)
-                sorted_tips_stats = sorted(tips_stats.items(), key=operator.itemgetter(0))
 
-                for tip_stats_tuple in sorted_tips_stats:
-                    tip_stats = tip_stats_tuple[1]
-                    file.write(';{};{};{}'.format(tip_stats.stats.count, tip_stats.stats.median, tip_stats.stats.std))
-                file.write(';'+self.tag)
-                file.write('\n')
-
-
-tip_types = ['headers-only', 'valid-fork', 'valid-headers']
-
-
-def tips_statistics(tips):
-    tip_stats = {tip_type: Values() for tip_type in tip_types}
-
-    for tip in tips:
-        if tip['status'] == 'active':
-            # omit active tip
-            pass
-        else:
-            try:
-                tip_stats[tip['status']].values.append(tip['branchlen'])
-            except KeyError:
-                logging.error('Unknown tip type={}'.format(tip['status']))
-                exit(-1)
-
-    all_values = []
-    for _, tip_stat in tip_stats.items():
-        all_values.extend(tip_stat.values)
-    tip_stats['total'] = Values.from_array(all_values)
-
-    for _, tip_stat in tip_stats.items():
-        tip_stat.calc()
-
-    return tip_stats
+                for tip in tips:
+                    file.write('{};{};{};{}\n'.format(node.name, tip['status'], tip['branchlen'], self.tag))
