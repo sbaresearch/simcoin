@@ -9,6 +9,7 @@ from parse import TxEvent
 from parse import ExceptionEvent
 from parse import TickEvent
 from parse import RPCExceptionEvent
+from clistats import Tip
 import utils
 
 
@@ -26,6 +27,7 @@ class FileWriter:
         self.write_csv(config.rpc_exceptions_csv, RPCExceptionEvent.csv_header(), self.context.rpc_exceptions)
         self.write_csv(config.blocks_received_csv, ReceivedEvent.csv_header(), self.context.blocks_received)
         self.write_csv(config.txs_received_csv, ReceivedEvent.csv_header(), self.context.txs_received)
+        self.write_csv(config.tips_csv, Tip.csv_header(), self.context.tips)
 
         self.create_general_infos_json()
 

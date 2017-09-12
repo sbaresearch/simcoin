@@ -110,19 +110,13 @@ class TestCliStats(TestCase):
         self.assertTrue('node-1;hash11;hash22;hash33;test\r\n' in lines)
         self.assertTrue('node-0;hash1;hash2;test\r\n' in lines)
 
-    @patch('builtins.open', new_callable=mock_open)
-    def test_node_stats(self, m_open):
+    def test_node_stats(self):
         node_0 = MagicMock()
         node_0.name = 'name'
         node_0.execute_rpc.return_value = [{'status': 'active', 'branchlen': 2}]
         self.context.all_bitcoin_nodes = {'0': node_0}
-        self.cli_stats.tag = 'test'
+        self.context.tips = []
 
         self.cli_stats.node_stats()
 
-        m_open.assert_called_with(config.tips_csv, 'w')
-        handle = m_open()
-        self.assertEqual(handle.write.call_count, 2)
-        self.assertEqual(handle.write.call_args_list[0][0][0], 'name;status;branchlen;tag\n')
-
-        self.assertEqual(handle.write.call_args_list[1][0][0], 'name;active;2;test\n')
+        self.assertEqual(len(self.context.tips), 1)

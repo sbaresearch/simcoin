@@ -51,10 +51,22 @@ class CliStats:
                 w.writerow(row)
 
     def node_stats(self):
-        with open(config.tips_csv, 'w') as file:
-            file.write('name;status;branchlen\n')
-            for node in self.context.all_bitcoin_nodes.values():
-                tips = node.execute_rpc('getchaintips')
+        for node in self.context.all_bitcoin_nodes.values():
+            tips = node.execute_rpc('getchaintips')
 
-                for tip in tips:
-                    file.write('{};{};{}\n'.format(node.name, tip['status'], tip['branchlen']))
+            for tip in tips:
+                self.context.tips.append(Tip(node.name, tip['status'], tip['branchlen']))
+
+
+class Tip:
+    def __init__(self, node, status, branchlen):
+        self.node = node
+        self.status = status
+        self.branchlen = branchlen
+
+    @staticmethod
+    def csv_header():
+        return ['node', 'status', 'branchlen']
+
+    def vars_to_array(self):
+        return [self.node, self.status, self.branchlen]
