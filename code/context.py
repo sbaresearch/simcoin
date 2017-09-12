@@ -36,7 +36,8 @@ class Context:
         self.parsed_txs = {}
         self.txs_received = []
         self.tick_infos = []
-        self.general_infos = dict(tag=self.args.tag)
+        self.general_infos = {}
+        self.tips = []
 
     def create(self):
         self.config_nodes = nodes_config.read()

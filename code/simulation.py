@@ -28,5 +28,5 @@ def run():
 
     runner.run()
 
-    logging.info("the duration of the experiment was {} seconds".format(str(time.time() - start)))
+    logging.info("The duration of the simulation was {} seconds".format(str(time.time() - start)))
     bash.check_output('cp {} {}'.format(config.log_file, config.sim_dir))
