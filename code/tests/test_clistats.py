@@ -16,36 +16,31 @@ class TestCliStats(TestCase):
         self.context = MagicMock()
         self.cli_stats = CliStats(self.context)
 
-    @patch('builtins.open', new_callable=mock_open)
-    def test_save_consensus_chain_first_node_no_block(self, mock):
+    def test_save_consensus_chain_first_node_no_block(self):
         node_0 = MagicMock()
         node_0.execute_rpc.side_effect = JSONRPCException({'code': -1, 'message': 'error'})
         self.context.first_block_height = 10
         self.context.all_bitcoin_nodes = {'0': node_0}
+        self.context.consensus_chain = []
 
         self.cli_stats.save_consensus_chain()
 
-        mock.assert_called_with(config.consensus_chain_csv, 'w')
-        handle = mock()
-        handle.write.assert_called_once_with('height;block_hash;tag\r\n')
+        self.assertEqual(len(self.context.consensus_chain), 0)
 
-    @patch('builtins.open', new_callable=mock_open)
-    def test_save_consensus_chain_one_node(self, mock):
+    def test_save_consensus_chain_one_node(self):
         node_0 = MagicMock()
         node_0.execute_rpc.side_effect = ['hash', JSONRPCException({'code': -1, 'message': 'error'})]
 
         self.context.first_block_height = 10
         self.context.all_bitcoin_nodes = {'0': node_0}
+        self.context.consensus_chain = []
 
         self.cli_stats.save_consensus_chain()
 
-        handle = mock()
-        self.assertEqual(handle.write.call_count, 2)
-        self.assertEqual(handle.write.call_args_list[0][0][0], 'height;block_hash;tag\r\n')
-        self.assertEqual(handle.write.call_args_list[1][0][0], '10;hash;test\r\n')
+        self.assertEqual(len(self.context.consensus_chain), 1)
+        self.assertEqual(self.context.consensus_chain[0], 'hash')
 
-    @patch('builtins.open', new_callable=mock_open)
-    def test_save_consensus_chain_multiple_nodes(self, mock):
+    def test_save_consensus_chain_multiple_nodes(self):
         node_0 = MagicMock()
         node_0.execute_rpc.side_effect = ['hash1', 'hash2', JSONRPCException({'code': -1, 'message': 'error'})]
         node_1 = MagicMock()
@@ -53,17 +48,15 @@ class TestCliStats(TestCase):
 
         self.context.first_block_height = 10
         self.context.all_bitcoin_nodes = {'0': node_0, '1': node_1}
+        self.context.consensus_chain = []
 
         self.cli_stats.save_consensus_chain()
 
-        handle = mock()
-        lines = [line[0][0] for line in handle.write.call_args_list]
-        self.assertEqual(len(lines), 3)
-        self.assertTrue('10;hash1;test\r\n' in lines)
-        self.assertTrue('11;hash2;test\r\n' in lines)
+        self.assertEqual(len(self.context.consensus_chain), 2)
+        self.assertEqual(self.context.consensus_chain[0], 'hash1')
+        self.assertEqual(self.context.consensus_chain[1], 'hash2')
 
-    @patch('builtins.open', new_callable=mock_open)
-    def test_save_consensus_chain_one_node_trailing_back(self, mock):
+    def test_save_consensus_chain_one_node_trailing_back(self):
         node_0 = MagicMock()
         node_0.execute_rpc.side_effect = ['hash1', 'hash2']
         node_1 = MagicMock()
@@ -71,13 +64,12 @@ class TestCliStats(TestCase):
 
         self.context.first_block_height = 10
         self.context.all_bitcoin_nodes = {'0': node_0, '1': node_1}
+        self.context.consensus_chain = []
 
         self.cli_stats.save_consensus_chain()
 
-        handle = mock()
-        lines = [line[0][0] for line in handle.write.call_args_list]
-        self.assertEqual(len(lines), 2)
-        self.assertTrue('10;hash1;test\r\n' in lines)
+        self.assertEqual(len(self.context.consensus_chain), 1)
+        self.assertEqual(self.context.consensus_chain[0], 'hash1')
 
     def test_node_stats(self):
         node_0 = MagicMock()

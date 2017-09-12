@@ -1,8 +1,6 @@
-import config
 import utils
 import logging
 from bitcoinrpc.authproxy import JSONRPCException
-import csv
 
 
 class CliStats:
@@ -17,24 +15,20 @@ class CliStats:
         logging.info('Executed cli stats')
 
     def save_consensus_chain(self):
-        with open(config.consensus_chain_csv, 'w') as file:
-            w = csv.writer(file, delimiter=';')
-            w.writerow(['height', 'block_hash'])
-            height = self.context.first_block_height
-            nodes = self.context.all_bitcoin_nodes.values()
-            while True:
-                blocks = []
-                for node in nodes:
-                    try:
-                        blocks.append(node.execute_rpc('getblockhash', height))
-                    except JSONRPCException:
-                        break
-                if len(blocks) == len(nodes) and utils.check_equal(blocks):
-                    self.context.consensus_chain.append(blocks[0])
-                    w.writerow([height, blocks[0]])
-                    height += 1
-                else:
+        height = self.context.first_block_height
+        nodes = self.context.all_bitcoin_nodes.values()
+        while True:
+            blocks = []
+            for node in nodes:
+                try:
+                    blocks.append(node.execute_rpc('getblockhash', height))
+                except JSONRPCException:
                     break
+            if len(blocks) == len(nodes) and utils.check_equal(blocks):
+                self.context.consensus_chain.append(blocks[0])
+                height += 1
+            else:
+                break
 
     def node_stats(self):
         for node in self.context.all_bitcoin_nodes.values():
