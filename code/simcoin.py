@@ -12,9 +12,6 @@ import bitcoin
 import utils
 
 
-# sys.tracebacklimit = None
-
-
 def run():
     nodes_config.create(unknown_arguments=True)
 
