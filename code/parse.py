@@ -219,7 +219,7 @@ def parse_checking_mempool(line):
     if matched is None:
         raise ParseException("Didn't matched 'Checking mempool' log line.")
 
-    return CheckingMempoolLogLine(parse_datetime(matched.group(1)), str(matched.group(2)),
+    return Mempool(parse_datetime(matched.group(1)), str(matched.group(2)),
                                   int(matched.group(3)), int(matched.group(4)))
 
 
@@ -281,9 +281,22 @@ UpdateTipLogLine = namedtuple('UpdateTipLogLine', 'timestamp node block_hash hei
 
 LogLineWithHash = namedtuple('LogLineWithHash', 'timestamp node obj_hash')
 
-CheckingMempoolLogLine = namedtuple('CheckingMempoolLogLine', 'timestamp node txs inputs')
-
 RPCExceptionLogLine = namedtuple('RPCExceptionLogLine', 'timestamp node method exception')
+
+
+class Mempool:
+    def __init__(self, timestamp, node, txs, inputs):
+        self.timestamp = timestamp
+        self.node = node
+        self.txs = txs
+        self.inputs = inputs
+
+    @staticmethod
+    def csv_header():
+        return ['timestamp', 'node', 'txs', 'inputs']
+
+    def vars_to_array(self):
+        return [self.timestamp, self.node, self.txs, self.inputs]
 
 
 class Tick:

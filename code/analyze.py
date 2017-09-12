@@ -8,6 +8,7 @@ from parse import BlockStats
 from parse import TxStats
 from parse import Exce
 from parse import Tick
+from parse import Mempool
 
 
 class Analyzer:
@@ -23,7 +24,7 @@ class Analyzer:
         write_csv(config.tx_exceptions_csv, Exce.csv_header(), self.context.tx_exceptions)
         write_csv(config.block_exceptions_csv, Exce.csv_header(), self.context.block_exceptions)
         write_csv(config.tick_infos_csv, Tick.csv_header(), self.context.tick_infos)
-        self.create_mempool_snapshots_csv()
+        write_csv(config.mempool_snapshots_csv, Mempool.csv_header(), self.context.mempool_snapshots)
         self.create_rpc_exceptions_csv()
         self.create_general_infos_json()
         write_csv(config.blocks_received_csv, ReceivedEvent.csv_header(), self.context.blocks_received)
