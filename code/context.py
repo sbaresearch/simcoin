@@ -35,7 +35,6 @@ class Context:
         self.blocks_received = []
         self.parsed_txs = {}
         self.txs_received = []
-        self.mempool_snapshots = []
         self.tick_infos = []
         self.general_infos = dict(tag=self.args.tag)
 

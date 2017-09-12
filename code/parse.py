@@ -18,7 +18,6 @@ class Parser:
             self.tx_creation_parser,
             self.tx_received_parser,
             self.peer_logic_validation_parser,
-            self.checking_mempool_parser,
             self.tick_parser,
             self.tx_exception_parser,
             self.block_exception_parser,
@@ -99,11 +98,6 @@ class Parser:
                                      create_new_block.total_size, create_new_block.txs)
             self.context.parsed_blocks[block_stats.block_hash] = block_stats
             self.nodes_create_blocks[log_line_with_hash.node] = None
-
-    def checking_mempool_parser(self, line):
-        self.context.mempool_snapshots.append(
-            parse_checking_mempool(line)
-        )
 
     def tick_parser(self, line):
         self.context.tick_infos.append(
@@ -212,17 +206,6 @@ def parse_peer_logic_validation(line):
     return EventWithHash(parse_datetime(matched.group(1)), str(matched.group(2)), str(matched.group(3)))
 
 
-def parse_checking_mempool(line):
-    regex = config.log_prefix_full + 'Checking mempool with ([0-9]+) transactions and ([0-9]+) inputs'
-    matched = re.match(regex, line)
-
-    if matched is None:
-        raise ParseException("Didn't matched 'Checking mempool' log line.")
-
-    return MempoolEvent(parse_datetime(matched.group(1)), str(matched.group(2)),
-                        int(matched.group(3)), int(matched.group(4)))
-
-
 def parse_tick_log_line(line):
     regex = config.log_prefix_full + '\[.*\] \[.*\]  The tick started at ([0-9]+\.[0-9]+)' \
                                      ' and took ([0-9]+\.[0-9]+)s to finish$'
@@ -298,20 +281,6 @@ class RPCExceptionEvent(Event):
 
     def vars_to_array(self):
         return [self.timestamp, self.node, self.method, self.exception]
-
-
-class MempoolEvent(Event):
-    def __init__(self, timestamp, node, txs, inputs):
-        super().__init__(timestamp, node)
-        self.txs = txs
-        self.inputs = inputs
-
-    @staticmethod
-    def csv_header():
-        return ['timestamp', 'node', 'txs', 'inputs']
-
-    def vars_to_array(self):
-        return [self.timestamp, self.node, self.txs, self.inputs]
 
 
 class ExceptionEvent(Event):

@@ -9,7 +9,6 @@ from mock import Mock
 from parse import TickEvent
 from parse import CreateNewBlockEvent
 from parse import UpdateTipEvent
-from parse import MempoolEvent
 from parse import EventWithHash
 from parse import ReceivedEvent
 from parse import BlockEvent
@@ -31,7 +30,6 @@ class TestParse(TestCase):
         self.context = Mock()
         self.context.parsed_blocks = {}
         self.context.parsed_txs = {}
-        self.context.mempool_snapshots = []
         self.context.tick_infos = []
         self.context.all_bitcoin_nodes.values.return_value = [node_0, node_1, node_2]
         self.parser = Parser(self.context)
@@ -259,22 +257,6 @@ class TestParse(TestCase):
 
         self.assertEqual(len(self.context.parsed_blocks), 0)
 
-    def test_parse_checking_mempool(self):
-        checking_mempool = parse.parse_checking_mempool(
-            '2017-07-31 16:09:28.663985 node-0 45 Checking mempool with 5878 transactions and 5999 inputs'
-        )
-
-        self.assertEqual(checking_mempool.timestamp, datetime(2017, 7, 31, 16, 9, 28, 663985, pytz.UTC).timestamp())
-        self.assertEqual(checking_mempool.node, 'node-0')
-        self.assertEqual(checking_mempool.txs, 5878)
-        self.assertEqual(checking_mempool.inputs, 5999)
-
-    @patch('parse.parse_checking_mempool', lambda line: MempoolEvent(None, None, None, None))
-    def test_checking_mempool_parser(self):
-        self.parser.checking_mempool_parser('line')
-
-        self.assertEqual(len(self.context.mempool_snapshots), 1)
-
     def test_parse_tick(self):
         tick_log_line = parse.parse_tick_log_line(
             '2017-08-19 16:05:14.609000 simcoin 1 [MainThread  ] [INFO ]  The tick started at 45.12'
@@ -286,7 +268,7 @@ class TestParse(TestCase):
         self.assertEqual(tick_log_line.duration, 0.9823310375213623)
 
     @patch('parse.parse_tick_log_line', lambda line: TickEvent(None, None, None))
-    def test_checking_mempool_parser(self):
+    def test_tick_parser(self):
         self.parser.tick_parser('line')
 
         self.assertEqual(len(self.context.tick_infos), 1)
