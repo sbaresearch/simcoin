@@ -51,7 +51,7 @@ class Parser:
 
         create_new_block = self.nodes_create_blocks[update_tip.node]
         if create_new_block is not None:
-            block_stats = BlockStats(create_new_block.timestamp, create_new_block.node, update_tip.block_hash,
+            block_stats = BlockEvent(create_new_block.timestamp, create_new_block.node, update_tip.block_hash,
                                      create_new_block.total_size, create_new_block.txs)
             block_stats.height = update_tip.height
             self.context.parsed_blocks[update_tip.block_hash] = block_stats
@@ -78,7 +78,7 @@ class Parser:
     def tx_creation_parser(self, line):
         log_line_with_hash = parse_add_to_wallet(line)
 
-        self.context.parsed_txs[log_line_with_hash.obj_hash] = TxStats(log_line_with_hash.timestamp,
+        self.context.parsed_txs[log_line_with_hash.obj_hash] = TxEvent(log_line_with_hash.timestamp,
                                                                        log_line_with_hash.node,
                                                                        log_line_with_hash.obj_hash)
 
@@ -95,7 +95,7 @@ class Parser:
 
         if create_new_block is not None:
 
-            block_stats = BlockStats(create_new_block.timestamp, create_new_block.node, log_line_with_hash.obj_hash,
+            block_stats = BlockEvent(create_new_block.timestamp, create_new_block.node, log_line_with_hash.obj_hash,
                                      create_new_block.total_size, create_new_block.txs)
             self.context.parsed_blocks[block_stats.block_hash] = block_stats
             self.nodes_create_blocks[log_line_with_hash.node] = None
@@ -219,8 +219,8 @@ def parse_checking_mempool(line):
     if matched is None:
         raise ParseException("Didn't matched 'Checking mempool' log line.")
 
-    return Mempool(parse_datetime(matched.group(1)), str(matched.group(2)),
-                                  int(matched.group(3)), int(matched.group(4)))
+    return MempoolEvent(parse_datetime(matched.group(1)), str(matched.group(2)),
+                        int(matched.group(3)), int(matched.group(4)))
 
 
 def parse_tick_log_line(line):
@@ -231,7 +231,7 @@ def parse_tick_log_line(line):
     if matched is None:
         raise ParseException("Didn't matched 'Tick' log line.")
 
-    return Tick(parse_datetime(matched.group(1)), float(matched.group(3)), float(matched.group(4)))
+    return TickEvent(parse_datetime(matched.group(1)), float(matched.group(3)), float(matched.group(4)))
 
 
 def parse_tx_creation_exception(line):
@@ -242,7 +242,7 @@ def parse_tx_creation_exception(line):
     if matched is None:
         raise ParseException("Didn't matched 'Tx exception' log line.")
 
-    return Exce(parse_datetime(matched.group(1)), str(matched.group(3)), str(matched.group(4)))
+    return ExceptionEvent(parse_datetime(matched.group(1)), str(matched.group(3)), str(matched.group(4)))
 
 
 def parse_block_creation_exception(line):
@@ -253,7 +253,7 @@ def parse_block_creation_exception(line):
     if matched is None:
         raise ParseException("Didn't matched 'Block exception' log line.")
 
-    return Exce(parse_datetime(matched.group(1)), str(matched.group(3)), str(matched.group(4)))
+    return ExceptionEvent(parse_datetime(matched.group(1)), str(matched.group(3)), str(matched.group(4)))
 
 
 def parse_rpc_exception(line):
@@ -264,8 +264,8 @@ def parse_rpc_exception(line):
     if matched is None:
         raise ParseException("Didn't matched 'RPC exception' log line.")
 
-    return RPCException(parse_datetime(matched.group(1)), str(matched.group(3)), str(matched.group(4)),
-                        str(matched.group(5)))
+    return RPCExceptionEvent(parse_datetime(matched.group(1)), str(matched.group(3)), str(matched.group(4)),
+                             str(matched.group(5)))
 
 
 def parse_datetime(date_time):
@@ -282,7 +282,7 @@ UpdateTipLogLine = namedtuple('UpdateTipLogLine', 'timestamp node block_hash hei
 LogLineWithHash = namedtuple('LogLineWithHash', 'timestamp node obj_hash')
 
 
-class RPCException:
+class RPCExceptionEvent:
     def __init__(self, timestamp, node, method, exception):
         self.timestamp = timestamp
         self.node = node
@@ -296,7 +296,8 @@ class RPCException:
     def vars_to_array(self):
         return [self.timestamp, self.node, self.method, self.exception]
 
-class Mempool:
+
+class MempoolEvent:
     def __init__(self, timestamp, node, txs, inputs):
         self.timestamp = timestamp
         self.node = node
@@ -311,7 +312,7 @@ class Mempool:
         return [self.timestamp, self.node, self.txs, self.inputs]
 
 
-class Tick:
+class TickEvent:
     def __init__(self, timestamp, start, duration):
         self.timestamp = timestamp
         self.start = start
@@ -325,7 +326,7 @@ class Tick:
         return [self.timestamp, self.start, self.duration]
 
 
-class Exce:
+class ExceptionEvent:
     def __init__(self, timestamp, node, exception):
         self.timestamp = timestamp
         self.node = node
@@ -354,7 +355,7 @@ class ReceivedEvent:
         return [self.timestamp, self.node, self.obj_hash, self.propagation_duration]
 
 
-class BlockStats:
+class BlockEvent:
     def __init__(self, timestamp, node, block_hash, total_size, txs):
         self.timestamp = timestamp
         self.node = node
@@ -372,7 +373,7 @@ class BlockStats:
         return [self.timestamp, self.node, self.block_hash, self.stale, self.total_size, self.txs, self.height]
 
 
-class TxStats:
+class TxEvent:
 
     def __init__(self, timestamp, node, tx_hash):
         self.timestamp = timestamp

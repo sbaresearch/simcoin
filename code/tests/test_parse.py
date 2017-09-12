@@ -6,15 +6,15 @@ from mock import patch
 from mock import mock_open
 from parse import Parser
 from mock import Mock
-from parse import TickLogLine
+from parse import TickEvent
 from parse import CreateNewBlockLogLine
 from parse import UpdateTipLogLine
-from parse import CheckingMempoolLogLine
+from parse import MempoolEvent
 from parse import LogLineWithHash
 from parse import ReceivedEvent
-from parse import BlockStats
+from parse import BlockEvent
 from datetime import datetime
-from parse import TxStats
+from parse import TxEvent
 import pytz
 
 
@@ -122,7 +122,7 @@ class TestParse(TestCase):
 
     @patch('parse.parse_update_tip', lambda line: UpdateTipLogLine(None, 'node-0', 'block_hash', 45, None))
     def test_update_tip_parser_with_block_stats_already_set(self):
-        self.context.parsed_blocks['block_hash'] = BlockStats(None, None, None, None, None)
+        self.context.parsed_blocks['block_hash'] = BlockEvent(None, None, None, None, None)
 
         self.parser.tip_updated_parser('line')
 
@@ -163,7 +163,7 @@ class TestParse(TestCase):
     @patch('parse.parse_received_block', lambda line: ReceivedEvent(10, None, 'block_hash'))
     def test_received_block_parser(self):
         self.context.blocks_received = []
-        self.context.parsed_blocks = {'block_hash': BlockStats(6, None, None, None, None)}
+        self.context.parsed_blocks = {'block_hash': BlockEvent(6, None, None, None, None)}
 
         self.parser.block_received_parser('line')
 
@@ -174,7 +174,7 @@ class TestParse(TestCase):
     @patch('parse.parse_successfully_reconstructed_block', lambda line: ReceivedEvent(10, None, 'block_hash'))
     def test_block_reconstructed_parser(self):
         self.context.blocks_received = []
-        self.context.parsed_blocks = {'block_hash': BlockStats(6, None, None, None, None)}
+        self.context.parsed_blocks = {'block_hash': BlockEvent(6, None, None, None, None)}
 
         self.parser.block_reconstructed_parser('line')
 
@@ -217,7 +217,7 @@ class TestParse(TestCase):
     @patch('parse.parse_accept_to_memory_pool', lambda line: ReceivedEvent(10, 'node-0', 'tx_hash'))
     def test_tx_received_parser(self):
         self.context.txs_received = []
-        self.context.parsed_txs['tx_hash'] = TxStats(4, 'node-1', 'tx_hash')
+        self.context.parsed_txs['tx_hash'] = TxEvent(4, 'node-1', 'tx_hash')
 
         self.parser.tx_received_parser('line')
 
@@ -269,7 +269,7 @@ class TestParse(TestCase):
         self.assertEqual(checking_mempool.txs, 5878)
         self.assertEqual(checking_mempool.inputs, 5999)
 
-    @patch('parse.parse_checking_mempool', lambda line: CheckingMempoolLogLine(None, None, None, None))
+    @patch('parse.parse_checking_mempool', lambda line: MempoolEvent(None, None, None, None))
     def test_checking_mempool_parser(self):
         self.parser.checking_mempool_parser('line')
 
@@ -285,7 +285,7 @@ class TestParse(TestCase):
         self.assertEqual(tick_log_line.start, 45.12)
         self.assertEqual(tick_log_line.duration, 0.9823310375213623)
 
-    @patch('parse.parse_tick_log_line', lambda line: TickLogLine(None, None, None))
+    @patch('parse.parse_tick_log_line', lambda line: TickEvent(None, None, None))
     def test_checking_mempool_parser(self):
         self.parser.tick_parser('line')
 
