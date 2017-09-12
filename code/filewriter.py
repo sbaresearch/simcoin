@@ -32,7 +32,7 @@ class FileWriter:
         logging.info('Executed analyzer')
 
     def create_general_infos_json(self):
-        self.context.general_infos['postprocessing_end'] = time.time()
+        self.context.general_infos['step_times']['postprocessing_end'] = time.time()
         with open(config.general_infos_json, 'w') as file:
             file.write('{}\n'.format(json.dumps(self.context.general_infos)))
 
