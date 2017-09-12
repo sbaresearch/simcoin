@@ -330,6 +330,13 @@ class TxStats:
         self.node = node
         self.tx_hash = tx_hash
 
+    @staticmethod
+    def csv_header():
+        return ['timestamp', 'node', 'tx_hash']
+
+    def vars_to_array(self):
+        return [self.timestamp, self.node, self.tx_hash]
+
 
 class ParseException(Exception):
     pass

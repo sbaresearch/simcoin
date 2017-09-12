@@ -14,24 +14,6 @@ from mock import Mock
 class TestAnalyze(TestCase):
 
     @patch('builtins.open', new_callable=mock_open)
-    def test_create_tx_csv(self, m_open):
-        txs = {
-            'tx_hash': TxStats(1, 'node-0', 'tx_hash'),
-        }
-
-        context = Mock()
-        context.parsed_txs = txs
-        context.general_infos = {'tag': 'test'}
-        analyzer = Analyzer(context)
-        analyzer.create_tx_csv()
-
-        m_open.assert_called_with(config.txs_csv, 'w')
-        handle = m_open()
-        self.assertEqual(handle.write.call_count, 2)
-        self.assertEqual(handle.write.call_args_list[0][0][0], 'tx_hash;node;timestamp;tag\r\n')
-        self.assertEqual(handle.write.call_args_list[1][0][0], 'tx_hash;node-0;1;test\r\n')
-
-    @patch('builtins.open', new_callable=mock_open)
     def test_create_tx_exceptions_csv(self, m_open):
         tx_exceptions = [
             ExceptionLogLine('timestamp', 'node-1', 'exception')

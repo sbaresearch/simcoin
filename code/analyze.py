@@ -5,6 +5,7 @@ import json
 import time
 from parse import ReceivedEvent
 from parse import BlockStats
+from parse import TxStats
 
 
 class Analyzer:
@@ -16,7 +17,7 @@ class Analyzer:
 
         self.check_block_stale_or_accepted()
         write_csv(config.blocks_csv, BlockStats.csv_header(), self.context.parsed_blocks)
-        self.create_tx_csv()
+        write_csv(config.txs_csv, TxStats.csv_header(), self.context.parsed_txs)
         self.create_tx_exceptions_csv()
         self.create_block_exceptions_csv()
         self.create_tick_infos_csv()
@@ -33,14 +34,6 @@ class Analyzer:
             block.stale = 'Stale'
             if block.block_hash in self.context.consensus_chain:
                 block.stale = 'Accepted'
-
-    def create_tx_csv(self):
-        with open(config.txs_csv, 'w') as file:
-            w = csv.writer(file, delimiter=';')
-            w.writerow(['tx_hash', 'node', 'timestamp', 'tag'])
-
-            for tx in self.context.parsed_txs.values():
-                w.writerow([tx.tx_hash, tx.node, tx.timestamp, self.tag])
 
     def create_tx_exceptions_csv(self):
         with open(config.tx_exceptions_csv, 'w') as file:
