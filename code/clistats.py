@@ -10,6 +10,7 @@ import csv
 class CliStats:
     def __init__(self, context):
         self.context = context
+        self.tag = context.general_infos['tag']
 
     def execute(self):
         self.save_consensus_chain()
@@ -21,7 +22,7 @@ class CliStats:
     def save_consensus_chain(self):
         with open(config.consensus_chain_csv, 'w') as file:
             w = csv.writer(file, delimiter=';')
-            w.writerow(['height', 'block_hash'])
+            w.writerow(['height', 'block_hash', 'tag'])
             height = self.context.first_block_height
             nodes = self.context.all_bitcoin_nodes.values()
             while True:
@@ -33,7 +34,7 @@ class CliStats:
                         break
                 if len(blocks) == len(nodes) and utils.check_equal(blocks):
                     self.context.consensus_chain.append(blocks[0])
-                    w.writerow([height, blocks[0]])
+                    w.writerow([height, blocks[0],self.tag])
                     height += 1
                 else:
                     break
@@ -41,7 +42,7 @@ class CliStats:
     def save_chains(self):
         with open(config.chains_csv, 'w') as file:
             w = csv.writer(file, delimiter=';')
-            w.writerow(['node', 'block_hashes'])
+            w.writerow(['node', 'block_hashes','tag'])
             for node in self.context.all_bitcoin_nodes.values():
                 height = int(node.execute_rpc('getblockcount'))
                 hashes = []
@@ -50,6 +51,7 @@ class CliStats:
                     height -= 1
                 row = [node.name]
                 row.extend(hashes)
+                row.append(self.tag)
                 w.writerow(row)
 
     def node_stats(self):
@@ -58,7 +60,7 @@ class CliStats:
                        'headers_only;headers_only_median_branchlen;headers_only_std_branchlen;'
                        'total_tips;total_tips_median_branchlen;total_tips_std_branchlen;'
                        'valid_fork;valid_fork_median_branchlen;valid_fork_std_branchlen;'
-                       'valid_headers;valid_headers_median_branchlen;valid_headers_std_branchlen;\n')
+                       'valid_headers;valid_headers_median_branchlen;valid_headers_std_branchlen;tag\n')
             for node in self.context.all_bitcoin_nodes.values():
                 file.write('{}'.format(node.name))
 
@@ -69,7 +71,7 @@ class CliStats:
                 for tip_stats_tuple in sorted_tips_stats:
                     tip_stats = tip_stats_tuple[1]
                     file.write(';{};{};{}'.format(tip_stats.stats.count, tip_stats.stats.median, tip_stats.stats.std))
-                file.write('\n')
+                file.write(';{}\n'.format(self.tag))
 
 
 tip_types = ['headers-only', 'valid-fork', 'valid-headers']

@@ -31,7 +31,7 @@ class TestCliStats(TestCase):
 
         mock.assert_called_with(config.consensus_chain_csv, 'w')
         handle = mock()
-        handle.write.assert_called_once_with('height;block_hash\r\n')
+        handle.write.assert_called_once_with('height;block_hash;tag\r\n')
 
     @patch('builtins.open', new_callable=mock_open)
     def test_save_consensus_chain_one_node(self, mock):
@@ -40,13 +40,14 @@ class TestCliStats(TestCase):
 
         self.context.first_block_height = 10
         self.context.all_bitcoin_nodes = {'0': node_0}
+        self.cli_stats.tag = 'test'
 
         self.cli_stats.save_consensus_chain()
 
         handle = mock()
         self.assertEqual(handle.write.call_count, 2)
-        self.assertEqual(handle.write.call_args_list[0][0][0], 'height;block_hash\r\n')
-        self.assertEqual(handle.write.call_args_list[1][0][0], '10;hash\r\n')
+        self.assertEqual(handle.write.call_args_list[0][0][0], 'height;block_hash;tag\r\n')
+        self.assertEqual(handle.write.call_args_list[1][0][0], '10;hash;test\r\n')
 
     @patch('builtins.open', new_callable=mock_open)
     def test_save_consensus_chain_multiple_nodes(self, mock):
@@ -57,14 +58,15 @@ class TestCliStats(TestCase):
 
         self.context.first_block_height = 10
         self.context.all_bitcoin_nodes = {'0': node_0, '1': node_1}
+        self.cli_stats.tag = 'test'
 
         self.cli_stats.save_consensus_chain()
 
         handle = mock()
         lines = [line[0][0] for line in handle.write.call_args_list]
         self.assertEqual(len(lines), 3)
-        self.assertTrue('10;hash1\r\n' in lines)
-        self.assertTrue('11;hash2\r\n' in lines)
+        self.assertTrue('10;hash1;test\r\n' in lines)
+        self.assertTrue('11;hash2;test\r\n' in lines)
 
     @patch('builtins.open', new_callable=mock_open)
     def test_save_consensus_chain_one_node_trailing_back(self, mock):
@@ -75,13 +77,14 @@ class TestCliStats(TestCase):
 
         self.context.first_block_height = 10
         self.context.all_bitcoin_nodes = {'0': node_0, '1': node_1}
+        self.cli_stats.tag = 'test'
 
         self.cli_stats.save_consensus_chain()
 
         handle = mock()
         lines = [line[0][0] for line in handle.write.call_args_list]
         self.assertEqual(len(lines), 2)
-        self.assertTrue('10;hash1\r\n' in lines)
+        self.assertTrue('10;hash1;test\r\n' in lines)
 
     @patch('builtins.open', new_callable=mock_open)
     def test_save_chains(self, mock):
@@ -89,7 +92,7 @@ class TestCliStats(TestCase):
 
         mock.assert_called_with(config.chains_csv, 'w')
         handle = mock()
-        handle.write.assert_called_once_with('node;block_hashes\r\n')
+        handle.write.assert_called_once_with('node;block_hashes;tag\r\n')
 
     @patch('builtins.open', new_callable=mock_open)
     def test_save_chains_with_nodes(self, mock):
@@ -101,14 +104,15 @@ class TestCliStats(TestCase):
         node_1.execute_rpc.side_effect = [7, 'hash11', 'hash22', 'hash33']
         self.context.first_block_height = 5
         self.context.all_bitcoin_nodes = {'0': node_0, '1': node_1}
+        self.cli_stats.tag = 'test'
 
         self.cli_stats.save_chains()
 
         handle = mock()
         lines = [line[0][0] for line in handle.write.call_args_list]
         self.assertEqual(len(lines), 3)
-        self.assertTrue('node-1;hash11;hash22;hash33\r\n' in lines)
-        self.assertTrue('node-0;hash1;hash2\r\n' in lines)
+        self.assertTrue('node-1;hash11;hash22;hash33;test\r\n' in lines)
+        self.assertTrue('node-0;hash1;hash2;test\r\n' in lines)
 
     @patch('builtins.open', new_callable=mock_open)
     @patch('clistats.tips_statistics')
@@ -116,6 +120,7 @@ class TestCliStats(TestCase):
         node_0 = MagicMock()
         node_0.name = 'name'
         self.context.all_bitcoin_nodes = {'0': node_0}
+        self.cli_stats.tag = 'test'
 
         tips_stats = {
             'headers-only': Values.from_array([1, 3]),
@@ -138,14 +143,14 @@ class TestCliStats(TestCase):
                          'headers_only;headers_only_median_branchlen;headers_only_std_branchlen;'
                          'total_tips;total_tips_median_branchlen;total_tips_std_branchlen;'
                          'valid_fork;valid_fork_median_branchlen;valid_fork_std_branchlen;'
-                         'valid_headers;valid_headers_median_branchlen;valid_headers_std_branchlen;\n')
+                         'valid_headers;valid_headers_median_branchlen;valid_headers_std_branchlen;tag\n')
 
         self.assertEqual(handle.write.call_args_list[1][0][0], 'name')
         self.assertEqual(handle.write.call_args_list[2][0][0], ';2;2.0;1.0')
         self.assertEqual(handle.write.call_args_list[3][0][0], ';2;3.0;2.0')
         self.assertEqual(handle.write.call_args_list[4][0][0], ';2;4.0;3.0')
         self.assertEqual(handle.write.call_args_list[5][0][0], ';2;5.0;4.0')
-        self.assertEqual(handle.write.call_args_list[6][0][0], '\n')
+        self.assertEqual(handle.write.call_args_list[6][0][0], ';test\n')
 
     def test_tips_statistics_unknown_status(self):
         tips = [{'status': 'unknown'}]

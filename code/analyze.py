@@ -1,6 +1,5 @@
 import config
 import logging
-from utils import Stats
 import csv
 import json
 import time
@@ -10,6 +9,7 @@ from parse import ReceivedEvent
 class Analyzer:
     def __init__(self, context):
         self.context = context
+        self.tag = context.general_infos['tag']
 
     def execute(self):
 
@@ -30,22 +30,22 @@ class Analyzer:
     def create_block_csv(self):
         with open(config.blocks_csv, 'w') as file:
             w = csv.writer(file, delimiter=';')
-            w.writerow(['block_hash', 'node', 'timestamp', 'stale', 'height', 'total_size', 'txs'])
+            w.writerow(['block_hash', 'node', 'timestamp', 'stale', 'height', 'total_size', 'txs', 'tag'])
             for block in self.context.parsed_blocks.values():
                 stale = 'Stale'
                 if block.block_hash in self.context.consensus_chain:
                     stale = 'Accepted'
 
                 w.writerow([block.block_hash, block.node, block.timestamp, stale, block.height, block.total_size,
-                            block.txs])
+                            block.txs, self.tag])
 
     def create_tx_csv(self):
         with open(config.txs_csv, 'w') as file:
             w = csv.writer(file, delimiter=';')
-            w.writerow(['tx_hash', 'node', 'timestamp'])
+            w.writerow(['tx_hash', 'node', 'timestamp', 'tag'])
 
             for tx in self.context.parsed_txs.values():
-                w.writerow([tx.tx_hash, tx.node, tx.timestamp])
+                w.writerow([tx.tx_hash, tx.node, tx.timestamp, self.tag])
 
     def create_tx_exceptions_csv(self):
         with open(config.tx_exceptions_csv, 'w') as file:
