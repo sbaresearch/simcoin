@@ -273,8 +273,6 @@ def parse_datetime(date_time):
     return parsed_date_time.replace(tzinfo=pytz.UTC).timestamp()
 
 
-LogLine = namedtuple('LogLine', 'timestamp node')
-
 CreateNewBlockLogLine = namedtuple('CreateNewBlockLogLine', 'timestamp node  total_size txs')
 
 UpdateTipLogLine = namedtuple('UpdateTipLogLine', 'timestamp node block_hash height tx')
