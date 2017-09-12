@@ -59,42 +59,6 @@ def update_args_json(args):
         file.write('{}\n'.format(json.dumps(data)))
 
 
-class Values:
-    def __init__(self):
-        self.values = []
-        self.np_values = None
-        self.stats = None
-
-    @classmethod
-    def from_array(cls, array):
-        obj = cls()
-        obj.values = array
-        return obj
-
-    def calc(self):
-        self.np_values = np.array(self.values)
-        self.stats = Stats.from_array(self.np_values)
-
-
-class Stats:
-
-    def __init__(self, count, median, std):
-        self.count = count
-        self.median = median
-        self.std = std
-
-    @classmethod
-    def from_array(cls, array):
-        count = len(array)
-        if count == 0:
-            median = ''
-            std = ''
-        else:
-            median = np.median(array)
-            std = np.std(array)
-        return cls(count, median, std)
-
-
 def read_json_file(file):
     with open(file) as file:
         return json.loads(file.read(), object_hook=json_object_hook)
