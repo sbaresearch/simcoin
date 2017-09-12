@@ -7,10 +7,10 @@ from mock import mock_open
 from parse import Parser
 from mock import Mock
 from parse import TickEvent
-from parse import CreateNewBlockLogLine
-from parse import UpdateTipLogLine
+from parse import CreateNewBlockEvent
+from parse import UpdateTipEvent
 from parse import MempoolEvent
-from parse import LogLineWithHash
+from parse import EventWithHash
 from parse import ReceivedEvent
 from parse import BlockEvent
 from datetime import datetime
@@ -102,16 +102,16 @@ class TestParse(TestCase):
 
             self.assertEqual(parser_2.call_count, 1)
 
-    @patch('parse.parse_create_new_block', lambda line: CreateNewBlockLogLine(None, 'node-0', None, None))
+    @patch('parse.parse_create_new_block', lambda line: CreateNewBlockEvent(None, 'node-0', None, None))
     def test_create_new_block_parser(self):
 
         self.parser.block_creation_parser('line')
 
         self.assertTrue(self.parser.nodes_create_blocks['node-0'])
 
-    @patch('parse.parse_update_tip', lambda line: UpdateTipLogLine(None, 'node-0', 'block_hash', 45, None))
+    @patch('parse.parse_update_tip', lambda line: UpdateTipEvent(None, 'node-0', 'block_hash', 45, None))
     def test_update_tip_parser_with_previous_create_new_block(self):
-        self.parser.nodes_create_blocks['node-0'] = CreateNewBlockLogLine(None, None, None, None)
+        self.parser.nodes_create_blocks['node-0'] = CreateNewBlockEvent(None, None, None, None)
 
         self.parser.tip_updated_parser('line')
 
@@ -120,7 +120,7 @@ class TestParse(TestCase):
         self.assertEqual(parsed_block.height, 45)
         self.assertEqual(self.parser.nodes_create_blocks['node-0'], None)
 
-    @patch('parse.parse_update_tip', lambda line: UpdateTipLogLine(None, 'node-0', 'block_hash', 45, None))
+    @patch('parse.parse_update_tip', lambda line: UpdateTipEvent(None, 'node-0', 'block_hash', 45, None))
     def test_update_tip_parser_with_block_stats_already_set(self):
         self.context.parsed_blocks['block_hash'] = BlockEvent(None, None, None, None, None)
 
@@ -130,7 +130,7 @@ class TestParse(TestCase):
         self.assertEqual(self.context.parsed_blocks['block_hash'].height, 45)
         self.assertEqual(self.parser.nodes_create_blocks['node-0'], None)
 
-    @patch('parse.parse_update_tip', lambda line: UpdateTipLogLine(None, 'node-0', None, None, None))
+    @patch('parse.parse_update_tip', lambda line: UpdateTipEvent(None, 'node-0', None, None, None))
     def test_update_tip_parser_with_previous_no_create_new_block(self):
         self.parser.tip_updated_parser('line')
 
@@ -184,7 +184,7 @@ class TestParse(TestCase):
 
     @patch('parse.parse_accept_to_memory_pool')
     def test_tx_received_parser(self, m_parse_accept_to_memory_pool):
-        m_parse_accept_to_memory_pool.return_value = LogLineWithHash(10, None, 'tx_hash')
+        m_parse_accept_to_memory_pool.return_value = EventWithHash(10, None, 'tx_hash')
         self.context.txs_received = []
 
         self.parser.tx_received_parser('line')
@@ -225,7 +225,7 @@ class TestParse(TestCase):
         self.assertEqual(self.context.txs_received[0].timestamp, 10)
         self.assertEqual(self.context.txs_received[0].propagation_duration, 6)
 
-    @patch('parse.parse_add_to_wallet', lambda line: LogLineWithHash(2, 'node-0', 'tx_hash'))
+    @patch('parse.parse_add_to_wallet', lambda line: EventWithHash(2, 'node-0', 'tx_hash'))
     def test_tx_creation_parser(self):
         self.parser.tx_creation_parser('line')
 
@@ -244,16 +244,16 @@ class TestParse(TestCase):
         self.assertEqual(log_line_with_hash.node, 'node-0')
         self.assertEqual(log_line_with_hash.obj_hash, '107692460326feaa6f0c6c35bb218bdb3ff2adbc0d10a3a36b8252acf54e0c03')
 
-    @patch('parse.parse_peer_logic_validation', lambda line: LogLineWithHash(None, 'node-0', 'block_hash'))
+    @patch('parse.parse_peer_logic_validation', lambda line: EventWithHash(None, 'node-0', 'block_hash'))
     def test_peer_logic_validation_parse(self):
-        self.parser.nodes_create_blocks['node-0'] = CreateNewBlockLogLine(None, None, None, None)
+        self.parser.nodes_create_blocks['node-0'] = CreateNewBlockEvent(None, None, None, None)
 
         self.parser.peer_logic_validation_parser('line')
 
         self.assertEqual(len(self.context.parsed_blocks), 1)
         self.assertEqual(self.parser.nodes_create_blocks['node-0'], None)
 
-    @patch('parse.parse_peer_logic_validation', lambda line: UpdateTipLogLine(None, 'node-0', None, None, None))
+    @patch('parse.parse_peer_logic_validation', lambda line: UpdateTipEvent(None, 'node-0', None, None, None))
     def test_update_tip_parser_with_previous_no_create_new_block(self):
         self.parser.peer_logic_validation_parser('line')
 

@@ -134,7 +134,7 @@ def parse_create_new_block(line):
     if matched is None:
         raise ParseException("Didn't matched 'CreateNewBlock' log line.")
 
-    return CreateNewBlockLogLine(
+    return CreateNewBlockEvent(
         parse_datetime(matched.group(1)),
         str(matched.group(2)),
         int(matched.group(3)),
@@ -152,8 +152,8 @@ def parse_update_tip(line):
     if matched is None:
         raise ParseException("Didn't matched 'CreateNewBlock' log line.")
 
-    return UpdateTipLogLine(parse_datetime(matched.group(1)), str(matched.group(2)), str(matched.group(3)),
-                            int(matched.group(4)), int(matched.group(5)))
+    return UpdateTipEvent(parse_datetime(matched.group(1)), str(matched.group(2)), str(matched.group(3)),
+                          int(matched.group(4)), int(matched.group(5)))
 
 
 def parse_received_block(line):
@@ -185,7 +185,7 @@ def parse_add_to_wallet(line):
     if matched is None:
         raise ParseException("Didn't matched 'AddToWallet' log line.")
 
-    return LogLineWithHash(parse_datetime(matched.group(1)), str(matched.group(2)), str(matched.group(3)))
+    return EventWithHash(parse_datetime(matched.group(1)), str(matched.group(2)), str(matched.group(3)))
 
 
 def parse_accept_to_memory_pool(line):
@@ -209,7 +209,7 @@ def parse_peer_logic_validation(line):
     if matched is None:
         raise ParseException("Didn't matched 'PeerLogicValidation' log line.")
 
-    return LogLineWithHash(parse_datetime(matched.group(1)), str(matched.group(2)), str(matched.group(3)))
+    return EventWithHash(parse_datetime(matched.group(1)), str(matched.group(2)), str(matched.group(3)))
 
 
 def parse_checking_mempool(line):
@@ -273,11 +273,11 @@ def parse_datetime(date_time):
     return parsed_date_time.replace(tzinfo=pytz.UTC).timestamp()
 
 
-CreateNewBlockLogLine = namedtuple('CreateNewBlockLogLine', 'timestamp node  total_size txs')
+CreateNewBlockEvent = namedtuple('CreateNewBlockLogLine', 'timestamp node  total_size txs')
 
-UpdateTipLogLine = namedtuple('UpdateTipLogLine', 'timestamp node block_hash height tx')
+UpdateTipEvent = namedtuple('UpdateTipLogLine', 'timestamp node block_hash height tx')
 
-LogLineWithHash = namedtuple('LogLineWithHash', 'timestamp node obj_hash')
+EventWithHash = namedtuple('LogLineWithHash', 'timestamp node obj_hash')
 
 
 class Event:
