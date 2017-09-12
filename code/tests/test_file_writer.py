@@ -1,5 +1,5 @@
 from unittest import TestCase
 
 
-class TestAnalyze(TestCase):
+class TestFileWriter(TestCase):
     pass

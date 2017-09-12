@@ -4,7 +4,7 @@ import config
 import bash
 import re
 import logging
-from analyze import Analyzer
+from filewriter import FileWriter
 from cmd import rcmd
 from cmd import dockercmd
 import utils
@@ -29,8 +29,10 @@ class PostProcessing:
         parser = Parser(self.context)
         parser.execute()
 
-        analyzer = Analyzer(self.context)
-        analyzer.execute()
+        self.update_parsed_blocks()
+
+        file_writer = FileWriter(self.context)
+        file_writer.execute()
 
         bash.check_output(rcmd.create_report())
         logging.info('Report created')
@@ -77,6 +79,12 @@ class PostProcessing:
             lines = bash.check_output_without_log(config.log_error_grep.format(config.log_file))
             file.write('{}\n\n\n'.format(lines))
         logging.info('Grepped all logs for errors and saved matched lines to {}'.format(config.log_errors_txt))
+
+    def update_parsed_blocks(self):
+        for block in self.context.parsed_blocks.values():
+            block.stale = 'Stale'
+            if block.block_hash in self.context.consensus_chain:
+                block.stale = 'Accepted'
 
 
 def rm_node(node):

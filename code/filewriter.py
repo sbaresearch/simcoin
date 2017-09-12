@@ -12,14 +12,13 @@ from parse import MempoolEvent
 from parse import RPCExceptionEvent
 
 
-class Analyzer:
+class FileWriter:
     def __init__(self, context):
         self.context = context
         self.tag = context.general_infos['tag']
 
     def execute(self):
 
-        self.check_block_stale_or_accepted()
         write_csv(config.blocks_csv, BlockEvent.csv_header(), self.context.parsed_blocks)
         write_csv(config.txs_csv, TxEvent.csv_header(), self.context.parsed_txs)
         write_csv(config.tx_exceptions_csv, ExceptionEvent.csv_header(), self.context.tx_exceptions)
@@ -33,12 +32,6 @@ class Analyzer:
         self.create_general_infos_json()
 
         logging.info('Executed analyzer')
-
-    def check_block_stale_or_accepted(self):
-        for block in self.context.parsed_blocks.values():
-            block.stale = 'Stale'
-            if block.block_hash in self.context.consensus_chain:
-                block.stale = 'Accepted'
 
     def create_general_infos_json(self):
         self.context.general_infos['postprocessing_end'] = time.time()
