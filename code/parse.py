@@ -280,34 +280,103 @@ UpdateTipLogLine = namedtuple('UpdateTipLogLine', 'timestamp node block_hash hei
 LogLineWithHash = namedtuple('LogLineWithHash', 'timestamp node obj_hash')
 
 
-class RPCExceptionEvent:
-    def __init__(self, timestamp, node, method, exception):
+class Event:
+    def __init__(self, timestamp, node):
         self.timestamp = timestamp
         self.node = node
+
+    @staticmethod
+    def csv_header():
+        return ['timestamp', 'node']
+
+    def vars_to_array(self):
+        return [self.timestamp, self.node]
+
+
+class RPCExceptionEvent(Event):
+    def __init__(self, timestamp, node, method, exception):
+        super().__init__(timestamp, node)
         self.method = method
         self.exception = exception
 
     @staticmethod
     def csv_header():
-        return ['timestamp', 'node', 'method', 'exception']
+        return Event.csv_header().extend(['method', 'exception'])
 
     def vars_to_array(self):
-        return [self.timestamp, self.node, self.method, self.exception]
+        return super().csv_header().extend([self.method, self.exception])
 
 
-class MempoolEvent:
+class MempoolEvent(Event):
     def __init__(self, timestamp, node, txs, inputs):
-        self.timestamp = timestamp
-        self.node = node
+        super().__init__(timestamp, node)
         self.txs = txs
         self.inputs = inputs
 
     @staticmethod
     def csv_header():
-        return ['timestamp', 'node', 'txs', 'inputs']
+        return Event.csv_header().extend(['txs', 'inputs'])
 
     def vars_to_array(self):
-        return [self.timestamp, self.node, self.txs, self.inputs]
+        return super().csv_header().extend([self.txs, self.inputs])
+
+
+class ExceptionEvent(Event):
+    def __init__(self, timestamp, node, exception):
+        super().__init__(timestamp, node)
+        self.exception = exception
+
+    @staticmethod
+    def csv_header():
+        return Event.csv_header().extend(['exception'])
+
+    def vars_to_array(self):
+        return super().csv_header().extend([self.exception])
+
+
+class ReceivedEvent(Event):
+    def __init__(self, timestamp, node, obj_hash):
+        super().__init__(timestamp, node)
+        self.obj_hash = obj_hash
+        self.propagation_duration = -1
+
+    @staticmethod
+    def csv_header():
+        return Event.csv_header().extend(['obj_hash', 'propagation_duration'])
+
+    def vars_to_array(self):
+        return super().csv_header().extend([self.obj_hash, self.propagation_duration])
+
+
+class BlockEvent(Event):
+    def __init__(self, timestamp, node, block_hash, total_size, txs):
+        super().__init__(timestamp, node)
+        self.block_hash = block_hash
+        self.stale = None
+        self.total_size = total_size
+        self.txs = txs
+        self.height = -1
+
+    @staticmethod
+    def csv_header():
+        return Event.csv_header().extend(['block_hash', 'stale', 'total_size', 'txs', 'height'])
+
+    def vars_to_array(self):
+        return super().csv_header().extend([self.block_hash, self.stale, self.total_size, self.txs, self.height])
+
+
+class TxEvent(Event):
+
+    def __init__(self, timestamp, node, tx_hash):
+        super().__init__(timestamp, node)
+        self.tx_hash = tx_hash
+
+    @staticmethod
+    def csv_header():
+        return Event.csv_header().extend(['tx_hash'])
+
+    def vars_to_array(self):
+        return super().csv_header().extend([self.tx_hash])
 
 
 class TickEvent:
@@ -322,68 +391,6 @@ class TickEvent:
 
     def vars_to_array(self):
         return [self.timestamp, self.start, self.duration]
-
-
-class ExceptionEvent:
-    def __init__(self, timestamp, node, exception):
-        self.timestamp = timestamp
-        self.node = node
-        self.exception = exception
-
-    @staticmethod
-    def csv_header():
-        return ['timestamp', 'node', 'exception']
-
-    def vars_to_array(self):
-        return [self.timestamp, self.node, self.exception]
-
-
-class ReceivedEvent:
-    def __init__(self, timestamp, node, obj_hash):
-        self.timestamp = timestamp
-        self.node = node
-        self.obj_hash = obj_hash
-        self.propagation_duration = -1
-
-    @staticmethod
-    def csv_header():
-        return ['timestamp', 'node', 'obj_hash', 'propagation_duration']
-
-    def vars_to_array(self):
-        return [self.timestamp, self.node, self.obj_hash, self.propagation_duration]
-
-
-class BlockEvent:
-    def __init__(self, timestamp, node, block_hash, total_size, txs):
-        self.timestamp = timestamp
-        self.node = node
-        self.block_hash = block_hash
-        self.stale = None
-        self.total_size = total_size
-        self.txs = txs
-        self.height = -1
-
-    @staticmethod
-    def csv_header():
-        return ['timestamp', 'node', 'block_hash', 'stale', 'total_size', 'txs', 'height']
-
-    def vars_to_array(self):
-        return [self.timestamp, self.node, self.block_hash, self.stale, self.total_size, self.txs, self.height]
-
-
-class TxEvent:
-
-    def __init__(self, timestamp, node, tx_hash):
-        self.timestamp = timestamp
-        self.node = node
-        self.tx_hash = tx_hash
-
-    @staticmethod
-    def csv_header():
-        return ['timestamp', 'node', 'tx_hash']
-
-    def vars_to_array(self):
-        return [self.timestamp, self.node, self.tx_hash]
 
 
 class ParseException(Exception):
