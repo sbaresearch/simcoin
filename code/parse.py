@@ -27,7 +27,7 @@ class Parser:
         logging.info('Created parser with {} log parsers'.format(len(self.parsers)))
 
     def execute(self):
-        with open(config.aggregated_sim_log, 'r') as file:
+        with open(self.context.path.aggregated_sim_log, 'r') as file:
             lines = file.readlines()
             for i, line in enumerate(lines):
                 for parser in self.parsers:

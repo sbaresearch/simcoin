@@ -19,15 +19,15 @@ class FileWriter:
         self.args = utils.read_json_file(config.args_json)
 
     def execute(self):
-        write_csv(config.blocks_csv, BlockEvent.csv_header(), self.context.parsed_blocks.values(), self.args.tag)
-        write_csv(config.txs_csv, TxEvent.csv_header(), self.context.parsed_txs.values(), self.args.tag)
-        write_csv(config.tx_exceptions_csv, ExceptionEvent.csv_header(), self.context.tx_exceptions, self.args.tag)
-        write_csv(config.block_exceptions_csv, ExceptionEvent.csv_header(), self.context.block_exceptions, self.args.tag)
-        write_csv(config.tick_infos_csv, TickEvent.csv_header(), self.context.tick_infos, self.args.tag)
-        write_csv(config.rpc_exceptions_csv, RPCExceptionEvent.csv_header(), self.context.rpc_exceptions, self.args.tag)
-        write_csv(config.blocks_received_csv, ReceivedEvent.csv_header(), self.context.blocks_received, self.args.tag)
-        write_csv(config.txs_received_csv, ReceivedEvent.csv_header(), self.context.txs_received, self.args.tag)
-        write_csv(config.tips_csv, Tip.csv_header(), self.context.tips, self.args.tag)
+        write_csv(self.context.path.blocks_csv, BlockEvent.csv_header(), self.context.parsed_blocks.values(), self.args.tag)
+        write_csv(self.context.path.txs_csv, TxEvent.csv_header(), self.context.parsed_txs.values(), self.args.tag)
+        write_csv(self.context.path.tx_exceptions_csv, ExceptionEvent.csv_header(), self.context.tx_exceptions, self.args.tag)
+        write_csv(self.context.path.block_exceptions_csv, ExceptionEvent.csv_header(), self.context.block_exceptions, self.args.tag)
+        write_csv(self.context.path.tick_infos_csv, TickEvent.csv_header(), self.context.tick_infos, self.args.tag)
+        write_csv(self.context.path.rpc_exceptions_csv, RPCExceptionEvent.csv_header(), self.context.rpc_exceptions, self.args.tag)
+        write_csv(self.context.path.blocks_received_csv, ReceivedEvent.csv_header(), self.context.blocks_received, self.args.tag)
+        write_csv(self.context.path.txs_received_csv, ReceivedEvent.csv_header(), self.context.txs_received, self.args.tag)
+        write_csv(self.context.path.tips_csv, Tip.csv_header(), self.context.tips, self.args.tag)
 
         self.create_general_infos_json()
 
@@ -35,7 +35,7 @@ class FileWriter:
 
     def create_general_infos_json(self):
         self.context.general_infos['step_times']['postprocessing_end'] = time.time()
-        with open(config.general_infos_json, 'w') as file:
+        with open(self.context.path.general_infos_json, 'w') as file:
             file.write('{}\n'.format(json.dumps(self.context.general_infos)))
 
 

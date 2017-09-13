@@ -7,10 +7,13 @@ import config
 import bash
 from context import Context
 from prepare import Prepare
+from config import Path
 
 
 def run():
-    context = Context()
+    path = Path()
+
+    context = Context(path)
     context.create()
 
     runner = Runner(context)
@@ -29,4 +32,4 @@ def run():
     runner.run()
 
     logging.info("The duration of the simulation was {} seconds".format(str(time.time() - start)))
-    bash.check_output('cp {} {}'.format(config.log_file, config.sim_dir))
+    bash.check_output('cp {} {}'.format(config.log_file, path.sim_dir))

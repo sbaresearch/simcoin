@@ -24,7 +24,7 @@ class PostProcessing:
         self.grep_log_for_errors()
 
         self.aggregate_logs()
-        cut_log()
+        self.cut_log()
 
         parser = Parser(self.context)
         parser.execute()
@@ -34,7 +34,7 @@ class PostProcessing:
         file_writer = FileWriter(self.context)
         file_writer.execute()
 
-        bash.check_output(rcmd.create_report())
+        bash.check_output(rcmd.create_report(self.context.path.postprocessing_dir))
         logging.info('Report created')
 
         logging.info('Executed post processing')
@@ -45,15 +45,15 @@ class PostProcessing:
             lines = prefix_log(lines, node.name)
             lines = add_line_number(lines)
 
-            with open(config.aggregated_log, 'a') as file:
+            with open(self.context.path.aggregated_log, 'a') as file:
                 file.write('\n'.join(lines) + '\n')
 
         lines = bash.check_output_without_log('cat {}'.format(config.log_file)).splitlines()
         lines = add_line_number(lines)
-        with open(config.aggregated_log, 'a') as file:
+        with open(self.context.path.aggregated_log, 'a') as file:
             file.write('\n'.join(lines) + '\n')
 
-        bash.check_output('sort {} -o {}'.format(config.aggregated_log, config.aggregated_log))
+        bash.check_output('sort {} -o {}'.format(self.context.path.aggregated_log, self.context.path.aggregated_log))
 
     def clean_up_docker(self):
         pool = ThreadPool(10)
@@ -66,11 +66,11 @@ class PostProcessing:
         bash.check_output(dockercmd.rm_network())
         logging.info('Deleted docker network')
 
-        bash.check_output(dockercmd.fix_data_dirs_permissions())
+        bash.check_output(dockercmd.fix_data_dirs_permissions(self.context.path.sim_dir))
         logging.info('Fixed permissions of dirs used by docker')
 
     def grep_log_for_errors(self):
-        with open(config.log_errors_txt, 'a') as file:
+        with open(self.context.path.log_errors_txt, 'a') as file:
             for node in self.context.all_nodes.values():
                 file.write('{}:\n\n'.format(node.name))
                 file.write('{}\n\n\n'.format(node.grep_log_for_errors()))
@@ -78,13 +78,30 @@ class PostProcessing:
             file.write('Simcoin:\n\n')
             lines = bash.check_output_without_log(config.log_error_grep.format(config.log_file))
             file.write('{}\n\n\n'.format(lines))
-        logging.info('Grepped all logs for errors and saved matched lines to {}'.format(config.log_errors_txt))
+        logging.info('Grepped all logs for errors and saved matched lines to {}'
+                     .format(self.context.path.log_errors_txt))
 
     def update_parsed_blocks(self):
         for block in self.context.parsed_blocks.values():
             block.stale = 'Stale'
             if block.block_hash in self.context.consensus_chain:
                 block.stale = 'Accepted'
+
+    def cut_log(self):
+        with open(self.context.path.aggregated_log, 'r') as aggregated_log:
+            with open(self.context.path.aggregated_sim_log, 'w') as aggregated_sim_log:
+                write = False
+                for line in aggregated_log.readlines():
+                    if write:
+                        if config.log_line_sim_end in line:
+                            aggregated_sim_log.write(line)
+                            break
+                        else:
+                            aggregated_sim_log.write(line)
+                    if config.log_line_sim_start in line:
+                        aggregated_sim_log.write(line)
+                        write = True
+        logging.info('Aggregated logs')
 
 
 def rm_node(node):
@@ -114,20 +131,3 @@ def add_line_number(lines):
                                      r'\1 \2 {} \3'.format(line_number), line))
         line_number += 1
     return prefixed_lines
-
-
-def cut_log():
-    with open(config.aggregated_log, 'r') as aggregated_log:
-        with open(config.aggregated_sim_log, 'w') as aggregated_sim_log:
-            write = False
-            for line in aggregated_log.readlines():
-                if write:
-                    if config.log_line_sim_end in line:
-                        aggregated_sim_log.write(line)
-                        break
-                    else:
-                        aggregated_sim_log.write(line)
-                if config.log_line_sim_start in line:
-                    aggregated_sim_log.write(line)
-                    write = True
-    logging.info('Aggregated logs')

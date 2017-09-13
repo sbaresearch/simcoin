@@ -18,7 +18,7 @@ class Prepare:
     def execute(self):
         logging.info('Begin of prepare step')
 
-        prepare_simulation_dir()
+        self.prepare_simulation_dir()
         remove_old_containers_if_exists()
         recreate_network()
 
@@ -96,6 +96,21 @@ class Prepare:
         logging.info('All nodes for the simulation are started')
         utils.sleep(3 + len(self.context.all_nodes) * 0.2)
 
+    def prepare_simulation_dir(self):
+        if not os.path.exists(self.context.path.sim_dir):
+            os.makedirs(self.context.path.sim_dir)
+        os.makedirs(self.context.path.postprocessing_dir)
+
+        if os.path.islink(config.soft_link_to_sim_dir):
+            bash.check_output('unlink {}'.format(config.soft_link_to_sim_dir))
+        bash.check_output('ln -s {} {}'.format(self.context.path.sim_dir, config.soft_link_to_sim_dir))
+
+        bash.check_output('cp {} {}'.format(config.network_csv, self.context.path.sim_dir))
+        bash.check_output('cp {} {}'.format(config.ticks_csv, self.context.path.sim_dir))
+        bash.check_output('cp {} {}'.format(config.nodes_json, self.context.path.sim_dir))
+        bash.check_output('cp {} {}'.format(config.args_json, self.context.path.sim_dir))
+        logging.info('Simulation directory created')
+
 
 def start_node(node, timeout=HTTP_TIMEOUT, height=0):
     node.run()
@@ -127,22 +142,6 @@ def add_latency(node, zones):
 def rm_node(node):
     node.delete_peers_file()
     node.rm()
-
-
-def prepare_simulation_dir():
-    if not os.path.exists(config.sim_dir):
-        os.makedirs(config.sim_dir)
-    os.makedirs(config.postprocessing_dir)
-
-    if os.path.islink(config.soft_link_to_sim_dir):
-        bash.check_output('unlink {}'.format(config.soft_link_to_sim_dir))
-    bash.check_output('ln -s {} {}'.format(config.sim_dir, config.soft_link_to_sim_dir))
-
-    bash.check_output('cp {} {}'.format(config.network_csv, config.sim_dir))
-    bash.check_output('cp {} {}'.format(config.ticks_csv, config.sim_dir))
-    bash.check_output('cp {} {}'.format(config.nodes_json, config.sim_dir))
-    bash.check_output('cp {} {}'.format(config.args_json, config.sim_dir))
-    logging.info('Simulation directory created')
 
 
 def remove_old_containers_if_exists():

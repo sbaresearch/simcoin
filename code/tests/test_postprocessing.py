@@ -22,10 +22,11 @@ class TestPostProcessing(TestCase):
         node_0 = MagicMock()
         node_0.cat_log_cmd.return_value = "1\n2\n"
         self.context.all_nodes = {'node-0': node_0}
+        self.context.path.aggregated_log = '/path'
 
         self.postprocessing.aggregate_logs()
 
-        self.assertEqual(m_open.call_args[0][0], config.aggregated_log)
+        self.assertEqual(m_open.call_args[0][0], '/path')
         handle = m_open()
         self.assertEqual(handle.write.call_args_list[0][0][0], '1\n2\n')
         self.assertEqual(handle.write.call_args_list[1][0][0], '3\n4\n')
@@ -69,13 +70,15 @@ class TestPostProcessing(TestCase):
             line4 {}
             line5
         """.format(config.log_line_sim_start, config.log_line_sim_end)).strip()
+        self.context.path.aggregated_log = '/path_log'
+        self.context.path.aggregated_sim_log = '/path_sim_log'
 
         with patch('builtins.open', mock_open(read_data=data)) as m_open:
-            postprocessing.cut_log()
+            self.postprocessing.cut_log()
 
             self.assertEqual(m_open.call_count, 2)
-            self.assertEqual(m_open.call_args_list[0][0][0], config.aggregated_log)
-            self.assertEqual(m_open.call_args_list[1][0][0], config.aggregated_sim_log)
+            self.assertEqual(m_open.call_args_list[0][0][0], '/path_log')
+            self.assertEqual(m_open.call_args_list[1][0][0], '/path_sim_log')
 
             handle = m_open()
             self.assertEqual(handle.write.call_args_list[0][0][0], 'line2 {}\n'.format(config.log_line_sim_start))

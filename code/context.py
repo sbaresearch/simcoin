@@ -11,7 +11,8 @@ from copy import copy
 
 
 class Context:
-    def __init__(self):
+    def __init__(self, path):
+        self.path = path
         self.args = utils.read_json_file(config.args_json)
         self.zone = Zone()
 
@@ -47,7 +48,8 @@ class Context:
         self.nodes = OrderedDict([])
         for node in nodes:
             self.nodes.update({node.name: PublicBitcoinNode(node.name, self.zone.get_ip(node.latency),
-                                                            node.latency, node.docker_image)})
+                                                            node.latency, node.docker_image,
+                                                            self.path.client_dir_on_host(node.name))})
 
         self.selfish_node_private_nodes = OrderedDict([])
         self.selfish_node_proxies = OrderedDict([])
