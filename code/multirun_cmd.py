@@ -50,7 +50,7 @@ def run():
     print("arguments called with: {}".format(sys.argv))
     print("parsed arguments: {}\n".format(args))
 
-    os.makedirs(config.multi_run_dir)
+    prepare()
 
     for i in range(args.repeat):
         logging.info('Starting {}/{} simulation'.format(i + 1, args.repeat))
@@ -60,10 +60,18 @@ def run():
 
         run_cmd.run()
         bash.check_output('cp -r {}/postprocessing {}/run-{}'
-                          .format(config.soft_link_to_sim_dir, config.multi_run_dir, i + 1))
+                          .format(config.soft_link_to_run_dir, config.multi_run_dir, i + 1))
         logging.info('Finished {}/{} simulation'.format(i + 1, args.repeat))
 
     concat_files()
+
+
+def prepare():
+    os.makedirs(config.multi_run_dir)
+
+    if os.path.islink(config.soft_link_to_multi_run_dir):
+        bash.check_output('unlink {}'.format(config.soft_link_to_multi_run_dir))
+    bash.check_output('ln -s {} {}'.format(config.multi_run_dir, config.soft_link_to_multi_run_dir))
 
 
 def concat_files():
