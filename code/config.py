@@ -50,6 +50,7 @@ multi_run_dir = '{}multi-run-{}'.format(data_dir, time.time())
 
 log_file = data_dir + 'debug.log'
 soft_link_to_sim_dir = '{}last_run'.format(data_dir)
+soft_link_to_multi_run_dir = '{}last_multi_run'.format(data_dir)
 
 network_csv_file_name = 'network.csv'
 ticks_csv_file_name = 'ticks.csv'
