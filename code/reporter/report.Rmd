@@ -1,5 +1,3 @@
-# Simulation Report
-
 ---
 title: "Sample Document Report"
 output: 
