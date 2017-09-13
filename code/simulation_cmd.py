@@ -11,6 +11,8 @@ from config import Path
 
 
 def run():
+    logging.info(config.log_line_run_start)
+
     path = Path()
 
     context = Context(path)

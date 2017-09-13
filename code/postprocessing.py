@@ -23,6 +23,10 @@ class PostProcessing:
 
         self.grep_log_for_errors()
 
+        logging.info(config.log_line_run_end)
+        flush_handlers()
+        extract_from_file(config.log_file, self.context.path.run_log,
+                          config.log_line_run_start, config.log_line_run_end)
         self.aggregate_logs()
         extract_from_file(self.context.path.aggregated_log, self.context.path.aggregated_sim_log,
                           config.log_line_sim_start, config.log_line_sim_end)
@@ -50,7 +54,7 @@ class PostProcessing:
                 file.write('\n'.join(lines) + '\n')
             logging.debug('Prefixed and added {} lines from node={} to aggregated log'.format(len(lines), node.name))
 
-        lines = bash.check_output_without_log('cat {}'.format(config.log_file)).splitlines()
+        lines = bash.check_output_without_log('cat {}'.format(self.context.path.run_log)).splitlines()
         lines = add_line_number(lines)
         with open(self.context.path.aggregated_log, 'a') as file:
             file.write('\n'.join(lines) + '\n')
@@ -88,6 +92,12 @@ class PostProcessing:
             block.stale = 'Stale'
             if block.block_hash in self.context.consensus_chain:
                 block.stale = 'Accepted'
+
+
+def flush_handlers():
+    for handler in logging.getLogger().handlers:
+        handler.flush()
+    logging.debug('Flushed all logging handlers')
 
 
 def extract_from_file(source, destination, start, end):

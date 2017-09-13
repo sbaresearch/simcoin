@@ -35,6 +35,8 @@ log_prefix_timestamp = r'^([0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}
 log_prefix_full = log_prefix_timestamp + ' ([a-zA-Z0-9-\.]+) [0-9]+ '
 log_error_grep = 'grep -E -i "WARN|FATAL|ERROR|CRITICAL|EXCEPTION" {} || true'
 log_time_format = '%Y-%m-%d %H:%M:%S.%f'
+log_line_run_start = 'RUN START'
+log_line_run_end = 'RUN END'
 log_line_sim_start = 'SIMULATION START'
 log_line_sim_end = 'SIMULATION END'
 
@@ -46,8 +48,7 @@ transaction_fee = 1000
 data_dir = '../data/'
 multi_run_dir = '{}multi-run-{}'.format(data_dir, time.time())
 
-log_file_file_name = 'debug.log'
-log_file = data_dir + log_file_file_name
+log_file = data_dir + 'debug.log'
 soft_link_to_sim_dir = '{}last_run'.format(data_dir)
 
 network_csv_file_name = 'network.csv'
@@ -83,8 +84,8 @@ class Path:
         self.sim_dir = '{}run-{}/'.format(data_dir, time.time())
 
         self.aggregated_log = self.sim_dir + 'aggregated.log'
-        self.aggregated_sim_log = self.sim_dir + 'aggregated_simulation.log'
-        self.log_file_in_sim_dir = self.sim_dir + log_file_file_name
+        self.aggregated_sim_log = self.sim_dir + 'aggregated_sim.log'
+        self.run_log = self.sim_dir + 'run.log'
 
         self.postprocessing_dir = self.sim_dir + 'postprocessing/'
 
