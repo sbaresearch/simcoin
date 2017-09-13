@@ -32,4 +32,3 @@ def run():
     runner.run()
 
     logging.info("The duration of the simulation was {} seconds".format(str(time.time() - start)))
-    bash.check_output('cp {} {}'.format(config.log_file, path.sim_dir))
