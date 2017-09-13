@@ -27,6 +27,8 @@ opts_chunk$set(fig.width=12, fig.height=4, fig.path='RmdFigs/',
 
 knitr::opts_chunk$set(error = TRUE)
 knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(dev = 'pdf')
+knitr::opts_chunk$set(fig.align='center')
 ```
 
 ```{r setup}
