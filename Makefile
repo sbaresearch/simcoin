@@ -73,7 +73,7 @@ multidemo1:
 		python3 simcoin.py \
 			multi-run \
 				--repeat 3 \
-				--node-group-a bitcoin 5 1 10 simcoin/patched:v1 \
+				--node-group-a bitcoin 4 1 10 simcoin/patched:v1 \
 				--blocks-per-tick 0.5 \
 				--amount-of-ticks 30 \
 				--txs-per-tick 25 \
