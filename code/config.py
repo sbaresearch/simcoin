@@ -63,6 +63,17 @@ client_dir = bitcoin_data_dir + bitcoin_regtest_dir
 cpu_time_csv_file_name = 'cpu_time.csv'
 memory_csv_file_name = 'memory.csv'
 
+blocks_csv_file_name = 'blocks.csv'
+tips_csv_file_name = 'tips.csv'
+txs_csv_file_name = 'txs.csv'
+tx_exceptions_csv_file_name = 'tx_exceptions.csv'
+block_exceptions_csv_file_name = 'block_exceptions.csv'
+rpc_exceptions_csv_file_name = 'rpc_exceptions.csv'
+blocks_received_csv_file_name = 'blocks_received.csv'
+txs_received_csv_file_name = 'txs_received.csv'
+tick_infos_csv_file_name = 'tick_infos.csv'
+
+
 class Path:
     def __init__(self):
         self.sim_dir = '{}run-{}/'.format(data_dir, time.time())
@@ -74,16 +85,16 @@ class Path:
 
         self.general_infos_json = self.postprocessing_dir + 'general_infos.json'
         self.tmp_log = self.postprocessing_dir + 'tmp.log'
-        self.blocks_csv = self.postprocessing_dir + 'blocks.csv'
-        self.tips_csv = self.postprocessing_dir + 'tips.csv'
-        self.txs_csv = self.postprocessing_dir + 'txs.csv'
-        self.tx_exceptions_csv = self.postprocessing_dir + 'tx_exceptions.csv'
-        self.block_exceptions_csv = self.postprocessing_dir + 'block_exceptions.csv'
-        self.rpc_exceptions_csv = self.postprocessing_dir + 'rpc_exceptions.csv'
         self.mempool_snapshots_csv = self.postprocessing_dir + 'mempool_snapshots.csv'
-        self.blocks_received_csv = self.postprocessing_dir + 'blocks_received.csv'
-        self.txs_received_csv = self.postprocessing_dir + 'txs_received.csv'
-        self.tick_infos_csv = self.postprocessing_dir + 'tick_infos.csv'
+        self.blocks_csv = self.postprocessing_dir + blocks_csv_file_name
+        self.tips_csv = self.postprocessing_dir + tips_csv_file_name
+        self.txs_csv = self.postprocessing_dir + txs_csv_file_name
+        self.tx_exceptions_csv = self.postprocessing_dir + tx_exceptions_csv_file_name
+        self.block_exceptions_csv = self.postprocessing_dir + block_exceptions_csv_file_name
+        self.rpc_exceptions_csv = self.postprocessing_dir + rpc_exceptions_csv_file_name
+        self.blocks_received_csv = self.postprocessing_dir + blocks_received_csv_file_name
+        self.txs_received_csv = self.postprocessing_dir + txs_received_csv_file_name
+        self.tick_infos_csv = self.postprocessing_dir + tick_infos_csv_file_name
         self.log_errors_txt = self.postprocessing_dir + 'log_errors.txt'
 
     def client_dir_on_host(self, name):
