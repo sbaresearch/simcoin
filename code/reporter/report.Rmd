@@ -73,7 +73,7 @@ The simulation started at `r utctime(general_info2$step_times[['preparation_star
 ```{r simulation}
 step_times           <- data.frame(t(data.frame(general_infos$step_times)))
 colnames(step_times) <- c('timestamp')
-step_times           <- step_times[ order(step_times$timestamp), , drop = FALSE]
+step_times           <- step_times[order(step_times$timestamp), , drop = FALSE]
 
 diff_steps <- data.frame(diff(as.matrix(step_times)))
 diff_steps <- rbind(diff_steps, apply(diff_steps, 2, sum))
