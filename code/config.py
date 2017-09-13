@@ -44,6 +44,8 @@ blocks_received_csv = postprocessing_dir + 'blocks_received.csv'
 txs_received_csv = postprocessing_dir + 'txs_received.csv'
 tick_infos_csv = postprocessing_dir + 'tick_infos.csv'
 log_errors_txt = postprocessing_dir + 'log_errors.txt'
+cpu_time_csv = postprocessing_dir + 'cpu_time.csv'
+memory_csv = postprocessing_dir + 'memory.csv'
 
 rpc_user = 'admin'
 rpc_password = 'admin'

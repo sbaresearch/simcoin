@@ -12,7 +12,8 @@ class Runner:
         self.event = None
         self.post_processing = None
         self.pill2kill = threading.Event()
-        self.system_monitor = threading.Thread(target=systemmonitor.run, args=(self.pill2kill, 5))
+        self.system_monitor = threading.Thread(
+            target=systemmonitor.run, args=(self.pill2kill, 5, self.context.args.tag))
 
     def run(self):
         try:
