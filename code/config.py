@@ -60,6 +60,8 @@ bitcoin_data_dir = '/data'
 bitcoin_regtest_dir = '/regtest'
 client_dir = bitcoin_data_dir + bitcoin_regtest_dir
 
+cpu_time_csv = 'cpu_time.csv'
+memory_csv = 'memory.csv'
 
 class Path:
     def __init__(self):
@@ -83,8 +85,6 @@ class Path:
         self.txs_received_csv = self.postprocessing_dir + 'txs_received.csv'
         self.tick_infos_csv = self.postprocessing_dir + 'tick_infos.csv'
         self.log_errors_txt = self.postprocessing_dir + 'log_errors.txt'
-        self.cpu_time_csv = self.postprocessing_dir + 'cpu_time.csv'
-        self.memory_csv = self.postprocessing_dir + 'memory.csv'
 
     def client_dir_on_host(self, name):
         return self.sim_dir + name + bitcoin_regtest_dir

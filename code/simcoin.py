@@ -5,29 +5,22 @@ from simulationfiles import ticks_config
 from simulationfiles import network_config
 import sys
 import argparse
-import simulation
+import simulation_cmd
 import config
 import os
 import bitcoin
 import utils
-
-
-def run():
-    nodes_config.create(unknown_arguments=True)
-
-    ticks_config.create(unknown_arguments=True)
-
-    network_config.create(unknown_arguments=True)
-
-    simulation.run()
+import multirun_cmd
+import run_cmd
 
 
 commands = {
     'nodes':        nodes_config.create,
     'network':      network_config.create,
     'ticks':        ticks_config.create,
-    'simulate':     simulation.run,
-    'run':          run,
+    'simulate':     simulation_cmd.run,
+    'run':          run_cmd.run,
+    'multi-run':    multirun_cmd.run,
 }
 
 
@@ -66,6 +59,7 @@ def main():
         ticks       creates the {} for a simulation
         simulate    executes a simulation based on the {}, {} and {}
         run         runs all above commands
+        multi-run   run the simulation multiple times
         '''.format(
             config.nodes_json_file_name,
             config.network_csv_file_name,
