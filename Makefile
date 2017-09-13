@@ -72,12 +72,12 @@ multidemo1:
 	cd code; \
 		python3 simcoin.py \
 			multi-run \
-				--repeat 3 \
-				--node-group-a bitcoin 5 1 10 simcoin/patched:v1 \
+				--repeat 2 \
+				--node-group-a bitcoin 3 1 10 simcoin/patched:v1 \
 				--blocks-per-tick 0.5 \
-				--amount-of-ticks 50 \
-				--txs-per-tick 100 \
-				--tick-duration 0.5 \
+				--amount-of-ticks 5 \
+				--txs-per-tick 10 \
+				--tick-duration .3 \
 				--verbose
 
 install:

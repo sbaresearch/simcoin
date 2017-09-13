@@ -39,7 +39,7 @@ class TestPrepare(TestCase):
     def test_prepare_simulation_dir(self, m_open, m_check_output, m_makedirs, m_exists):
         m_exists.return_value = False
 
-        prepare.prepare_simulation_dir()
+        self.prepare.prepare_simulation_dir()
 
         self.assertEqual(m_makedirs.call_count, 2)
         self.assertEqual(m_check_output.call_count, 5)

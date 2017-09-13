@@ -8,12 +8,15 @@ from simulationfiles import nodes_config
 from simulationfiles.zone import Zone
 from collections import OrderedDict
 from copy import copy
+import time
 
 
 class Context:
     def __init__(self):
+        self.run_name = 'run-' + str(time.time())
         self.args = utils.read_json_file(config.args_json)
         self.zone = Zone()
+        self.path = None
 
         self.config_nodes = None
 
@@ -47,7 +50,8 @@ class Context:
         self.nodes = OrderedDict([])
         for node in nodes:
             self.nodes.update({node.name: PublicBitcoinNode(node.name, self.zone.get_ip(node.latency),
-                                                            node.latency, node.docker_image)})
+                                                            node.latency, node.docker_image,
+                                                            self.path.client_dir_on_host(node.name))})
 
         self.selfish_node_private_nodes = OrderedDict([])
         self.selfish_node_proxies = OrderedDict([])

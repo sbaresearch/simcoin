@@ -22,10 +22,11 @@ class TestPostProcessing(TestCase):
         node_0 = MagicMock()
         node_0.cat_log_cmd.return_value = "1\n2\n"
         self.context.all_nodes = {'node-0': node_0}
+        self.context.path.aggregated_log = '/path'
 
         self.postprocessing.aggregate_logs()
 
-        self.assertEqual(m_open.call_args[0][0], config.aggregated_log)
+        self.assertEqual(m_open.call_args[0][0], '/path')
         handle = m_open()
         self.assertEqual(handle.write.call_args_list[0][0][0], '1\n2\n')
         self.assertEqual(handle.write.call_args_list[1][0][0], '3\n4\n')
@@ -64,20 +65,20 @@ class TestPostProcessing(TestCase):
     def test_cut_log(self):
         data = dedent("""
             line1
-            line2 {}
+            line2 start
             line3
-            line4 {}
+            line4 end
             line5
-        """.format(config.log_line_sim_start, config.log_line_sim_end)).strip()
+        """).strip()
 
         with patch('builtins.open', mock_open(read_data=data)) as m_open:
-            postprocessing.cut_log()
+            postprocessing.extract_from_file('source_file', 'destination_file', 'start', 'end')
 
             self.assertEqual(m_open.call_count, 2)
-            self.assertEqual(m_open.call_args_list[0][0][0], config.aggregated_log)
-            self.assertEqual(m_open.call_args_list[1][0][0], config.aggregated_sim_log)
+            self.assertEqual(m_open.call_args_list[0][0][0], 'source_file')
+            self.assertEqual(m_open.call_args_list[1][0][0], 'destination_file')
 
             handle = m_open()
-            self.assertEqual(handle.write.call_args_list[0][0][0], 'line2 {}\n'.format(config.log_line_sim_start))
+            self.assertEqual(handle.write.call_args_list[0][0][0], 'line2 start\n')
             self.assertEqual(handle.write.call_args_list[1][0][0], 'line3\n')
-            self.assertEqual(handle.write.call_args_list[2][0][0], 'line4 {}\n'.format(config.log_line_sim_end))
+            self.assertEqual(handle.write.call_args_list[2][0][0], 'line4 end\n')

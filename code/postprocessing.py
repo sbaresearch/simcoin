@@ -23,8 +23,14 @@ class PostProcessing:
 
         self.grep_log_for_errors()
 
+        logging.info(config.log_line_run_end + self.context.run_name)
+        flush_handlers()
+        extract_from_file(config.log_file, self.context.path.run_log,
+                          config.log_line_run_start + self.context.run_name,
+                          config.log_line_run_end + self.context.run_name)
         self.aggregate_logs()
-        cut_log()
+        extract_from_file(self.context.path.aggregated_log, self.context.path.aggregated_sim_log,
+                          config.log_line_sim_start, config.log_line_sim_end)
 
         parser = Parser(self.context)
         parser.execute()
@@ -34,7 +40,7 @@ class PostProcessing:
         file_writer = FileWriter(self.context)
         file_writer.execute()
 
-        bash.check_output(rcmd.create_report())
+        bash.check_output(rcmd.create_report(self.context.path.postprocessing_dir))
         logging.info('Report created')
 
         logging.info('Executed post processing')
@@ -45,15 +51,16 @@ class PostProcessing:
             lines = prefix_log(lines, node.name)
             lines = add_line_number(lines)
 
-            with open(config.aggregated_log, 'a') as file:
+            with open(self.context.path.aggregated_log, 'a') as file:
                 file.write('\n'.join(lines) + '\n')
+            logging.debug('Prefixed and added {} lines from node={} to aggregated log'.format(len(lines), node.name))
 
-        lines = bash.check_output_without_log('cat {}'.format(config.log_file)).splitlines()
+        lines = bash.check_output_without_log('cat {}'.format(self.context.path.run_log)).splitlines()
         lines = add_line_number(lines)
-        with open(config.aggregated_log, 'a') as file:
+        with open(self.context.path.aggregated_log, 'a') as file:
             file.write('\n'.join(lines) + '\n')
 
-        bash.check_output('sort {} -o {}'.format(config.aggregated_log, config.aggregated_log))
+        bash.check_output('sort {} -o {}'.format(self.context.path.aggregated_log, self.context.path.aggregated_log))
 
     def clean_up_docker(self):
         pool = ThreadPool(10)
@@ -66,11 +73,11 @@ class PostProcessing:
         bash.check_output(dockercmd.rm_network())
         logging.info('Deleted docker network')
 
-        bash.check_output(dockercmd.fix_data_dirs_permissions())
+        bash.check_output(dockercmd.fix_data_dirs_permissions(self.context.path.sim_dir))
         logging.info('Fixed permissions of dirs used by docker')
 
     def grep_log_for_errors(self):
-        with open(config.log_errors_txt, 'a') as file:
+        with open(self.context.path.log_errors_txt, 'a') as file:
             for node in self.context.all_nodes.values():
                 file.write('{}:\n\n'.format(node.name))
                 file.write('{}\n\n\n'.format(node.grep_log_for_errors()))
@@ -78,13 +85,38 @@ class PostProcessing:
             file.write('Simcoin:\n\n')
             lines = bash.check_output_without_log(config.log_error_grep.format(config.log_file))
             file.write('{}\n\n\n'.format(lines))
-        logging.info('Grepped all logs for errors and saved matched lines to {}'.format(config.log_errors_txt))
+        logging.info('Grepped all logs for errors and saved matched lines to {}'
+                     .format(self.context.path.log_errors_txt))
 
     def update_parsed_blocks(self):
         for block in self.context.parsed_blocks.values():
             block.stale = 'Stale'
             if block.block_hash in self.context.consensus_chain:
                 block.stale = 'Accepted'
+
+
+def flush_handlers():
+    for handler in logging.getLogger().handlers:
+        handler.flush()
+    logging.debug('Flushed all logging handlers')
+
+
+def extract_from_file(source, destination, start, end):
+    with open(source, 'r') as source_file:
+        with open(destination, 'w') as destination_file:
+            write = False
+            for line in source_file.readlines():
+                if write:
+                    if end in line:
+                        destination_file.write(line)
+                        break
+                    else:
+                        destination_file.write(line)
+                if start in line:
+                    destination_file.write(line)
+                    write = True
+    logging.debug('Extracted from file={} lines between start={} and end={} into file {}'
+                  .format(source, destination, start, end))
 
 
 def rm_node(node):
@@ -114,20 +146,3 @@ def add_line_number(lines):
                                      r'\1 \2 {} \3'.format(line_number), line))
         line_number += 1
     return prefixed_lines
-
-
-def cut_log():
-    with open(config.aggregated_log, 'r') as aggregated_log:
-        with open(config.aggregated_sim_log, 'w') as aggregated_sim_log:
-            write = False
-            for line in aggregated_log.readlines():
-                if write:
-                    if config.log_line_sim_end in line:
-                        aggregated_sim_log.write(line)
-                        break
-                    else:
-                        aggregated_sim_log.write(line)
-                if config.log_line_sim_start in line:
-                    aggregated_sim_log.write(line)
-                    write = True
-    logging.info('Aggregated logs')

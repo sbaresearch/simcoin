@@ -40,15 +40,16 @@ class PublicNode:
 class BitcoinNode(Node):
     log_file = '/debug.log'
 
-    def __init__(self, name, ip, docker_image):
+    def __init__(self, name, ip, docker_image, path):
         super().__init__(name, ip, docker_image)
+        self.path = path
         self.spent_to = None
         self.rpc_connection = None
         self.current_tx_chain_index = 0
         self.tx_chains = []
 
     def run(self):
-        bash.check_output(bitcoincmd.start(self))
+        bash.check_output(bitcoincmd.start(self, self.path))
         # sleep small amount to avoid
         # 'CannotSendRequest: Request-sent'
         # in bitcoinrpc
@@ -119,13 +120,13 @@ class BitcoinNode(Node):
     def grep_log_for_errors(self):
         return bash.check_output_without_log(
             config.log_error_grep.format(
-                config.client_dir_on_host(self) + BitcoinNode.log_file
+                self.path + BitcoinNode.log_file
             )
         )
 
     def cat_log_cmd(self):
         return bash.check_output_without_log(
-            'cat ' + config.client_dir_on_host(self) + BitcoinNode.log_file
+            'cat ' + self.path + BitcoinNode.log_file
         )
 
     def transfer_coinbases_to_normal_tx(self):
@@ -233,8 +234,8 @@ class BitcoinNode(Node):
 
 
 class PublicBitcoinNode(BitcoinNode, PublicNode):
-    def __init__(self, name, ip, latency, docker_image):
-        BitcoinNode.__init__(self, name, ip, docker_image)
+    def __init__(self, name, ip, latency, docker_image, path):
+        BitcoinNode.__init__(self, name, ip, docker_image, path)
         PublicNode.__init__(self, latency)
 
     def add_latency(self, zones):

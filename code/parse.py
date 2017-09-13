@@ -27,7 +27,7 @@ class Parser:
         logging.info('Created parser with {} log parsers'.format(len(self.parsers)))
 
     def execute(self):
-        with open(config.aggregated_sim_log, 'r') as file:
+        with open(self.context.path.aggregated_sim_log, 'r') as file:
             lines = file.readlines()
             for i, line in enumerate(lines):
                 for parser in self.parsers:
@@ -38,7 +38,7 @@ class Parser:
                         pass
                 if (i + 1) % 100000 == 0:
                     logging.info('Parsed {} of {} log lines'.format(i + 1, len(lines)))
-        logging.info('Executed parser')
+        logging.info('Parsed aggregated log={} with {} lines'.format(self.context.path.aggregated_sim_log, len(lines)))
 
     def block_creation_parser(self, line):
         create_new_block = parse_create_new_block(line)

@@ -1,7 +1,7 @@
 import config
 
 
-def run_node(node, cmd):
+def run_node(node, cmd, path):
     return ('docker run'
             ' --cap-add=NET_ADMIN'  # for `tc`
             ' --detach=true'
@@ -9,7 +9,7 @@ def run_node(node, cmd):
             ' --ip=' + str(node.ip) +
             ' --name=' + config.prefix + node.name +  # container name
             ' --hostname=' + config.prefix + node.name +
-            ' --volume $PWD/' + config.client_dir_on_host(node) + ':' + config.client_dir +
+            ' --volume $PWD/' + path + ':' + config.client_dir +
             ' ' + node.docker_image +
             ' bash -c "' + cmd + '"')
 
@@ -40,10 +40,10 @@ def rm_network():
     return 'docker network rm {}'.format(config.network_name)
 
 
-def fix_data_dirs_permissions():
+def fix_data_dirs_permissions(path):
     return ('docker run '
             ' --rm --volume $PWD/{}:/mnt ubuntu'
-            ' chmod a+rwx --recursive /mnt'.format(config.sim_dir))
+            ' chmod a+rwx --recursive /mnt'.format(path))
 
 
 def rm_container(name):
