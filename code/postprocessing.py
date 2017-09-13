@@ -73,7 +73,7 @@ class PostProcessing:
         bash.check_output(dockercmd.rm_network())
         logging.info('Deleted docker network')
 
-        bash.check_output(dockercmd.fix_data_dirs_permissions(self.context.path.sim_dir))
+        bash.check_output(dockercmd.fix_data_dirs_permissions(self.context.path.run_dir))
         logging.info('Fixed permissions of dirs used by docker')
 
     def grep_log_for_errors(self):

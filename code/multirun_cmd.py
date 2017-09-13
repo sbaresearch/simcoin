@@ -60,7 +60,7 @@ def run():
 
         run_cmd.run()
         bash.check_output('cp -r {}/postprocessing {}/run-{}'
-                          .format(config.soft_link_to_sim_dir, config.multi_run_dir, i + 1))
+                          .format(config.soft_link_to_run_dir, config.multi_run_dir, i + 1))
         logging.info('Finished {}/{} simulation'.format(i + 1, args.repeat))
 
     concat_files()

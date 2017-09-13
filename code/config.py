@@ -49,7 +49,7 @@ data_dir = '../data/'
 multi_run_dir = '{}multi-run-{}'.format(data_dir, time.time())
 
 log_file = data_dir + 'debug.log'
-soft_link_to_sim_dir = '{}last_run'.format(data_dir)
+soft_link_to_run_dir = '{}last_run'.format(data_dir)
 soft_link_to_multi_run_dir = '{}last_multi_run'.format(data_dir)
 
 network_csv_file_name = 'network.csv'
@@ -82,13 +82,13 @@ tick_infos_csv_file_name = 'tick_infos.csv'
 
 class Path:
     def __init__(self, run_name):
-        self.sim_dir = data_dir + run_name + '/'
+        self.run_dir = data_dir + run_name + '/'
 
-        self.aggregated_log = self.sim_dir + 'aggregated.log'
-        self.aggregated_sim_log = self.sim_dir + 'aggregated_sim.log'
-        self.run_log = self.sim_dir + 'run.log'
+        self.aggregated_log = self.run_dir + 'aggregated.log'
+        self.aggregated_sim_log = self.run_dir + 'aggregated_sim.log'
+        self.run_log = self.run_dir + 'run.log'
 
-        self.postprocessing_dir = self.sim_dir + 'postprocessing/'
+        self.postprocessing_dir = self.run_dir + 'postprocessing/'
 
         self.general_infos_json = self.postprocessing_dir + 'general_infos.json'
         self.tmp_log = self.postprocessing_dir + 'tmp.log'
@@ -104,5 +104,5 @@ class Path:
         self.log_errors_txt = self.postprocessing_dir + 'log_errors.txt'
 
     def client_dir_on_host(self, name):
-        return self.sim_dir + name + bitcoin_regtest_dir
+        return self.run_dir + name + bitcoin_regtest_dir
 
