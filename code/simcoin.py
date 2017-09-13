@@ -32,21 +32,21 @@ commands = {
 
 
 def parse_args():
-    argument_parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser()
 
-    argument_parser.add_argument('--verbose'
-                                 , action="store_true"
-                                 , help='Verbose log.'
-                                 )
+    parser.add_argument('--verbose'
+                        , action="store_true"
+                        , help='Verbose log.'
+                        )
 
-    argument_parser.add_argument('--tag'
-                                 , dest='tag'
-                                 , action="store"
-                                 , default='run_1'
-                                 , help='A tag that will be added to every csv file.'
-                                 )
+    parser.add_argument('--tag'
+                        , dest='tag'
+                        , action="store"
+                        , default='default_tag'
+                        , help='A tag that will be added to every csv file.'
+                        )
 
-    args = argument_parser.parse_known_args(sys.argv[2:])[0]
+    args = parser.parse_known_args(sys.argv[2:])[0]
 
     print("arguments called with: {}".format(sys.argv))
     print("parsed arguments: {}\n".format(args))
