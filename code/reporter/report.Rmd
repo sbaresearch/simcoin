@@ -45,8 +45,8 @@ txs    <- read.csv2("txs.csv", dec=".")
 blocks <- read.csv2("blocks.csv", dec=".")
 tips   <- read.csv2("tips.csv", dec=".")
 
-blocks_received         <- read.csv2("blocks_received.csv", dec=".")
-txs_received            <- read.csv2("blocks_received.csv", dec=".")
+memory   <- read.csv2("memory.csv", dec=".")
+cpu_time <- read.csv2("cpu_time.csv", dec=".")
 
 blocks_received <- read.csv2("blocks_received.csv", dec=".")
 txs_received    <- read.csv2("blocks_received.csv", dec=".")
@@ -110,6 +110,32 @@ tick_duration_median <- tapply(tick_infos$duration, cut(tick_infos$rel_timestamp
 plot(tick_duration_median, xlab = 'Time [s]', ylab='Duration of tick [s]', xaxt='n', type = 'b')
 axis(1, at=1:nrow(tick_duration_median), labels=names(tick_duration_median))
 ```
+
+## System
+
+```{r system}
+memory$rel_timestamp <- memory$timestamp - sim_start
+memory$usage         <- (1 - memory$free/memory$total) * 100
+
+cpu_time$rel_timestamp   <- cpu_time$timestamp - sim_start
+cpu_time$total           <- cpu_time$user + cpu_time$nice + cpu_time$system
+cpu_time_delta           <- data.frame(cpu_time$rel_timestamp[-1], diff(cpu_time$total), diff(cpu_time$idle))
+colnames(cpu_time_delta) <- c('rel_timestamp', 'total', 'idle')
+cpu_time_delta$usage     <- (cpu_time_delta$idle / cpu_time_delta$total) * 100
+```
+
+### Memory
+*Information of the memory usage is extracted from `/proc/meminfo`.*
+```{r memory_usage_over_time}
+plot(memory$rel_timestamp, memory$usage, xlab = 'Time [s]', ylab='Memory usage [%]', type = 'b')
+```
+
+### CPU
+*Information of the CPU usage is extracted from `/proc/stat`.*
+```{r usage_over_time}
+plot(cpu_time_delta$rel_timestamp, cpu_time_delta$usage, xlab = 'Time [s]', ylab='CPU usage [%]', type = 'b')
+```
+
 
 ##  Blocks
 In this simulation `r nrow(blocks)` blocks were created by `r length(unique(blocks$node))` different nodes.
