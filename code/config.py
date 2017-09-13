@@ -60,8 +60,8 @@ bitcoin_data_dir = '/data'
 bitcoin_regtest_dir = '/regtest'
 client_dir = bitcoin_data_dir + bitcoin_regtest_dir
 
-cpu_time_csv = 'cpu_time.csv'
-memory_csv = 'memory.csv'
+cpu_time_csv_file_name = 'cpu_time.csv'
+memory_csv_file_name = 'memory.csv'
 
 class Path:
     def __init__(self):
