@@ -130,7 +130,7 @@ plot(memory$rel_timestamp, memory$usage, xlab = 'Time [s]', ylab='Memory usage [
 
 ### CPU
 *Information of the CPU usage is extracted from `/proc/stat`.*
-```{r usage_over_time}
+```{r cpu_usage_over_time}
 plot(cpu_time_delta$rel_timestamp, cpu_time_delta$usage, xlab = 'Time [s]', ylab='CPU usage [%]', type = 'b')
 ```
 
