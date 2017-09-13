@@ -4,7 +4,6 @@ import config
 import sys
 import os
 import re
-import numpy as np
 import json
 from collections import namedtuple
 
