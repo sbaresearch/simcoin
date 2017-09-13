@@ -109,8 +109,8 @@ kable(ticks_stats,  align = c('l'), col.names = c('', 'value'))
 par(mar=c(7,5,1,1)) # increase plot margins to fit longer labels on the x-axis
 boxplot(tick_infos$duration ~ cut(tick_infos$rel_timestamp, 25),las=2)
 ```
-## System
 
+## System
 ```{r system}
 memory$rel_timestamp <- memory$timestamp - sim_start
 memory$usage         <- (1 - memory$free/memory$total) * 100
