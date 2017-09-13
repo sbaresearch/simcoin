@@ -107,9 +107,8 @@ kable(ticks_stats,  align = c('l'), col.names = c('', 'value'))
 ### Tick duration over time
 ```{r tick_duration_median}
 tick_duration_median <- tapply(tick_infos$duration, cut(tick_infos$rel_timestamp, pretty(tick_infos$rel_timestamp)), median)
-plot(tick_duration_median, xlab = 'Time [s]', ylab='Duration of tick [s]', xaxt='n')
+plot(tick_duration_median, xlab = 'Time [s]', ylab='Duration of tick [s]', xaxt='n', type = 'b')
 axis(1, at=1:nrow(tick_duration_median), labels=names(tick_duration_median))
-lines(tick_duration_median)
 ```
 
 ##  Blocks
