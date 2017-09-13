@@ -46,7 +46,8 @@ transaction_fee = 1000
 data_dir = '../data/'
 multi_run_dir = '{}multi-run-{}'.format(data_dir, time.time())
 
-log_file = data_dir + 'debug.log'
+log_file_file_name = 'debug.log'
+log_file = data_dir + log_file_file_name
 soft_link_to_sim_dir = '{}last_run'.format(data_dir)
 
 network_csv_file_name = 'network.csv'
@@ -83,6 +84,7 @@ class Path:
 
         self.aggregated_log = self.sim_dir + 'aggregated.log'
         self.aggregated_sim_log = self.sim_dir + 'aggregated_simulation.log'
+        self.log_file_in_sim_dir = self.sim_dir + log_file_file_name
 
         self.postprocessing_dir = self.sim_dir + 'postprocessing/'
 
