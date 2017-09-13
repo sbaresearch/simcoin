@@ -1,6 +1,8 @@
 import config
 import logging
 import time
+import systemmonitor
+import threading
 
 
 class Runner:
@@ -9,6 +11,9 @@ class Runner:
         self.prepare = None
         self.event = None
         self.post_processing = None
+        self.pill2kill = threading.Event()
+        self.system_monitor = threading.Thread(
+            target=systemmonitor.run, args=(self.pill2kill, 5, self.context.args.tag))
 
     def run(self):
         try:
@@ -16,10 +21,14 @@ class Runner:
             self.context.general_infos['step_times']['preparation_start'] = time.time()
             self.prepare.execute()
 
+            self.system_monitor.start()
             self.context.general_infos['step_times']['simulation_start'] = time.time()
             logging.info(config.log_line_sim_start)
             self.event.execute()
             logging.info(config.log_line_sim_end)
+
+            self.pill2kill.set()
+            self.system_monitor.join()
 
             self.context.general_infos['step_times']['postprocessing_start'] = time.time()
             self.post_processing.execute()

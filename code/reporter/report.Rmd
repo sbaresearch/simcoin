@@ -41,23 +41,23 @@ general_infos <- fromJSON(file('general_infos.json'))
 general_info2 <- fromJSON(file('general_infos.json'))
 tick_infos    <- read.csv2("tick_infos.csv", dec=".")
 
-txs           <- read.csv2("txs.csv", dec=".")
-blocks        <- read.csv2("blocks.csv", dec=".")
-tips          <- read.csv2("tips.csv", dec=".")
+txs    <- read.csv2("txs.csv", dec=".")
+blocks <- read.csv2("blocks.csv", dec=".")
+tips   <- read.csv2("tips.csv", dec=".")
 
-blocks_received         <- read.csv2("blocks_received.csv", dec=".")
-txs_received            <- read.csv2("blocks_received.csv", dec=".")
+memory   <- read.csv2("memory.csv", dec=".")
+cpu_time <- read.csv2("cpu_time.csv", dec=".")
 
-blocks_received         <- read.csv2("blocks_received.csv", dec=".")
-txs_received            <- read.csv2("blocks_received.csv", dec=".")
+blocks_received <- read.csv2("blocks_received.csv", dec=".")
+txs_received    <- read.csv2("blocks_received.csv", dec=".")
 
-tx_exces      <- read.csv2("tx_exceptions.csv", dec=".")
-block_exces   <- read.csv2("block_exceptions.csv", dec=".")
-rpc_exces     <- read.csv2("rpc_exceptions.csv", dec=".")
-log_errors    <- readChar("log_errors.txt", file.info("log_errors.txt")$size)
+tx_exces    <- read.csv2("tx_exceptions.csv", dec=".")
+block_exces <- read.csv2("block_exceptions.csv", dec=".")
+rpc_exces   <- read.csv2("rpc_exceptions.csv", dec=".")
+log_errors  <- readChar("log_errors.txt", file.info("log_errors.txt")$size)
 
-args          <- stream_in(file('../args.json'))
-sim_start     <- tick_infos$start[1]
+args      <- stream_in(file('../args.json'))
+sim_start <- tick_infos$start[1]
 ```
 
 
@@ -73,7 +73,7 @@ The simulation started at `r utctime(general_info2$step_times[['preparation_star
 ```{r simulation}
 step_times           <- data.frame(t(data.frame(general_infos$step_times)))
 colnames(step_times) <- c('timestamp')
-step_times           <- step_times[ order(step_times$timestamp), , drop = FALSE]
+step_times           <- step_times[order(step_times$timestamp), , drop = FALSE]
 
 diff_steps <- data.frame(diff(as.matrix(step_times)))
 diff_steps <- rbind(diff_steps, apply(diff_steps, 2, sum))
@@ -107,17 +107,42 @@ kable(ticks_stats,  align = c('l'), col.names = c('', 'value'))
 ### Tick duration over time
 ```{r tick_duration_median}
 tick_duration_median <- tapply(tick_infos$duration, cut(tick_infos$rel_timestamp, pretty(tick_infos$rel_timestamp)), median)
-plot(tick_duration_median, xlab = 'Time [s]', ylab='Duration of tick [s]', xaxt='n')
+plot(tick_duration_median, xlab = 'Time [s]', ylab='Duration of tick [s]', xaxt='n', type = 'b')
 axis(1, at=1:nrow(tick_duration_median), labels=names(tick_duration_median))
-lines(tick_duration_median)
 ```
+
+## System
+
+```{r system}
+memory$rel_timestamp <- memory$timestamp - sim_start
+memory$usage         <- (1 - memory$free/memory$total) * 100
+
+cpu_time$rel_timestamp   <- cpu_time$timestamp - sim_start
+cpu_time$total           <- cpu_time$user + cpu_time$nice + cpu_time$system
+cpu_time_delta           <- data.frame(cpu_time$rel_timestamp[-1], diff(cpu_time$total), diff(cpu_time$idle))
+colnames(cpu_time_delta) <- c('rel_timestamp', 'total', 'idle')
+cpu_time_delta$usage     <- (cpu_time_delta$idle / cpu_time_delta$total) * 100
+```
+
+### Memory
+*Information of the memory usage is extracted from `/proc/meminfo`.*
+```{r memory_usage_over_time}
+plot(memory$rel_timestamp, memory$usage, xlab = 'Time [s]', ylab='Memory usage [%]', type = 'b')
+```
+
+### CPU
+*Information of the CPU usage is extracted from `/proc/stat`.*
+```{r usage_over_time}
+plot(cpu_time_delta$rel_timestamp, cpu_time_delta$usage, xlab = 'Time [s]', ylab='CPU usage [%]', type = 'b')
+```
+
 
 ##  Blocks
 In this simulation `r nrow(blocks)` blocks were created by `r length(unique(blocks$node))` different nodes.
 
 ```{r blocks}
-blocks$total_size_kb         <- blocks$total_size/1000
-blocks$rel_timestamp         <- blocks$timestamp - sim_start
+blocks$total_size_kb <- blocks$total_size/1000
+blocks$rel_timestamp <- blocks$timestamp - sim_start
 ```
 
 ### Distribution of blocks over nodes
