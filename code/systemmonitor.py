@@ -33,12 +33,12 @@ def collect(q_cpu_time, q_memory):
 
 
 class CpuTimeSnapshot:
-    def __init__(self, timestamp, cpu_user, cpu_nice, cpu_system, cpu_idle):
+    def __init__(self, timestamp, user, nice, system, idle):
         self.timestamp = timestamp
-        self.cpu_user = cpu_user
-        self.cpu_nice = cpu_nice
-        self.cpu_system = cpu_system
-        self.cpu_idle = cpu_idle
+        self.user = user
+        self.nice = nice
+        self.system = system
+        self.idle = idle
 
     @classmethod
     def from_bash(cls, cpu_time):
@@ -48,17 +48,17 @@ class CpuTimeSnapshot:
 
     @staticmethod
     def csv_header():
-        return ['timestamp', 'cpu_user', 'cpu_nice', 'cpu_system', 'cpu_idle']
+        return ['timestamp', 'user', 'nice', 'system', 'idle']
 
     def vars_to_array(self):
-        return [self.timestamp, self.cpu_user, self.cpu_nice, self.cpu_system, self.cpu_idle]
+        return [self.timestamp, self.user, self.nice, self.system, self.idle]
 
 
 class MemorySnapshot:
-    def __init__(self, timestamp, total_memory, free_memory):
+    def __init__(self, timestamp, total, free):
         self.timestamp = timestamp
-        self.total_memory = total_memory
-        self.free_memory = free_memory
+        self.total = total
+        self.free = free
 
     @classmethod
     def from_bash(cls, memory):
@@ -68,7 +68,7 @@ class MemorySnapshot:
 
     @staticmethod
     def csv_header():
-        return ['timestamp', 'total_memory', 'free_memory']
+        return ['timestamp', 'total', 'free']
 
     def vars_to_array(self):
-        return [self.timestamp, self.total_memory, self.free_memory]
+        return [self.timestamp, self.total, self.free]
