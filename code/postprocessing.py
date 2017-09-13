@@ -47,6 +47,7 @@ class PostProcessing:
 
             with open(self.context.path.aggregated_log, 'a') as file:
                 file.write('\n'.join(lines) + '\n')
+            logging.debug('Prefixed and added {} lines from node={} to aggregated log'.format(len(lines), node.name))
 
         lines = bash.check_output_without_log('cat {}'.format(config.log_file)).splitlines()
         lines = add_line_number(lines)
