@@ -56,6 +56,7 @@ rpc_simulation_timeout = 0.25
 def create_rpc_connection_string(ip):
     return 'http://{}:{}@{}:{}'.format(rpc_user, rpc_password, ip, rpc_port)
 
+
 reference_node = 'node-0'
 
 blocks_needed_to_make_coinbase_spendable = 100
