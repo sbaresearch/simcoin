@@ -23,10 +23,11 @@ class PostProcessing:
 
         self.grep_log_for_errors()
 
-        logging.info(config.log_line_run_end)
+        logging.info(config.log_line_run_end + self.context.run_name)
         flush_handlers()
         extract_from_file(config.log_file, self.context.path.run_log,
-                          config.log_line_run_start, config.log_line_run_end)
+                          config.log_line_run_start + self.context.run_name,
+                          config.log_line_run_end + self.context.run_name)
         self.aggregate_logs()
         extract_from_file(self.context.path.aggregated_log, self.context.path.aggregated_sim_log,
                           config.log_line_sim_start, config.log_line_sim_end)

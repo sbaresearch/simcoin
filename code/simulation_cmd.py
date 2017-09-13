@@ -11,12 +11,12 @@ from config import Path
 
 
 def run():
-    logging.info(config.log_line_run_start)
-
-    path = Path()
-
-    context = Context(path)
+    context = Context()
+    path = Path(context.run_name)
+    context.path = path
     context.create()
+
+    logging.info(config.log_line_run_start + context.run_name)
 
     runner = Runner(context)
 

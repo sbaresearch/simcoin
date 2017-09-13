@@ -35,8 +35,8 @@ log_prefix_timestamp = r'^([0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}
 log_prefix_full = log_prefix_timestamp + ' ([a-zA-Z0-9-\.]+) [0-9]+ '
 log_error_grep = 'grep -E -i "WARN|FATAL|ERROR|CRITICAL|EXCEPTION" {} || true'
 log_time_format = '%Y-%m-%d %H:%M:%S.%f'
-log_line_run_start = 'RUN START'
-log_line_run_end = 'RUN END'
+log_line_run_start = 'RUN START '
+log_line_run_end = 'RUN END '
 log_line_sim_start = 'SIMULATION START'
 log_line_sim_end = 'SIMULATION END'
 
@@ -80,8 +80,8 @@ tick_infos_csv_file_name = 'tick_infos.csv'
 
 
 class Path:
-    def __init__(self):
-        self.sim_dir = '{}run-{}/'.format(data_dir, time.time())
+    def __init__(self, run_name):
+        self.sim_dir = data_dir + run_name + '/'
 
         self.aggregated_log = self.sim_dir + 'aggregated.log'
         self.aggregated_sim_log = self.sim_dir + 'aggregated_sim.log'

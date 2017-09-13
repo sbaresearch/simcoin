@@ -8,13 +8,15 @@ from simulationfiles import nodes_config
 from simulationfiles.zone import Zone
 from collections import OrderedDict
 from copy import copy
+import time
 
 
 class Context:
-    def __init__(self, path):
-        self.path = path
+    def __init__(self):
+        self.run_name = 'run-' + str(time.time())
         self.args = utils.read_json_file(config.args_json)
         self.zone = Zone()
+        self.path = None
 
         self.config_nodes = None
 
