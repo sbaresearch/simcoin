@@ -42,7 +42,10 @@ smallest_amount = 1
 smallest_amount_btc = 0.00000001
 transaction_fee = 1000
 
+
 data_dir = '../data/'
+multi_run_dir = '{}multi-run-{}'.format(data_dir, time.time())
+
 log_file = data_dir + 'debug.log'
 soft_link_to_sim_dir = '{}last_run'.format(data_dir)
 
