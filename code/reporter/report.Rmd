@@ -41,23 +41,23 @@ general_infos <- fromJSON(file('general_infos.json'))
 general_info2 <- fromJSON(file('general_infos.json'))
 tick_infos    <- read.csv2("tick_infos.csv", dec=".")
 
-txs           <- read.csv2("txs.csv", dec=".")
-blocks        <- read.csv2("blocks.csv", dec=".")
-tips          <- read.csv2("tips.csv", dec=".")
+txs    <- read.csv2("txs.csv", dec=".")
+blocks <- read.csv2("blocks.csv", dec=".")
+tips   <- read.csv2("tips.csv", dec=".")
 
 blocks_received         <- read.csv2("blocks_received.csv", dec=".")
 txs_received            <- read.csv2("blocks_received.csv", dec=".")
 
-blocks_received         <- read.csv2("blocks_received.csv", dec=".")
-txs_received            <- read.csv2("blocks_received.csv", dec=".")
+blocks_received <- read.csv2("blocks_received.csv", dec=".")
+txs_received    <- read.csv2("blocks_received.csv", dec=".")
 
-tx_exces      <- read.csv2("tx_exceptions.csv", dec=".")
-block_exces   <- read.csv2("block_exceptions.csv", dec=".")
-rpc_exces     <- read.csv2("rpc_exceptions.csv", dec=".")
-log_errors    <- readChar("log_errors.txt", file.info("log_errors.txt")$size)
+tx_exces    <- read.csv2("tx_exceptions.csv", dec=".")
+block_exces <- read.csv2("block_exceptions.csv", dec=".")
+rpc_exces   <- read.csv2("rpc_exceptions.csv", dec=".")
+log_errors  <- readChar("log_errors.txt", file.info("log_errors.txt")$size)
 
-args          <- stream_in(file('../args.json'))
-sim_start     <- tick_infos$start[1]
+args      <- stream_in(file('../args.json'))
+sim_start <- tick_infos$start[1]
 ```
 
 
@@ -116,8 +116,8 @@ lines(tick_duration_median)
 In this simulation `r nrow(blocks)` blocks were created by `r length(unique(blocks$node))` different nodes.
 
 ```{r blocks}
-blocks$total_size_kb         <- blocks$total_size/1000
-blocks$rel_timestamp         <- blocks$timestamp - sim_start
+blocks$total_size_kb <- blocks$total_size/1000
+blocks$rel_timestamp <- blocks$timestamp - sim_start
 ```
 
 ### Distribution of blocks over nodes
