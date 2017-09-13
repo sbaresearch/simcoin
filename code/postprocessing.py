@@ -24,7 +24,8 @@ class PostProcessing:
         self.grep_log_for_errors()
 
         self.aggregate_logs()
-        self.cut_log()
+        extract_from_file(self.context.path.aggregated_log, self.context.path.aggregated_sim_log,
+                          config.log_line_sim_start, config.log_line_sim_end)
 
         parser = Parser(self.context)
         parser.execute()
@@ -88,21 +89,23 @@ class PostProcessing:
             if block.block_hash in self.context.consensus_chain:
                 block.stale = 'Accepted'
 
-    def cut_log(self):
-        with open(self.context.path.aggregated_log, 'r') as aggregated_log:
-            with open(self.context.path.aggregated_sim_log, 'w') as aggregated_sim_log:
-                write = False
-                for line in aggregated_log.readlines():
-                    if write:
-                        if config.log_line_sim_end in line:
-                            aggregated_sim_log.write(line)
-                            break
-                        else:
-                            aggregated_sim_log.write(line)
-                    if config.log_line_sim_start in line:
-                        aggregated_sim_log.write(line)
-                        write = True
-        logging.info('Aggregated logs')
+
+def extract_from_file(source, destination, start, end):
+    with open(source, 'r') as source_file:
+        with open(destination, 'w') as destination_file:
+            write = False
+            for line in source_file.readlines():
+                if write:
+                    if end in line:
+                        destination_file.write(line)
+                        break
+                    else:
+                        destination_file.write(line)
+                if start in line:
+                    destination_file.write(line)
+                    write = True
+    logging.debug('Extracted from file={} lines between start={} and end={} into file {}'
+                  .format(source, destination, start, end))
 
 
 def rm_node(node):

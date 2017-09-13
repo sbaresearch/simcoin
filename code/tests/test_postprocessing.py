@@ -65,22 +65,20 @@ class TestPostProcessing(TestCase):
     def test_cut_log(self):
         data = dedent("""
             line1
-            line2 {}
+            line2 start
             line3
-            line4 {}
+            line4 end
             line5
-        """.format(config.log_line_sim_start, config.log_line_sim_end)).strip()
-        self.context.path.aggregated_log = '/path_log'
-        self.context.path.aggregated_sim_log = '/path_sim_log'
+        """).strip()
 
         with patch('builtins.open', mock_open(read_data=data)) as m_open:
-            self.postprocessing.cut_log()
+            postprocessing.extract_from_file('source_file', 'destination_file', 'start', 'end')
 
             self.assertEqual(m_open.call_count, 2)
-            self.assertEqual(m_open.call_args_list[0][0][0], '/path_log')
-            self.assertEqual(m_open.call_args_list[1][0][0], '/path_sim_log')
+            self.assertEqual(m_open.call_args_list[0][0][0], 'source_file')
+            self.assertEqual(m_open.call_args_list[1][0][0], 'destination_file')
 
             handle = m_open()
-            self.assertEqual(handle.write.call_args_list[0][0][0], 'line2 {}\n'.format(config.log_line_sim_start))
+            self.assertEqual(handle.write.call_args_list[0][0][0], 'line2 start\n')
             self.assertEqual(handle.write.call_args_list[1][0][0], 'line3\n')
-            self.assertEqual(handle.write.call_args_list[2][0][0], 'line4 {}\n'.format(config.log_line_sim_end))
+            self.assertEqual(handle.write.call_args_list[2][0][0], 'line4 end\n')
