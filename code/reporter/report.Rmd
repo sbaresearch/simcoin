@@ -18,7 +18,6 @@ library(dplyr)
 library(kableExtra)
 Sys.setenv(TZ='UTC')
 
-# set working directory for development: knitr::opts_knit$set(root.dir = '/tmp/run/postprocessing/')
 opts_chunk$set(
   fig.path='RmdFigs/',
   warning=FALSE,
@@ -29,6 +28,7 @@ opts_chunk$set(
   fig.align='center'
   )
 
+# set working directory for development: knitr::opts_knit$set(root.dir = '/tmp/run/postprocessing/')
 ```
 
 ```{r setup, include=FALSE}
