@@ -2,6 +2,9 @@
 title: "Sample Document Report"
 output:
   pdf_document:
+    pandoc_args: [
+      "-V", "classoption=twocolumn"
+    ]
     toc: yes
 date: '`r format(Sys.time(), "%d %B, %Y")`'
 author: "simcoin"
@@ -9,8 +12,7 @@ author: "simcoin"
 
 ```{r knitr_options, include=FALSE}
 library(knitr)
-opts_chunk$set(fig.width=12, fig.height=4, fig.path='RmdFigs/',
-               warning=FALSE, message=FALSE)
+opts_chunk$set(fig.path='RmdFigs/', warning=FALSE, message=FALSE)
 
 # set working directory for development: knitr::opts_knit$set(root.dir = '/tmp/run/postprocessing/')
 
@@ -24,6 +26,7 @@ knitr::opts_chunk$set(fig.align='center')
 library('jsonlite')
 library('anytime')
 library('dplyr')
+library('kableExtra')
 Sys.setenv(TZ='UTC')
 
 # general infos is needed twice to avoid exception in simulation section.
@@ -50,22 +53,17 @@ args      <- stream_in(file('../args.json'))
 sim_start <- tick_infos$start[1]
 ```
 
-## Base Information
-```{r base_information}
-infos <- data.frame(c(general_infos$hostname, general_infos$cpu_model, general_infos$cpus, round(as.double(general_infos$total_memory) / 1000000, 3)))
-row.names(infos) <- c('hostname', 'CPU model', 'CPU(s)', 'memory [GB]')
-kable(infos, col.names = c('value'))
+## Start arguments
+```{r read_start_arguments}
+args_transposed <- as.data.frame(t(args))
+kable(args_transposed, col.names = c('value'), format = 'latex') %>%
+  kable_styling(latex_options = "scale_down")
 ```
 
 **Used commit:**
 
 `r  gsub('\n', '  \n', general_infos$current_commit)`
 
-## Start arguments
-```{r read_start_arguments}
-args_transposed <- as.data.frame(t(args))
-kable(args_transposed, col.names = c('value'))
-```
 
 ## Simulation
 The simulation started at
@@ -82,9 +80,10 @@ diff_steps <- data.frame(diff(as.matrix(step_times)))
 diff_steps <- rbind(diff_steps, apply(diff_steps, 2, sum))
 diff_steps$duration_min <- diff_steps$timestamp/60
 diff_steps <- diff_steps %>% mutate_at(.vars = vars(timestamp, duration_min), .funs = funs(round(.,2)))
-rownames(diff_steps)   <- c('preparation step', 'run step', 'postprocessing step (wo. report creation)', '***total***')
+rownames(diff_steps)   <- c('preparation step', 'simulation step', 'postprocessing step', 'total')
 
-kable(diff_steps, align = c('ll'), col.names = c('duration [s]', 'duration [min]'))
+kable(diff_steps, col.names = c('duration [s]', 'duration [min]'), format = 'latex') %>%
+  kable_styling(latex_options = "scale_down")
 ```
 
 ### Ticks
@@ -95,16 +94,26 @@ tick_infos$rel_timestamp <- tick_infos$start - sim_start
 ```
 
 ```{r tick_duration_summary}
-kable(unclass(summary(tick_infos$duration)), digits = 3, caption = 'Tick duration [s]')
+kable(unclass(summary(tick_infos$duration)), digits = 3, caption = 'Tick duration [s]', format = 'latex')
 ```
 
-### Tick duration over time
-```{r tick_duration_median}
+```{r tick_duration_boxplot, fig.cap='Tick duration'}
+boxplot(tick_infos$duration, ylab='Tick duration [s]')
+```
+
+```{r tick_duration_median, fig.cap='Tick duration over time', fig.env='figure*'}
 par(mar=c(7,5,1,1)) # increase plot margins to fit longer labels on the x-axis
-boxplot(tick_infos$duration ~ cut(tick_infos$rel_timestamp, 25),las=2)
+boxplot(tick_infos$duration ~ cut(tick_infos$rel_timestamp, 25), las=2)
 ```
 
 ## System
+```{r base_information}
+infos <- data.frame(c(general_infos$hostname, general_infos$cpu_model, general_infos$cpus, round(as.double(general_infos$total_memory) / 1000000, 3)))
+row.names(infos) <- c('hostname', 'CPU model', 'CPU(s)', 'memory [GB]')
+kable(infos, col.names = c('value'), format = 'latex') %>%
+  kable_styling(latex_options = "scale_down")
+```
+
 ```{r system}
 memory$rel_timestamp <- memory$timestamp - sim_start
 memory$usage         <- (1 - memory$free/memory$total) * 100
@@ -116,105 +125,91 @@ colnames(cpu_time_delta) <- c('rel_timestamp', 'total', 'idle')
 cpu_time_delta$usage     <- (cpu_time_delta$idle / cpu_time_delta$total) * 100
 ```
 
-### Memory
-*Information of the memory usage is extracted from `/proc/meminfo`.*
-```{r memory_usage_over_time}
+During the run every 5 seconds the files `/proc/stat` and `/proc/meminfo` were read to monitor the system. In total 100 snapshots were collected. Figure A shows the CPU utilization and figure B shows the memory usage during the run.
+
+```{r memory_usage_over_time, fig.cap='Memory usage over time', fig.env='figure*'}
 plot(memory$rel_timestamp, memory$usage, xlab = 'Time [s]', ylab='Memory usage [%]', type = 'b')
 ```
 
-### CPU
-*Information of the CPU usage is extracted from `/proc/stat`.*
-```{r cpu_usage_over_time}
+```{r cpu_usage_over_time, fig.cap='CPU usage over time', fig.env='figure*'}
 plot(cpu_time_delta$rel_timestamp, cpu_time_delta$usage, xlab = 'Time [s]', ylab='CPU usage [%]', type = 'b')
 ```
 
-
 ##  Blocks
-In this simulation `r nrow(blocks)` blocks were created by `r length(unique(blocks$node))` different nodes.
+In this simulation `r nrow(blocks)` blocks were created by `r length(unique(blocks$node))` different nodes. Note: Some blocks may never reached some nodes because of forks in the chain or other reasons.
+
 
 ```{r blocks}
 blocks$rel_timestamp <- blocks$timestamp - sim_start
 ```
 
-### Distribution of blocks over nodes
-```{r blocks_distribution, fig.height=3}
+```{r blocks_distribution, fig.cap='Block creators'}
 blocks_per_node <- table(blocks$node)
 percentage <- round(blocks_per_node/sum(blocks_per_node)*100)
 labels <- paste(names(blocks_per_node), ' blocks: ', blocks_per_node, ', ', percentage, '%', sep='')
 pie(blocks_per_node, labels)
 ```
 
-### Creation time of blocks
-```{r blocks_creation_time}
-hist(blocks$rel_timestamp, xlab = 'Time [s]')
+```{r blocks_creation_time, fig.cap='Histogram of block creation time'}
+hist(blocks$rel_timestamp, xlab = 'Time [s]', main = NULL)
 ```
 
-### Stale blocks
-```{r stale, fig.height=6}
+```{r stale, fig.cap='Accepted/stale blocks'}
 stale_blocks <- table(blocks$stale)
 percentage <- round(stale_blocks/sum(stale_blocks)*100)
 labels <- paste(names(stale_blocks), ' blocks: ', stale_blocks, ', ', percentage, '%', sep='')
 pie(stale_blocks, labels)
 ```
 
-### Size of blocks
 ```{r block_size_summary}
-kable(unclass(summary(blocks$total_size / 1000)), digits = 3, caption = 'Block size [kB]')
+kable(unclass(summary(blocks$total_size / 1000)), digits = 3, caption = 'Block size [kB]', format = 'latex')
 ```
 
-```{r size}
-hist(blocks$total_size / 1000, xlab = 'Size [kb]')
+```{r size, fig.cap='Histogram of block size'}
+hist(blocks$total_size / 1000, xlab = 'Size [kb]', main = NULL)
 ```
-
-### Propagation time of blocks
-*Note: Some blocks may never reached some nodes because of forks in the chain or other reasons.*
 
 ```{r block_propagation_summary}
-kable(unclass(summary(blocks_received$propagation_duration * 1000)), digits = 3, caption = 'Block propagation [ms]')
+kable(unclass(summary(blocks_received$propagation_duration * 1000)), digits = 3, caption = 'Block propagation [ms]', format = 'latex')
 ```
 
-
 ## Transactions
-There were `r nrow(txs)` transaction created in this simulation.
+There were `r nrow(txs)` transaction created in this simulation. Note: Some transactions may reached other nodes included in a block. Hence they wouldn't appear in this statistics.
+
 
 ```{r txs}
 txs$rel_timestamp <- txs$timestamp - sim_start
 ```
 
-### Distribution
-```{r txs_distribution, fig.height=6}
+```{r txs_distribution, fig.cap='Transaction creators'}
 txs_per_node <- table(txs$node)
 percentage <- round(txs_per_node/sum(txs_per_node)*100)
 labels <- paste(names(txs_per_node), ' blocks: ', txs_per_node, ', ', percentage, '%', sep='')
 pie(txs_per_node, labels)
 ```
 
-### Creation time
-```{r txs_creation_time}
-hist(txs$rel_timestamp, xlab = 'Time [s]')
+```{r txs_creation_time, fig.cap='Histogram of transaction creation'}
+hist(txs$rel_timestamp, xlab = 'Time [s]', main = NULL)
 ```
 
-### Transaction acception time
-*Note: Some transactions may reached other nodes included in a block. Hence they wouldn't appear in this statistics.*
-
-```{r txs_median_propagation_stats}
-kable(unclass(summary(txs_received$propagation_duration * 1000)), digits = 3, caption = 'Transactions propagation [ms]')
+```{r txs_propagation_summary}
+kable(unclass(summary(txs_received$propagation_duration * 1000)), digits = 3, caption = 'Transactions propagation [ms]', format = 'latex')
 ```
 
-### Transactions per block
 ```{r txs_per_block_stats}
-kable(unclass(summary(blocks$txs)), digits = 0, caption = 'Transactions per block')
+kable(unclass(summary(blocks$txs)), digits = 0, caption = 'Transactions per block', format = 'latex')
 ```
 
-```{r txs_per_block}
-hist(blocks$txs, xlab = 'Transactions')
+```{r txs_per_block, fig.cap='Histogramm of transactions in block'}
+hist(blocks$txs, xlab = 'Transactions', main = NULL)
 ```
 
 ## Nodes
 In this simulation were `r length(unique(tips$node))` nodes. In the following the statistics based on data from the RPC-call `getchaintips` are presented.
 
 ```{r tips}
-kable(tips)
+kable(tips, format = 'latex') %>%
+  kable_styling(latex_options = "scale_down")
 not_active_tips <- tips[!(tips$status=='active'),]
 ```
 
@@ -289,12 +284,7 @@ pie(exces_per_node, labels)
 title(main = 'Exception type')
 ```
 
-## Log errors
-Presenting all lines from the log files which matched suspicious strings like `ERROR`, `Exception` and so on.
-
-```
-`r log_errors`
-```
+\clearpage
 
 #### R and package versions used
 
