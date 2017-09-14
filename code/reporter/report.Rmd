@@ -12,14 +12,18 @@ author: "simcoin"
 
 ```{r knitr_options, include=FALSE}
 library(knitr)
-opts_chunk$set(fig.path='RmdFigs/', warning=FALSE, message=FALSE)
 
 # set working directory for development: knitr::opts_knit$set(root.dir = '/tmp/run/postprocessing/')
+opts_chunk$set(
+  fig.path='RmdFigs/',
+  warning=FALSE,
+  message=FALSE,
+  error = TRUE,
+  echo = FALSE,
+  dev = 'pdf',
+  fig.align='center'
+  )
 
-knitr::opts_chunk$set(error = TRUE)
-knitr::opts_chunk$set(echo = FALSE)
-knitr::opts_chunk$set(dev = 'pdf')
-knitr::opts_chunk$set(fig.align='center')
 ```
 
 ```{r setup, include=FALSE}
