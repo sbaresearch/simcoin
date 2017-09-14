@@ -94,7 +94,7 @@ tick_infos$rel_timestamp <- tick_infos$start - sim_start
 ```
 
 ```{r tick_duration_summary}
-kable(unclass(summary(tick_infos$duration)), digits = 3, caption = 'Tick duration [s]', format = 'latex')
+kable(unclass(summary(tick_infos$duration)), col.names = c('duration [s]'), digits = 3, caption = 'Tick duration', format = 'latex')
 ```
 
 ```{r tick_duration_boxplot, fig.cap='Tick duration'}
@@ -158,7 +158,7 @@ pie(stale_blocks, labels)
 ```
 
 ```{r block_size_summary}
-kable(unclass(summary(blocks$total_size / 1000)), digits = 3, caption = 'Block size [kB]', format = 'latex')
+kable(unclass(summary(blocks$total_size / 1000)), col.names = c('size [kB]'), digits = 3, caption = 'Block size', format = 'latex')
 ```
 
 ```{r block_size_boxplot, fig.cap='Block size'}
@@ -166,7 +166,7 @@ boxplot(blocks$total_size / 1000, ylab='Block size [kb]')
 ```
 
 ```{r block_propagation_summary}
-kable(unclass(summary(blocks_received$propagation_duration * 1000)), digits = 3, caption = 'Block propagation [ms]', format = 'latex')
+kable(unclass(summary(blocks_received$propagation_duration * 1000)), col.names = c('propagation [ms]'), digits = 3, caption = 'Block propagation', format = 'latex')
 ```
 
 ```{r block_propagation_density, fig.cap='Block propagation density'}
@@ -190,7 +190,7 @@ pie(txs_per_node, labels)
 ```
 
 ```{r txs_propagation_summary}
-kable(unclass(summary(txs_received$propagation_duration * 1000)), digits = 3, caption = 'Transactions propagation [ms]', format = 'latex')
+kable(unclass(summary(txs_received$propagation_duration * 1000)), col.names = c('propagation [ms]'), digits = 3, caption = 'Transactions propagation', format = 'latex')
 ```
 
 ```{r tx_propagation_density, fig.cap='Transaction propagation density'}
