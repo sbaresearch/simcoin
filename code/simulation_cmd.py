@@ -4,7 +4,6 @@ import time
 from postprocessing import PostProcessing
 from event import Event
 import config
-import bash
 from context import Context
 from prepare import Prepare
 from config import Path
