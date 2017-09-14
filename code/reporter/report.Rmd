@@ -94,17 +94,8 @@ During the simulation `r if(nrow(tick_infos) == args['amount_of_ticks']) {'all'}
 tick_infos$rel_timestamp <- tick_infos$start - sim_start
 ```
 
-```{r ticks_stats}
-ticks_stats <- data.frame(c('Mean tick duration [s]', 'Median tick duration [s]', 'Std tick duration [s]', 'Min tick duration [s]', 'Max tick duration [s]'))
-ticks_stats$values <- c(
-  round(mean(tick_infos$duration), 3),
-  round(median(tick_infos$duration), 3),
-  round(sd(tick_infos$duration), 3),
-  round(min(tick_infos$duration), 3),
-  round(max(tick_infos$duration), 3)
-)
-
-kable(ticks_stats,  align = c('l'), col.names = c('', 'value'))
+```{r tick_duration_summary}
+kable(unclass(summary(tick_infos$duration)), digits = 3, caption = 'Tick duration [s]')
 ```
 
 ### Tick duration over time
@@ -142,7 +133,6 @@ plot(cpu_time_delta$rel_timestamp, cpu_time_delta$usage, xlab = 'Time [s]', ylab
 In this simulation `r nrow(blocks)` blocks were created by `r length(unique(blocks$node))` different nodes.
 
 ```{r blocks}
-blocks$total_size_kb <- blocks$total_size/1000
 blocks$rel_timestamp <- blocks$timestamp - sim_start
 ```
 
@@ -168,40 +158,19 @@ pie(stale_blocks, labels)
 ```
 
 ### Size of blocks
-```{r block_size_stats}
-block_size_stats <- data.frame(c('Mean block size [kB]', 'Median block size [kB]', 'Std block size [kB]', 'Min block size [kB]', 'Max block size [kB]'))
-block_size_stats$values <- c(
-  round(mean(blocks$total_size_kb), 3),
-  round(median(blocks$total_size_kb), 3),
-  round(sd(blocks$total_size_kb), 3),
-  round(min(blocks$total_size_kb), 3),
-  round(max(blocks$total_size_kb), 3)
-)
-
-kable(block_size_stats,  align = c('l'), col.names = c('', 'value'))
+```{r block_size_summary}
+kable(unclass(summary(blocks$total_size / 1000)), digits = 3, caption = 'Block size [kB]')
 ```
 
 ```{r size}
-hist(blocks$total_size_kb, xlab = 'Size [kb]')
+hist(blocks$total_size / 1000, xlab = 'Size [kb]')
 ```
 
 ### Propagation time of blocks
 *Note: Some blocks may never reached some nodes because of forks in the chain or other reasons*
-```{r blocks_received}
-blocks_received$propagation_duration_ms <- blocks_received$propagation_duration * 1000
-```
 
-```{r block_propagation_stats}
-block_propagation_stats <- data.frame(c('Mean block propagation [ms]', 'Median block propagation [ms]', 'Std block propagation [ms]', 'Min block propagation [ms]', 'Max block propagation [ms]'))
-block_propagation_stats$values <- c(
-  round(mean(blocks_received$propagation_duration_ms), 3),
-  round(median(blocks_received$propagation_duration_ms), 3),
-  round(sd(blocks_received$propagation_duration_ms), 3),
-  round(min(blocks_received$propagation_duration_ms), 3),
-  round(max(blocks_received$propagation_duration_ms), 3)
-)
-
-kable(block_propagation_stats,  align = c('l'), col.names = c('', 'value'))
+```{r block_propagation_summary}
+kable(unclass(summary(blocks_received$propagation_duration * 1000)), digits = 3, caption = 'Block propagation [ms]')
 ```
 
 
@@ -227,35 +196,14 @@ hist(txs$rel_timestamp, xlab = 'Time [s]')
 
 ### Transaction acception time
 *Note: Some txs may reached other nodes included in a block. Hence they wouldn't appear in this statistics.*
-```{r txs_received}
-txs_received$propagation_duration_ms <- blocks_received$propagation_duration * 1000
-```
 
 ```{r txs_median_propagation_stats}
-txs_median_propagation <- data.frame(c('Mean txs acception time [ms]', 'Median txs acception time [ms]', 'Std txs acception time [ms]', 'Min txs acception time [ms]', 'Max txs acception time [ms]'))
-txs_median_propagation$values <- c(
-  round(mean(txs_received$propagation_duration_ms), 3),
-  round(median(txs_received$propagation_duration_ms), 3),
-  round(sd(txs_received$propagation_duration_ms), 3),
-  round(min(txs_received$propagation_duration_ms), 3),
-  round(median(txs_received$propagation_duration_ms), 3)
-)
-
-kable(txs_median_propagation,  align = c('l'), col.names = c('', 'value'))
+kable(unclass(summary(txs_received$propagation_duration * 1000)), digits = 3, caption = 'Transactions propagation [ms]')
 ```
 
 ### Transactions per block
 ```{r txs_per_block_stats}
-txs_per_block_stats <- data.frame(c('Mean transactions per block', 'Median transactions per block', 'Std transactions per block', 'Min transactions per block', 'Max transactions per block'))
-txs_per_block_stats$values <- c(
-  round(mean(blocks$txs), 3),
-  round(median(blocks$txs), 3),
-  round(sd(blocks$txs), 3),
-  min(blocks$txs),
-  max(blocks$txs)
-)
-
-kable(txs_per_block_stats,  align = c('l'), col.names = c('', 'value'))
+kable(unclass(summary(blocks$txs)), digits = 0, caption = 'Transactions per block')
 ```
 
 ```{r txs_per_block}
