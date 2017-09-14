@@ -57,22 +57,21 @@ sim_start <- tick_infos$start[1]
 ```
 
 ## Simulation
-```{r read_start_arguments}
+
+The simulation was started with the start arguments shown by table \ref{tab:start_arguments} at
+**`r format(utctime(general_info2$step_times[['preparation_start']]), '%Y-%m-%d %H:%M:%S %Z')`**
+and ended at
+**`r format(utctime(general_info2$step_times[['postprocessing_end']]), '%Y-%m-%d %H:%M:%S %Z')`**.
+During the simulation `r if(nrow(tick_infos) == args['amount_of_ticks']) {'all'} else {'only'}` **`r nrow(tick_infos)` of `r args['amount_of_ticks']`** ticks were executed in time, where one tick took `r args['tick_duration']` second(s).
+The checked out commit at execution time was:
+
+`r general_infos$current_commit`
+
+```{r start_arguments}
 args_transposed <- as.data.frame(t(args))
 kable(args_transposed, col.names = c('value'), caption = 'Start arguments', format = 'latex') %>%
   kable_styling(latex_options = "scale_down")
 ```
-
-**Used commit:**
-
-`r  gsub('\n', '  \n', general_infos$current_commit)`
-
-
-The simulation started at
-**`r format(utctime(general_info2$step_times[['preparation_start']]), '%Y-%m-%d %H:%M:%S %Z')`**
-and ended at
-**`r format(utctime(general_info2$step_times[['postprocessing_end']]), '%Y-%m-%d %H:%M:%S %Z')`**.
-During the simulation `r if(nrow(tick_infos) == args['amount_of_ticks']) {'all'} else {'only'}` **`r nrow(tick_infos)` of `r args['amount_of_ticks']`** ticks were executed in time.
 
 ```{r simulation}
 step_times           <- data.frame(t(data.frame(general_infos$step_times)))
