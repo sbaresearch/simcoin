@@ -33,4 +33,4 @@ def run():
 
     runner.run()
 
-    logging.info("The duration of the simulation was {} seconds".format(str(time.time() - start)))
+    logging.info("The duration of the run was {} seconds".format(str(time.time() - start)))
