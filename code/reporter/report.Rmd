@@ -1,13 +1,10 @@
 ---
 title: "Sample Document Report"
-output: 
+output:
   pdf_document:
-    toc: true
-    pandoc_args: [
-      "-V", "classoption=twocolumn"
-    ]
+    toc: yes
 date: '`r format(Sys.time(), "%d %B, %Y")`'
-author: simcoin 
+author: "simcoin"
 ---
 
 ## Base Information
