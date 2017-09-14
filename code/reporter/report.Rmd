@@ -167,7 +167,7 @@ hist(blocks$total_size / 1000, xlab = 'Size [kb]')
 ```
 
 ### Propagation time of blocks
-*Note: Some blocks may never reached some nodes because of forks in the chain or other reasons*
+*Note: Some blocks may never reached some nodes because of forks in the chain or other reasons.*
 
 ```{r block_propagation_summary}
 kable(unclass(summary(blocks_received$propagation_duration * 1000)), digits = 3, caption = 'Block propagation [ms]')
