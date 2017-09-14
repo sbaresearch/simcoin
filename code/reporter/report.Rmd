@@ -56,10 +56,12 @@ args      <- stream_in(file('../args.json'))
 sim_start <- tick_infos$start[1]
 ```
 
-## Start arguments
+\newpage
+
+## Simulation
 ```{r read_start_arguments}
 args_transposed <- as.data.frame(t(args))
-kable(args_transposed, col.names = c('value'), format = 'latex') %>%
+kable(args_transposed, col.names = c('value'), caption = 'Start arguments', format = 'latex') %>%
   kable_styling(latex_options = "scale_down")
 ```
 
@@ -68,11 +70,11 @@ kable(args_transposed, col.names = c('value'), format = 'latex') %>%
 `r  gsub('\n', '  \n', general_infos$current_commit)`
 
 
-## Simulation
 The simulation started at
 **`r format(utctime(general_info2$step_times[['preparation_start']]), '%Y-%m-%d %H:%M:%S %Z')`**
 and ended at
 **`r format(utctime(general_info2$step_times[['postprocessing_end']]), '%Y-%m-%d %H:%M:%S %Z')`**.
+During the simulation `r if(nrow(tick_infos) == args['amount_of_ticks']) {'all'} else {'only'}` **`r nrow(tick_infos)` of `r args['amount_of_ticks']`** ticks were executed in time.
 
 ```{r simulation}
 step_times           <- data.frame(t(data.frame(general_infos$step_times)))
@@ -85,11 +87,9 @@ diff_steps$duration_min <- diff_steps$timestamp/60
 diff_steps <- diff_steps %>% mutate_at(.vars = vars(timestamp, duration_min), .funs = funs(round(.,2)))
 rownames(diff_steps)   <- c('preparation step', 'simulation step', 'postprocessing step', 'total')
 
-kable(diff_steps, col.names = c('duration [s]', 'duration [min]'), format = 'latex') %>%
+kable(diff_steps, col.names = c('duration [s]', 'duration [min]'), caption = 'Duration of different steps', format = 'latex') %>%
   kable_styling(latex_options = "scale_down")
 ```
-
-During the simulation `r if(nrow(tick_infos) == args['amount_of_ticks']) {'all'} else {'only'}` **`r nrow(tick_infos)` of `r args['amount_of_ticks']`** ticks were executed in time.
 
 ```{r ticks}
 tick_infos$rel_timestamp <- tick_infos$start - sim_start
