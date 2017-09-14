@@ -6,6 +6,7 @@ import argparse
 import utils
 import logging
 import sys
+from simulationfiles import checkargs
 
 
 def parse_args():
@@ -17,10 +18,14 @@ def parse_args():
                         )
 
     parser.add_argument('--tag'
-                        , dest='tag'
-                        , action="store"
                         , default='default_tag'
                         , help='A tag that will be added to every csv file.'
+                        )
+
+    parser.add_argument('--system-snapshots-frequency'
+                        , default=5
+                        , type=checkargs.check_positive_int
+                        , help='Frequency of system snapshot in seconds collected in an own thread.'
                         )
 
     args = parser.parse_known_args(sys.argv[2:])[0]
