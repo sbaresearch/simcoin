@@ -8,6 +8,7 @@ import argparse
 from simulationfiles import checkargs
 import sys
 import utils
+import logging
 
 np.set_printoptions(precision=2, suppress=True)
 
@@ -46,7 +47,7 @@ def create_parser():
 
 
 def create(unknown_arguments=False):
-    print('Called ticks config')
+    logging.info('Called ticks config')
     nodes = nodes_config.read()
 
     parser = create_parser()
@@ -54,8 +55,7 @@ def create(unknown_arguments=False):
         args = parser.parse_known_args(sys.argv[2:])[0]
     else:
         args = parser.parse_args(sys.argv[2:])
-    print("arguments called with: {}".format(sys.argv))
-    print("parsed arguments: {}\n".format(args))
+    logging.info("Parsed arguments in {}: {}".format(__name__, args))
     utils.update_args_json(args)
 
     random.seed(args.seed)
@@ -65,13 +65,13 @@ def create(unknown_arguments=False):
 
     ticks = create_ticks(nodes, block_events, args.txs_per_tick, args.amount_of_ticks)
 
-    print('Created {}:'.format(config.ticks_csv))
+    logging.info('Created {}:'.format(config.ticks_csv))
     print(pandas.DataFrame(ticks))
 
     with open(config.ticks_csv, "w") as file:
         writer = csv.writer(file, delimiter=';')
         writer.writerows(ticks)
-    print('End ticks config\n\n')
+    logging.info('End ticks config')
 
 
 def calc_expected_events(number_of_ticks, events_per_tick):

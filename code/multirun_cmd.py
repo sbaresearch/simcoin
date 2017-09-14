@@ -42,13 +42,11 @@ def create_parser():
 
 
 def run():
-    print('Called network config')
+    logging.info('Called network config')
 
     parser = create_parser()
     args = parser.parse_known_args(sys.argv[2:])[0]
-
-    print("arguments called with: {}".format(sys.argv))
-    print("parsed arguments: {}\n".format(args))
+    logging.info("Parsed arguments in {}: {}".format(__name__, args))
 
     prepare()
 

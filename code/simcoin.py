@@ -12,7 +12,7 @@ import bitcoin
 import utils
 import multirun_cmd
 import run_cmd
-
+import logging
 
 commands = {
     'nodes':        nodes_config.create,
@@ -40,9 +40,6 @@ def parse_args():
                         )
 
     args = parser.parse_known_args(sys.argv[2:])[0]
-
-    print("arguments called with: {}".format(sys.argv))
-    print("parsed arguments: {}\n".format(args))
     utils.update_args_json(args)
 
     return args
@@ -88,6 +85,10 @@ def main():
 
     args = parse_args()
     utils.config_logger(args.verbose)
+    logging.info("Arguments called with: {}".format(sys.argv))
+    logging.info("Parsed arguments in simcoin.py: {}".format(args))
+
+    logging.info('Executing command={}'.format(command))
     commands[command]()
 
 

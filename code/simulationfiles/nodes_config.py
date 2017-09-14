@@ -5,6 +5,7 @@ import sys
 import utils
 import bash
 from cmd import dockercmd
+import logging
 
 node_groups = [
         {'argparse': '--node-group-a', 'variable': 'node_group_a', 'default':
@@ -29,15 +30,14 @@ def create_parser():
 
 
 def create(unknown_arguments=False):
-    print('Called nodes config')
+    logging.info('Called nodes config')
 
     parser = create_parser()
     if unknown_arguments:
         args = parser.parse_known_args(sys.argv[2:])[0]
     else:
         args = parser.parse_args(sys.argv[2:])
-    print("arguments called with: {}".format(sys.argv))
-    print("parsed arguments: {}\n".format(args))
+    logging.info("Parsed arguments in {}: {}".format(__name__, args))
     utils.update_args_json(args)
 
     nodes = []
@@ -53,12 +53,12 @@ def create(unknown_arguments=False):
 
     check_if_share_sum_is_1(nodes)
 
-    print('Created {}:'.format(config.nodes_json))
+    logging.info('Created {}:'.format(config.nodes_json))
     print(json.dumps([node.__dict__ for node in nodes], indent=4))
 
     with open(config.nodes_json, 'w') as file:
         file.write(json.dumps([node.__dict__ for node in nodes], indent=4))
-    print('End nodes config\n\n')
+    logging.info('End nodes config')
 
 
 def read():
@@ -77,8 +77,8 @@ def check_if_image_exists(node_args):
 
     return_value = bash.call_silent(dockercmd.inspect(docker_image))
     if return_value != 0:
-        print("Image {} doesn't exist. Check `docker images` for available images and"
-              " consult the Makefile for how wo create the image.".format(docker_image))
+        logging.error("Image {} doesn't exist. Check `docker images` for available images and"
+                      " consult the Makefile for how wo create the image.".format(docker_image))
         exit(-1)
 
 
@@ -88,7 +88,7 @@ def check_if_share_sum_is_1(nodes):
         sum_of_shares += node.share
     sum_of_shares = round(sum_of_shares, 2)
     if sum_of_shares != 1:
-        print('Sum of shares should be 1. It was {} instead.'.format(sum_of_shares))
+        logging.error('Sum of shares should be 1. It was {} instead.'.format(sum_of_shares))
         return False
     else:
         return True
