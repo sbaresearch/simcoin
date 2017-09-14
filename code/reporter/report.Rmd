@@ -211,7 +211,7 @@ hist(blocks$txs, xlab = 'Transactions')
 ```
 
 ## Nodes
-In this simulation were `r length(unique(tips$name))` nodes. In the following the statistics based on data from the RPC-call `getchaintips` are presented.
+In this simulation were `r length(unique(tips$node))` nodes. In the following the statistics based on data from the RPC-call `getchaintips` are presented.
 
 ```{r tips}
 kable(tips)
