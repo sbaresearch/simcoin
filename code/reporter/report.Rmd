@@ -170,6 +170,11 @@ boxplot(blocks$total_size / 1000, ylab='Block size [kb]')
 kable(unclass(summary(blocks_received$propagation_duration * 1000)), digits = 3, caption = 'Block propagation [ms]', format = 'latex')
 ```
 
+```{r block_propagation_density, fig.cap='Block propagation density'}
+hist(blocks_received$propagation_duration, xlab = 'Time [s]', main = NULL)
+lines(density(blocks_received$propagation_duration))
+```
+
 ## Transactions
 There were `r nrow(txs)` transaction created in this simulation. Note: Some transactions may reached other nodes included in a block. Hence they wouldn't appear in this statistics.
 
@@ -187,6 +192,11 @@ pie(txs_per_node, labels)
 
 ```{r txs_propagation_summary}
 kable(unclass(summary(txs_received$propagation_duration * 1000)), digits = 3, caption = 'Transactions propagation [ms]', format = 'latex')
+```
+
+```{r tx_propagation_density, fig.cap='Transaction propagation density'}
+hist(txs_received$propagation_duration, xlab = 'Time [s]', main = NULL)
+lines(density(txs_received$propagation_duration))
 ```
 
 ```{r txs_per_block_summary}
