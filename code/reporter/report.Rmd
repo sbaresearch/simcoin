@@ -28,7 +28,7 @@ knitr::opts_chunk$set(dev = 'pdf')
 knitr::opts_chunk$set(fig.align='center')
 ```
 
-```{r setup}
+```{r setup, include=FALSE}
 library('jsonlite')
 library('anytime')
 library('dplyr')
