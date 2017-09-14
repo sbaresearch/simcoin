@@ -149,10 +149,6 @@ labels <- paste(names(blocks_per_node), ' blocks: ', blocks_per_node, ', ', perc
 pie(blocks_per_node, labels)
 ```
 
-```{r blocks_creation_time, fig.cap='Histogram of block creation time'}
-hist(blocks$rel_timestamp, xlab = 'Time [s]', main = NULL)
-```
-
 ```{r stale, fig.cap='Accepted/stale blocks'}
 stale_blocks <- table(blocks$stale)
 percentage <- round(stale_blocks/sum(stale_blocks)*100)
@@ -164,8 +160,8 @@ pie(stale_blocks, labels)
 kable(unclass(summary(blocks$total_size / 1000)), digits = 3, caption = 'Block size [kB]', format = 'latex')
 ```
 
-```{r size, fig.cap='Histogram of block size'}
-hist(blocks$total_size / 1000, xlab = 'Size [kb]', main = NULL)
+```{r block_size_boxplot, fig.cap='Block size'}
+boxplot(blocks$total_size / 1000, ylab='Block size [kb]')
 ```
 
 ```{r block_propagation_summary}
@@ -187,20 +183,16 @@ labels <- paste(names(txs_per_node), ' blocks: ', txs_per_node, ', ', percentage
 pie(txs_per_node, labels)
 ```
 
-```{r txs_creation_time, fig.cap='Histogram of transaction creation'}
-hist(txs$rel_timestamp, xlab = 'Time [s]', main = NULL)
-```
-
 ```{r txs_propagation_summary}
 kable(unclass(summary(txs_received$propagation_duration * 1000)), digits = 3, caption = 'Transactions propagation [ms]', format = 'latex')
 ```
 
-```{r txs_per_block_stats}
+```{r txs_per_block_summary}
 kable(unclass(summary(blocks$txs)), digits = 0, caption = 'Transactions per block', format = 'latex')
 ```
 
-```{r txs_per_block, fig.cap='Histogramm of transactions in block'}
-hist(blocks$txs, xlab = 'Transactions', main = NULL)
+```{r txs_per_block_boxplot, fig.cap='Transactions in block'}
+boxplot(blocks$txs, ylab='Transactions')
 ```
 
 ## Nodes
