@@ -7,14 +7,6 @@ date: '`r format(Sys.time(), "%d %B, %Y")`'
 author: "simcoin"
 ---
 
-## Base Information
-
-Date: `date()`
-Version: `git log -1`
-Machine: `Simcoin VM`
-CPU: `?? cores AMD`
-
-
 ```{r knitr_options, include=FALSE}
 library(knitr)
 opts_chunk$set(fig.width=12, fig.height=4, fig.path='RmdFigs/',
@@ -32,6 +24,7 @@ knitr::opts_chunk$set(fig.align='center')
 library('jsonlite')
 library('anytime')
 library('dplyr')
+Sys.setenv(TZ='UTC')
 
 # general infos is needed twice to avoid exception in simulation section.
 general_infos <- fromJSON(file('general_infos.json'))
@@ -57,6 +50,15 @@ args      <- stream_in(file('../args.json'))
 sim_start <- tick_infos$start[1]
 ```
 
+## Base Information
+
+Date: `r format(Sys.time(), "%d. %B, %Y %H:%M %Z")`
+
+Version: `git log -1`
+
+Machine: `Simcoin VM`
+
+CPU: `?? cores AMD`
 
 ## Start arguments
 ```{r read_start_arguments}
