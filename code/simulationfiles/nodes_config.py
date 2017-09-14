@@ -24,7 +24,8 @@ def create_parser():
         parser.add_argument(node_group['argparse']
                             , default=node_group['default']
                             , nargs='+'
-                            , help='{}. Pass [node_type] [amount] [share] [latency] [docker-image]'.format(node_group['variable'])
+                            , help='{}. Pass [node_type] [amount] [share] [latency] [docker-image]'
+                                   .format(node_group['variable'])
                             )
     return parser
 
