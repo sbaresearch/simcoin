@@ -7,6 +7,8 @@ import re
 import filewriter
 import config
 
+PRIORITY = 1
+
 
 def run(stop_event, frequency, path, tag):
     logging.info('Starting system monitor with frequency={}s'.format(str(frequency)))
@@ -16,7 +18,7 @@ def run(stop_event, frequency, path, tag):
     q_memory = queue.Queue()
 
     while not stop_event.wait(0):
-        scheduler.enterabs(next_execution, 1, collect, (q_cpu_time, q_memory,))
+        scheduler.enterabs(next_execution, PRIORITY, collect, (q_cpu_time, q_memory,))
         scheduler.run()
         next_execution += frequency
 
