@@ -51,14 +51,15 @@ sim_start <- tick_infos$start[1]
 ```
 
 ## Base Information
+```{r base_information}
+infos <- data.frame(c(general_infos$hostname, general_infos$cpu_model, general_infos$cpus, round(as.double(general_infos$total_memory) / 1000000, 3)))
+row.names(infos) <- c('hostname', 'CPU model', 'CPU(s)', 'memory [GB]')
+kable(infos, col.names = c('value'))
+```
 
-Date: `r format(Sys.time(), "%d. %B, %Y %H:%M %Z")`
+**Used commit:**
 
-Version: `git log -1`
-
-Machine: `Simcoin VM`
-
-CPU: `?? cores AMD`
+`r  gsub('\n', '  \n', general_infos$current_commit)`
 
 ## Start arguments
 ```{r read_start_arguments}
