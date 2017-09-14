@@ -37,8 +37,6 @@ def parse_args():
 
 
 def run():
-    logging.info('Called network config')
-
     args = parse_args()
     logging.info("Parsed arguments in {}: {}".format(__name__, args))
 
