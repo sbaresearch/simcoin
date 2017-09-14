@@ -25,7 +25,6 @@ def parse_args():
 
     args = parser.parse_known_args(sys.argv[2:])[0]
     utils.update_args_json(args)
-
     return args
 
 

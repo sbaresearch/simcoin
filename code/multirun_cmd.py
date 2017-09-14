@@ -22,7 +22,7 @@ files_to_concat = [
 ]
 
 
-def create_parser():
+def parse_args():
     parser = argparse.ArgumentParser()
 
     parser.add_argument('--repeat'
@@ -31,15 +31,15 @@ def create_parser():
                         , help='Number of repetition of the simulation.'
                         )
 
-    return parser
+    args = parser.parse_known_args(sys.argv[2:])[0]
+    utils.update_args_json(args)
+    return args
 
 
 def run():
     logging.info('Called network config')
 
-    parser = create_parser()
-    args = parser.parse_known_args(sys.argv[2:])[0]
-    utils.update_args_json(args)
+    args = parse_args()
     logging.info("Parsed arguments in {}: {}".format(__name__, args))
 
     prepare()
