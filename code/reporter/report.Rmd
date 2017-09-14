@@ -221,76 +221,72 @@ not_active_tips <- tips[!(tips$status=='active'),]
 ## Block exceptions
 There were `r nrow(block_exces)` exceptions catched during the execution of the RPC-call to create a block.
 
-```{r block_exces}
-block_exces$rel_timestamp <- block_exces$timestamp - sim_start
+```{r block_exces_hist, eval=nrow(block_exces)}
+hist(block_exces$rel_timestamp - sim_start, xlab = 'Time [s]')
 ```
 
-```{r block_exces_hist}
-hist(block_exces$rel_timestamp, xlab = 'Time [s]')
-```
-
-### Distribution
-```{r block_exces_node_distribution, fig.height=6}
+```{r block_exces_node_distribution, eval=nrow(block_exces), fig.height=6}
 exces_per_node <- table(block_exces$node)
 percentage     <- round(exces_per_node/sum(exces_per_node)*100)
 labels         <- paste(names(exces_per_node), ': ', exces_per_node, ', ', percentage, '%', sep='')
 pie(exces_per_node, labels)
+title(main = 'Distribution of exceptions')
 ```
 
-### Exception error message
-```{r block_exces_distribution, fig.height=6}
+```{r block_exces_distribution, eval=nrow(block_exces), fig.height=6}
 exces_per_node <- table(block_exces$exception)
 percentage     <- round(exces_per_node/sum(exces_per_node)*100)
 labels         <- paste(names(exces_per_node), ': ', exces_per_node, ', ', percentage, '%', sep='')
 pie(exces_per_node, labels)
+title(main = 'Exception types')
 ```
 
 ## Transaction exceptions
 There were `r nrow(tx_exces)` exceptions catched during the execution of the RPC-call to send a transaction.
 
-```{r tx_exces}
+```{r tx_exces, eval=nrow(tx_exces)}
 tx_exces$rel_timestamp <- tx_exces$timestamp - sim_start
 hist(tx_exces$rel_timestamp, xlab = 'Time [s]')
 ```
 
-### Distribution
-```{r tx_exces_node_distribution, fig.height=6}
+```{r tx_exces_node_distribution, eval=nrow(tx_exces), fig.height=6}
 exces_per_node <- table(tx_exces$node)
 percentage     <- round(exces_per_node/sum(exces_per_node)*100)
 labels         <- paste(names(exces_per_node), ': ', exces_per_node, ', ', percentage, '%', sep='')
 pie(exces_per_node, labels)
+title(main = 'Distribution of exceptions')
 ```
 
-### Exception error message
-```{r tx_exces_distribution, fig.height=6}
+```{r tx_exces_distribution, eval=nrow(tx_exces), fig.height=6}
 exces_per_node <- table(tx_exces$exception)
 percentage     <- round(exces_per_node/sum(exces_per_node)*100)
 labels         <- paste(names(exces_per_node), ': ', exces_per_node, ', ', percentage, '%', sep='')
 pie(exces_per_node, labels)
+title(main = 'Exception types')
 ```
 
 ## RPC exceptions
 There were `r nrow(rpc_exces)` exceptions catched during a RPC-call.
 
-```{r rpc_exces}
+```{r rpc_exces, eval=nrow(rpc_exces)}
 rpc_exces$rel_timestamp <- rpc_exces$timestamp - sim_start
 hist(rpc_exces$rel_timestamp, xlab = 'Time [s]')
 ```
 
-### Distribution
-```{r rpc_exces_node_distribution, fig.height=6}
+```{r rpc_exces_node_distribution, eval=nrow(rpc_exces), fig.height=6}
 exces_per_node <- table(rpc_exces$node)
 percentage     <- round(exces_per_node/sum(exces_per_node)*100)
 labels         <- paste(names(exces_per_node), ': ', exces_per_node, ', ', percentage, '%', sep='')
 pie(exces_per_node, labels)
+title(main = 'Distribution of exceptions')
 ```
 
-### Exception error message
-```{r rpc_exces_distribution, fig.height=6}
+```{r rpc_exces_distribution, eval=nrow(rpc_exces), eval=nrow(rpc_exces), fig.height=6}
 exces_per_node <- table(rpc_exces$exception)
 percentage     <- round(exces_per_node/sum(exces_per_node)*100)
 labels         <- paste(names(exces_per_node), ': ', exces_per_node, ', ', percentage, '%', sep='')
 pie(exces_per_node, labels)
+title(main = 'Exception type')
 ```
 
 ## Log errors
