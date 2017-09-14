@@ -7,6 +7,7 @@ import argparse
 from simulationfiles import checkargs
 import sys
 import utils
+import logging
 
 
 def create_parser():
@@ -28,15 +29,14 @@ def create_parser():
 
 
 def create(unknown_arguments=False):
-    print('Called network config')
+    logging.info('Called network config')
 
     parser = create_parser()
     if unknown_arguments:
         args = parser.parse_known_args(sys.argv[2:])[0]
     else:
         args = parser.parse_args(sys.argv[2:])
-    print("arguments called with: {}".format(sys.argv))
-    print("parsed arguments: {}\n".format(args))
+    logging.info("Parsed arguments in {}: {}".format(__name__, args))
     utils.update_args_json(args)
 
     nodes = nodes_config.read()
@@ -50,13 +50,13 @@ def create(unknown_arguments=False):
     if check_if_fully_connected(matrix) is not True:
         raise Exception("Not all nodes a reachable. Consider to raise the connectivity.")
 
-    print('Created {}:'.format(config.network_csv))
+    logging.info('Created {}:'.format(config.network_csv))
     print(pandas.DataFrame(matrix))
 
     with open(config.network_csv, "w") as file:
         writer = csv.writer(file, delimiter=';')
         writer.writerows(matrix)
-    print('End network config\n\n')
+    logging.info('End network config')
 
 
 def create_header(nodes):
