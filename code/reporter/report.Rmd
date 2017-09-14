@@ -125,7 +125,7 @@ colnames(cpu_time_delta) <- c('rel_timestamp', 'total', 'idle')
 cpu_time_delta$usage     <- (cpu_time_delta$idle / cpu_time_delta$total) * 100
 ```
 
-During the run every 5 seconds the files `/proc/stat` and `/proc/meminfo` were read to monitor the system. In total 100 snapshots were collected. Figure A shows the CPU utilization and figure B shows the memory usage during the run.
+During the run every `r args['system_snapshots_frequency']` seconds the files `/proc/stat` and `/proc/meminfo` were read to monitor the system. In total 100 snapshots were collected. Figure A shows the CPU utilization and figure B shows the memory usage during the run.
 
 ```{r memory_usage_over_time, fig.cap='Memory usage over time', fig.env='figure*'}
 plot(memory$rel_timestamp, memory$usage, xlab = 'Time [s]', ylab='Memory usage [%]', type = 'b')
