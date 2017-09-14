@@ -31,13 +31,6 @@ def create_parser():
                         , help='Number of repetition of the simulation.'
                         )
 
-    parser.add_argument('--tag'
-                        , dest='tag'
-                        , action="store"
-                        , default='default_tag'
-                        , help='A tag that will be added to every csv file.'
-                        )
-
     return parser
 
 
@@ -46,6 +39,7 @@ def run():
 
     parser = create_parser()
     args = parser.parse_known_args(sys.argv[2:])[0]
+    utils.update_args_json(args)
     logging.info("Parsed arguments in {}: {}".format(__name__, args))
 
     prepare()
@@ -53,10 +47,7 @@ def run():
     for i in range(args.repeat):
         logging.info('Starting {}/{} simulation'.format(i + 1, args.repeat))
 
-        args.tag = args.tag + '-' + str(i)
-        utils.update_args_json(args)
-
-        run_cmd.run()
+        run_cmd.run('_run_' + str(i + 1))
         bash.check_output('cp -r {}/postprocessing {}/run-{}'
                           .format(config.soft_link_to_run_dir, config.multi_run_dir, i + 1))
         logging.info('Finished {}/{} simulation'.format(i + 1, args.repeat))
