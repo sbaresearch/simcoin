@@ -134,6 +134,8 @@ plot(memory$rel_timestamp, memory$usage, xlab = 'Time [s]', ylab='Memory usage [
 plot(cpu_time_delta$rel_timestamp, cpu_time_delta$usage, xlab = 'Time [s]', ylab='CPU usage [%]', type = 'b')
 ```
 
+\newpage
+
 ##  Blocks
 In this simulation `r nrow(blocks)` blocks were created by `r length(unique(blocks$node))` different nodes. Note: Some blocks may never reached some nodes because of forks in the chain or other reasons.
 
