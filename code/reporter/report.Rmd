@@ -1,5 +1,5 @@
 ---
-title: "Sample Document Report"
+title: "Simcoin Report"
 output:
   pdf_document:
     pandoc_args: [
