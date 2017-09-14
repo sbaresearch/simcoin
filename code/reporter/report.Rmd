@@ -195,7 +195,7 @@ hist(txs$rel_timestamp, xlab = 'Time [s]')
 ```
 
 ### Transaction acception time
-*Note: Some txs may reached other nodes included in a block. Hence they wouldn't appear in this statistics.*
+*Note: Some transactions may reached other nodes included in a block. Hence they wouldn't appear in this statistics.*
 
 ```{r txs_median_propagation_stats}
 kable(unclass(summary(txs_received$propagation_duration * 1000)), digits = 3, caption = 'Transactions propagation [ms]')
