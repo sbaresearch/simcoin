@@ -12,6 +12,11 @@ author: "simcoin"
 
 ```{r knitr_options, include=FALSE}
 library(knitr)
+library(jsonlite)
+library(anytime)
+library(dplyr)
+library(kableExtra)
+Sys.setenv(TZ='UTC')
 
 # set working directory for development: knitr::opts_knit$set(root.dir = '/tmp/run/postprocessing/')
 opts_chunk$set(
@@ -27,12 +32,6 @@ opts_chunk$set(
 ```
 
 ```{r setup, include=FALSE}
-library('jsonlite')
-library('anytime')
-library('dplyr')
-library('kableExtra')
-Sys.setenv(TZ='UTC')
-
 # general infos is needed twice to avoid exception in simulation section.
 general_infos <- fromJSON(file('general_infos.json'))
 general_info2 <- fromJSON(file('general_infos.json'))
