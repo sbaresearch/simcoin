@@ -97,7 +97,7 @@ class PostProcessing:
                 block.stale = 'Accepted'
 
     def collect_general_infos(self):
-        self.context.general_infos['current_commit'] = try_cmd('git log -1')
+        self.context.general_infos['current_commit'] = try_cmd('git log -n 1 --pretty=format:"%H"')
         self.context.general_infos['hostname'] = try_cmd('hostname')
         self.context.general_infos['uname'] = try_cmd('uname -a')
         self.context.general_infos['total_memory'] = try_cmd('cat /proc/meminfo | sed -n 1p | grep -ohE [0-9]+')
