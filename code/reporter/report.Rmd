@@ -56,8 +56,6 @@ args      <- stream_in(file('../args.json'))
 sim_start <- tick_infos$start[1]
 ```
 
-\newpage
-
 ## Simulation
 ```{r read_start_arguments}
 args_transposed <- as.data.frame(t(args))
@@ -136,8 +134,6 @@ plot(memory$rel_timestamp, memory$usage, xlab = 'Time [s]', ylab='Memory usage [
 ```{r cpu_usage_over_time, fig.cap='CPU usage over time', fig.env='figure*'}
 plot(cpu_time_delta$rel_timestamp, cpu_time_delta$usage, xlab = 'Time [s]', ylab='CPU usage [%]', type = 'b')
 ```
-
-\newpage
 
 ##  Blocks
 In this simulation `r nrow(blocks)` blocks were created by `r length(unique(blocks$node))` different nodes. Note: Some blocks may never reached some nodes because of forks in the chain or other reasons.
