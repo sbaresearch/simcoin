@@ -1,27 +1,18 @@
 ---
 title: "Sample Document Report"
-output: 
+output:
   pdf_document:
-    toc: true
     pandoc_args: [
       "-V", "classoption=twocolumn"
     ]
+    toc: yes
 date: '`r format(Sys.time(), "%d %B, %Y")`'
-author: simcoin 
+author: "simcoin"
 ---
-
-## Base Information
-
-Date: `date()`
-Version: `git log -1`
-Machine: `Simcoin VM`
-CPU: `?? cores AMD`
-
 
 ```{r knitr_options, include=FALSE}
 library(knitr)
-opts_chunk$set(fig.width=12, fig.height=4, fig.path='RmdFigs/',
-               warning=FALSE, message=FALSE)
+opts_chunk$set(fig.path='RmdFigs/', warning=FALSE, message=FALSE)
 
 # set working directory for development: knitr::opts_knit$set(root.dir = '/tmp/run/postprocessing/')
 
@@ -31,10 +22,12 @@ knitr::opts_chunk$set(dev = 'pdf')
 knitr::opts_chunk$set(fig.align='center')
 ```
 
-```{r setup}
+```{r setup, include=FALSE}
 library('jsonlite')
 library('anytime')
 library('dplyr')
+library('kableExtra')
+Sys.setenv(TZ='UTC')
 
 # general infos is needed twice to avoid exception in simulation section.
 general_infos <- fromJSON(file('general_infos.json'))
@@ -49,7 +42,7 @@ memory   <- read.csv2("memory.csv", dec=".")
 cpu_time <- read.csv2("cpu_time.csv", dec=".")
 
 blocks_received <- read.csv2("blocks_received.csv", dec=".")
-txs_received    <- read.csv2("blocks_received.csv", dec=".")
+txs_received    <- read.csv2("txs_received.csv", dec=".")
 
 tx_exces    <- read.csv2("tx_exceptions.csv", dec=".")
 block_exces <- read.csv2("block_exceptions.csv", dec=".")
@@ -60,15 +53,23 @@ args      <- stream_in(file('../args.json'))
 sim_start <- tick_infos$start[1]
 ```
 
-
 ## Start arguments
 ```{r read_start_arguments}
 args_transposed <- as.data.frame(t(args))
-kable(args_transposed, col.names = c('value'))
+kable(args_transposed, col.names = c('value'), format = 'latex') %>%
+  kable_styling(latex_options = "scale_down")
 ```
 
+**Used commit:**
+
+`r  gsub('\n', '  \n', general_infos$current_commit)`
+
+
 ## Simulation
-The simulation started at `r utctime(general_info2$step_times[['preparation_start']])` and ended at `r utctime(general_info2$step_times[['postprocessing_end']])`.
+The simulation started at
+**`r format(utctime(general_info2$step_times[['preparation_start']]), '%Y-%m-%d %H:%M:%S %Z')`**
+and ended at
+**`r format(utctime(general_info2$step_times[['postprocessing_end']]), '%Y-%m-%d %H:%M:%S %Z')`**.
 
 ```{r simulation}
 step_times           <- data.frame(t(data.frame(general_infos$step_times)))
@@ -79,38 +80,39 @@ diff_steps <- data.frame(diff(as.matrix(step_times)))
 diff_steps <- rbind(diff_steps, apply(diff_steps, 2, sum))
 diff_steps$duration_min <- diff_steps$timestamp/60
 diff_steps <- diff_steps %>% mutate_at(.vars = vars(timestamp, duration_min), .funs = funs(round(.,2)))
-rownames(diff_steps)   <- c('preparation step', 'run step', 'postprocessing step (wo. report creation)', '***total***')
+rownames(diff_steps)   <- c('preparation step', 'simulation step', 'postprocessing step', 'total')
 
-kable(diff_steps, align = c('ll'), col.names = c('duration [s]', 'duration [min]'))
+kable(diff_steps, col.names = c('duration [s]', 'duration [min]'), format = 'latex') %>%
+  kable_styling(latex_options = "scale_down")
 ```
 
-### Ticks
 During the simulation `r if(nrow(tick_infos) == args['amount_of_ticks']) {'all'} else {'only'}` **`r nrow(tick_infos)` of `r args['amount_of_ticks']`** ticks were executed in time.
 
 ```{r ticks}
 tick_infos$rel_timestamp <- tick_infos$start - sim_start
 ```
 
-```{r ticks_stats}
-ticks_stats <- data.frame(c('Mean tick duration [s]', 'Median tick duration [s]', 'Std tick duration [s]', 'Min tick duration [s]', 'Max tick duration [s]'))
-ticks_stats$values <- c(
-  round(mean(tick_infos$duration), 3),
-  round(median(tick_infos$duration), 3),
-  round(sd(tick_infos$duration), 3),
-  round(min(tick_infos$duration), 3),
-  round(max(tick_infos$duration), 3)
-)
-
-kable(ticks_stats,  align = c('l'), col.names = c('', 'value'))
+```{r tick_duration_summary}
+kable(unclass(summary(tick_infos$duration)), digits = 3, caption = 'Tick duration [s]', format = 'latex')
 ```
 
-### Tick duration over time
-```{r tick_duration_median}
+```{r tick_duration_boxplot, fig.cap='Tick duration'}
+boxplot(tick_infos$duration, ylab='Tick duration [s]')
+```
+
+```{r tick_duration_median, fig.cap='Tick duration over time', fig.env='figure*'}
 par(mar=c(7,5,1,1)) # increase plot margins to fit longer labels on the x-axis
-boxplot(tick_infos$duration ~ cut(tick_infos$rel_timestamp, 25),las=2)
+boxplot(tick_infos$duration ~ cut(tick_infos$rel_timestamp, 25), las=2)
 ```
 
 ## System
+```{r base_information}
+infos <- data.frame(c(general_infos$hostname, general_infos$cpu_model, general_infos$cpus, round(as.double(general_infos$total_memory) / 1000000, 3)))
+row.names(infos) <- c('hostname', 'CPU model', 'CPU(s)', 'memory [GB]')
+kable(infos, col.names = c('value'), format = 'latex') %>%
+  kable_styling(latex_options = "scale_down")
+```
+
 ```{r system}
 memory$rel_timestamp <- memory$timestamp - sim_start
 memory$usage         <- (1 - memory$free/memory$total) * 100
@@ -122,232 +124,170 @@ colnames(cpu_time_delta) <- c('rel_timestamp', 'total', 'idle')
 cpu_time_delta$usage     <- (cpu_time_delta$idle / cpu_time_delta$total) * 100
 ```
 
-### Memory
-*Information of the memory usage is extracted from `/proc/meminfo`.*
-```{r memory_usage_over_time}
+During the run every 5 seconds the files `/proc/stat` and `/proc/meminfo` were read to monitor the system. In total 100 snapshots were collected. Figure A shows the CPU utilization and figure B shows the memory usage during the run.
+
+```{r memory_usage_over_time, fig.cap='Memory usage over time', fig.env='figure*'}
 plot(memory$rel_timestamp, memory$usage, xlab = 'Time [s]', ylab='Memory usage [%]', type = 'b')
 ```
 
-### CPU
-*Information of the CPU usage is extracted from `/proc/stat`.*
-```{r cpu_usage_over_time}
+```{r cpu_usage_over_time, fig.cap='CPU usage over time', fig.env='figure*'}
 plot(cpu_time_delta$rel_timestamp, cpu_time_delta$usage, xlab = 'Time [s]', ylab='CPU usage [%]', type = 'b')
 ```
 
+\newpage
 
 ##  Blocks
-In this simulation `r nrow(blocks)` blocks were created by `r length(unique(blocks$node))` different nodes.
+In this simulation `r nrow(blocks)` blocks were created by `r length(unique(blocks$node))` different nodes. Note: Some blocks may never reached some nodes because of forks in the chain or other reasons.
+
 
 ```{r blocks}
-blocks$total_size_kb <- blocks$total_size/1000
 blocks$rel_timestamp <- blocks$timestamp - sim_start
 ```
 
-### Distribution of blocks over nodes
-```{r blocks_distribution, fig.height=3}
+```{r blocks_distribution, fig.cap='Block creators'}
 blocks_per_node <- table(blocks$node)
 percentage <- round(blocks_per_node/sum(blocks_per_node)*100)
 labels <- paste(names(blocks_per_node), ' blocks: ', blocks_per_node, ', ', percentage, '%', sep='')
 pie(blocks_per_node, labels)
 ```
 
-### Creation time of blocks
-```{r blocks_creation_time}
-hist(blocks$rel_timestamp, xlab = 'Time [s]')
-```
-
-### Stale blocks
-```{r stale, fig.height=6}
+```{r stale, fig.cap='Accepted/stale blocks'}
 stale_blocks <- table(blocks$stale)
 percentage <- round(stale_blocks/sum(stale_blocks)*100)
 labels <- paste(names(stale_blocks), ' blocks: ', stale_blocks, ', ', percentage, '%', sep='')
 pie(stale_blocks, labels)
 ```
 
-### Size of blocks
-```{r block_size_stats}
-block_size_stats <- data.frame(c('Mean block size [kB]', 'Median block size [kB]', 'Std block size [kB]', 'Min block size [kB]', 'Max block size [kB]'))
-block_size_stats$values <- c(
-  round(mean(blocks$total_size_kb), 3),
-  round(median(blocks$total_size_kb), 3),
-  round(sd(blocks$total_size_kb), 3),
-  round(min(blocks$total_size_kb), 3),
-  round(max(blocks$total_size_kb), 3)
-)
-
-kable(block_size_stats,  align = c('l'), col.names = c('', 'value'))
+```{r block_size_summary}
+kable(unclass(summary(blocks$total_size / 1000)), digits = 3, caption = 'Block size [kB]', format = 'latex')
 ```
 
-```{r size}
-hist(blocks$total_size_kb, xlab = 'Size [kb]')
+```{r block_size_boxplot, fig.cap='Block size'}
+boxplot(blocks$total_size / 1000, ylab='Block size [kb]')
 ```
 
-### Propagation time of blocks
-*Note: Some blocks may never reached some nodes because of forks in the chain or other reasons*
-```{r blocks_received}
-blocks_received$propagation_duration_ms <- blocks_received$propagation_duration * 1000
+```{r block_propagation_summary}
+kable(unclass(summary(blocks_received$propagation_duration * 1000)), digits = 3, caption = 'Block propagation [ms]', format = 'latex')
 ```
 
-```{r block_propagation_stats}
-block_propagation_stats <- data.frame(c('Mean block propagation [ms]', 'Median block propagation [ms]', 'Std block propagation [ms]', 'Min block propagation [ms]', 'Max block propagation [ms]'))
-block_propagation_stats$values <- c(
-  round(mean(blocks_received$propagation_duration_ms), 3),
-  round(median(blocks_received$propagation_duration_ms), 3),
-  round(sd(blocks_received$propagation_duration_ms), 3),
-  round(min(blocks_received$propagation_duration_ms), 3),
-  round(max(blocks_received$propagation_duration_ms), 3)
-)
-
-kable(block_propagation_stats,  align = c('l'), col.names = c('', 'value'))
+```{r block_propagation_density, fig.cap='Block propagation density'}
+hist(blocks_received$propagation_duration, xlab = 'Time [s]', main = NULL)
+lines(density(blocks_received$propagation_duration))
 ```
-
 
 ## Transactions
-There were `r nrow(txs)` transaction created in this simulation.
+There were `r nrow(txs)` transaction created in this simulation. Note: Some transactions may reached other nodes included in a block. Hence they wouldn't appear in this statistics.
+
 
 ```{r txs}
 txs$rel_timestamp <- txs$timestamp - sim_start
 ```
 
-### Distribution
-```{r txs_distribution, fig.height=6}
+```{r txs_distribution, fig.cap='Transaction creators'}
 txs_per_node <- table(txs$node)
 percentage <- round(txs_per_node/sum(txs_per_node)*100)
 labels <- paste(names(txs_per_node), ' blocks: ', txs_per_node, ', ', percentage, '%', sep='')
 pie(txs_per_node, labels)
 ```
 
-### Creation time
-```{r txs_creation_time}
-hist(txs$rel_timestamp, xlab = 'Time [s]')
+```{r txs_propagation_summary}
+kable(unclass(summary(txs_received$propagation_duration * 1000)), digits = 3, caption = 'Transactions propagation [ms]', format = 'latex')
 ```
 
-### Transaction acception time
-*Note: Some txs may reached other nodes included in a block. Hence they wouldn't appear in this statistics.*
-```{r txs_received}
-txs_received$propagation_duration_ms <- blocks_received$propagation_duration * 1000
+```{r tx_propagation_density, fig.cap='Transaction propagation density'}
+hist(txs_received$propagation_duration, xlab = 'Time [s]', main = NULL)
+lines(density(txs_received$propagation_duration))
 ```
 
-```{r txs_median_propagation_stats}
-txs_median_propagation <- data.frame(c('Mean txs acception time [ms]', 'Median txs acception time [ms]', 'Std txs acception time [ms]', 'Min txs acception time [ms]', 'Max txs acception time [ms]'))
-txs_median_propagation$values <- c(
-  round(mean(txs_received$propagation_duration_ms), 3),
-  round(median(txs_received$propagation_duration_ms), 3),
-  round(sd(txs_received$propagation_duration_ms), 3),
-  round(min(txs_received$propagation_duration_ms), 3),
-  round(median(txs_received$propagation_duration_ms), 3)
-)
-
-kable(txs_median_propagation,  align = c('l'), col.names = c('', 'value'))
+```{r txs_per_block_summary}
+kable(unclass(summary(blocks$txs)), digits = 0, caption = 'Transactions per block', format = 'latex')
 ```
 
-### Transactions per block
-```{r txs_per_block_stats}
-txs_per_block_stats <- data.frame(c('Mean transactions per block', 'Median transactions per block', 'Std transactions per block', 'Min transactions per block', 'Max transactions per block'))
-txs_per_block_stats$values <- c(
-  round(mean(blocks$txs), 3),
-  round(median(blocks$txs), 3),
-  round(sd(blocks$txs), 3),
-  min(blocks$txs),
-  max(blocks$txs)
-)
-
-kable(txs_per_block_stats,  align = c('l'), col.names = c('', 'value'))
-```
-
-```{r txs_per_block}
-hist(blocks$txs, xlab = 'Transactions')
+```{r txs_per_block_boxplot, fig.cap='Transactions in block'}
+boxplot(blocks$txs, ylab='Transactions')
 ```
 
 ## Nodes
-In this simulation were `r length(unique(tips$name))` nodes. In the following the statistics based on data from the RPC-call `getchaintips` are presented.
+In this simulation were `r length(unique(tips$node))` nodes. In the following the statistics based on data from the RPC-call `getchaintips` are presented.
 
 ```{r tips}
-kable(tips)
+kable(tips, format = 'latex') %>%
+  kable_styling(latex_options = "scale_down")
 not_active_tips <- tips[!(tips$status=='active'),]
 ```
 
 ## Block exceptions
 There were `r nrow(block_exces)` exceptions catched during the execution of the RPC-call to create a block.
 
-```{r block_exces}
-block_exces$rel_timestamp <- block_exces$timestamp - sim_start
+```{r block_exces_hist, eval=nrow(block_exces)}
+hist(block_exces$rel_timestamp - sim_start, xlab = 'Time [s]')
 ```
 
-```{r block_exces_hist}
-hist(block_exces$rel_timestamp, xlab = 'Time [s]')
-```
-
-### Distribution
-```{r block_exces_node_distribution, fig.height=6}
+```{r block_exces_node_distribution, eval=nrow(block_exces), fig.height=6}
 exces_per_node <- table(block_exces$node)
 percentage     <- round(exces_per_node/sum(exces_per_node)*100)
 labels         <- paste(names(exces_per_node), ': ', exces_per_node, ', ', percentage, '%', sep='')
 pie(exces_per_node, labels)
+title(main = 'Distribution of exceptions')
 ```
 
-### Exception error message
-```{r block_exces_distribution, fig.height=6}
+```{r block_exces_distribution, eval=nrow(block_exces), fig.height=6}
 exces_per_node <- table(block_exces$exception)
 percentage     <- round(exces_per_node/sum(exces_per_node)*100)
 labels         <- paste(names(exces_per_node), ': ', exces_per_node, ', ', percentage, '%', sep='')
 pie(exces_per_node, labels)
+title(main = 'Exception types')
 ```
 
 ## Transaction exceptions
 There were `r nrow(tx_exces)` exceptions catched during the execution of the RPC-call to send a transaction.
 
-```{r tx_exces}
+```{r tx_exces, eval=nrow(tx_exces)}
 tx_exces$rel_timestamp <- tx_exces$timestamp - sim_start
 hist(tx_exces$rel_timestamp, xlab = 'Time [s]')
 ```
 
-### Distribution
-```{r tx_exces_node_distribution, fig.height=6}
+```{r tx_exces_node_distribution, eval=nrow(tx_exces), fig.height=6}
 exces_per_node <- table(tx_exces$node)
 percentage     <- round(exces_per_node/sum(exces_per_node)*100)
 labels         <- paste(names(exces_per_node), ': ', exces_per_node, ', ', percentage, '%', sep='')
 pie(exces_per_node, labels)
+title(main = 'Distribution of exceptions')
 ```
 
-### Exception error message
-```{r tx_exces_distribution, fig.height=6}
+```{r tx_exces_distribution, eval=nrow(tx_exces), fig.height=6}
 exces_per_node <- table(tx_exces$exception)
 percentage     <- round(exces_per_node/sum(exces_per_node)*100)
 labels         <- paste(names(exces_per_node), ': ', exces_per_node, ', ', percentage, '%', sep='')
 pie(exces_per_node, labels)
+title(main = 'Exception types')
 ```
 
 ## RPC exceptions
 There were `r nrow(rpc_exces)` exceptions catched during a RPC-call.
 
-```{r rpc_exces}
+```{r rpc_exces, eval=nrow(rpc_exces)}
 rpc_exces$rel_timestamp <- rpc_exces$timestamp - sim_start
 hist(rpc_exces$rel_timestamp, xlab = 'Time [s]')
 ```
 
-### Distribution
-```{r rpc_exces_node_distribution, fig.height=6}
+```{r rpc_exces_node_distribution, eval=nrow(rpc_exces), fig.height=6}
 exces_per_node <- table(rpc_exces$node)
 percentage     <- round(exces_per_node/sum(exces_per_node)*100)
 labels         <- paste(names(exces_per_node), ': ', exces_per_node, ', ', percentage, '%', sep='')
 pie(exces_per_node, labels)
+title(main = 'Distribution of exceptions')
 ```
 
-### Exception error message
-```{r rpc_exces_distribution, fig.height=6}
+```{r rpc_exces_distribution, eval=nrow(rpc_exces), eval=nrow(rpc_exces), fig.height=6}
 exces_per_node <- table(rpc_exces$exception)
 percentage     <- round(exces_per_node/sum(exces_per_node)*100)
 labels         <- paste(names(exces_per_node), ': ', exces_per_node, ', ', percentage, '%', sep='')
 pie(exces_per_node, labels)
+title(main = 'Exception type')
 ```
 
-## Log errors
-Presenting all lines from the log files which matched suspicious strings like `ERROR`, `Exception` and so on.
-
-```
-`r log_errors`
-```
+\clearpage
 
 #### R and package versions used
 

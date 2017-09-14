@@ -9,6 +9,7 @@ from cmd import rcmd
 from cmd import dockercmd
 import utils
 from multiprocessing.dummy import Pool as ThreadPool
+import subprocess
 
 
 class PostProcessing:
@@ -36,6 +37,7 @@ class PostProcessing:
         parser.execute()
 
         self.update_parsed_blocks()
+        self.collect_general_infos()
 
         file_writer = FileWriter(self.context)
         file_writer.execute()
@@ -94,6 +96,14 @@ class PostProcessing:
             if block.block_hash in self.context.consensus_chain:
                 block.stale = 'Accepted'
 
+    def collect_general_infos(self):
+        self.context.general_infos['current_commit'] = try_cmd('git log -1')
+        self.context.general_infos['hostname'] = try_cmd('hostname')
+        self.context.general_infos['uname'] = try_cmd('uname -a')
+        self.context.general_infos['total_memory'] = try_cmd('cat /proc/meminfo | sed -n 1p | grep -ohE [0-9]+')
+        self.context.general_infos['cpu_model'] = try_cmd("lscpu | grep -oP 'Model name:\s+\K(.*)'")
+        self.context.general_infos['cpus'] = try_cmd("lscpu | grep -oP 'CPU\(s\):\s+\K([0-9]+)$'")
+
 
 def flush_handlers():
     for handler in logging.getLogger().handlers:
@@ -146,3 +156,10 @@ def add_line_number(lines):
                                      r'\1 \2 {} \3'.format(line_number), line))
         line_number += 1
     return prefixed_lines
+
+
+def try_cmd(cmd):
+    try:
+        return bash.check_output(cmd)
+    except subprocess.CalledProcessError:
+        return 'cmd={} failed'.format(cmd)
