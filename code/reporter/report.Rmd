@@ -68,7 +68,10 @@ kable(args_transposed, col.names = c('value'))
 ```
 
 ## Simulation
-The simulation started at `r utctime(general_info2$step_times[['preparation_start']])` and ended at `r utctime(general_info2$step_times[['postprocessing_end']])`.
+The simulation started at
+**`r format(utctime(general_info2$step_times[['preparation_start']]), '%Y-%m-%d %H:%M:%S %Z')`**
+and ended at
+**`r format(utctime(general_info2$step_times[['postprocessing_end']]), '%Y-%m-%d %H:%M:%S %Z')`**.
 
 ```{r simulation}
 step_times           <- data.frame(t(data.frame(general_infos$step_times)))
