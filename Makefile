@@ -67,6 +67,17 @@ demo5:
 				--txs-per-tick 100 \
 				--tick-duration 3 \
 				--verbose
+# check startup
+demo6:
+	cd code; \
+		python3 simcoin.py \
+			run \
+				--node-group-a bitcoin 100 1 0 simcoin/patched:v1 \
+				--blocks-per-tick 0.01 \
+				--amount-of-ticks 10 \
+				--txs-per-tick 10 \
+				--tick-duration 1 \
+				--verbose
 
 multidemo1:
 	cd code; \
