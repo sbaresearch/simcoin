@@ -105,8 +105,8 @@ kable(unclass(summary(tick_infos$duration)), col.names = c('duration [s]'), digi
   kable_styling(latex_options = c('HOLD_position'))
 ```
 
-```{r tick_duration_xyplot}
-xyplot(tick_infos$duration ~ ticks$elapsed, groups=ticks$tag,  t="b" )
+```{r tick_duration_xyplot, fig.cap='Tick duration over time', fig.env='figure*'}
+xyplot(tick_infos$duration ~ ticks$elapsed, groups=ticks$tag, xlab = 'Time [s]', ylab = 'Duration [s]', t='b' )
 ```
 
 ```{r tick_duration_median, fig.cap='Tick duration', fig.pos='H'}
