@@ -133,7 +133,11 @@ kable(unclass(summary(tick_infos$duration)), col.names = c('duration [s]'), digi
 boxplot(tick_infos$duration, ylab='Tick duration [s]')
 ```
 
-```{r tick_duration_median, fig.cap='Tick duration over time', fig.env='figure*'}
+```{r tick_duration_xyplot, fig.cap='Tick duration over time', fig.env='figure*'}
+xyplot(tick_infos$duration ~ tick_infos$start - sim_start, xlab = 'Time [s]', ylab = 'Duration [s]', t = 'b' )
+```
+
+```{r tick_duration_median, fig.cap='Tick duration over time with boxplot', fig.env='figure*'}
 par(mar=c(7,5,1,1)) # increase plot margins to fit longer labels on the x-axis
 boxplot(tick_infos$duration ~ cut(tick_infos$start - sim_start, 25), las=2)
 ```
