@@ -44,7 +44,7 @@ blocks <- read.csv2("blocks.csv", dec=".")
 tips   <- read.csv2("tips.csv", dec=".")
 
 blocks_received <- read.csv2("blocks_received.csv", dec=".")
-txs_received    <- read.csv2("blocks_received.csv", dec=".")
+txs_received    <- read.csv2("txs_received.csv", dec=".")
 
 tx_exces    <- read.csv2("tx_exceptions.csv", dec=".")
 block_exces <- read.csv2("block_exceptions.csv", dec=".")
