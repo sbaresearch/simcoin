@@ -136,10 +136,6 @@ xyplot(tick_infos$duration ~ ticks$elapsed, groups=ticks$tag, xlab = 'Time [s]',
 boxplot(tick_infos$duration ~ tick_infos$tag)
 ```
 
-```{r blocks}
-blocks$total_size_kb <- blocks$total_size/1000
-```
-
 ```{r stale, fig.cap='Stale blocks', fig.env='figure*'}
 stale_blocks <- blocks[blocks$stale == "Stale", ]
 stale_blocks <- aggregate(timestamp~stale+tag, data=stale_blocks, FUN=length)
