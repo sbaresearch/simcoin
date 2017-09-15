@@ -82,7 +82,7 @@ multidemo1:
 
 install:
 	cd code; pip3 install -r requirements.txt
-	R -e "install.packages(c('rmarkdown','devtools','jsonlite','dplyr','anytime', 'kableExtra'), repos='https://cran.wu.ac.at')"
+	R -e "install.packages(c('rmarkdown','devtools','jsonlite','dplyr','anytime', 'kableExtra', 'lattice'), repos='https://cran.wu.ac.at')"
 	# https://stackoverflow.com/questions/20923209/problems-installing-the-devtools-package
 	sudo apt install pandoc
 
