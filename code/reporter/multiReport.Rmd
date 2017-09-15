@@ -17,7 +17,7 @@ output:
 
 ```{r knitr_options, include=FALSE}
 library(knitr)
-opts_chunk$set(fig.width=12, fig.height=4, fig.path='RmdFigs/',
+opts_chunk$set(fig.path='RmdFigs/',
                warning=FALSE, message=FALSE)
 
 # set working directory for development: knitr::opts_knit$set(root.dir = '/tmp/multi-run/')
