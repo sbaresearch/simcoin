@@ -28,7 +28,7 @@ knitr::opts_chunk$set(
 # set working directory for development: knitr::opts_knit$set(root.dir = '/tmp/multi-run/')
 ```
 
-```{r setup}
+```{r setup, include=FALSE}
 library(jsonlite)
 library(anytime)
 library(dplyr)
