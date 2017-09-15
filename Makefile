@@ -57,7 +57,6 @@ demo4:
 				--verbose
 
 # maxes out notebook and server
-
 demo5:
 	cd code; \
 		python3 simcoin.py \
