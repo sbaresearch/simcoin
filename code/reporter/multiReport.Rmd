@@ -20,6 +20,7 @@ library(knitr)
 library('jsonlite')
 library('anytime')
 library('dplyr')
+Sys.setenv(TZ='UTC')
 
 opts_chunk$set(fig.path='RmdFigs/',
                warning=FALSE, message=FALSE)
