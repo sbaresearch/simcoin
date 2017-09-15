@@ -12,9 +12,6 @@ output:
     toc: yes
 ---
 
-
-
-
 ```{r setup, include=FALSE}
 library(knitr)
 library('jsonlite')
