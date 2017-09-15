@@ -123,10 +123,6 @@ kable(diff_steps, col.names = c('duration [s]', 'duration [min]'), caption = 'Du
   kable_styling(latex_options = c('scale_down','HOLD_position'))
 ```
 
-```{r ticks}
-tick_infos$rel_timestamp <- tick_infos$start - sim_start
-```
-
 ```{r tick_duration_summary}
 kable(unclass(summary(tick_infos$duration)), col.names = c('duration [s]'), digits = 3, caption = 'Tick duration', format = 'latex')  %>%
   kable_styling(latex_options = c('HOLD_position'))
@@ -138,16 +134,11 @@ boxplot(tick_infos$duration, ylab='Tick duration [s]')
 
 ```{r tick_duration_median, fig.cap='Tick duration over time', fig.env='figure*'}
 par(mar=c(7,5,1,1)) # increase plot margins to fit longer labels on the x-axis
-boxplot(tick_infos$duration ~ cut(tick_infos$rel_timestamp, 25), las=2)
+boxplot(tick_infos$duration ~ cut(tick_infos$start - sim_start, 25), las=2)
 ```
 
 ##  Blocks
 In this simulation `r nrow(blocks)` blocks were created by `r length(unique(blocks$node))` different nodes. Note: Some blocks may never reached some nodes because of forks in the chain or other reasons.
-
-
-```{r blocks}
-blocks$rel_timestamp <- blocks$timestamp - sim_start
-```
 
 ```{r blocks_distribution, fig.cap='Block creators', fig.pos='H'}
 blocks_per_node <- table(blocks$node)
@@ -184,11 +175,6 @@ lines(density(blocks_received$propagation_duration))
 
 ## Transactions
 There were `r nrow(txs)` transaction created in this simulation. Note: Some transactions may reached other nodes included in a block. Hence they wouldn't appear in this statistics.
-
-
-```{r txs}
-txs$rel_timestamp <- txs$timestamp - sim_start
-```
 
 ```{r txs_distribution, fig.cap='Transaction creators', fig.pos='H'}
 txs_per_node <- table(txs$node)
