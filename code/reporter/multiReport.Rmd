@@ -122,7 +122,7 @@ blocks$rel_timestamp <- blocks$timestamp - sim_start
 ```
 
 ### Stale blocks
-```{r stale, fig.height=6}
+```{r stale}
 stale_blocks <- blocks[blocks$stale == "Stale", ]
 stale_blocks <- aggregate(timestamp~stale+tag, data=stale_blocks, FUN=length)
 colnames(stale_blocks)[3] <- "count" # counted the number of timestamps for blocks
@@ -232,7 +232,7 @@ block_exces$rel_timestamp <- block_exces$timestamp - sim_start
 
 
 ### Exception error message
-```{r block_exces_distribution, fig.height=6}
+```{r block_exces_distribution}
 exces_per_node <- table(block_exces$exception)
 percentage     <- round(exces_per_node/sum(exces_per_node)*100)
 labels         <- paste(names(exces_per_node), ': ', exces_per_node, ', ', percentage, '%', sep='')
@@ -248,7 +248,7 @@ tx_exces$rel_timestamp <- tx_exces$timestamp - sim_start
 ```
 
 ### Distribution
-```{r tx_exces_node_distribution, fig.height=6}
+```{r tx_exces_node_distribution}
 exces_per_node <- table(tx_exces$node)
 percentage     <- round(exces_per_node/sum(exces_per_node)*100)
 labels         <- paste(names(exces_per_node), ': ', exces_per_node, ', ', percentage, '%', sep='')
@@ -256,7 +256,7 @@ labels         <- paste(names(exces_per_node), ': ', exces_per_node, ', ', perce
 ```
 
 ### Exception error message
-```{r tx_exces_distribution, fig.height=6}
+```{r tx_exces_distribution}
 exces_per_node <- table(tx_exces$exception)
 percentage     <- round(exces_per_node/sum(exces_per_node)*100)
 labels         <- paste(names(exces_per_node), ': ', exces_per_node, ', ', percentage, '%', sep='')
@@ -272,7 +272,7 @@ rpc_exces$rel_timestamp <- rpc_exces$timestamp - sim_start
 ```
 
 ### Distribution
-```{r rpc_exces_node_distribution, fig.height=6}
+```{r rpc_exces_node_distribution}
 exces_per_node <- table(rpc_exces$node)
 percentage     <- round(exces_per_node/sum(exces_per_node)*100)
 labels         <- paste(names(exces_per_node), ': ', exces_per_node, ', ', percentage, '%', sep='')
@@ -280,7 +280,7 @@ labels         <- paste(names(exces_per_node), ': ', exces_per_node, ', ', perce
 ```
 
 ### Exception error message
-```{r rpc_exces_distribution, fig.height=6}
+```{r rpc_exces_distribution}
 exces_per_node <- table(rpc_exces$exception)
 percentage     <- round(exces_per_node/sum(exces_per_node)*100)
 labels         <- paste(names(exces_per_node), ': ', exces_per_node, ', ', percentage, '%', sep='')
