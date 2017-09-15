@@ -98,7 +98,6 @@ colnames(mins) <- c('tag', 'run_start')
 
 ticks         <- merge(tick_infos, mins)
 ticks$elapsed <- ticks$timestamp - ticks$run_start 
-
 ```
 
 ```{r ticks_stats}
