@@ -14,9 +14,10 @@ output:
 
 ```{r setup, include=FALSE}
 library(knitr)
-library('jsonlite')
-library('anytime')
-library('dplyr')
+library(jsonlite)
+library(anytime)
+library(dplyr)
+library(kableExtra)
 Sys.setenv(TZ='UTC')
 
 knitr::opts_chunk$set(
