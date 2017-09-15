@@ -96,7 +96,7 @@ tick_infos$rel_timestamp <- tick_infos$start - sim_start
 mins <- aggregate(tick_infos$timestamp, by=list(tick_infos$tag), FUN=min)
 colnames(mins) <- c('tag', 'run_start')
 
-ticks         <- merge(tick_infos,mins)
+ticks         <- merge(tick_infos, mins)
 ticks$elapsed <- ticks$timestamp - ticks$run_start 
 
 ```
