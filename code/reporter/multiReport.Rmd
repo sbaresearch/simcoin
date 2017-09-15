@@ -87,7 +87,7 @@ kable(Sys.info(), col.names = c('value'), format = 'latex', caption = 'System in
 ```
 
 
-### Ticks
+## Ticks
 During the simulation `r if(nrow(tick_infos) == args['amount_of_ticks']) {'all'} else {'only'}` **`r nrow(tick_infos)` of `r args['amount_of_ticks']`** ticks were executed in time.
 
 ```{r ticks}
