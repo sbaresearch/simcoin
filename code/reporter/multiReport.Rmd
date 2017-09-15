@@ -43,7 +43,6 @@ txs    <- read.csv2("txs.csv", dec=".")
 blocks <- read.csv2("blocks.csv", dec=".")
 tips   <- read.csv2("tips.csv", dec=".")
 
-
 blocks_received <- read.csv2("blocks_received.csv", dec=".")
 txs_received    <- read.csv2("blocks_received.csv", dec=".")
 
