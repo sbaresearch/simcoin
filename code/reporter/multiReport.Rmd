@@ -57,14 +57,14 @@ sim_start <- tick_infos$start[1]
 Should include: date, simcoin_version, machine, cpu
 
 ```{r sys_info}
-kable(Sys.info(), col.names = c('value'))
+kable(Sys.info(), col.names = c('value'), format = 'latex')
 ```
 
 
 ## Start arguments
 ```{r read_start_arguments}
 args_transposed <- as.data.frame(t(args))
-kable(args_transposed, col.names = c('value'))
+kable(args_transposed, col.names = c('value'), format = 'latex')
 ```
 
 ## Simulation
@@ -81,7 +81,7 @@ diff_steps$duration_min <- diff_steps$timestamp/60
 diff_steps <- diff_steps %>% mutate_at(.vars = vars(timestamp, duration_min), .funs = funs(round(.,2)))
 rownames(diff_steps)   <- c('preparation step', 'run step', 'postprocessing step (wo. report creation)', '***total***')
 
-kable(diff_steps, align = c('ll'), col.names = c('duration [s]', 'duration [min]'))
+kable(diff_steps, align = c('ll'), col.names = c('duration [s]', 'duration [min]'), format = 'latex')
 
 #TODO merge general_infos.json
 ```
@@ -170,7 +170,7 @@ block_size_stats$values <- c(
 
 
 par(mfrow=c(1,2))
-kable(block_size_stats,  align = c('l'), col.names = c('_', 'value'))
+kable(block_size_stats,  align = c('l'), col.names = c('_', 'value'), format = 'latex')
 boxplot(blocks$total_size ~ blocks$tag)
 ```
 
@@ -194,7 +194,7 @@ block_propagation_stats$values <- c(
   round(max(blocks_received$propagation_duration_ms), 3)
 )
 
-kable(block_propagation_stats,  align = c('l'), col.names = c('', 'value'))
+kable(block_propagation_stats,  align = c('l'), col.names = c('', 'value'), format = 'latex')
 ```
 
 
@@ -234,7 +234,7 @@ txs_median_propagation$values <- c(
   round(median(txs_received$propagation_duration_ms), 3)
 )
 
-kable(txs_median_propagation,  align = c('l'), col.names = c('', 'value'))
+kable(txs_median_propagation,  align = c('l'), col.names = c('', 'value'), format = 'latex')
 ```
 
 ### Transactions per block
@@ -248,7 +248,7 @@ txs_per_block_stats$values <- c(
   max(blocks$txs)
 )
 
-kable(txs_per_block_stats,  align = c('l'), col.names = c('', 'value'))
+kable(txs_per_block_stats,  align = c('l'), col.names = c('', 'value'), format = 'latex')
 ```
 
 ```{r txs_per_block}
@@ -259,7 +259,7 @@ hist(blocks$txs, xlab = 'Transactions')
 In this simulation were `r length(unique(tips$name))` nodes. In the following the statistics based on data from the RPC-call `getchaintips` are presented.
 
 ```{r tips}
-kable(tips)
+kable(tips, format = 'latex')
 not_active_tips <- tips[!(tips$status=='active'),]
 ```
 
