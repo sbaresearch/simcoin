@@ -55,24 +55,12 @@ args      <- stream_in(file('args.json'))
 sim_start <- tick_infos$start[1]
 ```
 
-## Base Information
-
-Should include: date, simcoin_version, machine, cpu
-
-```{r sys_info}
-kable(Sys.info(), col.names = c('value'), format = 'latex') %>%
-  kable_styling(latex_options = c('scale_down','HOLD_position'))
-```
-
-
-## Start arguments
+## Simulation
 ```{r read_start_arguments}
 args_transposed <- as.data.frame(t(args))
 kable(args_transposed, col.names = c('value'), format = 'latex') %>%
   kable_styling(latex_options = c('scale_down','HOLD_position'))
 ```
-
-## Simulation
 
 ```{r simulation}
 step_times           <- data.frame(t(data.frame(general_infos$step_times)))
@@ -90,6 +78,14 @@ kable(diff_steps, align = c('ll'), col.names = c('duration [s]', 'duration [min]
 
 #TODO merge general_infos.json
 ```
+
+## System
+
+```{r sys_info}
+kable(Sys.info(), col.names = c('value'), format = 'latex') %>%
+  kable_styling(latex_options = c('scale_down','HOLD_position'))
+```
+
 
 ### Ticks
 During the simulation `r if(nrow(tick_infos) == args['amount_of_ticks']) {'all'} else {'only'}` **`r nrow(tick_infos)` of `r args['amount_of_ticks']`** ticks were executed in time.
