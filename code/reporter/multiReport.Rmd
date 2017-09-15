@@ -33,6 +33,7 @@ library(jsonlite)
 library(anytime)
 library(dplyr)
 library(kableExtra)
+library(lattice)
 Sys.setenv(TZ='UTC')
 
 # general infos is needed twice to avoid exception in simulation section.
