@@ -88,7 +88,6 @@ kable(Sys.info(), col.names = c('value'), format = 'latex', caption = 'System in
 
 
 ## Ticks
-During the simulation `r if(nrow(tick_infos) == args['amount_of_ticks']) {'all'} else {'only'}` **`r nrow(tick_infos)` of `r args['amount_of_ticks']`** ticks were executed in time.
 
 ```{r ticks}
 tick_infos$rel_timestamp <- tick_infos$start - sim_start
@@ -132,25 +131,8 @@ blocks$total_size_kb <- blocks$total_size/1000
 blocks$rel_timestamp <- blocks$timestamp - sim_start
 ```
 
-### Distribution of blocks over nodes
-```{r blocks_distribution, fig.height=3}
-blocks_per_node <- table(blocks$node)
-percentage <- round(blocks_per_node/sum(blocks_per_node)*100)
-labels <- paste(names(blocks_per_node), ' blocks: ', blocks_per_node, ', ', percentage, '%', sep='')
-pie(blocks_per_node, labels)
-
-nodes <- aggregate(timestamp~node+tag, data=blocks, FUN=length)
-colnames(nodes)[3] <- "blocks" # counted the number of timestamps for blocks
-boxplot(nodes$blocks ~ nodes$tag)
-```
-
-
 ### Stale blocks
 ```{r stale, fig.height=6}
-#stale_blocks <- table(blocks$stale, blocks$tag)
-#percentage <- round(stale_blocks/sum(stale_blocks)*100)
-#labels <- paste(names(stale_blocks), ' blocks: ', stale_blocks, ', ', percentage, '%', sep='')
-#pie(stale_blocks, labels)
 stale_blocks <- blocks[blocks$stale == "Stale", ]
 stale_blocks <- aggregate(timestamp~stale+tag, data=stale_blocks, FUN=length)
 colnames(stale_blocks)[3] <- "count" # counted the number of timestamps for blocks
@@ -173,10 +155,6 @@ block_size_stats$values <- c(
 par(mfrow=c(1,2))
 kable(block_size_stats,  align = c('l'), col.names = c('_', 'value'), format = 'latex')
 boxplot(blocks$total_size ~ blocks$tag)
-```
-
-```{r size}
-hist(blocks$total_size_kb, xlab = 'Size [kb]')
 ```
 
 ### Propagation time of blocks
@@ -206,18 +184,6 @@ There were `r nrow(txs)` transaction created in this simulation.
 txs$rel_timestamp <- txs$timestamp - sim_start
 ```
 
-### Distribution
-```{r txs_distribution, fig.height=6}
-txs_per_node <- table(txs$node)
-percentage <- round(txs_per_node/sum(txs_per_node)*100)
-labels <- paste(names(txs_per_node), ' blocks: ', txs_per_node, ', ', percentage, '%', sep='')
-pie(txs_per_node, labels)
-```
-
-### Creation time
-```{r txs_creation_time}
-hist(txs$rel_timestamp, xlab = 'Time [s]')
-```
 
 ### Transaction acception time
 *Note: Some txs may reached other nodes included in a block. Hence they wouldn't appear in this statistics.*
