@@ -72,7 +72,7 @@ The checked out commit at execution time was:
 ```{r start_arguments}
 args_transposed <- as.data.frame(t(args))
 kable(args_transposed, col.names = c('value'), caption = 'Start arguments', format = 'latex') %>%
-  kable_styling(latex_options = 'scale_down')
+  kable_styling(latex_options = c('scale_down','HOLD_position'))
 ```
 
 ```{r simulation}
@@ -87,7 +87,7 @@ diff_steps <- diff_steps %>% mutate_at(.vars = vars(timestamp, duration_min), .f
 rownames(diff_steps)   <- c('preparation step', 'simulation step', 'postprocessing step', 'total')
 
 kable(diff_steps, col.names = c('duration [s]', 'duration [min]'), caption = 'Duration of different steps', format = 'latex') %>%
-  kable_styling(latex_options = 'scale_down')
+  kable_styling(latex_options = c('scale_down','HOLD_position'))
 ```
 
 ```{r ticks}
@@ -95,7 +95,8 @@ tick_infos$rel_timestamp <- tick_infos$start - sim_start
 ```
 
 ```{r tick_duration_summary}
-kable(unclass(summary(tick_infos$duration)), col.names = c('duration [s]'), digits = 3, caption = 'Tick duration', format = 'latex')
+kable(unclass(summary(tick_infos$duration)), col.names = c('duration [s]'), digits = 3, caption = 'Tick duration', format = 'latex')  %>%
+  kable_styling(latex_options = c('HOLD_position'))
 ```
 
 ```{r tick_duration_boxplot, fig.cap='Tick duration', fig.pos='H'}
@@ -112,7 +113,7 @@ boxplot(tick_infos$duration ~ cut(tick_infos$rel_timestamp, 25), las=2)
 infos <- data.frame(c(general_infos$hostname, general_infos$cpu_model, general_infos$cpus, round(as.double(general_infos$total_memory) / 1000000, 3)))
 row.names(infos) <- c('hostname', 'CPU model', 'CPU(s)', 'memory [GB]')
 kable(infos, col.names = c('value'), format = 'latex') %>%
-  kable_styling(latex_options = 'scale_down')
+  kable_styling(latex_options = c('scale_down','HOLD_position'))
 ```
 
 ```{r system}
@@ -159,7 +160,8 @@ pie(stale_blocks, labels)
 ```
 
 ```{r block_size_summary}
-kable(unclass(summary(blocks$total_size / 1000)), col.names = c('size [kB]'), digits = 3, caption = 'Block size', format = 'latex')
+kable(unclass(summary(blocks$total_size / 1000)), col.names = c('size [kB]'), digits = 3, caption = 'Block size', format = 'latex') %>%
+  kable_styling(latex_options = c('HOLD_position'))
 ```
 
 ```{r block_size_boxplot, fig.cap='Block size', fig.pos='H'}
@@ -167,7 +169,8 @@ boxplot(blocks$total_size / 1000, ylab='Block size [kb]')
 ```
 
 ```{r block_propagation_summary}
-kable(unclass(summary(blocks_received$propagation_duration * 1000)), col.names = c('propagation [ms]'), digits = 3, caption = 'Block propagation', format = 'latex')
+kable(unclass(summary(blocks_received$propagation_duration * 1000)), col.names = c('propagation [ms]'), digits = 3, caption = 'Block propagation', format = 'latex') %>%
+  kable_styling(latex_options = c('HOLD_position'))
 ```
 
 ```{r block_propagation_density, fig.cap='Block propagation density', fig.env='figure*'}
@@ -191,7 +194,8 @@ pie(txs_per_node, labels)
 ```
 
 ```{r txs_propagation_summary}
-kable(unclass(summary(txs_received$propagation_duration * 1000)), col.names = c('propagation [ms]'), digits = 3, caption = 'Transactions propagation', format = 'latex')
+kable(unclass(summary(txs_received$propagation_duration * 1000)), col.names = c('propagation [ms]'), digits = 3, caption = 'Transactions propagation', format = 'latex') %>%
+  kable_styling(latex_options = c('HOLD_position'))
 ```
 
 ```{r tx_propagation_density, fig.cap='Transaction propagation density', fig.env='figure*'}
@@ -200,7 +204,8 @@ lines(density(txs_received$propagation_duration))
 ```
 
 ```{r txs_per_block_summary}
-kable(unclass(summary(blocks$txs)), digits = 0, caption = 'Transactions per block', format = 'latex')
+kable(unclass(summary(blocks$txs)), digits = 0, caption = 'Transactions per block', format = 'latex') %>%
+  kable_styling(latex_options = c('HOLD_position'))
 ```
 
 ```{r txs_per_block_boxplot, fig.cap='Transactions in block', fig.pos='H'}
@@ -212,7 +217,7 @@ In this simulation were `r length(unique(tips$node))` nodes. In the following th
 
 ```{r tips}
 kable(tips, format = 'latex') %>%
-  kable_styling(latex_options = 'scale_down')
+  kable_styling(latex_options = c('scale_down','HOLD_position'))
 not_active_tips <- tips[!(tips$status=='active'),]
 ```
 
