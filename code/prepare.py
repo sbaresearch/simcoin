@@ -161,7 +161,7 @@ def recreate_network():
 
 def wait_until_height_reached(node, height):
     while int(node.execute_rpc('getblockcount')) < height:
-        logging.debug('Waiting until height={} is reached...'.format(str(height)))
+        logging.debug('Waiting until node={} reached height={}...'.format(node.name, str(height)))
         utils.sleep(0.2)
 
 
