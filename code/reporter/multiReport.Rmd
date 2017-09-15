@@ -131,18 +131,18 @@ xyplot(tick_infos$duration ~ ticks$elapsed, groups = ticks$tag, xlab = 'Time [s]
 ```
 
 ```{r tick_duration_median, fig.cap='Tick duration', fig.env='figure*'}
-boxplot(tick_infos$duration ~ tick_infos$tag)
+bwplot(tick_infos$duration ~ tick_infos$tag, ylab = 'Duration [s]')
 ```
 
 ```{r stale, fig.cap='Stale blocks', fig.env='figure*'}
 stale_blocks <- blocks[blocks$stale == "Stale", ]
 stale_blocks <- aggregate(timestamp~stale+tag, data=stale_blocks, FUN=length)
 colnames(stale_blocks)[3] <- "count" # counted the number of timestamps for blocks
-boxplot(stale_blocks$count ~ stale_blocks$tag)
+bwplot(stale_blocks$count ~ stale_blocks$tag, ylab = 'Stale blocks')
 ```
 
 ```{r block_size_bloxplot, fig.cap='Block size', fig.env='figure*'}
-boxplot(blocks$total_size ~ blocks$tag)
+bwplot(blocks$total_size / 1000 ~ blocks$tag, ylab = 'Block size [kB]')
 ```
 
 ```{r block_propagation_density, fig.cap='Block propagation density', fig.env='figure*'}
@@ -150,7 +150,7 @@ densityplot(~propagation_duration, data=blocks_received, groups = tag, auto.key 
 ```
 
 ```{r block_propagation_boxplot, fig.cap='Block propagation boxplot', fig.env='figure*'}
-boxplot(blocks_received$propagation_duration ~ blocks_received$tag)
+bwplot(blocks_received$propagation_duration ~ blocks_received$tag, ylab = 'Duration [s]')
 ```
 
 ```{r tx_propagation_density, fig.cap='Transaction propagation density', fig.env='figure*'}
@@ -158,7 +158,7 @@ densityplot(~propagation_duration, data=txs_received, groups = tag, auto.key = l
 ```
 
 ```{r tx_propagation_boxplot, fig.cap='Transaction propagation boxplot', fig.env='figure*'}
-boxplot(txs_received$propagation_duration ~ txs_received$tag)
+bwplot(txs_received$propagation_duration ~ txs_received$tag, ylab = 'Duration [s]')
 ```
 
 \clearpage
