@@ -50,7 +50,7 @@ tx_exces    <- read.csv2("tx_exceptions.csv", dec=".")
 block_exces <- read.csv2("block_exceptions.csv", dec=".")
 rpc_exces   <- read.csv2("rpc_exceptions.csv", dec=".")
 
-args      <- stream_in(file('../args.json'))
+args      <- stream_in(file('args.json'))
 sim_start <- tick_infos$start[1]
 ```
 

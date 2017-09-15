@@ -50,6 +50,7 @@ def run():
                           .format(config.soft_link_to_run_dir, config.multi_run_dir, i + 1))
         logging.info('Finished {}/{} simulation'.format(i + 1, args.repeat))
 
+    bash.check_output('cp {} {}/.'.format(config.args_json, config.soft_link_to_multi_run_dir))
     concat_files()
 
 
