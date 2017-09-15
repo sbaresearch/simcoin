@@ -100,15 +100,10 @@ ticks         <- merge(tick_infos, mins)
 ticks$elapsed <- ticks$timestamp - ticks$run_start 
 ```
 
-```{r ticks_stats}
-ticks_stats <- data.frame(c('Mean tick duration [s]', 'Median tick duration [s]', 'Std tick duration [s]', 'Min tick duration [s]', 'Max tick duration [s]'))
-ticks_stats$values <- c(
-  round(mean(tick_infos$duration), 3),
-  round(median(tick_infos$duration), 3),
-  round(sd(tick_infos$duration), 3),
-  round(min(tick_infos$duration), 3),
-  round(max(tick_infos$duration), 3)
-)
+```{r tick_duration_summary}
+kable(unclass(summary(tick_infos$duration)), col.names = c('duration [s]'), digits = 3, caption = 'Overall tick duration', format = 'latex')  %>%
+  kable_styling(latex_options = c('HOLD_position'))
+```
 
 #kable(ticks_stats,  align = c('l'), col.names = c('', 'value'))
 #boxplot(tick_infos$duration ~ tick_infos$tag)
