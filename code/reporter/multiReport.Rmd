@@ -91,8 +91,6 @@ kable(Sys.info(), col.names = c('value'), format = 'latex', caption = 'System in
 ## Ticks
 
 ```{r ticks}
-tick_infos$rel_timestamp <- tick_infos$start - sim_start
-
 mins <- aggregate(tick_infos$timestamp, by=list(tick_infos$tag), FUN=min)
 colnames(mins) <- c('tag', 'run_start')
 
@@ -143,10 +141,6 @@ kable(unclass(summary(blocks_received$propagation_duration * 1000)), col.names =
 ```
 
 ## Transactions
-
-```{r txs}
-txs$rel_timestamp <- txs$timestamp - sim_start
-```
 
 ```{r txs_propagation_summary}
 kable(unclass(summary(txs_received$propagation_duration * 1000)), col.names = c('propagation [ms]'), digits = 3, caption = 'Overall transactions propagation', format = 'latex') %>%
