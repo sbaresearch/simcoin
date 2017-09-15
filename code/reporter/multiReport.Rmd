@@ -105,9 +105,8 @@ kable(unclass(summary(tick_infos$duration)), col.names = c('duration [s]'), digi
   kable_styling(latex_options = c('HOLD_position'))
 ```
 
-#kable(ticks_stats,  align = c('l'), col.names = c('', 'value'))
-#boxplot(tick_infos$duration ~ tick_infos$tag)
-xyplot( ticks$duration ~ ticks$elapsed, groups=ticks$tag,  t="b" )
+```{r tick_duration_xyplot}
+xyplot(tick_infos$duration ~ ticks$elapsed, groups=ticks$tag,  t="b" )
 ```
 
 ### Tick duration over time
