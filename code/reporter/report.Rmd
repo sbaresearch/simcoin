@@ -1,5 +1,5 @@
 ---
-title: "Simcoin Report"
+title: "Simcoin run-report"
 header-includes:
    - \usepackage{float}
 output:
