@@ -1,5 +1,7 @@
 ---
-title: "Simcoin run-report"
+title: "Simcoin run Report"
+date: '`r format(Sys.time(), "%d %B, %Y")`'
+author: "simcoin"
 header-includes:
    - \usepackage{float}
 output:
@@ -8,8 +10,6 @@ output:
       "-V", "classoption=twocolumn"
     ]
     toc: yes
-date: '`r format(Sys.time(), "%d %B, %Y")`'
-author: "simcoin"
 ---
 
 ```{r knitr_options, include=FALSE}
