@@ -100,7 +100,7 @@ xyplot(memory$usage ~ memory$timestamp - sim_start, xlab = 'Time [s]', ylab = 'M
 cpu_time$total           <- cpu_time$user + cpu_time$nice + cpu_time$system
 cpu_time_delta           <- data.frame(cpu_time$timestamp[-1], diff(cpu_time$total), diff(cpu_time$idle))
 colnames(cpu_time_delta) <- c('timestamp', 'total', 'idle')
-cpu_time_delta$usage     <- (cpu_time_delta$idle / cpu_time_delta$total) * 100
+cpu_time_delta$usage     <- (1 - cpu_time_delta$idle / (cpu_time_delta$total + cpu_time_delta$idle)) * 100
 
 xyplot(cpu_time_delta$usage ~ cpu_time_delta$timestamp  - sim_start, xlab = 'Time [s]', ylab = 'CPU usage [%]', t = 'b' )
 ```
