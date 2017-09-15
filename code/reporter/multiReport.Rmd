@@ -116,7 +116,6 @@ kable(unclass(summary(blocks$txs)), digits = 0, caption = 'Overall transactions 
   kable_styling(latex_options = c('HOLD_position'))
 ```
 
-
 ## Nodes
 
 ```{r tips}
