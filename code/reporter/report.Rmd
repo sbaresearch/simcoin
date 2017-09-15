@@ -20,7 +20,7 @@ library(dplyr)
 library(kableExtra)
 Sys.setenv(TZ='UTC')
 
-opts_chunk$set(
+knitr::opts_chunk$set(
   fig.path='RmdFigs/',
   warning=FALSE,
   message=FALSE,
