@@ -34,8 +34,8 @@ library('anytime')
 library('dplyr')
 
 # general infos is needed twice to avoid exception in simulation section.
-general_infos <- fromJSON(file('./run-1/general_infos.json'))
-general_info2 <- fromJSON(file('./run-1/general_infos.json'))
+general_infos <- fromJSON(file('run-1/general_infos.json'))
+general_info2 <- fromJSON(file('run-1/general_infos.json'))
 tick_infos    <- read.csv2("tick_infos.csv", dec=".")
 
 txs    <- read.csv2("txs.csv", dec=".")
