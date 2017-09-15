@@ -14,11 +14,6 @@ output:
 
 ```{r knitr_options, include=FALSE}
 library(knitr)
-library(jsonlite)
-library(anytime)
-library(dplyr)
-library(kableExtra)
-Sys.setenv(TZ='UTC')
 
 knitr::opts_chunk$set(
   fig.path='RmdFigs/',
@@ -34,6 +29,12 @@ knitr::opts_chunk$set(
 ```
 
 ```{r setup}
+library(jsonlite)
+library(anytime)
+library(dplyr)
+library(kableExtra)
+Sys.setenv(TZ='UTC')
+
 # general infos is needed twice to avoid exception in simulation section.
 general_infos <- fromJSON(file('run-1/general_infos.json'))
 general_info2 <- fromJSON(file('run-1/general_infos.json'))
