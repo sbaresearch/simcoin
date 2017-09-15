@@ -12,7 +12,7 @@ output:
     toc: yes
 ---
 
-```{r setup, include=FALSE}
+```{r knitr_options, include=FALSE}
 library(knitr)
 library(jsonlite)
 library(anytime)
@@ -31,7 +31,9 @@ knitr::opts_chunk$set(
   )
 
 # set working directory for development: knitr::opts_knit$set(root.dir = '/tmp/multi-run/')
+```
 
+```{r setup}
 # general infos is needed twice to avoid exception in simulation section.
 general_infos <- fromJSON(file('run-1/general_infos.json'))
 general_info2 <- fromJSON(file('run-1/general_infos.json'))
