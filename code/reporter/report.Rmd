@@ -1,5 +1,7 @@
 ---
 title: "Simcoin Report"
+header-includes:
+   - \usepackage{float}
 output:
   pdf_document:
     pandoc_args: [
@@ -96,7 +98,7 @@ tick_infos$rel_timestamp <- tick_infos$start - sim_start
 kable(unclass(summary(tick_infos$duration)), col.names = c('duration [s]'), digits = 3, caption = 'Tick duration', format = 'latex')
 ```
 
-```{r tick_duration_boxplot, fig.cap='Tick duration'}
+```{r tick_duration_boxplot, fig.cap='Tick duration', fig.pos='H'}
 boxplot(tick_infos$duration, ylab='Tick duration [s]')
 ```
 
@@ -142,14 +144,14 @@ In this simulation `r nrow(blocks)` blocks were created by `r length(unique(bloc
 blocks$rel_timestamp <- blocks$timestamp - sim_start
 ```
 
-```{r blocks_distribution, fig.cap='Block creators'}
+```{r blocks_distribution, fig.cap='Block creators', fig.pos='H'}
 blocks_per_node <- table(blocks$node)
 percentage <- round(blocks_per_node/sum(blocks_per_node)*100)
 labels <- paste(names(blocks_per_node), ' blocks: ', blocks_per_node, ', ', percentage, '%', sep='')
 pie(blocks_per_node, labels)
 ```
 
-```{r stale, fig.cap='Accepted/stale blocks'}
+```{r stale, fig.cap='Accepted/stale blocks', fig.pos='H'}
 stale_blocks <- table(blocks$stale)
 percentage <- round(stale_blocks/sum(stale_blocks)*100)
 labels <- paste(names(stale_blocks), ' blocks: ', stale_blocks, ', ', percentage, '%', sep='')
@@ -160,7 +162,7 @@ pie(stale_blocks, labels)
 kable(unclass(summary(blocks$total_size / 1000)), col.names = c('size [kB]'), digits = 3, caption = 'Block size', format = 'latex')
 ```
 
-```{r block_size_boxplot, fig.cap='Block size'}
+```{r block_size_boxplot, fig.cap='Block size', fig.pos='H'}
 boxplot(blocks$total_size / 1000, ylab='Block size [kb]')
 ```
 
@@ -168,7 +170,7 @@ boxplot(blocks$total_size / 1000, ylab='Block size [kb]')
 kable(unclass(summary(blocks_received$propagation_duration * 1000)), col.names = c('propagation [ms]'), digits = 3, caption = 'Block propagation', format = 'latex')
 ```
 
-```{r block_propagation_density, fig.cap='Block propagation density'}
+```{r block_propagation_density, fig.cap='Block propagation density', fig.env='figure*'}
 hist(blocks_received$propagation_duration, xlab = 'Time [s]', main = NULL)
 lines(density(blocks_received$propagation_duration))
 ```
@@ -181,7 +183,7 @@ There were `r nrow(txs)` transaction created in this simulation. Note: Some tran
 txs$rel_timestamp <- txs$timestamp - sim_start
 ```
 
-```{r txs_distribution, fig.cap='Transaction creators'}
+```{r txs_distribution, fig.cap='Transaction creators', fig.pos='H'}
 txs_per_node <- table(txs$node)
 percentage <- round(txs_per_node/sum(txs_per_node)*100)
 labels <- paste(names(txs_per_node), ' blocks: ', txs_per_node, ', ', percentage, '%', sep='')
@@ -192,7 +194,7 @@ pie(txs_per_node, labels)
 kable(unclass(summary(txs_received$propagation_duration * 1000)), col.names = c('propagation [ms]'), digits = 3, caption = 'Transactions propagation', format = 'latex')
 ```
 
-```{r tx_propagation_density, fig.cap='Transaction propagation density'}
+```{r tx_propagation_density, fig.cap='Transaction propagation density', fig.env='figure*'}
 hist(txs_received$propagation_duration, xlab = 'Time [s]', main = NULL)
 lines(density(txs_received$propagation_duration))
 ```
@@ -201,7 +203,7 @@ lines(density(txs_received$propagation_duration))
 kable(unclass(summary(blocks$txs)), digits = 0, caption = 'Transactions per block', format = 'latex')
 ```
 
-```{r txs_per_block_boxplot, fig.cap='Transactions in block'}
+```{r txs_per_block_boxplot, fig.cap='Transactions in block', fig.pos='H'}
 boxplot(blocks$txs, ylab='Transactions')
 ```
 
@@ -217,11 +219,11 @@ not_active_tips <- tips[!(tips$status=='active'),]
 ## Block exceptions
 There were `r nrow(block_exces)` exceptions catched during the execution of the RPC-call to create a block.
 
-```{r block_exces_hist, eval=nrow(block_exces)}
+```{r block_exces_hist, eval=nrow(block_exces), fig.pos='H'}
 hist(block_exces$rel_timestamp - sim_start, xlab = 'Time [s]')
 ```
 
-```{r block_exces_node_distribution, eval=nrow(block_exces), fig.height=6}
+```{r block_exces_node_distribution, eval=nrow(block_exces), fig.pos='H'}
 exces_per_node <- table(block_exces$node)
 percentage     <- round(exces_per_node/sum(exces_per_node)*100)
 labels         <- paste(names(exces_per_node), ': ', exces_per_node, ', ', percentage, '%', sep='')
@@ -229,7 +231,7 @@ pie(exces_per_node, labels)
 title(main = 'Distribution of exceptions')
 ```
 
-```{r block_exces_distribution, eval=nrow(block_exces), fig.height=6}
+```{r block_exces_distribution, eval=nrow(block_exces), , fig.pos='H'}
 exces_per_node <- table(block_exces$exception)
 percentage     <- round(exces_per_node/sum(exces_per_node)*100)
 labels         <- paste(names(exces_per_node), ': ', exces_per_node, ', ', percentage, '%', sep='')
@@ -240,12 +242,12 @@ title(main = 'Exception types')
 ## Transaction exceptions
 There were `r nrow(tx_exces)` exceptions catched during the execution of the RPC-call to send a transaction.
 
-```{r tx_exces, eval=nrow(tx_exces)}
+```{r tx_exces, eval=nrow(tx_exces), fig.pos='H'}
 tx_exces$rel_timestamp <- tx_exces$timestamp - sim_start
 hist(tx_exces$rel_timestamp, xlab = 'Time [s]')
 ```
 
-```{r tx_exces_node_distribution, eval=nrow(tx_exces), fig.height=6}
+```{r tx_exces_node_distribution, eval=nrow(tx_exces), fig.pos='H'}
 exces_per_node <- table(tx_exces$node)
 percentage     <- round(exces_per_node/sum(exces_per_node)*100)
 labels         <- paste(names(exces_per_node), ': ', exces_per_node, ', ', percentage, '%', sep='')
@@ -253,7 +255,7 @@ pie(exces_per_node, labels)
 title(main = 'Distribution of exceptions')
 ```
 
-```{r tx_exces_distribution, eval=nrow(tx_exces), fig.height=6}
+```{r tx_exces_distribution, eval=nrow(tx_exces), fig.pos='H'}
 exces_per_node <- table(tx_exces$exception)
 percentage     <- round(exces_per_node/sum(exces_per_node)*100)
 labels         <- paste(names(exces_per_node), ': ', exces_per_node, ', ', percentage, '%', sep='')
@@ -264,12 +266,12 @@ title(main = 'Exception types')
 ## RPC exceptions
 There were `r nrow(rpc_exces)` exceptions catched during a RPC-call.
 
-```{r rpc_exces, eval=nrow(rpc_exces)}
+```{r rpc_exces, eval=nrow(rpc_exces), fig.pos='H'}
 rpc_exces$rel_timestamp <- rpc_exces$timestamp - sim_start
 hist(rpc_exces$rel_timestamp, xlab = 'Time [s]')
 ```
 
-```{r rpc_exces_node_distribution, eval=nrow(rpc_exces), fig.height=6}
+```{r rpc_exces_node_distribution, eval=nrow(rpc_exces), fig.pos='H'}
 exces_per_node <- table(rpc_exces$node)
 percentage     <- round(exces_per_node/sum(exces_per_node)*100)
 labels         <- paste(names(exces_per_node), ': ', exces_per_node, ', ', percentage, '%', sep='')
@@ -277,7 +279,7 @@ pie(exces_per_node, labels)
 title(main = 'Distribution of exceptions')
 ```
 
-```{r rpc_exces_distribution, eval=nrow(rpc_exces), eval=nrow(rpc_exces), fig.height=6}
+```{r rpc_exces_distribution, eval=nrow(rpc_exces), eval=nrow(rpc_exces), fig.pos='H'}
 exces_per_node <- table(rpc_exces$exception)
 percentage     <- round(exces_per_node/sum(exces_per_node)*100)
 labels         <- paste(names(exces_per_node), ': ', exces_per_node, ', ', percentage, '%', sep='')
