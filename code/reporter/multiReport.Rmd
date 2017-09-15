@@ -37,7 +37,6 @@ Sys.setenv(TZ='UTC')
 
 # general infos is needed twice to avoid exception in simulation section.
 general_infos <- fromJSON(file('run-1/general_infos.json'))
-general_info2 <- fromJSON(file('run-1/general_infos.json'))
 tick_infos    <- read.csv2("tick_infos.csv", dec=".")
 
 txs    <- read.csv2("txs.csv", dec=".")
@@ -72,7 +71,6 @@ kable(args_transposed, col.names = c('value'), format = 'latex')
 ```
 
 ## Simulation
-The simulation started at `r utctime(general_info2$step_times[['preparation_start']])` and ended at `r utctime(general_info2$step_times[['postprocessing_end']])`.
 
 ```{r simulation}
 step_times           <- data.frame(t(data.frame(general_infos$step_times)))
