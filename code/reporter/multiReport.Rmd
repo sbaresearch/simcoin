@@ -121,99 +121,44 @@ blocks$total_size_kb <- blocks$total_size/1000
 blocks$rel_timestamp <- blocks$timestamp - sim_start
 ```
 
-### Stale blocks
-```{r stale}
+```{r stale, fig.cap='Stale blocks', fig.env='figure*'}
 stale_blocks <- blocks[blocks$stale == "Stale", ]
 stale_blocks <- aggregate(timestamp~stale+tag, data=stale_blocks, FUN=length)
 colnames(stale_blocks)[3] <- "count" # counted the number of timestamps for blocks
 boxplot(stale_blocks$count ~ stale_blocks$tag)
 ```
 
-### Size of blocks
-```{r block_size_stats}
-block_size_stats <- data.frame(c('Mean block size [kB]', 'Median block size [kB]', 'Std block size [kB]', 'Min block size [kB]', 'Max block size [kB]'))
-block_size_stats$values <- c(
-  round(mean(blocks$total_size_kb), 3),
-  round(median(blocks$total_size_kb), 3),
-  round(sd(blocks$total_size_kb), 3),
-  round(min(blocks$total_size_kb), 3),
-  round(max(blocks$total_size_kb), 3)
-)
+```{r block_size_summary}
+kable(unclass(summary(blocks$total_size / 1000)), col.names = c('size [kB]'), digits = 3, caption = 'Overall block size', format = 'latex') %>%
+  kable_styling(latex_options = c('HOLD_position'))
+```
 
-
-
-par(mfrow=c(1,2))
-kable(block_size_stats,  align = c('l'), col.names = c('_', 'value'), format = 'latex')
+```{r block_size_bloxplot, fig.cap='Block size', fig.env='figure*'}
 boxplot(blocks$total_size ~ blocks$tag)
 ```
 
-### Propagation time of blocks
-*Note: Some blocks may never reached some nodes because of forks in the chain or other reasons*
-```{r blocks_received}
-blocks_received$propagation_duration_ms <- blocks_received$propagation_duration * 1000
+```{r block_propagation_summary}
+kable(unclass(summary(blocks_received$propagation_duration * 1000)), col.names = c('propagation [ms]'), digits = 3, caption = 'Overall block propagation', format = 'latex') %>%
+  kable_styling(latex_options = c('HOLD_position'))
 ```
-
-```{r block_propagation_stats}
-block_propagation_stats <- data.frame(c('Mean block propagation [ms]', 'Median block propagation [ms]', 'Std block propagation [ms]', 'Min block propagation [ms]', 'Max block propagation [ms]'))
-block_propagation_stats$values <- c(
-  round(mean(blocks_received$propagation_duration_ms), 3),
-  round(median(blocks_received$propagation_duration_ms), 3),
-  round(sd(blocks_received$propagation_duration_ms), 3),
-  round(min(blocks_received$propagation_duration_ms), 3),
-  round(max(blocks_received$propagation_duration_ms), 3)
-)
-
-kable(block_propagation_stats,  align = c('l'), col.names = c('', 'value'), format = 'latex')
-```
-
 
 ## Transactions
-There were `r nrow(txs)` transaction created in this simulation.
 
 ```{r txs}
 txs$rel_timestamp <- txs$timestamp - sim_start
 ```
 
-
-### Transaction acception time
-*Note: Some txs may reached other nodes included in a block. Hence they wouldn't appear in this statistics.*
-```{r txs_received}
-txs_received$propagation_duration_ms <- blocks_received$propagation_duration * 1000
+```{r txs_propagation_summary}
+kable(unclass(summary(txs_received$propagation_duration * 1000)), col.names = c('propagation [ms]'), digits = 3, caption = 'Overall transactions propagation', format = 'latex') %>%
+  kable_styling(latex_options = c('HOLD_position'))
 ```
 
-```{r txs_median_propagation_stats}
-txs_median_propagation <- data.frame(c('Mean txs acception time [ms]', 'Median txs acception time [ms]', 'Std txs acception time [ms]', 'Min txs acception time [ms]', 'Max txs acception time [ms]'))
-txs_median_propagation$values <- c(
-  round(mean(txs_received$propagation_duration_ms), 3),
-  round(median(txs_received$propagation_duration_ms), 3),
-  round(sd(txs_received$propagation_duration_ms), 3),
-  round(min(txs_received$propagation_duration_ms), 3),
-  round(median(txs_received$propagation_duration_ms), 3)
-)
-
-kable(txs_median_propagation,  align = c('l'), col.names = c('', 'value'), format = 'latex')
-```
-
-### Transactions per block
-```{r txs_per_block_stats}
-txs_per_block_stats <- data.frame(c('Mean transactions per block', 'Median transactions per block', 'Std transactions per block', 'Min transactions per block', 'Max transactions per block'))
-txs_per_block_stats$values <- c(
-  round(mean(blocks$txs), 3),
-  round(median(blocks$txs), 3),
-  round(sd(blocks$txs), 3),
-  min(blocks$txs),
-  max(blocks$txs)
-)
-
-kable(txs_per_block_stats,  align = c('l'), col.names = c('', 'value'), format = 'latex')
-```
-
-```{r txs_per_block}
-hist(blocks$txs, xlab = 'Transactions')
+```{r txs_per_block_summary}
+kable(unclass(summary(blocks$txs)), digits = 0, caption = 'Overall transactions per block', format = 'latex') %>%
+  kable_styling(latex_options = c('HOLD_position'))
 ```
 
 ## Nodes
-In this simulation were `r length(unique(tips$name))` nodes. In the following the statistics based on data from the RPC-call `getchaintips` are presented.
 
 ```{r tips}
 kable(tips, format = 'latex') %>%
