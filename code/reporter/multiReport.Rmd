@@ -127,7 +127,7 @@ not_active_tips <- tips[!(tips$status=='active'),]
 \clearpage
 
 ```{r tick_duration_xyplot, fig.cap='Tick duration over time', fig.env='figure*'}
-xyplot(tick_infos$duration ~ ticks$elapsed, groups=ticks$tag, xlab = 'Time [s]', ylab = 'Duration [s]', t='b' )
+xyplot(tick_infos$duration ~ ticks$elapsed, groups = ticks$tag, xlab = 'Time [s]', ylab = 'Duration [s]', t = 'b' )
 ```
 
 ```{r tick_duration_median, fig.cap='Tick duration', fig.env='figure*'}
