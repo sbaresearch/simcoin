@@ -62,22 +62,7 @@ kable(args_transposed, col.names = c('value'), format = 'latex', caption ='Start
   kable_styling(latex_options = c('scale_down','HOLD_position'))
 ```
 
-```{r simulation}
-step_times           <- data.frame(t(data.frame(general_infos$step_times)))
-colnames(step_times) <- c('timestamp')
-step_times           <- step_times[order(step_times$timestamp), , drop = FALSE]
-
-diff_steps <- data.frame(diff(as.matrix(step_times)))
-diff_steps <- rbind(diff_steps, apply(diff_steps, 2, sum))
-diff_steps$duration_min <- diff_steps$timestamp/60
-diff_steps <- diff_steps %>% mutate_at(.vars = vars(timestamp, duration_min), .funs = funs(round(.,2)))
-rownames(diff_steps)   <- c('preparation step', 'run step', 'postprocessing step (wo. report creation)', '***total***')
-
-#kable(diff_steps, align = c('ll'), col.names = c('duration [s]', 'duration [min]'), format = 'latex') %>%
-#  kable_styling(latex_options = c('scale_down','HOLD_position'))
-
-#TODO merge general_infos.json
-```
+`r #TODO merge general_infos.json`
 
 ## System
 
