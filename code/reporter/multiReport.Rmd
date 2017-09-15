@@ -88,7 +88,7 @@ kable(Sys.info(), col.names = c('value'), format = 'latex', caption = 'System in
 ```
 
 
-## Ticks
+## Overall stats
 
 ```{r ticks}
 mins <- aggregate(tick_infos$timestamp, by=list(tick_infos$tag), FUN=min)
@@ -103,27 +103,11 @@ kable(unclass(summary(tick_infos$duration)), col.names = c('duration [s]'), digi
   kable_styling(latex_options = c('HOLD_position'))
 ```
 
-```{r tick_duration_xyplot, fig.cap='Tick duration over time', fig.env='figure*'}
-xyplot(tick_infos$duration ~ ticks$elapsed, groups=ticks$tag, xlab = 'Time [s]', ylab = 'Duration [s]', t='b' )
-```
+### Blocks
 
-```{r tick_duration_median, fig.cap='Tick duration', fig.env='figure*'}
-boxplot(tick_infos$duration ~ tick_infos$tag)
-```
-
-
-##  Blocks
-
-```{r blocks}
-blocks$total_size_kb <- blocks$total_size/1000
-blocks$rel_timestamp <- blocks$timestamp - sim_start
-```
-
-```{r stale, fig.cap='Stale blocks', fig.env='figure*'}
-stale_blocks <- blocks[blocks$stale == "Stale", ]
-stale_blocks <- aggregate(timestamp~stale+tag, data=stale_blocks, FUN=length)
-colnames(stale_blocks)[3] <- "count" # counted the number of timestamps for blocks
-boxplot(stale_blocks$count ~ stale_blocks$tag)
+```{r block_propagation_summary}
+kable(unclass(summary(blocks_received$propagation_duration * 1000)), col.names = c('propagation [ms]'), digits = 3, caption = 'Overall block propagation', format = 'latex') %>%
+  kable_styling(latex_options = c('HOLD_position'))
 ```
 
 ```{r block_size_summary}
@@ -131,16 +115,7 @@ kable(unclass(summary(blocks$total_size / 1000)), col.names = c('size [kB]'), di
   kable_styling(latex_options = c('HOLD_position'))
 ```
 
-```{r block_size_bloxplot, fig.cap='Block size', fig.env='figure*'}
-boxplot(blocks$total_size ~ blocks$tag)
-```
-
-```{r block_propagation_summary}
-kable(unclass(summary(blocks_received$propagation_duration * 1000)), col.names = c('propagation [ms]'), digits = 3, caption = 'Overall block propagation', format = 'latex') %>%
-  kable_styling(latex_options = c('HOLD_position'))
-```
-
-## Transactions
+### Transactions
 
 ```{r txs_propagation_summary}
 kable(unclass(summary(txs_received$propagation_duration * 1000)), col.names = c('propagation [ms]'), digits = 3, caption = 'Overall transactions propagation', format = 'latex') %>%
@@ -152,7 +127,8 @@ kable(unclass(summary(blocks$txs)), digits = 0, caption = 'Overall transactions 
   kable_styling(latex_options = c('HOLD_position'))
 ```
 
-## Nodes
+
+### Nodes
 
 ```{r tips}
 kable(tips, format = 'latex') %>%
@@ -160,70 +136,29 @@ kable(tips, format = 'latex') %>%
 not_active_tips <- tips[!(tips$status=='active'),]
 ```
 
-## Block exceptions
-There were `r nrow(block_exces)` exceptions catched during the execution of the RPC-call to create a block.
+\clearpage
 
-```{r block_exces}
-block_exces$rel_timestamp <- block_exces$timestamp - sim_start
+```{r tick_duration_xyplot, fig.cap='Tick duration over time', fig.env='figure*'}
+xyplot(tick_infos$duration ~ ticks$elapsed, groups=ticks$tag, xlab = 'Time [s]', ylab = 'Duration [s]', t='b' )
 ```
 
-
-
-
-### Exception error message
-```{r block_exces_distribution}
-exces_per_node <- table(block_exces$exception)
-percentage     <- round(exces_per_node/sum(exces_per_node)*100)
-labels         <- paste(names(exces_per_node), ': ', exces_per_node, ', ', percentage, '%', sep='')
-#pie(exces_per_node, labels)
+```{r tick_duration_median, fig.cap='Tick duration', fig.env='figure*'}
+boxplot(tick_infos$duration ~ tick_infos$tag)
 ```
 
-## Transaction exceptions
-There were `r nrow(tx_exces)` exceptions catched during the execution of the RPC-call to send a transaction.
-
-```{r tx_exces}
-tx_exces$rel_timestamp <- tx_exces$timestamp - sim_start
-#hist(tx_exces$rel_timestamp, xlab = 'Time [s]')
+```{r blocks}
+blocks$total_size_kb <- blocks$total_size/1000
 ```
 
-### Distribution
-```{r tx_exces_node_distribution}
-exces_per_node <- table(tx_exces$node)
-percentage     <- round(exces_per_node/sum(exces_per_node)*100)
-labels         <- paste(names(exces_per_node), ': ', exces_per_node, ', ', percentage, '%', sep='')
-#pie(exces_per_node, labels)
+```{r stale, fig.cap='Stale blocks', fig.env='figure*'}
+stale_blocks <- blocks[blocks$stale == "Stale", ]
+stale_blocks <- aggregate(timestamp~stale+tag, data=stale_blocks, FUN=length)
+colnames(stale_blocks)[3] <- "count" # counted the number of timestamps for blocks
+boxplot(stale_blocks$count ~ stale_blocks$tag)
 ```
 
-### Exception error message
-```{r tx_exces_distribution}
-exces_per_node <- table(tx_exces$exception)
-percentage     <- round(exces_per_node/sum(exces_per_node)*100)
-labels         <- paste(names(exces_per_node), ': ', exces_per_node, ', ', percentage, '%', sep='')
-#pie(exces_per_node, labels)
-```
-
-## RPC exceptions
-There were `r nrow(rpc_exces)` exceptions catched during a RPC-call.
-
-```{r rpc_exces}
-rpc_exces$rel_timestamp <- rpc_exces$timestamp - sim_start
-#hist(rpc_exces$rel_timestamp, xlab = 'Time [s]')
-```
-
-### Distribution
-```{r rpc_exces_node_distribution}
-exces_per_node <- table(rpc_exces$node)
-percentage     <- round(exces_per_node/sum(exces_per_node)*100)
-labels         <- paste(names(exces_per_node), ': ', exces_per_node, ', ', percentage, '%', sep='')
-#pie(exces_per_node, labels)
-```
-
-### Exception error message
-```{r rpc_exces_distribution}
-exces_per_node <- table(rpc_exces$exception)
-percentage     <- round(exces_per_node/sum(exces_per_node)*100)
-labels         <- paste(names(exces_per_node), ': ', exces_per_node, ', ', percentage, '%', sep='')
-#pie(exces_per_node, labels)
+```{r block_size_bloxplot, fig.cap='Block size', fig.env='figure*'}
+boxplot(blocks$total_size ~ blocks$tag)
 ```
 
 \clearpage
