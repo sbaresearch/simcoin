@@ -109,7 +109,7 @@ kable(unclass(summary(tick_infos$duration)), col.names = c('duration [s]'), digi
 xyplot(tick_infos$duration ~ ticks$elapsed, groups=ticks$tag,  t="b" )
 ```
 
-```{r tick_duration_median}
+```{r tick_duration_median, fig.cap='Tick duration', fig.pos='H'}
 boxplot(tick_infos$duration ~ tick_infos$tag)
 ```
 
