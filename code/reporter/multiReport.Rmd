@@ -58,7 +58,7 @@ sim_start <- tick_infos$start[1]
 ## Simulation
 ```{r read_start_arguments}
 args_transposed <- as.data.frame(t(args))
-kable(args_transposed, col.names = c('value'), format = 'latex') %>%
+kable(args_transposed, col.names = c('value'), format = 'latex', caption ='Start arguments') %>%
   kable_styling(latex_options = c('scale_down','HOLD_position'))
 ```
 
@@ -82,7 +82,7 @@ kable(diff_steps, align = c('ll'), col.names = c('duration [s]', 'duration [min]
 ## System
 
 ```{r sys_info}
-kable(Sys.info(), col.names = c('value'), format = 'latex') %>%
+kable(Sys.info(), col.names = c('value'), format = 'latex', caption = 'System information') %>%
   kable_styling(latex_options = c('scale_down','HOLD_position'))
 ```
 
