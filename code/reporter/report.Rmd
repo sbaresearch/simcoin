@@ -90,15 +90,20 @@ kable(infos, col.names = c('value'), format = 'latex', caption = 'System hardwar
   kable_styling(latex_options = c('scale_down','HOLD_position'))
 ```
 
-```{r system}
+```{r memory_usage_over_time, fig.cap='Memory usage over time', fig.env='figure*'}
 memory$rel_timestamp <- memory$timestamp - sim_start
 memory$usage         <- (1 - memory$free/memory$total) * 100
+plot(memory$rel_timestamp, memory$usage, xlab = 'Time [s]', ylab='Memory usage [%]', type = 'b')
+```
 
+```{r cpu_usage_over_time, fig.cap='CPU usage over time', fig.env='figure*'}
 cpu_time$rel_timestamp   <- cpu_time$timestamp - sim_start
 cpu_time$total           <- cpu_time$user + cpu_time$nice + cpu_time$system
 cpu_time_delta           <- data.frame(cpu_time$rel_timestamp[-1], diff(cpu_time$total), diff(cpu_time$idle))
 colnames(cpu_time_delta) <- c('rel_timestamp', 'total', 'idle')
 cpu_time_delta$usage     <- (cpu_time_delta$idle / cpu_time_delta$total) * 100
+
+plot(cpu_time_delta$rel_timestamp, cpu_time_delta$usage, xlab = 'Time [s]', ylab='CPU usage [%]', type = 'b')
 ```
 
 During the run every `r args['system_snapshots_frequency']` seconds the files `/proc/stat` and `/proc/meminfo` were read to monitor the system. In total 100 snapshots were collected. Figure A shows the CPU utilization and figure B shows the memory usage during the run.
@@ -136,14 +141,6 @@ boxplot(tick_infos$duration, ylab='Tick duration [s]')
 ```{r tick_duration_median, fig.cap='Tick duration over time', fig.env='figure*'}
 par(mar=c(7,5,1,1)) # increase plot margins to fit longer labels on the x-axis
 boxplot(tick_infos$duration ~ cut(tick_infos$rel_timestamp, 25), las=2)
-```
-
-```{r memory_usage_over_time, fig.cap='Memory usage over time', fig.env='figure*'}
-plot(memory$rel_timestamp, memory$usage, xlab = 'Time [s]', ylab='Memory usage [%]', type = 'b')
-```
-
-```{r cpu_usage_over_time, fig.cap='CPU usage over time', fig.env='figure*'}
-plot(cpu_time_delta$rel_timestamp, cpu_time_delta$usage, xlab = 'Time [s]', ylab='CPU usage [%]', type = 'b')
 ```
 
 ##  Blocks
