@@ -6,9 +6,9 @@ header-includes:
    - \usepackage{float}
 output:
   pdf_document:
-    pandoc_args: [
-      "-V", "classoption=twocolumn"
-    ]
+    pandoc_args:
+      - -V
+      - classoption=twocolumn
     toc: yes
 ---
 
