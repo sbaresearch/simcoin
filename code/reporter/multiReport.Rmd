@@ -109,7 +109,6 @@ kable(unclass(summary(tick_infos$duration)), col.names = c('duration [s]'), digi
 xyplot(tick_infos$duration ~ ticks$elapsed, groups=ticks$tag,  t="b" )
 ```
 
-### Tick duration over time
 ```{r tick_duration_median}
 par(mar=c(7,5,1,1)) # increase plot margins to fit longer labels on the x-axis
 boxplot(tick_infos$duration ~ tick_infos$tag)
