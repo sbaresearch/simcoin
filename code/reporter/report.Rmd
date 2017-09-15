@@ -12,7 +12,7 @@ date: '`r format(Sys.time(), "%d %B, %Y")`'
 author: "simcoin"
 ---
 
-```{r knitr_options, include=FALSE}
+```{r setup, include=FALSE}
 library(knitr)
 library(jsonlite)
 library(anytime)
@@ -31,9 +31,7 @@ opts_chunk$set(
   )
 
 # set working directory for development: knitr::opts_knit$set(root.dir = '/tmp/run/postprocessing/')
-```
 
-```{r setup, include=FALSE}
 # general infos is needed twice to avoid exception in simulation section.
 general_infos <- fromJSON(file('general_infos.json'))
 general_info2 <- fromJSON(file('general_infos.json'))
