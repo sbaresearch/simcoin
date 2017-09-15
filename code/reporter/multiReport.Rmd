@@ -145,6 +145,22 @@ boxplot(stale_blocks$count ~ stale_blocks$tag)
 boxplot(blocks$total_size ~ blocks$tag)
 ```
 
+```{r block_propagation_density, fig.cap='Block propagation density', fig.env='figure*'}
+densityplot(~propagation_duration, data=blocks_received, groups = tag, auto.key = list(space = "right"), ref = TRUE, xlab = 'Duration [s]')
+```
+
+```{r block_propagation_boxplot, fig.cap='Block propagation boxplot', fig.env='figure*'}
+boxplot(blocks_received$propagation_duration ~ blocks_received$tag)
+```
+
+```{r tx_propagation_density, fig.cap='Transaction propagation density', fig.env='figure*'}
+densityplot(~propagation_duration, data=txs_received, groups = tag, auto.key = list(space = "right"), ref = TRUE, xlab = 'Duration [s]')
+```
+
+```{r tx_propagation_boxplot, fig.cap='Transaction propagation boxplot', fig.env='figure*'}
+boxplot(txs_received$propagation_duration ~ txs_received$tag)
+```
+
 \clearpage
 
 #### R and package versions used
