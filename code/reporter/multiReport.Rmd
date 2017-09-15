@@ -93,7 +93,7 @@ kable(infos, col.names = c('value'), format = 'latex', caption = 'System hardwar
   kable_styling(latex_options = c('scale_down','HOLD_position'))
 ```
 
-## Overall stats
+## Ticks
 
 ```{r ticks}
 mins <- aggregate(tick_infos$timestamp, by=list(tick_infos$tag), FUN=min)
@@ -108,7 +108,7 @@ kable(unclass(summary(tick_infos$duration)), col.names = c('duration [s]'), digi
   kable_styling(latex_options = c('HOLD_position'))
 ```
 
-### Blocks
+## Blocks
 
 ```{r block_propagation_summary}
 kable(unclass(summary(blocks_received$propagation_duration * 1000)), col.names = c('propagation [ms]'), digits = 3, caption = 'Overall block propagation', format = 'latex') %>%
@@ -120,7 +120,7 @@ kable(unclass(summary(blocks$total_size / 1000)), col.names = c('size [kB]'), di
   kable_styling(latex_options = c('HOLD_position'))
 ```
 
-### Transactions
+## Transactions
 
 ```{r txs_propagation_summary}
 kable(unclass(summary(txs_received$propagation_duration * 1000)), col.names = c('propagation [ms]'), digits = 3, caption = 'Overall transactions propagation', format = 'latex') %>%
@@ -133,7 +133,7 @@ kable(unclass(summary(blocks$txs)), digits = 0, caption = 'Overall transactions 
 ```
 
 
-### Nodes
+## Nodes
 
 ```{r tips}
 kable(tips, format = 'latex') %>%
