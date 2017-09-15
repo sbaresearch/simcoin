@@ -19,7 +19,6 @@ library('anytime')
 library('dplyr')
 Sys.setenv(TZ='UTC')
 
-# set working directory for development: knitr::opts_knit$set(root.dir = '/tmp/multi-run/')
 knitr::opts_chunk$set(
   fig.path='RmdFigs/',
   warning=FALSE,
@@ -29,6 +28,8 @@ knitr::opts_chunk$set(
   dev = 'pdf',
   fig.align='center'
   )
+
+# set working directory for development: knitr::opts_knit$set(root.dir = '/tmp/multi-run/')
 
 # general infos is needed twice to avoid exception in simulation section.
 general_infos <- fromJSON(file('run-1/general_infos.json'))
