@@ -77,10 +77,16 @@ kable(args_transposed, col.names = c('value'), caption = 'Start arguments', form
 ```
 
 ## System
-```{r base_information}
-infos <- data.frame(c(general_infos$hostname, general_infos$cpu_model, general_infos$cpus, round(as.double(general_infos$total_memory) / 1000000, 3)))
-row.names(infos) <- c('hostname', 'CPU model', 'CPU(s)', 'memory [GB]')
-kable(infos, col.names = c('value'), format = 'latex', caption = 'System information') %>%
+
+```{r system_information}
+kable(Sys.info(), col.names = c('value'), format = 'latex', caption = 'System information') %>%
+  kable_styling(latex_options = c('scale_down','HOLD_position'))
+```
+
+```{r system_hardware_specs}
+infos <- data.frame(c(general_infos$cpu_model, general_infos$cpus, round(as.double(general_infos$total_memory) / 1000000, 3)))
+row.names(infos) <- c('CPU model', 'CPU(s)', 'memory [GB]')
+kable(infos, col.names = c('value'), format = 'latex', caption = 'System hardware specs') %>%
   kable_styling(latex_options = c('scale_down','HOLD_position'))
 ```
 
