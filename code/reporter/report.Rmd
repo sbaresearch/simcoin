@@ -76,6 +76,29 @@ kable(args_transposed, col.names = c('value'), caption = 'Start arguments', form
   kable_styling(latex_options = c('scale_down','HOLD_position'))
 ```
 
+## System
+```{r base_information}
+infos <- data.frame(c(general_infos$hostname, general_infos$cpu_model, general_infos$cpus, round(as.double(general_infos$total_memory) / 1000000, 3)))
+row.names(infos) <- c('hostname', 'CPU model', 'CPU(s)', 'memory [GB]')
+kable(infos, col.names = c('value'), format = 'latex', caption = 'System information') %>%
+  kable_styling(latex_options = c('scale_down','HOLD_position'))
+```
+
+```{r system}
+memory$rel_timestamp <- memory$timestamp - sim_start
+memory$usage         <- (1 - memory$free/memory$total) * 100
+
+cpu_time$rel_timestamp   <- cpu_time$timestamp - sim_start
+cpu_time$total           <- cpu_time$user + cpu_time$nice + cpu_time$system
+cpu_time_delta           <- data.frame(cpu_time$rel_timestamp[-1], diff(cpu_time$total), diff(cpu_time$idle))
+colnames(cpu_time_delta) <- c('rel_timestamp', 'total', 'idle')
+cpu_time_delta$usage     <- (cpu_time_delta$idle / cpu_time_delta$total) * 100
+```
+
+During the run every `r args['system_snapshots_frequency']` seconds the files `/proc/stat` and `/proc/meminfo` were read to monitor the system. In total 100 snapshots were collected. Figure A shows the CPU utilization and figure B shows the memory usage during the run.
+
+## Ticks
+
 ```{r simulation}
 step_times           <- data.frame(t(data.frame(general_infos$step_times)))
 colnames(step_times) <- c('timestamp')
@@ -108,27 +131,6 @@ boxplot(tick_infos$duration, ylab='Tick duration [s]')
 par(mar=c(7,5,1,1)) # increase plot margins to fit longer labels on the x-axis
 boxplot(tick_infos$duration ~ cut(tick_infos$rel_timestamp, 25), las=2)
 ```
-
-## System
-```{r base_information}
-infos <- data.frame(c(general_infos$hostname, general_infos$cpu_model, general_infos$cpus, round(as.double(general_infos$total_memory) / 1000000, 3)))
-row.names(infos) <- c('hostname', 'CPU model', 'CPU(s)', 'memory [GB]')
-kable(infos, col.names = c('value'), format = 'latex') %>%
-  kable_styling(latex_options = c('scale_down','HOLD_position'))
-```
-
-```{r system}
-memory$rel_timestamp <- memory$timestamp - sim_start
-memory$usage         <- (1 - memory$free/memory$total) * 100
-
-cpu_time$rel_timestamp   <- cpu_time$timestamp - sim_start
-cpu_time$total           <- cpu_time$user + cpu_time$nice + cpu_time$system
-cpu_time_delta           <- data.frame(cpu_time$rel_timestamp[-1], diff(cpu_time$total), diff(cpu_time$idle))
-colnames(cpu_time_delta) <- c('rel_timestamp', 'total', 'idle')
-cpu_time_delta$usage     <- (cpu_time_delta$idle / cpu_time_delta$total) * 100
-```
-
-During the run every `r args['system_snapshots_frequency']` seconds the files `/proc/stat` and `/proc/meminfo` were read to monitor the system. In total 100 snapshots were collected. Figure A shows the CPU utilization and figure B shows the memory usage during the run.
 
 ```{r memory_usage_over_time, fig.cap='Memory usage over time', fig.env='figure*'}
 plot(memory$rel_timestamp, memory$usage, xlab = 'Time [s]', ylab='Memory usage [%]', type = 'b')
