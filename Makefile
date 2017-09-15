@@ -53,6 +53,7 @@ demo4:
 				--amount-of-ticks 10 \
 				--tx-per-tick 2 \
 				--blocks-per-tick 0.7 \
+				--system-snapshots-frequency 1 \
 				--verbose
 
 # maxes out notebook and server
