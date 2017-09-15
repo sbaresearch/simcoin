@@ -33,6 +33,7 @@ library(jsonlite)
 library(anytime)
 library(dplyr)
 library(kableExtra)
+library(lattice)
 Sys.setenv(TZ='UTC')
 
 # general infos is needed twice to avoid exception in simulation section.
@@ -169,8 +170,7 @@ kable(unclass(summary(blocks_received$propagation_duration * 1000)), col.names =
 ```
 
 ```{r block_propagation_density, fig.cap='Block propagation density', fig.env='figure*'}
-hist(blocks_received$propagation_duration, xlab = 'Time [s]', main = NULL)
-lines(density(blocks_received$propagation_duration))
+densityplot(~propagation_duration, data=blocks_received, auto.key = list(space = "right"), ref = TRUE, xlab = 'Duration [s]')
 ```
 
 ## Transactions
@@ -189,8 +189,7 @@ kable(unclass(summary(txs_received$propagation_duration * 1000)), col.names = c(
 ```
 
 ```{r tx_propagation_density, fig.cap='Transaction propagation density', fig.env='figure*'}
-hist(txs_received$propagation_duration, xlab = 'Time [s]', main = NULL)
-lines(density(txs_received$propagation_duration))
+densityplot(~propagation_duration, data=txs_received, auto.key = list(space = "right"), ref = TRUE, xlab = 'Duration [s]')
 ```
 
 ```{r txs_per_block_summary}
