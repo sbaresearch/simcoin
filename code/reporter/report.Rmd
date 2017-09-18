@@ -130,7 +130,7 @@ kable(unclass(summary(tick_infos$duration)), col.names = c('duration [s]'), digi
 ```
 
 ```{r tick_duration_boxplot, fig.cap='Tick duration', fig.pos='H'}
-bwplot(tick_infos$duration, ylab='Tick duration [s]')
+bwplot(tick_infos$duration, xlab='Tick duration [s]')
 ```
 
 ```{r tick_duration_xyplot, fig.cap='Tick duration over time', fig.env='figure*'}
@@ -165,7 +165,7 @@ kable(unclass(summary(blocks$total_size / 1000)), col.names = c('size [kB]'), di
 ```
 
 ```{r block_size_boxplot, fig.cap='Block size', fig.pos='H'}
-bwplot(blocks$total_size / 1000, ylab='Block size [kb]')
+bwplot(blocks$total_size / 1000, xlab='Block size [kb]')
 ```
 
 ```{r block_propagation_summary}
@@ -202,7 +202,7 @@ kable(unclass(summary(blocks$txs)), digits = 0, caption = 'Transactions per bloc
 ```
 
 ```{r txs_per_block_boxplot, fig.cap='Transactions in block', fig.pos='H'}
-bwplot(blocks$txs, ylab='Transactions')
+bwplot(blocks$txs, xlab='Transactions')
 ```
 
 ## Nodes
