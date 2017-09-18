@@ -93,7 +93,7 @@ kable(infos, col.names = c('value'), format = 'latex', caption = 'System hardwar
 
 ```{r memory_usage_over_time, fig.cap='Memory usage over time', fig.env='figure*'}
 memory$usage         <- (1 - memory$free/memory$total) * 100
-xyplot(memory$usage ~ memory$timestamp - sim_start, xlab = 'Time [s]', ylab = 'Memory usage [%]', t = 'b' )
+xyplot(memory$usage ~ memory$timestamp - sim_start, xlab = 'Time [s]', ylab = 'Memory usage [%]', t = 'l' )
 ```
 
 ```{r cpu_usage_over_time, fig.cap='CPU usage over time', fig.env='figure*'}
@@ -102,7 +102,7 @@ cpu_time_delta           <- data.frame(cpu_time$timestamp[-1], diff(cpu_time$tot
 colnames(cpu_time_delta) <- c('timestamp', 'total', 'idle')
 cpu_time_delta$usage     <- (1 - cpu_time_delta$idle / (cpu_time_delta$total + cpu_time_delta$idle)) * 100
 
-xyplot(cpu_time_delta$usage ~ cpu_time_delta$timestamp - sim_start, xlab = 'Time [s]', ylab = 'CPU usage [%]', t = 'b' )
+xyplot(cpu_time_delta$usage ~ cpu_time_delta$timestamp - sim_start, xlab = 'Time [s]', ylab = 'CPU usage [%]', t = 'l' )
 ```
 
 During the run every `r args['system_snapshots_frequency']` seconds the files `/proc/stat` and `/proc/meminfo` were read to monitor the system. In total 100 snapshots were collected. Figure A shows the CPU utilization and figure B shows the memory usage during the run.
@@ -134,7 +134,7 @@ bwplot(tick_infos$duration, xlab='Tick duration [s]')
 ```
 
 ```{r tick_duration_xyplot, fig.cap='Tick duration over time', fig.env='figure*'}
-xyplot(tick_infos$duration ~ tick_infos$start - sim_start, xlab = 'Time [s]', ylab = 'Duration [s]', t = 'b' )
+xyplot(tick_infos$duration ~ tick_infos$start - sim_start, xlab = 'Time [s]', ylab = 'Duration [s]', t = 'l' )
 ```
 
 ```{r tick_duration_median, fig.cap='Tick duration over time with boxplot', fig.env='figure*'}
@@ -167,7 +167,7 @@ kable(unclass(summary(blocks_received$propagation_duration * 1000)), col.names =
 ```
 
 ```{r block_propagation_density, fig.cap='Block propagation density', fig.env='figure*'}
-densityplot(~propagation_duration, data=blocks_received, auto.key = list(space = "right"), ref = TRUE, xlab = 'Duration [s]')
+densityplot(~propagation_duration, data=blocks_received, auto.key = list(space = "right"), ref = TRUE, xlab = 'Duration [s]', plot.points = FALSE)
 ```
 
 ## Transactions
@@ -179,7 +179,7 @@ kable(unclass(summary(txs_received$propagation_duration * 1000)), col.names = c(
 ```
 
 ```{r tx_propagation_density, fig.cap='Transaction propagation density', fig.env='figure*'}
-densityplot(~propagation_duration, data=txs_received, auto.key = list(space = "right"), ref = TRUE, xlab = 'Duration [s]')
+densityplot(~propagation_duration, data=txs_received, auto.key = list(space = "right"), ref = TRUE, xlab = 'Duration [s]', plot.points = FALSE)
 ```
 
 ```{r txs_per_block_summary}

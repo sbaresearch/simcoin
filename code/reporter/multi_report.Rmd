@@ -127,7 +127,7 @@ not_active_tips <- tips[!(tips$status=='active'),]
 \clearpage
 
 ```{r tick_duration_xyplot, fig.cap='Tick duration over time', fig.env='figure*'}
-xyplot(tick_infos$duration ~ ticks$elapsed, groups = ticks$tag, xlab = 'Time [s]', ylab = 'Duration [s]', t = 'b' )
+xyplot(tick_infos$duration ~ ticks$elapsed, groups = ticks$tag, xlab = 'Time [s]', ylab = 'Duration [s]', t = 'l' )
 ```
 
 ```{r tick_duration_median, fig.cap='Tick duration', fig.env='figure*'}
@@ -144,7 +144,7 @@ bwplot(blocks$total_size / 1000 ~ blocks$tag, ylab = 'Block size [kB]')
 ```
 
 ```{r block_propagation_density, fig.cap='Block propagation density', fig.env='figure*'}
-densityplot(~propagation_duration, data=blocks_received, groups = tag, auto.key = list(space = "right"), ref = TRUE, xlab = 'Duration [s]')
+densityplot(~propagation_duration, data=blocks_received, groups = tag, auto.key = list(space = "right"), ref = TRUE, xlab = 'Duration [s]', plot.points = FALSE)
 ```
 
 ```{r block_propagation_boxplot, fig.cap='Block propagation boxplot', fig.env='figure*'}
@@ -152,7 +152,7 @@ bwplot(blocks_received$propagation_duration ~ blocks_received$tag, ylab = 'Durat
 ```
 
 ```{r tx_propagation_density, fig.cap='Transaction propagation density', fig.env='figure*'}
-densityplot(~propagation_duration, data=txs_received, groups = tag, auto.key = list(space = "right"), ref = TRUE, xlab = 'Duration [s]')
+densityplot(~propagation_duration, data=txs_received, groups = tag, auto.key = list(space = "right"), ref = TRUE, xlab = 'Duration [s]', plot.points = FALSE)
 ```
 
 ```{r tx_propagation_boxplot, fig.cap='Transaction propagation boxplot', fig.env='figure*'}
