@@ -100,4 +100,4 @@ class TestPrepare(TestCase):
         config.max_in_mempool_ancestors = 25
         amount = prepare.calc_number_of_tx_chains(2, 1/600, 10)
 
-        self.assertEqual(amount, 18)
+        self.assertEqual(amount, 51)
