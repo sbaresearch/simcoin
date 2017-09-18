@@ -80,6 +80,10 @@ txs_received_csv_file_name = 'txs_received.csv'
 tick_infos_csv_file_name = 'tick_infos.csv'
 
 
+report_file_name = 'report.Rmd'
+multi_report_file_name = 'multiReport.Rmd'
+
+
 class Path:
     def __init__(self, run_name):
         self.run_dir = data_dir + run_name + '/'

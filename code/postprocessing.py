@@ -42,8 +42,9 @@ class PostProcessing:
         file_writer = FileWriter(self.context)
         file_writer.execute()
 
-        bash.check_output(rcmd.create_report(self.context.path.postprocessing_dir))
-        logging.info('Report created')
+        bash.check_output(rcmd.create_report(self.context.path.postprocessing_dir, config.report_file_name))
+        logging.info('Created {} report in folder={}'
+                     .format(config.report_file_name, self.context.path.postprocessing_dir))
 
         logging.info('Executed post processing')
 

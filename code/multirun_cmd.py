@@ -7,6 +7,7 @@ import run_cmd
 import os
 import config
 import bash
+from cmd import rcmd
 
 
 files_to_concat = [
@@ -52,6 +53,9 @@ def run():
 
     bash.check_output('cp {} {}/.'.format(config.args_json, config.soft_link_to_multi_run_dir))
     concat_files()
+
+    bash.check_output(rcmd.create_report(config.multi_run_dir, config.multi_report_file_name))
+    logging.info('Created {} report in folder={}'.format(config.multi_report_file_name, config.multi_run_dir))
 
 
 def prepare():
