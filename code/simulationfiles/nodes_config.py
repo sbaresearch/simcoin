@@ -50,7 +50,7 @@ def create(unknown_arguments=False):
                             .format(node_group['variable']))
             check_if_image_exists(node_args)
 
-            nodes.extend(create_node_group(node_args, index + 1))
+            nodes.extend(create_node_group(node_args, node_group['variable'], index + 1))
 
     check_if_share_sum_is_1(nodes)
 
@@ -95,7 +95,7 @@ def check_if_share_sum_is_1(nodes):
         return True
 
 
-def create_node_group(node_args, index):
+def create_node_group(node_args, group, index):
     node_type = str(node_args[0])
     amount = int(node_args[1])
     share = float(node_args[2])
@@ -104,13 +104,14 @@ def create_node_group(node_args, index):
 
     nodes = []
     for i in range(amount):
-        nodes.append(NodeConfig(node_type, config.node_name.format(index, i + 1), share/amount, latency, docker_image))
+        nodes.append(NodeConfig(node_type, group, config.node_name.format(index, i + 1), share/amount, latency, docker_image))
     return nodes
 
 
 class NodeConfig:
-    def __init__(self, node_type, name, share, latency, docker_image):
+    def __init__(self, node_type, group, name, share, latency, docker_image):
         self.node_type = node_type
+        self.group = group
         self.name = name
         self.share = share
         self.latency = latency

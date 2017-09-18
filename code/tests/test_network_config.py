@@ -9,7 +9,10 @@ from simulationfiles.nodes_config import NodeConfig
 class TestNetworkConfig(TestCase):
 
     def test_create_header(self, ):
-        header = network_config.create_header([NodeConfig('type', 'node-1', 0, 0, None), NodeConfig('type', 'node-2', 0, 0, None)])
+        header = network_config.create_header([
+            NodeConfig('type', 'group', 'node-1', 0, 0, None),
+            NodeConfig('type', 'group', 'node-2', 0, 0, None)
+        ])
 
         self.assertEqual(len(header), 3)
         self.assertEqual(header, ['', 'node-1', 'node-2'])
