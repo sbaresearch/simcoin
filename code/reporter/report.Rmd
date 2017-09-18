@@ -36,9 +36,7 @@ library(kableExtra)
 library(lattice)
 Sys.setenv(TZ='UTC')
 
-# general infos is needed twice to avoid exception in simulation section.
 general_infos <- fromJSON(file('general_infos.json'))
-general_info2 <- fromJSON(file('general_infos.json'))
 tick_infos    <- read.csv2("tick_infos.csv", dec=".")
 step_times    <-  read.csv2("step_times.csv", dec=".")
 
