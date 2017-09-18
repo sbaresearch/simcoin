@@ -40,6 +40,8 @@ general_infos <- fromJSON(file('general_infos.json'))
 tick_infos    <- read.csv2("tick_infos.csv", dec=".")
 step_times    <-  read.csv2("step_times.csv", dec=".")
 
+ticks <- read.csv2('../ticks.csv', row.names = NULL, header = FALSE)
+
 txs    <- read.csv2("txs.csv", dec=".")
 blocks <- read.csv2("blocks.csv", dec=".")
 tips   <- read.csv2("tips.csv", dec=".")
@@ -73,6 +75,20 @@ The checked out commit at execution time was:
 ```{r start_arguments}
 args_transposed <- as.data.frame(t(args))
 kable(args_transposed, col.names = c('value'), caption = 'Start arguments', format = 'latex') %>%
+  kable_styling(latex_options = c('scale_down','HOLD_position'))
+```
+
+```{r events_summar}
+planned_blocks <- length(unlist(apply(ticks, c(1,2), function(x) grep("block", x)), use.names = FALSE))
+planned_txs    <- length(unlist(apply(ticks, c(1,2), function(x) grep("tx", x)), use.names = FALSE))
+df             <- data.frame(
+                    c(nrow(ticks), nrow(tick_infos) + 1),
+                    c(planned_blocks, nrow(blocks)),
+                    c(planned_txs, nrow(txs) - nrow(blocks))
+                  )
+row.names(df)  <- c('planned', 'run')
+kable(df,
+      col.names = c('Ticks', 'Blocks', 'Transactions'), caption = 'Events summary', format = 'latex') %>%
   kable_styling(latex_options = c('scale_down','HOLD_position'))
 ```
 
