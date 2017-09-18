@@ -50,6 +50,9 @@ tx_exces    <- read.csv2("tx_exceptions.csv", dec=".")
 block_exces <- read.csv2("block_exceptions.csv", dec=".")
 rpc_exces   <- read.csv2("rpc_exceptions.csv", dec=".")
 
+cpu_time <- read.csv2("cpu_time.csv", dec=".")
+memory <- read.csv2("memory.csv", dec=".")
+
 args      <- stream_in(file('args.json'))
 sim_start <- tick_infos$start[1]
 ```
@@ -79,12 +82,9 @@ kable(infos, col.names = c('value'), format = 'latex', caption = 'System hardwar
 
 ## Ticks
 
-```{r ticks}
-mins <- aggregate(tick_infos$timestamp, by=list(tick_infos$tag), FUN=min)
-colnames(mins) <- c('tag', 'run_start')
-
-ticks         <- merge(tick_infos, mins)
-ticks$elapsed <- ticks$timestamp - ticks$run_start 
+```{r simulation_starts}
+simulation_starts           <- aggregate(tick_infos$timestamp, by=list(tick_infos$tag), FUN=min)
+colnames(simulation_starts) <- c('tag', 'run_start')
 ```
 
 ```{r tick_duration_summary}
@@ -126,7 +126,29 @@ not_active_tips <- tips[!(tips$status=='active'),]
 
 \clearpage
 
+```{r cpu_time_plot, fig.cap='CPU usage over time', fig.env='figure*'}
+cpu_time$total <- cpu_time$user + cpu_time$nice + cpu_time$system
+cpu_time_delta <- cpu_time %>%
+ group_by(tag) %>%
+ mutate(diff = c(NA, diff(idle))) %>%
+ filter(!is.na(diff))
+cpu_time_delta$usage   <- (1 - cpu_time_delta$idle / (cpu_time_delta$total + cpu_time_delta$idle)) * 100
+cpu_time_delta         <- merge(cpu_time_delta, simulation_starts)
+cpu_time_delta$elapsed <- cpu_time_delta$timestamp - cpu_time_delta$run_start
+xyplot(cpu_time_delta$usage ~ cpu_time_delta$elapsed, groups = cpu_time_delta$tag, xlab = 'Time [s]', ylab = 'CPU usage [%]', t = 'l' )
+```
+
+```{r memory_xyplot, fig.cap='Memory usage over time', fig.env='figure*'}
+memory$usage   <- (1 - memory$free/memory$total) * 100
+memory         <- merge(memory, simulation_starts)
+memory$elapsed <- memory$timestamp - memory$run_start
+xyplot(memory$usage ~ memory$elapsed, groups = memory$tag, xlab = 'Time [s]', ylab = 'Memory usage [%]', t = 'l' )
+```
+
+
 ```{r tick_duration_xyplot, fig.cap='Tick duration over time', fig.env='figure*'}
+ticks         <- merge(tick_infos, simulation_starts)
+ticks$elapsed <- ticks$timestamp - ticks$run_start
 xyplot(tick_infos$duration ~ ticks$elapsed, groups = ticks$tag, xlab = 'Time [s]', ylab = 'Duration [s]', t = 'l' )
 ```
 

@@ -20,6 +20,8 @@ files_to_concat = [
     config.blocks_received_csv_file_name,
     config.txs_received_csv_file_name,
     config.tick_infos_csv_file_name,
+    config.memory_csv_file_name,
+    config.cpu_time_csv_file_name,
 ]
 
 

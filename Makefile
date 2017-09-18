@@ -89,6 +89,7 @@ multidemo1:
 				--amount-of-ticks 5 \
 				--txs-per-tick 10 \
 				--tick-duration .3 \
+				--system-snapshots-frequency 1 \
 				--verbose
 
 install:
