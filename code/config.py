@@ -78,6 +78,7 @@ rpc_exceptions_csv_file_name = 'rpc_exceptions.csv'
 blocks_received_csv_file_name = 'blocks_received.csv'
 txs_received_csv_file_name = 'txs_received.csv'
 tick_infos_csv_file_name = 'tick_infos.csv'
+step_times_csv_file_name = 'step_times.csv'
 
 
 report_file_name = 'report.Rmd'
@@ -95,7 +96,7 @@ class Path:
         self.postprocessing_dir = self.run_dir + 'postprocessing/'
 
         self.general_infos_json = self.postprocessing_dir + 'general_infos.json'
-        self.step_times = self.postprocessing_dir + 'step_times.csv'
+        self.step_times = self.postprocessing_dir + step_times_csv_file_name
         self.cpu_time_csv = self.postprocessing_dir + cpu_time_csv_file_name
         self.memory_csv = self.postprocessing_dir + memory_csv_file_name
         self.tmp_log = self.postprocessing_dir + 'tmp.log'
