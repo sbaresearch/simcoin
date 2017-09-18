@@ -41,6 +41,9 @@ class Context:
         self.tick_infos = []
         self.general_infos = {}
         self.tips = []
+        self.step_times = []
+        self.cpu_time = None
+        self.memory = None
 
     def create(self):
         self.config_nodes = nodes_config.read()

@@ -2,28 +2,20 @@ import sched
 import time
 import logging
 import bash
-import queue
 import re
-import filewriter
-import config
 
 PRIORITY = 1
 
 
-def run(stop_event, frequency, path, tag):
+def run(stop_event, frequency, q_cpu_time, q_memory):
     logging.info('Starting system monitor with frequency={}s'.format(str(frequency)))
     scheduler = sched.scheduler(time.time, time.sleep)
     next_execution = time.time()
-    q_cpu_time = queue.Queue()
-    q_memory = queue.Queue()
 
     while not stop_event.wait(0):
         scheduler.enterabs(next_execution, PRIORITY, collect, (q_cpu_time, q_memory,))
         scheduler.run()
         next_execution += frequency
-
-    filewriter.write_csv(path + config.cpu_time_csv_file_name, CpuTimeSnapshot.csv_header(), list(q_cpu_time.queue), tag)
-    filewriter.write_csv(path + config.memory_csv_file_name, MemorySnapshot.csv_header(), list(q_memory.queue), tag)
 
 
 def collect(q_cpu_time, q_memory):

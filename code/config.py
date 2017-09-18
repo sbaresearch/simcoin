@@ -95,6 +95,9 @@ class Path:
         self.postprocessing_dir = self.run_dir + 'postprocessing/'
 
         self.general_infos_json = self.postprocessing_dir + 'general_infos.json'
+        self.step_times = self.postprocessing_dir + 'step_times.csv'
+        self.cpu_time_csv = self.postprocessing_dir + cpu_time_csv_file_name
+        self.memory_csv = self.postprocessing_dir + memory_csv_file_name
         self.tmp_log = self.postprocessing_dir + 'tmp.log'
         self.blocks_csv = self.postprocessing_dir + blocks_csv_file_name
         self.tips_csv = self.postprocessing_dir + tips_csv_file_name
