@@ -171,7 +171,7 @@ xyplot(tick_infos$duration ~ ticks$elapsed, groups = ticks$tag, xlab = 'Time [s]
 bwplot(tick_infos$duration ~ tick_infos$tag, ylab = 'Duration [s]')
 ```
 
-```{r stale, fig.cap='Stale blocks', fig.env='figure*'}
+```{r stale, fig.cap='Stale blocks', fig.env='figure*', fig.height=length(unique(blocks$tag)) + 1}
 stale_block <- t(table(blocks$stale, blocks$tag))
 barchart(stale_block, stack = TRUE, ref = FALSE, xlab = 'Blocks', auto.key = list(space='top',text=colnames(stale_block)))
 ```
