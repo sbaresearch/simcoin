@@ -169,7 +169,7 @@ def calc_number_of_tx_chains(txs_per_tick, blocks_per_tick, number_of_nodes):
     txs_per_block = txs_per_tick / blocks_per_tick
     txs_per_block_per_node = txs_per_block / number_of_nodes
 
-    # 3 times + 3 chains in reserve
-    needed_tx_chains = (txs_per_block_per_node / config.max_in_mempool_ancestors) * 3 + 3
+    # 10 times + 3 chains in reserve
+    needed_tx_chains = (txs_per_block_per_node / config.max_in_mempool_ancestors) * 10 + 3
 
     return math.ceil(needed_tx_chains)
