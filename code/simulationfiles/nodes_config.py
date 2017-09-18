@@ -70,7 +70,7 @@ def read():
 
 
 def object_decoder(obj):
-    return NodeConfig(obj['node_type'], obj['name'], obj['share'], obj['latency'], obj['docker_image'])
+    return NodeConfig(obj['node_type'], obj['group'], obj['name'], obj['share'], obj['latency'], obj['docker_image'])
 
 
 def check_if_image_exists(node_args):
