@@ -11,7 +11,7 @@ bitcoin.SelectParams('regtest')
 class TestNode(TestCase):
 
     def setUp(self):
-        self.node = BitcoinNode('node-1', 'ip', 'image', '/path')
+        self.node = BitcoinNode('node-1', 'group', 'ip', 'image', '/path')
 
     def test_get_coinbase_variables(self):
         self.node.execute_rpc = MagicMock()

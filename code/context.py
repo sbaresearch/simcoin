@@ -49,7 +49,8 @@ class Context:
 
         self.nodes = OrderedDict([])
         for node in nodes:
-            self.nodes.update({node.name: PublicBitcoinNode(node.name, self.zone.get_ip(node.latency),
+            self.nodes.update({node.name: PublicBitcoinNode(node.name, node.group,
+                                                            self.zone.get_ip(node.latency),
                                                             node.latency, node.docker_image,
                                                             self.path.client_dir_on_host(node.name))})
 
@@ -59,10 +60,11 @@ class Context:
             ip_private_node = self.zone.get_ip(node.latency)
             ip_proxy = self.zone.get_ip(node.latency)
 
-            self.selfish_node_private_nodes.update({node.name: SelfishPrivateNode(node.name,
-                                                                                  ip_private_node, node.docker_image)})
+            self.selfish_node_private_nodes.update({node.name: SelfishPrivateNode(node.name, node.group,
+                                                                                  ip_private_node,
+                                                                                  node.docker_image)})
 
-            self.selfish_node_proxies.update({node.name_proxy: ProxyNode(node.name_proxy, ip_proxy,
+            self.selfish_node_proxies.update({node.name_proxy: ProxyNode(node.name_proxy, node.group, ip_proxy,
                                                                          ip_private_node, node.selfish_nodes_args,
                                                                          node.latency, node.docker_image)})
 

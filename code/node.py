@@ -22,8 +22,9 @@ from bitcoinrpc.authproxy import HTTP_TIMEOUT
 
 
 class Node:
-    def __init__(self, name, ip, docker_image):
+    def __init__(self, name, group, ip, docker_image):
         self.name = name
+        self.group = group
         self.ip = ip
         self.docker_image = docker_image
 
@@ -40,8 +41,8 @@ class PublicNode:
 class BitcoinNode(Node):
     log_file = '/debug.log'
 
-    def __init__(self, name, ip, docker_image, path):
-        super().__init__(name, ip, docker_image)
+    def __init__(self, name, group, ip, docker_image, path):
+        super().__init__(name, group, ip, docker_image)
         self.path = path
         self.spent_to = None
         self.rpc_connection = None
@@ -234,8 +235,8 @@ class BitcoinNode(Node):
 
 
 class PublicBitcoinNode(BitcoinNode, PublicNode):
-    def __init__(self, name, ip, latency, docker_image, path):
-        BitcoinNode.__init__(self, name, ip, docker_image, path)
+    def __init__(self, name, group, ip, latency, docker_image, path):
+        BitcoinNode.__init__(self, name, group, ip, docker_image, path)
         PublicNode.__init__(self, latency)
 
     def add_latency(self, zones):
@@ -248,15 +249,15 @@ class PublicBitcoinNode(BitcoinNode, PublicNode):
 
 
 class SelfishPrivateNode(BitcoinNode):
-    def __init__(self, name, ip, docker_image):
-        super().__init__(name, ip, docker_image)
+    def __init__(self, name, group, ip, docker_image):
+        super().__init__(name, group, ip, docker_image)
 
 
 class ProxyNode(Node, PublicNode):
     log_file = '/tmp/selfish_proxy.log'
 
-    def __init__(self, name, ip, private_ip, args, latency, docker_image):
-        Node.__init__(self, name, ip, docker_image)
+    def __init__(self, name, group, ip, private_ip, args, latency, docker_image):
+        Node.__init__(self, name, group, ip, docker_image)
         PublicNode.__init__(self, latency)
         self.private_ip = private_ip
         self.args = args
