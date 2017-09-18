@@ -153,10 +153,10 @@ pie(blocks_per_node, labels)
 ```
 
 ```{r stale, fig.cap='Accepted/stale blocks', fig.pos='H'}
-stale_blocks <- table(blocks$stale)
-percentage <- round(stale_blocks/sum(stale_blocks)*100)
-labels <- paste(names(stale_blocks), ' blocks: ', stale_blocks, ', ', percentage, '%', sep='')
-pie(stale_blocks, labels)
+stale_block <- t(table(blocks$stale))
+rownames(stale_block) <- c('run')
+legend = paste(paste(colnames(stale_block), prop.table(stale_block)[1,]), '%', sep = '')
+barchart(stale_block, stack = TRUE, ref = FALSE, xlab = 'Blocks', auto.key = list(space='top',text=legend))
 ```
 
 ```{r block_size_summary}
