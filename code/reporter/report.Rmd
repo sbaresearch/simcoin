@@ -145,13 +145,6 @@ boxplot(tick_infos$duration ~ cut(tick_infos$start - sim_start, 25), las=2)
 ##  Blocks
 In this simulation `r nrow(blocks)` blocks were created by `r length(unique(blocks$node))` different nodes. Note: Some blocks may never reached some nodes because of forks in the chain or other reasons.
 
-```{r blocks_distribution, fig.cap='Block creators', fig.pos='H'}
-blocks_per_node <- table(blocks$node)
-percentage <- round(blocks_per_node/sum(blocks_per_node)*100)
-labels <- paste(names(blocks_per_node), ' blocks: ', blocks_per_node, ', ', percentage, '%', sep='')
-pie(blocks_per_node, labels)
-```
-
 ```{r stale, fig.cap='Accepted/stale blocks', fig.pos='H'}
 stale_block <- t(table(blocks$stale))
 rownames(stale_block) <- c('run')
@@ -179,13 +172,6 @@ densityplot(~propagation_duration, data=blocks_received, auto.key = list(space =
 
 ## Transactions
 There were `r nrow(txs)` transaction created in this simulation. Note: Some transactions may reached other nodes included in a block. Hence they wouldn't appear in this statistics.
-
-```{r txs_distribution, fig.cap='Transaction creators', fig.pos='H'}
-txs_per_node <- table(txs$node)
-percentage <- round(txs_per_node/sum(txs_per_node)*100)
-labels <- paste(names(txs_per_node), ' blocks: ', txs_per_node, ', ', percentage, '%', sep='')
-pie(txs_per_node, labels)
-```
 
 ```{r txs_propagation_summary}
 kable(unclass(summary(txs_received$propagation_duration * 1000)), col.names = c('propagation [ms]'), digits = 3, caption = 'Transactions propagation', format = 'latex') %>%
