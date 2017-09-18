@@ -37,8 +37,8 @@ class Parser:
                     except ParseException:
                         pass
                 if (i + 1) % 100000 == 0:
-                    logging.info('Parsed {} of {} log lines'.format(i + 1, len(lines)))
-        logging.info('Parsed aggregated log={} with {} lines'.format(self.context.path.aggregated_sim_log, len(lines)))
+                    logging.info('Parsed {:,} of {:,} log lines'.format(i + 1, len(lines)))
+        logging.info('Parsed aggregated log={} with {:,} lines'.format(self.context.path.aggregated_sim_log, len(lines)))
 
     def block_creation_parser(self, line):
         create_new_block = parse_create_new_block(line)
