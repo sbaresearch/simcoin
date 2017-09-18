@@ -1,5 +1,3 @@
-import config
-
 
 def create_report(path):
     cp_report_rmd_cmd = 'cp reporter/report.Rmd {}'.format(path)
