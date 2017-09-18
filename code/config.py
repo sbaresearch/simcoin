@@ -81,7 +81,7 @@ tick_infos_csv_file_name = 'tick_infos.csv'
 
 
 report_file_name = 'report.Rmd'
-multi_report_file_name = 'multiReport.Rmd'
+multi_report_file_name = 'multi_report.Rmd'
 
 
 class Path:
