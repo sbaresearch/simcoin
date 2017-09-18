@@ -34,10 +34,12 @@ library(anytime)
 library(dplyr)
 library(kableExtra)
 library(lattice)
+library(reshape2)
 Sys.setenv(TZ='UTC')
 
 general_infos <- fromJSON(file('run-1/general_infos.json'))
 tick_infos    <- read.csv2("tick_infos.csv", dec=".")
+step_times    <-  read.csv2("step_times.csv", dec=".")
 
 txs    <- read.csv2("txs.csv", dec=".")
 blocks <- read.csv2("blocks.csv", dec=".")
@@ -145,6 +147,19 @@ memory$elapsed <- memory$timestamp - memory$run_start
 xyplot(memory$usage ~ memory$elapsed, groups = memory$tag, xlab = 'Time [s]', ylab = 'Memory usage [%]', t = 'l' )
 ```
 
+
+```{r step_times_barchart, fig.cap='Step times', fig.env='figure*', fig.height=length(unique(step_times$tag)) + 1}
+diff_steps <- step_times %>%
+  group_by(tag) %>%
+  mutate(diff = c(NA, diff(timestamp))) %>%
+  filter(!is.na(diff))
+diff_steps <- dcast(diff_steps, tag~type, value.var = 'diff')
+rownames(diff_steps) <- diff_steps[,1]
+diff_steps           <- diff_steps[,-1]
+diff_steps           <- diff_steps[, c(3,2,1)]
+colnames(diff_steps) <- c('preparation', 'simulation', 'postprocessing')
+barchart(as.matrix(diff_steps), stack = TRUE, ref = FALSE, xlab = 'Time [s]', auto.key = list(space='top',text=colnames(diff_steps)))
+```
 
 ```{r tick_duration_xyplot, fig.cap='Tick duration over time', fig.env='figure*'}
 ticks         <- merge(tick_infos, simulation_starts)
