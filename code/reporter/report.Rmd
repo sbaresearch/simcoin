@@ -114,11 +114,11 @@ xyplot(memory$usage ~ memory$timestamp - sim_start, xlab = 'Time [s]', ylab = 'M
 
 ```{r cpu_usage_over_time, fig.cap='CPU usage over time', fig.env='figure*'}
 cpu_time$total           <- cpu_time$user + cpu_time$nice + cpu_time$system
-cpu_time_delta           <- data.frame(cpu_time$timestamp[-1], diff(cpu_time$total), diff(cpu_time$idle))
-colnames(cpu_time_delta) <- c('timestamp', 'total', 'idle')
-cpu_time_delta$usage     <- (1 - cpu_time_delta$idle / (cpu_time_delta$total + cpu_time_delta$idle)) * 100
+cpu_time_diff           <- data.frame(cpu_time$timestamp[-1], diff(cpu_time$total), diff(cpu_time$idle))
+colnames(cpu_time_diff) <- c('timestamp', 'total', 'idle')
+cpu_time_diff$usage     <- (1 - cpu_time_diff$idle / (cpu_time_diff$total + cpu_time_diff$idle)) * 100
 
-xyplot(cpu_time_delta$usage ~ cpu_time_delta$timestamp - sim_start, xlab = 'Time [s]', ylab = 'CPU usage [%]', t = 'l' )
+xyplot(cpu_time_diff$usage ~ cpu_time_diff$timestamp - sim_start, xlab = 'Time [s]', ylab = 'CPU usage [%]', t = 'l' )
 ```
 
 During the run every `r args['system_snapshots_frequency']` seconds the files `/proc/stat` and `/proc/meminfo` were read to monitor the system. In total 100 snapshots were collected. Figure A shows the CPU utilization and figure B shows the memory usage during the run.
@@ -126,24 +126,24 @@ During the run every `r args['system_snapshots_frequency']` seconds the files `/
 ## Ticks
 
 ```{r simulation}
-diff_steps                      <- data.frame(diff(step_times$timestamp))
-colnames(diff_steps)            <- c('timestamp')
-diff_steps_summary              <- rbind(diff_steps, apply(diff_steps, 2, sum))
-diff_steps_summary$duration_min <- diff_steps_summary$timestamp/60
-diff_steps_summary              <- diff_steps_summary %>%
+step_diff                      <- data.frame(diff(step_times$timestamp))
+colnames(step_diff)            <- c('timestamp')
+step_diff_summary              <- rbind(step_diff, apply(step_diff, 2, sum))
+step_diff_summary$duration_min <- step_diff_summary$timestamp/60
+step_diff_summary              <- step_diff_summary %>%
   mutate_at(.vars = vars(timestamp, duration_min), .funs = funs(round(.,2)))
-rownames(diff_steps_summary)   <- c('preparation step', 'simulation step', 'postprocessing step', 'total')
+rownames(step_diff_summary)   <- c('preparation step', 'simulation step', 'postprocessing step', 'total')
 
-kable(diff_steps_summary, col.names = c('duration [s]', 'duration [min]'), caption = 'Duration of different steps', format = 'latex') %>%
+kable(step_diff_summary, col.names = c('duration [s]', 'duration [min]'), caption = 'Duration of different steps', format = 'latex') %>%
   kable_styling(latex_options = c('scale_down','HOLD_position'))
 ```
 
 ```{r step_times_barchart, fig.cap='Step times', fig.pos='H', fig.height=3}
-diff_steps             <- data.frame(diff(step_times$timestamp))
-t_diff_steps           <- t(diff_steps)
-colnames(t_diff_steps) <- c('preparation', 'simulation', 'postprocessing')
-rownames(t_diff_steps) <- c('run')
-barchart(t_diff_steps, stack = TRUE, ref = FALSE, xlab = 'Time [s]', auto.key = list(space='top',text=colnames(t_diff_steps)))
+step_diff             <- data.frame(diff(step_times$timestamp))
+t_step_diff           <- t(step_diff)
+colnames(t_step_diff) <- c('preparation', 'simulation', 'postprocessing')
+rownames(t_step_diff) <- c('run')
+barchart(t_step_diff, stack = TRUE, ref = FALSE, xlab = 'Time [s]', auto.key = list(space='top',text=colnames(t_step_diff)))
 ```
 
 ```{r tick_duration_summary}

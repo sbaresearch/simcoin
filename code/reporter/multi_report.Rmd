@@ -145,14 +145,14 @@ not_active_tips <- tips[!(tips$status=='active'),]
 
 ```{r cpu_time_plot, fig.cap='CPU usage over time', fig.env='figure*'}
 cpu_time$total <- cpu_time$user + cpu_time$nice + cpu_time$system
-cpu_time_delta <- cpu_time %>%
+cpu_time_diff <- cpu_time %>%
  group_by(tag) %>%
  mutate(diff = c(NA, diff(idle))) %>%
  filter(!is.na(diff))
-cpu_time_delta$usage   <- (1 - cpu_time_delta$idle / (cpu_time_delta$total + cpu_time_delta$idle)) * 100
-cpu_time_delta         <- merge(cpu_time_delta, simulation_starts)
-cpu_time_delta$elapsed <- cpu_time_delta$timestamp - cpu_time_delta$run_start
-xyplot(cpu_time_delta$usage ~ cpu_time_delta$elapsed, groups = cpu_time_delta$tag, xlab = 'Time [s]', ylab = 'CPU usage [%]', t = 'l' )
+cpu_time_diff$usage   <- (1 - cpu_time_diff$idle / (cpu_time_diff$total + cpu_time_diff$idle)) * 100
+cpu_time_diff         <- merge(cpu_time_diff, simulation_starts)
+cpu_time_diff$elapsed <- cpu_time_diff$timestamp - cpu_time_diff$run_start
+xyplot(cpu_time_diff$usage ~ cpu_time_diff$elapsed, groups = cpu_time_diff$tag, xlab = 'Time [s]', ylab = 'CPU usage [%]', t = 'l' )
 ```
 
 ```{r memory_xyplot, fig.cap='Memory usage over time', fig.env='figure*'}
@@ -164,16 +164,16 @@ xyplot(memory$usage ~ memory$elapsed, groups = memory$tag, xlab = 'Time [s]', yl
 
 
 ```{r step_times_barchart, fig.cap='Step times', fig.env='figure*', fig.height=length(unique(step_times$tag)) + 1}
-diff_steps <- step_times %>%
+step_diff <- step_times %>%
   group_by(tag) %>%
   mutate(diff = c(NA, diff(timestamp))) %>%
   filter(!is.na(diff))
-diff_steps <- dcast(diff_steps, tag~type, value.var = 'diff')
-rownames(diff_steps) <- diff_steps[,1]
-diff_steps           <- diff_steps[,-1]
-diff_steps           <- diff_steps[, c(3,2,1)]
-colnames(diff_steps) <- c('preparation', 'simulation', 'postprocessing')
-barchart(as.matrix(diff_steps), stack = TRUE, ref = FALSE, xlab = 'Time [s]', auto.key = list(space='top',text=colnames(diff_steps)))
+step_diff <- dcast(step_diff, tag~type, value.var = 'diff')
+rownames(step_diff) <- step_diff[,1]
+step_diff           <- step_diff[,-1]
+step_diff           <- step_diff[, c(3,2,1)]
+colnames(step_diff) <- c('preparation', 'simulation', 'postprocessing')
+barchart(as.matrix(step_diff), stack = TRUE, ref = FALSE, xlab = 'Time [s]', auto.key = list(space='top',text=colnames(step_diff)))
 ```
 
 ```{r tick_duration_xyplot, fig.cap='Tick duration over time', fig.env='figure*'}
