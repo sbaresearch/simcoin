@@ -142,7 +142,7 @@ kable(unclass(summary(tick_infos$duration)), col.names = c('duration [s]'), digi
   kable_styling(latex_options = c('HOLD_position'))
 ```
 
-```{r tick_duration_boxplot, fig.cap='Tick duration', fig.pos='H'}
+```{r tick_duration_boxplot, fig.cap='Tick duration', fig.pos='H', fig.height=3}
 bwplot(tick_infos$duration, xlab='Tick duration [s]')
 ```
 
@@ -170,7 +170,7 @@ kable(unclass(summary(blocks$total_size / 1000)), col.names = c('size [kB]'), di
   kable_styling(latex_options = c('HOLD_position'))
 ```
 
-```{r block_size_boxplot, fig.cap='Block size', fig.pos='H'}
+```{r block_size_boxplot, fig.cap='Block size', fig.pos='H', fig.height=3}
 bwplot(blocks$total_size / 1000, xlab='Block size [kb]')
 ```
 
@@ -200,7 +200,7 @@ kable(unclass(summary(blocks$txs)), digits = 0, caption = 'Transactions per bloc
   kable_styling(latex_options = c('HOLD_position'))
 ```
 
-```{r txs_per_block_boxplot, fig.cap='Transactions in block', fig.pos='H'}
+```{r txs_per_block_boxplot, fig.cap='Transactions in block', fig.pos='H', fig.height=3}
 bwplot(blocks$txs, xlab='Transactions')
 ```
 
