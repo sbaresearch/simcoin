@@ -50,15 +50,15 @@ class Parser:
 
         create_new_block = self.nodes_create_blocks[update_tip.node]
         if create_new_block is not None:
-            block_stats = BlockEvent(create_new_block.timestamp, create_new_block.node, update_tip.block_hash,
+            block_event = BlockEvent(create_new_block.timestamp, create_new_block.node, update_tip.block_hash,
                                      create_new_block.total_size, create_new_block.txs)
-            block_stats.height = update_tip.height
-            self.context.parsed_blocks[update_tip.block_hash] = block_stats
+            block_event.height = update_tip.height
+            self.context.parsed_blocks[update_tip.block_hash] = block_event
             self.nodes_create_blocks[update_tip.node] = None
         else:
             if update_tip.block_hash in self.context.parsed_blocks:
-                block_stats = self.context.parsed_blocks[update_tip.block_hash]
-                block_stats.height = update_tip.height
+                block_event = self.context.parsed_blocks[update_tip.block_hash]
+                block_event.height = update_tip.height
 
     def block_received_parser(self, line):
         received_event = parse_received_block(line)
@@ -94,9 +94,9 @@ class Parser:
 
         if create_new_block is not None:
 
-            block_stats = BlockEvent(create_new_block.timestamp, create_new_block.node, log_line_with_hash.obj_hash,
+            block_event = BlockEvent(create_new_block.timestamp, create_new_block.node, log_line_with_hash.obj_hash,
                                      create_new_block.total_size, create_new_block.txs)
-            self.context.parsed_blocks[block_stats.block_hash] = block_stats
+            self.context.parsed_blocks[block_event.block_hash] = block_event
             self.nodes_create_blocks[log_line_with_hash.node] = None
 
     def tick_parser(self, line):
