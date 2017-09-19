@@ -53,8 +53,7 @@ class Event:
         elif cmd_parts[0] == 'block':
             node = self.context.all_bitcoin_nodes[cmd_parts[1]]
             try:
-                block_hash = node.execute_rpc('generate', 1)
-                logging.info('Created block with hash={}'.format(block_hash))
+                node.generate_block()
             except JSONRPCException as exce:
                 logging.info('Could not generate block for node={}. Exception="{}"'.format(node.name, exce.message))
         elif len(cmd) == 0:

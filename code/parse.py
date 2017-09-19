@@ -144,7 +144,7 @@ def parse_update_tip(line):
     matched = re.match(regex, line)
 
     if matched is None:
-        raise ParseException("Didn't matched 'CreateNewBlock' log line.")
+        raise ParseException("Didn't matched 'UpdateTip' log line.")
 
     return UpdateTipEvent(parse_datetime(matched.group(1)), str(matched.group(2)), str(matched.group(3)),
                           int(matched.group(4)), int(matched.group(5)))

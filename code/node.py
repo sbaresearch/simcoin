@@ -153,6 +153,11 @@ class BitcoinNode(Node):
                 signed_raw_transaction
             )
 
+    def generate_block(self):
+        logging.debug('{} trying to generate block'.format(self.name))
+        block_hash = self.execute_rpc('generate', 1)
+        logging.info('{} generated block with hash={}'.format(self.name, block_hash))
+
     def generate_tx(self):
         tx_chain = self.get_next_tx_chain()
         txid = lx(tx_chain.current_unspent_tx)
@@ -189,7 +194,7 @@ class BitcoinNode(Node):
             txin.scriptSig = CScript([sig, txin_seckeys[i].pub])
 
         tx_serialized = tx.serialize()
-        logging.info(
+        logging.debug(
             '{} trying to sendrawtransaction'
             ' (in=2x{} out=2x{} fee={} bytes={})'
             ' using tx_chain number={}'
