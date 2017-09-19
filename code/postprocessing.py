@@ -66,7 +66,7 @@ class PostProcessing:
         bash.check_output('sort {} -o {}'.format(self.context.path.aggregated_log, self.context.path.aggregated_log))
 
     def clean_up_docker(self):
-        pool = ThreadPool(10)
+        pool = ThreadPool(3)
         pool.map(rm_node, self.context.all_nodes.values())
         pool.close()
         logging.info('Removed all nodes')
