@@ -158,7 +158,7 @@ boxplot(tick_infos$duration ~ cut(tick_infos$start - sim_start, 25), las=2)
 ##  Blocks
 In this simulation `r nrow(blocks)` blocks were created by `r length(unique(blocks$node))` different nodes. Note: Some blocks may never reached some nodes because of forks in the chain or other reasons.
 
-```{r stale, fig.cap='Accepted/stale blocks', fig.pos='H'}
+```{r stale, fig.cap='Accepted/stale blocks', fig.pos='H', fig.height=3}
 stale_block <- t(table(blocks$stale))
 rownames(stale_block) <- c('run')
 legend = paste(paste(colnames(stale_block), prop.table(stale_block)[1,]), '%', sep = '')
