@@ -161,7 +161,7 @@ In this simulation `r nrow(blocks)` blocks were created by `r length(unique(bloc
 ```{r stale, fig.cap='Accepted/stale blocks', fig.pos='H', fig.height=3}
 stale_block <- t(table(blocks$stale))
 rownames(stale_block) <- c('run')
-legend = paste(paste(colnames(stale_block), prop.table(stale_block)[1,]), '%', sep = '')
+legend = paste(paste(colnames(stale_block), prop.table(stale_block)[1,] * 100), '%', sep = '')
 barchart(stale_block, stack = TRUE, ref = FALSE, xlab = 'Blocks', auto.key = list(space='top',text=legend))
 ```
 
