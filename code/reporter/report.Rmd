@@ -176,7 +176,8 @@ xyplot(tick_infos$duration ~ tick_infos$start - sim_start, xlab = 'Time [s]', yl
 ```{r block_stale_barchart, fig.cap='Accepted/stale blocks', fig.pos='H', fig.height=3}
 stale_block <- t(table(blocks$stale))
 rownames(stale_block) <- c('Run')
-barchart(stale_block, stack = TRUE, ref = FALSE, xlab = 'Blocks', auto.key = list(columns=2, points = FALSE, rectangles = TRUE), panel=function(x,y,...){
+barchart(stale_block, stack = TRUE, ref = FALSE, xlab = 'Blocks',
+         auto.key = list(columns=2, points = FALSE, rectangles = TRUE), panel=function(x,y,...){
        panel.barchart(x,y,...)
        xx <- do.call('c', unname(lapply(split(x, y), function(t)cumsum(t)-t/2)))
        ltext(xx, y=y, labels=x)
