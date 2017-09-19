@@ -111,12 +111,12 @@ kable(infos, col.names = c('Value'), format = 'latex', caption = 'System hardwar
 ```
 
 ```{r memory_usage_over_time, fig.cap='Memory usage over time', fig.env='figure*'}
-memory$usage         <- (1 - memory$free/memory$total) * 100
+memory$usage <- (1 - memory$free/memory$total) * 100
 xyplot(memory$usage ~ memory$timestamp - sim_start, xlab = 'Time [s]', ylab = 'Memory usage [%]', t = 'l' )
 ```
 
 ```{r cpu_usage_over_time, fig.cap='CPU usage over time', fig.env='figure*'}
-cpu_time$total           <- cpu_time$user + cpu_time$nice + cpu_time$system
+cpu_time$total          <- cpu_time$user + cpu_time$nice + cpu_time$system
 cpu_time_diff           <- data.frame(cpu_time$timestamp[-1], diff(cpu_time$total), diff(cpu_time$idle))
 colnames(cpu_time_diff) <- c('timestamp', 'total', 'idle')
 cpu_time_diff$usage     <- (1 - cpu_time_diff$idle / (cpu_time_diff$total + cpu_time_diff$idle)) * 100
