@@ -65,7 +65,7 @@ sim_start <- tick_infos$start[1]
 ## Simulation
 ```{r start_arguments}
 args_transposed <- as.data.frame(t(args))
-kable(args_transposed, col.names = c('value'), format = 'latex', caption ='Start arguments') %>%
+kable(args_transposed, col.names = c('Value'), format = 'latex', caption ='Start arguments') %>%
   kable_styling(latex_options = c('scale_down','HOLD_position'))
 ```
 
@@ -77,7 +77,7 @@ df             <- data.frame(
                     c(planned_blocks, data.frame(table(blocks$tag))[,2]),
                     c(planned_txs, data.frame(table(txs$tag))[,2] - data.frame(table(blocks$tag))[,2])
                   )
-row.names(df)  <- c('planned', levels(data.frame(table(tick_infos$tag))[,1]))
+row.names(df)  <- c('Planned', levels(data.frame(table(tick_infos$tag))[,1]))
 kable(df,
       col.names = c('Ticks', 'Blocks', 'Transactions'), caption = 'Events summary', format = 'latex') %>%
   kable_styling(latex_options = c('scale_down','HOLD_position'))
@@ -86,14 +86,14 @@ kable(df,
 ## System
 
 ```{r system_information}
-kable(Sys.info(), col.names = c('value'), format = 'latex', caption = 'System information') %>%
+kable(Sys.info(), col.names = c('Value'), format = 'latex', caption = 'System information') %>%
   kable_styling(latex_options = c('scale_down','HOLD_position'))
 ```
 
 ```{r system_hardware_specs}
 infos <- data.frame(c(general_infos$cpu_model, general_infos$cpus, round(as.double(general_infos$total_memory) / 1000000, 3)))
-row.names(infos) <- c('CPU model', 'CPU(s)', 'memory [GB]')
-kable(infos, col.names = c('value'), format = 'latex', caption = 'System hardware specs') %>%
+row.names(infos) <- c('CPU model', 'CPU(s)', 'Memory [GB]')
+kable(infos, col.names = c('Value'), format = 'latex', caption = 'System hardware specs') %>%
   kable_styling(latex_options = c('scale_down','HOLD_position'))
 ```
 
@@ -105,26 +105,26 @@ colnames(simulation_starts) <- c('tag', 'run_start')
 ```
 
 ```{r tick_duration_summary}
-kable(unclass(summary(tick_infos$duration)), col.names = c('duration [s]'), digits = 3, caption = 'Overall tick duration', format = 'latex')  %>%
+kable(unclass(summary(tick_infos$duration)), col.names = c('Duration [s]'), digits = 3, caption = 'Overall tick duration', format = 'latex')  %>%
   kable_styling(latex_options = c('HOLD_position'))
 ```
 
 ## Blocks
 
 ```{r block_propagation_summary}
-kable(unclass(summary(blocks_received$propagation_duration * 1000)), col.names = c('propagation [ms]'), digits = 3, caption = 'Overall block propagation', format = 'latex') %>%
+kable(unclass(summary(blocks_received$propagation_duration * 1000)), col.names = c('Propagation [ms]'), digits = 3, caption = 'Overall block propagation', format = 'latex') %>%
   kable_styling(latex_options = c('HOLD_position'))
 ```
 
 ```{r block_size_summary}
-kable(unclass(summary(blocks$total_size / 1000)), col.names = c('size [kB]'), digits = 3, caption = 'Overall block size', format = 'latex') %>%
+kable(unclass(summary(blocks$total_size / 1000)), col.names = c('Size [kB]'), digits = 3, caption = 'Overall block size', format = 'latex') %>%
   kable_styling(latex_options = c('HOLD_position'))
 ```
 
 ## Transactions
 
 ```{r txs_propagation_summary}
-kable(unclass(summary(txs_received$propagation_duration * 1000)), col.names = c('propagation [ms]'), digits = 3, caption = 'Overall transactions propagation', format = 'latex') %>%
+kable(unclass(summary(txs_received$propagation_duration * 1000)), col.names = c('Propagation [ms]'), digits = 3, caption = 'Overall transactions propagation', format = 'latex') %>%
   kable_styling(latex_options = c('HOLD_position'))
 ```
 
@@ -172,7 +172,7 @@ step_diff <- dcast(step_diff, tag~type, value.var = 'diff')
 rownames(step_diff) <- step_diff[,1]
 step_diff           <- step_diff[,-1]
 step_diff           <- step_diff[, c(3,2,1)]
-colnames(step_diff) <- c('preparation', 'simulation', 'postprocessing')
+colnames(step_diff) <- c('Preparation', 'Simulation', 'Postprocessing')
 barchart(as.matrix(step_diff), stack = TRUE, ref = FALSE, xlab = 'Time [s]', auto.key = list(space='top',text=colnames(step_diff)))
 ```
 

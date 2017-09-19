@@ -78,7 +78,7 @@ kable(general_infos_table,
 
 ```{r start_arguments}
 args_transposed <- as.data.frame(t(args))
-kable(args_transposed, col.names = c('value'), caption = 'Start arguments', format = 'latex') %>%
+kable(args_transposed, col.names = c('Value'), caption = 'Start arguments', format = 'latex') %>%
   kable_styling(latex_options = c('scale_down','HOLD_position'))
 ```
 
@@ -90,7 +90,7 @@ df             <- data.frame(
                     c(planned_blocks, nrow(blocks)),
                     c(planned_txs, nrow(txs) - nrow(blocks))
                   )
-row.names(df)  <- c('planned', 'run')
+row.names(df)  <- c('Planned', 'Run')
 kable(df,
       col.names = c('Ticks', 'Blocks', 'Transactions'), caption = 'Events summary', format = 'latex') %>%
   kable_styling(latex_options = c('scale_down','HOLD_position'))
@@ -99,14 +99,14 @@ kable(df,
 ## System
 
 ```{r system_information}
-kable(Sys.info(), col.names = c('value'), format = 'latex', caption = 'System information') %>%
+kable(Sys.info(), col.names = c('Value'), format = 'latex', caption = 'System information') %>%
   kable_styling(latex_options = c('scale_down','HOLD_position'))
 ```
 
 ```{r system_hardware_specs}
 infos <- data.frame(c(general_infos$cpu_model, general_infos$cpus, round(as.double(general_infos$total_memory) / 1000000, 3)))
-row.names(infos) <- c('CPU model', 'CPU(s)', 'memory [GB]')
-kable(infos, col.names = c('value'), format = 'latex', caption = 'System hardware specs') %>%
+row.names(infos) <- c('CPU model', 'CPU(s)', 'Memory [GB]')
+kable(infos, col.names = c('Value'), format = 'latex', caption = 'System hardware specs') %>%
   kable_styling(latex_options = c('scale_down','HOLD_position'))
 ```
 
@@ -133,22 +133,22 @@ step_diff_summary              <- rbind(step_diff, apply(step_diff, 2, sum))
 step_diff_summary$duration_min <- step_diff_summary$timestamp/60
 step_diff_summary              <- step_diff_summary %>%
   mutate_at(.vars = vars(timestamp, duration_min), .funs = funs(round(.,2)))
-rownames(step_diff_summary)   <- c('preparation step', 'simulation step', 'postprocessing step', 'total')
+rownames(step_diff_summary)   <- c('Preparation step', 'Simulation step', 'Postprocessing step', 'Total')
 
-kable(step_diff_summary, col.names = c('duration [s]', 'duration [min]'), caption = 'Duration of different steps', format = 'latex') %>%
+kable(step_diff_summary, col.names = c('Duration [s]', 'Duration [min]'), caption = 'Duration of different steps', format = 'latex') %>%
   kable_styling(latex_options = c('scale_down','HOLD_position'))
 ```
 
 ```{r step_times_barchart, fig.cap='Step times', fig.pos='H', fig.height=3}
 step_diff             <- data.frame(diff(step_times$timestamp))
 t_step_diff           <- t(step_diff)
-colnames(t_step_diff) <- c('preparation', 'simulation', 'postprocessing')
-rownames(t_step_diff) <- c('run')
+colnames(t_step_diff) <- c('Preparation', 'Simulation', 'Postprocessing')
+rownames(t_step_diff) <- c('Run')
 barchart(t_step_diff, stack = TRUE, ref = FALSE, xlab = 'Time [s]', auto.key = list(space='top',text=colnames(t_step_diff)))
 ```
 
 ```{r tick_duration_summary}
-kable(unclass(summary(tick_infos$duration)), col.names = c('duration [s]'), digits = 3, caption = 'Tick duration', format = 'latex')  %>%
+kable(unclass(summary(tick_infos$duration)), col.names = c('Duration [s]'), digits = 3, caption = 'Tick duration', format = 'latex')  %>%
   kable_styling(latex_options = c('HOLD_position'))
 ```
 
@@ -169,13 +169,13 @@ xyplot(tick_infos$duration ~ tick_infos$start - sim_start, xlab = 'Time [s]', yl
 
 ```{r stale, fig.cap='Accepted/stale blocks', fig.pos='H', fig.height=3}
 stale_block <- t(table(blocks$stale))
-rownames(stale_block) <- c('run')
+rownames(stale_block) <- c('Run')
 legend = paste(paste(colnames(stale_block), prop.table(stale_block)[1,] * 100), '%', sep = '')
 barchart(stale_block, stack = TRUE, ref = FALSE, xlab = 'Blocks', auto.key = list(space='top',text=legend))
 ```
 
 ```{r block_size_summary}
-kable(unclass(summary(blocks$total_size / 1000)), col.names = c('size [kB]'), digits = 3, caption = 'Block size', format = 'latex') %>%
+kable(unclass(summary(blocks$total_size / 1000)), col.names = c('Size [kB]'), digits = 3, caption = 'Block size', format = 'latex') %>%
   kable_styling(latex_options = c('HOLD_position'))
 ```
 
@@ -184,7 +184,7 @@ bwplot(blocks$total_size / 1000, xlab='Block size [kb]')
 ```
 
 ```{r block_propagation_summary}
-kable(unclass(summary(blocks_received$propagation_duration * 1000)), col.names = c('propagation [ms]'), digits = 3, caption = 'Block propagation', format = 'latex') %>%
+kable(unclass(summary(blocks_received$propagation_duration * 1000)), col.names = c('Propagation [ms]'), digits = 3, caption = 'Block propagation', format = 'latex') %>%
   kable_styling(latex_options = c('HOLD_position'))
 ```
 
@@ -195,7 +195,7 @@ densityplot(~propagation_duration, data=blocks_received, auto.key = list(space =
 ## Transactions
 
 ```{r txs_propagation_summary}
-kable(unclass(summary(txs_received$propagation_duration * 1000)), col.names = c('propagation [ms]'), digits = 3, caption = 'Transactions propagation', format = 'latex') %>%
+kable(unclass(summary(txs_received$propagation_duration * 1000)), col.names = c('Propagation [ms]'), digits = 3, caption = 'Transactions propagation', format = 'latex') %>%
   kable_styling(latex_options = c('HOLD_position'))
 ```
 
