@@ -144,7 +144,7 @@ step_diff             <- data.frame(diff(step_times$timestamp))
 t_step_diff           <- t(step_diff)
 colnames(t_step_diff) <- c('Preparation', 'Simulation', 'Postprocessing')
 rownames(t_step_diff) <- c('Run')
-barchart(t_step_diff, stack = TRUE, ref = FALSE, xlab = 'Time [s]', auto.key = list(space='top',text=colnames(t_step_diff)))
+barchart(t_step_diff, stack = TRUE, ref = FALSE, xlab = 'Time [s]', auto.key = list(space='top', columns=2, text=colnames(t_step_diff)))
 ```
 
 ```{r tick_duration_summary}
