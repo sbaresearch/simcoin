@@ -13,7 +13,7 @@ from bitcoinrpc.authproxy import HTTP_TIMEOUT
 class Prepare:
     def __init__(self, context):
         self.context = context
-        self.pool = ThreadPool(3)
+        self.pool = ThreadPool(5)
 
     def execute(self):
         logging.info('Begin of prepare step')

@@ -17,7 +17,7 @@ from threading import Lock
 class PostProcessing:
     def __init__(self, context):
         self.context = context
-        self.pool = ThreadPool(3)
+        self.pool = ThreadPool(5)
 
     def execute(self):
         cli_stats = CliStats(self.context)
