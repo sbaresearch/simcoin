@@ -54,7 +54,6 @@ class PostProcessing:
         for node in self.context.all_nodes.values():
             lines = node.cat_log_cmd().splitlines()
             lines = prefix_log(lines, node.name)
-            lines = add_line_number(lines)
 
             with open(self.context.path.aggregated_log, 'a') as file:
                 file.write('\n'.join(lines) + '\n')
@@ -135,21 +134,23 @@ def rm_node(node):
 def prefix_log(lines, node_name):
     prev_match = ''
     prefixed_lines = []
+    line_number = 1
     for line in lines:
         match = re.match(config.log_prefix_timestamp, line)
         if match:
             prefixed_lines.append(re.sub(config.log_prefix_timestamp
-                                         , r'\1 {}'.format(node_name)
+                                         , r'\1 {} {}'.format(node_name, line_number)
                                          , line))
             prev_match = match.group(0)
         else:
-            prefixed_lines.append('{} {} {}'.format(prev_match, node_name, line))
+            prefixed_lines.append('{} {} {} {}'.format(prev_match, node_name, line_number, line))
+        line_number += 1
     return prefixed_lines
 
 
 def add_line_number(lines):
     prefixed_lines = []
-    line_number = 0
+    line_number = 1
     for line in lines:
         prefixed_lines.append(re.sub(config.log_prefix_timestamp + ' ([a-zA-Z0-9-\.]+) (.*)',
                                      r'\1 \2 {} \3'.format(line_number), line))
