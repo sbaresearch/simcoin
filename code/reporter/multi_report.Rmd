@@ -180,7 +180,13 @@ rownames(step_diff) <- step_diff[,1]
 step_diff           <- step_diff[,-1]
 step_diff           <- step_diff[, c(3,2,1)]
 colnames(step_diff) <- c('Preparation', 'Simulation', 'Postprocessing')
-barchart(as.matrix(step_diff), stack = TRUE, ref = FALSE, xlab = 'Time [s]', auto.key = list(columns=2, space='top', text=colnames(step_diff)))
+barchart(as.matrix(step_diff), stack = TRUE, ref = FALSE, xlab = 'Time [s]',
+         auto.key = list(columns=2, rectangles = TRUE, points = FALSE, space='top', text=colnames(step_diff)),
+         panel=function(x,y,...){
+      panel.barchart(x,y,...)
+      xx <- unsplit(unname(lapply(split(x, y), function(t)cumsum(t)-t/2)), y)
+      ltext(xx, y=y, labels=round(x, 1))
+})
 ```
 
 ```{r tick_duration_xyplot, fig.cap='Tick duration over time', fig.env='figure*'}
