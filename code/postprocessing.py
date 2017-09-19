@@ -10,6 +10,8 @@ from cmd import dockercmd
 import utils
 from multiprocessing.dummy import Pool as ThreadPool
 import subprocess
+import itertools
+from threading import Lock
 
 
 class PostProcessing:
@@ -51,13 +53,11 @@ class PostProcessing:
         logging.info('Executed post processing')
 
     def aggregate_logs(self):
-        for node in self.context.all_nodes.values():
-            lines = node.cat_log_cmd().splitlines()
-            lines = prefix_log(lines, node.name)
-
-            with open(self.context.path.aggregated_log, 'a') as file:
-                file.write('\n'.join(lines) + '\n')
-            logging.debug('Prefixed and added {:,} lines from node={} to aggregated log'.format(len(lines), node.name))
+        lock = Lock()
+        self.pool.starmap(aggregate_node_log, zip(
+            self.context.all_nodes.values(),
+            itertools.repeat(self.context.path.aggregated_log),
+            itertools.repeat(lock)))
 
         lines = bash.check_output_without_log('cat {}'.format(self.context.path.run_log)).splitlines()
         lines = add_line_number(lines)
@@ -129,6 +129,17 @@ def extract_from_file(source, destination, start, end):
 
 def rm_node(node):
     node.rm()
+
+
+def aggregate_node_log(node, path, lock):
+    lines = node.cat_log_cmd().splitlines()
+    lines = prefix_log(lines, node.name)
+
+    lock.acquire()
+    with open(path, 'a') as file:
+        file.write('\n'.join(lines) + '\n')
+    lock.release()
+    logging.debug('Prefixed and added {:,} lines from node={} to aggregated log'.format(len(lines), node.name))
 
 
 def prefix_log(lines, node_name):
