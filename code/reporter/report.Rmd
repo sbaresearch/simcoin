@@ -78,7 +78,7 @@ kable(args_transposed, col.names = c('value'), caption = 'Start arguments', form
   kable_styling(latex_options = c('scale_down','HOLD_position'))
 ```
 
-```{r events_summar}
+```{r events_summary}
 planned_blocks <- length(unlist(apply(ticks, c(1,2), function(x) grep("block", x)), use.names = FALSE))
 planned_txs    <- length(unlist(apply(ticks, c(1,2), function(x) grep("tx", x)), use.names = FALSE))
 df             <- data.frame(
