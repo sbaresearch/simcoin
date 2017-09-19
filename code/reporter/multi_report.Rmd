@@ -150,7 +150,7 @@ not_active_tips <- tips[!(tips$status=='active'),]
 
 \clearpage
 
-```{r cpu_time_plot, fig.cap='CPU usage over time', fig.env='figure*'}
+```{r cpu_time_plot, fig.cap='CPU usage over time', fig.env='figure*', fig.height=3}
 cpu_time$total <- cpu_time$user + cpu_time$nice + cpu_time$system
 cpu_time_diff <- cpu_time %>%
  group_by(tag) %>%
@@ -162,7 +162,7 @@ cpu_time_diff$elapsed <- cpu_time_diff$timestamp - cpu_time_diff$run_start
 xyplot(cpu_time_diff$usage ~ cpu_time_diff$elapsed, groups = cpu_time_diff$tag, xlab = 'Time [s]', ylab = 'CPU usage [%]', t = 'l' )
 ```
 
-```{r memory_xyplot, fig.cap='Memory usage over time', fig.env='figure*'}
+```{r memory_xyplot, fig.cap='Memory usage over time', fig.env='figure*', fig.height=3}
 memory$usage   <- (1 - memory$free/memory$total) * 100
 memory         <- merge(memory, simulation_starts)
 memory$elapsed <- memory$timestamp - memory$run_start

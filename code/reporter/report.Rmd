@@ -110,18 +110,18 @@ kable(infos, col.names = c('Value'), format = 'latex', caption = 'System hardwar
   kable_styling(latex_options = c('scale_down','HOLD_position'))
 ```
 
-```{r memory_usage_over_time, fig.cap='Memory usage over time', fig.env='figure*'}
-memory$usage <- (1 - memory$free/memory$total) * 100
-xyplot(memory$usage ~ memory$timestamp - sim_start, xlab = 'Time [s]', ylab = 'Memory usage [%]', t = 'l' )
-```
-
-```{r cpu_usage_over_time, fig.cap='CPU usage over time', fig.env='figure*'}
+```{r cpu_usage_over_time, fig.cap='CPU usage over time', fig.env='figure*', fig.height=3}
 cpu_time$total          <- cpu_time$user + cpu_time$nice + cpu_time$system
 cpu_time_diff           <- data.frame(cpu_time$timestamp[-1], diff(cpu_time$total), diff(cpu_time$idle))
 colnames(cpu_time_diff) <- c('timestamp', 'total', 'idle')
 cpu_time_diff$usage     <- (1 - cpu_time_diff$idle / (cpu_time_diff$total + cpu_time_diff$idle)) * 100
 
 xyplot(cpu_time_diff$usage ~ cpu_time_diff$timestamp - sim_start, xlab = 'Time [s]', ylab = 'CPU usage [%]', t = 'l' )
+```
+
+```{r memory_usage_over_time, fig.cap='Memory usage over time', fig.env='figure*', fig.height=3}
+memory$usage <- (1 - memory$free/memory$total) * 100
+xyplot(memory$usage ~ memory$timestamp - sim_start, xlab = 'Time [s]', ylab = 'Memory usage [%]', t = 'l' )
 ```
 
 ## Ticks
