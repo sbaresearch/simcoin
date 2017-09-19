@@ -35,11 +35,14 @@ library(dplyr)
 library(kableExtra)
 library(lattice)
 library(reshape2)
+library(stringr)
 Sys.setenv(TZ='UTC')
 
 general_infos <- fromJSON(file('run-1/general_infos.json'))
 tick_infos    <- read.csv2("tick_infos.csv", dec=".")
 step_times    <-  read.csv2("step_times.csv", dec=".")
+
+ticks <- readLines('ticks.csv')
 
 txs    <- read.csv2("txs.csv", dec=".")
 blocks <- read.csv2("blocks.csv", dec=".")
@@ -66,7 +69,19 @@ kable(args_transposed, col.names = c('value'), format = 'latex', caption ='Start
   kable_styling(latex_options = c('scale_down','HOLD_position'))
 ```
 
-`r #TODO merge general_infos.json`
+```{r events_summary}
+planned_blocks <- sum(str_count(ticks, 'block'))
+planned_txs    <- sum(str_count(ticks, 'tx'))
+df             <- data.frame(
+                    c(length(ticks), data.frame(table(tick_infos$tag))[,2]),
+                    c(planned_blocks, data.frame(table(blocks$tag))[,2]),
+                    c(planned_txs, data.frame(table(txs$tag))[,2] - data.frame(table(blocks$tag))[,2])
+                  )
+row.names(df)  <- c('planned', levels(data.frame(table(tick_infos$tag))[,1]))
+kable(df,
+      col.names = c('Ticks', 'Blocks', 'Transactions'), caption = 'Events summary', format = 'latex') %>%
+  kable_styling(latex_options = c('scale_down','HOLD_position'))
+```
 
 ## System
 

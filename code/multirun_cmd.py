@@ -55,6 +55,7 @@ def run():
         logging.info('Finished {}/{} simulation'.format(i + 1, args.repeat))
 
     bash.check_output('cp {} {}/.'.format(config.args_json, config.soft_link_to_multi_run_dir))
+    bash.check_output('cp {} {}/.'.format(config.ticks_csv, config.soft_link_to_multi_run_dir))
     concat_files()
 
     bash.check_output(rcmd.create_report(config.multi_run_dir, config.multi_report_file_name))
