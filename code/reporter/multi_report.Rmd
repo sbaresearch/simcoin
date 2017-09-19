@@ -60,7 +60,7 @@ sim_start <- tick_infos$start[1]
 ```
 
 ## Simulation
-```{r read_start_arguments}
+```{r start_arguments}
 args_transposed <- as.data.frame(t(args))
 kable(args_transposed, col.names = c('value'), format = 'latex', caption ='Start arguments') %>%
   kable_styling(latex_options = c('scale_down','HOLD_position'))
