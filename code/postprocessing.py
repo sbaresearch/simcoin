@@ -25,7 +25,7 @@ class PostProcessing:
         self.grep_log_for_errors()
 
         logging.info(config.log_line_run_end + self.context.run_name)
-        flush_handlers()
+        flush_log_handlers()
         extract_from_file(config.log_file, self.context.path.run_log,
                           config.log_line_run_start + self.context.run_name,
                           config.log_line_run_end + self.context.run_name)
@@ -104,7 +104,7 @@ class PostProcessing:
         self.context.general_infos['cpus'] = try_cmd("lscpu | grep -oP 'CPU\(s\):\s+\K([0-9]+)$'")
 
 
-def flush_handlers():
+def flush_log_handlers():
     for handler in logging.getLogger().handlers:
         handler.flush()
     logging.debug('Flushed all logging handlers')
