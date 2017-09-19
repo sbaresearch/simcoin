@@ -116,7 +116,7 @@ cpu_time_diff           <- data.frame(cpu_time$timestamp[-1], diff(cpu_time$tota
 colnames(cpu_time_diff) <- c('timestamp', 'total', 'idle')
 cpu_time_diff$usage     <- (1 - cpu_time_diff$idle / (cpu_time_diff$total + cpu_time_diff$idle)) * 100
 
-xyplot(cpu_time_diff$usage ~ cpu_time_diff$timestamp - sim_start, xlab = 'Time [s]', ylab = 'CPU usage [%]', t = 'l' )
+xyplot(cpu_time_diff$usage ~ cpu_time_diff$timestamp - sim_start, xlab = 'Time [s]', ylab = 'CPU usage [%]', t = 'l')
 ```
 
 ```{r memory_usage_over_time, fig.cap='Memory usage over time', fig.env='figure*', fig.height=3}
