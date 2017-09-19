@@ -66,7 +66,7 @@ sim_start <- tick_infos$start[1]
 The simulation was started with the start arguments shown by table \ref{tab:start_arguments} at
 **`r format(utctime(step_times$timestamp[1]), '%Y-%m-%d %H:%M:%S %Z')`**
 and ended at
-**`r format(utctime(step_times$timestamp[length(step_times)]), '%Y-%m-%d %H:%M:%S %Z')`**
+**`r format(utctime(step_times$timestamp[length(step_times)]), '%Y-%m-%d %H:%M:%S %Z')`**.
 During the simulation `r if(nrow(tick_infos) == args['amount_of_ticks']) {'all'} else {'only'}` **`r nrow(tick_infos)` of `r args['amount_of_ticks']`** ticks were executed in time, where one tick took `r args['tick_duration']` second(s).
 The checked out commit at execution time was:
 
