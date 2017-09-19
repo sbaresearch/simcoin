@@ -167,7 +167,7 @@ xyplot(tick_infos$duration ~ tick_infos$start - sim_start, xlab = 'Time [s]', yl
 
 ##  Blocks
 
-```{r stale, fig.cap='Accepted/stale blocks', fig.pos='H', fig.height=3}
+```{r block_stale_barchart fig.cap='Accepted/stale blocks', fig.pos='H', fig.height=3}
 stale_block <- t(table(blocks$stale))
 rownames(stale_block) <- c('Run')
 barchart(stale_block, stack = TRUE, ref = FALSE, xlab = 'Blocks', auto.key = list(columns=2, points = FALSE, rectangles = TRUE), panel=function(x,y,...){
@@ -175,6 +175,13 @@ barchart(stale_block, stack = TRUE, ref = FALSE, xlab = 'Blocks', auto.key = lis
        xx <- do.call('c', unname(lapply(split(x, y), function(t)cumsum(t)-t/2)))
        ltext(xx, y=y, labels=x)
 })
+```
+
+```{r block_stale_rate_summary}
+stale_rate <- data.frame(c(round(prop.table(stale_block)[,2] * 100, 3)))
+rownames(stale_rate) <- c('Block stale rate')
+kable(stale_rate, col.names = c('Rate [%]'), digits = 3, caption = 'Stale block rate', format = 'latex') %>%
+  kable_styling(latex_options = c('HOLD_position'))
 ```
 
 ```{r block_size_summary}
