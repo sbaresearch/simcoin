@@ -22,12 +22,6 @@ def parse_args():
                         , help='A tag that will be added to every csv file.'
                         )
 
-    parser.add_argument('--system-snapshots-frequency'
-                        , default=5
-                        , type=checkargs.check_positive_int
-                        , help='Frequency of system snapshot in seconds collected in an own thread.'
-                        )
-
     args = parser.parse_known_args(sys.argv[2:])[0]
     utils.update_args_json(args)
     return args

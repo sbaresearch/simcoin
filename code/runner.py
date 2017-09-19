@@ -4,6 +4,7 @@ import time
 import systemmonitor
 import threading
 import queue
+import math
 
 
 class Runner:
@@ -16,7 +17,10 @@ class Runner:
         self.q_cpu_time = queue.Queue()
         self.q_memory = queue.Queue()
         self.system_monitor = threading.Thread(
-            target=systemmonitor.run, args=(self.pill2kill, self.context.args.system_snapshots_frequency,
+            target=systemmonitor.run, args=(self.pill2kill,
+                                            calculate_frequency(
+                                                self.context.args.tick_duration,
+                                                self.context.args.amount_of_ticks),
                                             self.q_cpu_time, self.q_memory))
 
     def run(self):
@@ -53,3 +57,11 @@ class StepTimes:
 
     def vars_to_array(self):
         return [self.timestamp, self.type]
+
+
+def calculate_frequency(tick_duration, amount_of_ticks):
+    frequency = math.ceil(tick_duration * amount_of_ticks / config.amount_of_system_snapshots)
+    logging.info('With tick_duration={}, amount_of_ticks={} and amount_of_system_snapshots={}'
+                 ' the system monitor needs to take every {}s a snapshot'
+                 .format(tick_duration, amount_of_ticks, config.amount_of_system_snapshots, frequency))
+    return frequency
