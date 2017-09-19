@@ -64,14 +64,17 @@ sim_start <- tick_infos$start[1]
 
 ## Simulation
 
-The simulation was started with the start arguments shown by table \ref{tab:start_arguments} at
-**`r format(utctime(step_times$timestamp[1]), '%Y-%m-%d %H:%M:%S %Z')`**
-and ended at
-**`r format(utctime(step_times$timestamp[length(step_times)]), '%Y-%m-%d %H:%M:%S %Z')`**.
-During the simulation `r if(nrow(tick_infos) == args['amount_of_ticks']) {'all'} else {'only'}` **`r nrow(tick_infos)` of `r args['amount_of_ticks']`** ticks were executed in time, where one tick took `r args['tick_duration']` second(s).
-The checked out commit at execution time was:
-
-`r general_infos$current_commit`
+```{r general_infos}
+general_infos_table <- data.frame(
+                    c(format(utctime(step_times$timestamp[1]), '%Y-%m-%d %H:%M:%S %Z'),
+                      format(utctime(step_times$timestamp[length(step_times)]), '%Y-%m-%d %H:%M:%S %Z'),
+                      general_infos$current_commit)
+                  )
+row.names(general_infos_table)  <- c('Start', 'End', 'Commit')
+kable(general_infos_table,
+      col.names = c('Value'), caption = 'General information', format = 'latex') %>%
+  kable_styling(latex_options = c('scale_down','HOLD_position'))
+```
 
 ```{r start_arguments}
 args_transposed <- as.data.frame(t(args))
@@ -163,7 +166,6 @@ xyplot(tick_infos$duration ~ tick_infos$start - sim_start, xlab = 'Time [s]', yl
 ```
 
 ##  Blocks
-In this simulation `r nrow(blocks)` blocks were created by `r length(unique(blocks$node))` different nodes. Note: Some blocks may never reached some nodes because of forks in the chain or other reasons.
 
 ```{r stale, fig.cap='Accepted/stale blocks', fig.pos='H', fig.height=3}
 stale_block <- t(table(blocks$stale))
@@ -191,7 +193,6 @@ densityplot(~propagation_duration, data=blocks_received, auto.key = list(space =
 ```
 
 ## Transactions
-There were `r nrow(txs)` transaction created in this simulation. Note: Some transactions may reached other nodes included in a block. Hence they wouldn't appear in this statistics.
 
 ```{r txs_propagation_summary}
 kable(unclass(summary(txs_received$propagation_duration * 1000)), col.names = c('propagation [ms]'), digits = 3, caption = 'Transactions propagation', format = 'latex') %>%
@@ -212,7 +213,6 @@ bwplot(blocks$txs, xlab='Transactions')
 ```
 
 ## Nodes
-In this simulation were `r length(unique(tips$node))` nodes. In the following the statistics based on data from the RPC-call `getchaintips` are presented.
 
 ```{r tips}
 kable(tips, format = 'latex') %>%
