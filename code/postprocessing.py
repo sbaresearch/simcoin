@@ -15,6 +15,7 @@ import subprocess
 class PostProcessing:
     def __init__(self, context):
         self.context = context
+        self.pool = ThreadPool(3)
 
     def execute(self):
         cli_stats = CliStats(self.context)
@@ -46,6 +47,7 @@ class PostProcessing:
         logging.info('Created {} report in folder={}'
                      .format(config.report_file_name, self.context.path.postprocessing_dir))
 
+        self.pool.close()
         logging.info('Executed post processing')
 
     def aggregate_logs(self):
@@ -66,9 +68,7 @@ class PostProcessing:
         bash.check_output('sort {} -o {}'.format(self.context.path.aggregated_log, self.context.path.aggregated_log))
 
     def clean_up_docker(self):
-        pool = ThreadPool(3)
-        pool.map(rm_node, self.context.all_nodes.values())
-        pool.close()
+        self.pool.map(rm_node, self.context.all_nodes.values())
         logging.info('Removed all nodes')
 
         utils.sleep(3 + len(self.context.all_nodes) * 0.2)
