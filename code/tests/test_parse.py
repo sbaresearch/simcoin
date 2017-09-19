@@ -67,7 +67,7 @@ class TestParse(TestCase):
         with self.assertRaises(ParseException) as context:
             parse.parse_update_tip('Some other log_line')
 
-        self.assertTrue("Didn't matched 'CreateNewBlock' log line." in str(context.exception))
+        self.assertTrue("Didn't matched 'UpdateTip' log line." in str(context.exception))
 
     def test_parse_aggregated_log_first_matching(self):
         data = dedent("""

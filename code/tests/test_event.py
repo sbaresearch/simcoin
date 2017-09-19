@@ -95,7 +95,7 @@ class TestEvent(TestCase):
         e.context.all_bitcoin_nodes = {'node-1': node_1}
         e.execute_cmd(cmd)
 
-        self.assertTrue(node_1.execute_rpc.called)
+        self.assertTrue(node_1.generate_block.called)
 
     def test_execute_cmd_with_block_cmd_with_empty_cmd(self):
         node_1 = Mock()
