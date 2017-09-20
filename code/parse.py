@@ -13,6 +13,7 @@ class Parser:
     def __init__(self, context):
         self.context = context
         self.nodes_create_blocks = {node.name: None for node in context.all_bitcoin_nodes.values()}
+        self.parsed_blocks = {}
         self.parsers = [
             self.block_creation_parser,
             self.tip_updated_parser,
@@ -40,7 +41,16 @@ class Parser:
                         pass
                 if (i + 1) % 100000 == 0:
                     logging.info('Parsed {:,} of {:,} log lines'.format(i + 1, len(lines)))
-        logging.info('Parsed aggregated log={} with {:,} lines'.format(self.context.path.aggregated_sim_log, len(lines)))
+
+            utils.write_csv(
+                self.context.path.postprocessing_dir + BlockEvent.file_name,
+                BlockEvent.csv_header,
+                self.parsed_blocks.values(),
+                self.context.args.tag
+            )
+            logging.info('Block parser parsed {} events out of {} lines from {} into file {}'
+                         .format(len(self.parsed_blocks.values()), len(lines), self.context.path.aggregated_sim_log,
+                                 BlockEvent.file_name))
 
     def execute2(self):
         self.pool.starmap(parse, zip(
@@ -68,11 +78,11 @@ class Parser:
             block_event = BlockEvent(create_new_block.timestamp, create_new_block.node, update_tip.block_hash,
                                      create_new_block.total_size, create_new_block.txs)
             block_event.height = update_tip.height
-            self.context.parsed_blocks[update_tip.block_hash] = block_event
+            self.parsed_blocks[update_tip.block_hash] = block_event
             self.nodes_create_blocks[update_tip.node] = None
         else:
-            if update_tip.block_hash in self.context.parsed_blocks:
-                block_event = self.context.parsed_blocks[update_tip.block_hash]
+            if update_tip.block_hash in self.parsed_blocks:
+                block_event = self.parsed_blocks[update_tip.block_hash]
                 block_event.height = update_tip.height
 
     def peer_logic_validation_parser(self, line):
@@ -83,7 +93,7 @@ class Parser:
 
             block_event = BlockEvent(create_new_block.timestamp, create_new_block.node, log_line_with_hash.obj_hash,
                                      create_new_block.total_size, create_new_block.txs)
-            self.context.parsed_blocks[block_event.block_hash] = block_event
+            self.parsed_blocks[block_event.block_hash] = block_event
             self.nodes_create_blocks[log_line_with_hash.node] = None
 
 
@@ -165,18 +175,18 @@ class Event:
 
 
 class BlockEvent(Event):
-    csv_header = ['timestamp', 'node', 'hash', 'stale', 'total_size', 'txs', 'height']
+    csv_header = ['timestamp', 'node', 'hash', 'total_size', 'txs', 'height']
+    file_name = 'blocks.csv'
 
     def __init__(self, timestamp, node, block_hash, total_size, txs):
         super().__init__(timestamp, node)
         self.block_hash = block_hash
-        self.stale = None
         self.total_size = total_size
         self.txs = txs
         self.height = -1
 
     def vars_to_array(self):
-        return [self.timestamp, self.node, self.block_hash, self.stale, self.total_size, self.txs, self.height]
+        return [self.timestamp, self.node, self.block_hash, self.total_size, self.txs, self.height]
 
 
 class TxEvent(Event):

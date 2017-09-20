@@ -44,9 +44,10 @@ step_times    <-  read.csv2("step_times.csv", dec=".")
 
 ticks <- readLines('ticks.csv')
 
-txs    <- read.csv2("txs.csv", dec=".")
-blocks <- read.csv2("blocks.csv", dec=".")
-tips   <- read.csv2("tips.csv", dec=".")
+txs             <- read.csv2("txs.csv", dec=".")
+blocks          <- read.csv2("blocks.csv", dec=".")
+tips            <- read.csv2("tips.csv", dec=".")
+consensus_chain <- read.csv2("consensus_chain.csv", dec=".")
 
 blocks_received <- read.csv2("blocks_received.csv", dec=".")
 txs_received    <- read.csv2("txs_received.csv", dec=".")
@@ -125,7 +126,11 @@ kable(unclass(summary(blocks$total_size / 1000)), col.names = c('Size [kB]'), di
 ```
 
 ```{r block_stale_rate_summary}
-stale_block <- table(blocks$tag, blocks$stale)
+consensus_chain$stale = 'Accepted'
+blocks <- merge(blocks, consensus_chain, all.x = TRUE)
+blocks$stale[is.na(blocks$stale)] <- 'Stale'
+
+stale_block <- table(blocks$tag, factor(blocks$stale, levels = c('Accepted', 'Stale')))
 stale_rate  <- data.frame(c(round(prop.table(stale_block, 1)[,2] * 100, 3)))
 kable(stale_rate, col.names = c('Rate [%]'), digits = 3, caption = 'Stale block rate', format = 'latex') %>%
   kable_styling(latex_options = c('HOLD_position'))

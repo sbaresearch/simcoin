@@ -67,10 +67,9 @@ bitcoin_data_dir = '/data'
 bitcoin_regtest_dir = '/regtest'
 client_dir = bitcoin_data_dir + bitcoin_regtest_dir
 
-blocks_csv_file_name = 'blocks.csv'
 tips_csv_file_name = 'tips.csv'
 step_times_csv_file_name = 'step_times.csv'
-
+consensus_chain_csv_file_name = 'consensus_chain.csv'
 
 report_file_name = 'report.Rmd'
 multi_report_file_name = 'multi_report.Rmd'
@@ -86,11 +85,10 @@ class Path:
 
         self.postprocessing_dir = self.run_dir + 'postprocessing/'
 
-        self.consensus_chain_csv = self.postprocessing_dir + 'consensus_chain.csv'
+        self.consensus_chain_csv = self.postprocessing_dir + consensus_chain_csv_file_name
         self.general_infos_json = self.postprocessing_dir + 'general_infos.json'
         self.step_times = self.postprocessing_dir + step_times_csv_file_name
         self.tmp_log = self.postprocessing_dir + 'tmp.log'
-        self.blocks_csv = self.postprocessing_dir + blocks_csv_file_name
         self.tips_csv = self.postprocessing_dir + tips_csv_file_name
         self.log_errors_txt = self.postprocessing_dir + 'log_errors.txt'
 

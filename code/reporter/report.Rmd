@@ -43,9 +43,10 @@ step_times    <-  read.csv2("step_times.csv", dec=".")
 
 ticks <- readLines('../ticks.csv')
 
-txs    <- read.csv2("txs.csv", dec=".")
-blocks <- read.csv2("blocks.csv", dec=".")
-tips   <- read.csv2("tips.csv", dec=".")
+txs             <- read.csv2("txs.csv", dec=".")
+blocks          <- read.csv2("blocks.csv", dec=".")
+tips            <- read.csv2("tips.csv", dec=".")
+consensus_chain <- read.csv2("consensus_chain.csv", dec=".")
 
 memory   <- read.csv2("memory.csv", dec=".")
 cpu_time <- read.csv2("cpu_time.csv", dec=".")
@@ -174,6 +175,10 @@ xyplot(tick_infos$duration ~ tick_infos$start - sim_start, xlab = 'Time [s]', yl
 ##  Blocks
 
 ```{r block_stale_barchart, fig.cap='Accepted/stale blocks', fig.pos='H', fig.height=3}
+consensus_chain$stale = 'Accepted'
+blocks <- merge(blocks, consensus_chain, all.x = TRUE)
+blocks$stale[is.na(blocks$stale)] <- 'Stale'
+
 stale_block <- t(table(blocks$stale))
 rownames(stale_block) <- c('Run')
 barchart(stale_block, stack = TRUE, ref = FALSE, xlab = 'Blocks',

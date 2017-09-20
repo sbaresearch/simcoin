@@ -12,7 +12,7 @@ import parse
 import systemmonitor
 
 files_to_concat = [
-    config.blocks_csv_file_name,
+    parse.BlockEvent.file_name,
     config.tips_csv_file_name,
     parse.TxEvent.file_name,
     parse.TxExceptionEvent.file_name,
@@ -22,6 +22,7 @@ files_to_concat = [
     parse.TxReceivedEvent.file_name,
     parse.TickEvent.file_name,
     config.step_times_csv_file_name,
+    config.consensus_chain_csv_file_name,
 
     systemmonitor.CpuTimeSnapshot.file_name,
     systemmonitor.MemorySnapshot.file_name,

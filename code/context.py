@@ -30,7 +30,6 @@ class Context:
 
         self.first_block_height = None
 
-        self.parsed_blocks = {}
         self.tips = []
         self.step_times = []
 
