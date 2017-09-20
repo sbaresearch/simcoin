@@ -1,4 +1,3 @@
-import utils
 import logging
 from bitcoinrpc.authproxy import JSONRPCException
 import utils
