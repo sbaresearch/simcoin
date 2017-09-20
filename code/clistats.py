@@ -9,7 +9,7 @@ class CliStats:
 
     def execute(self):
         self.persist_consensus_chain()
-        self.node_stats()
+        self.persist_node_stats()
 
         logging.info('Executed cli stats')
 
@@ -31,7 +31,7 @@ class CliStats:
                 break
         write_consensus_chain(self.context.path.consensus_chain_csv, consensus_chain)
 
-    def node_stats(self):
+    def persist_node_stats(self):
         tips = []
         for node in self.context.all_bitcoin_nodes.values():
             tips.extend([Tip.from_dict(node.name, chain_tip) for chain_tip in node.execute_rpc('getchaintips')])

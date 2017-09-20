@@ -78,7 +78,7 @@ class TestCliStats(TestCase):
         node_0.execute_rpc.return_value = [{'status': 'active', 'branchlen': 2}]
         self.context.all_bitcoin_nodes = {'0': node_0}
 
-        self.cli_stats.node_stats()
+        self.cli_stats.persist_node_stats()
 
         self.assertEqual(write_csv.call_args[0][1], ['node', 'status', 'branchlen'])
         self.assertEqual(len(write_csv.call_args[0][2]), 1)
