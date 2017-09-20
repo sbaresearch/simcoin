@@ -32,7 +32,6 @@ class Context:
 
         self.consensus_chain = []
         self.parsed_blocks = {}
-        self.general_infos = {}
         self.tips = []
         self.step_times = []
 

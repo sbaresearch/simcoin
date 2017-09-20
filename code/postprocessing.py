@@ -12,6 +12,8 @@ from multiprocessing.dummy import Pool as ThreadPool
 import subprocess
 import itertools
 from threading import Lock
+from collections import namedtuple
+import json
 
 
 class PostProcessing:
@@ -40,7 +42,7 @@ class PostProcessing:
         parser.execute()
 
         self.update_parsed_blocks()
-        self.collect_general_infos()
+        collect_general_infos(self.context.path.general_infos_json)
 
         file_writer = FileWriter(self.context)
         file_writer.execute()
@@ -96,11 +98,17 @@ class PostProcessing:
             if block.block_hash in self.context.consensus_chain:
                 block.stale = 'Accepted'
 
-    def collect_general_infos(self):
-        self.context.general_infos['current_commit'] = try_cmd('git log -n 1 --pretty=format:"%H"')
-        self.context.general_infos['total_memory'] = try_cmd('cat /proc/meminfo | sed -n 1p | grep -ohE [0-9]+')
-        self.context.general_infos['cpu_model'] = try_cmd("lscpu | grep -oP 'Model name:\s+\K(.*)'")
-        self.context.general_infos['cpus'] = try_cmd("lscpu | grep -oP 'CPU\(s\):\s+\K([0-9]+)$'")
+
+def collect_general_infos(path):
+    general_infos = {
+        'current_commit': try_cmd('git log -n 1 --pretty=format:"%H"'),
+        'total_memory': try_cmd('cat /proc/meminfo | sed -n 1p | grep -ohE [0-9]+'),
+        'cpu_model': try_cmd("lscpu | grep -oP 'Model name:\s+\K(.*)'"),
+        'cpus': try_cmd("lscpu | grep -oP 'CPU\(s\):\s+\K([0-9]+)$'"),
+    }
+
+    with open(path, 'w') as file:
+        file.write('{}\n'.format(json.dumps(general_infos)))
 
 
 def flush_log_handlers():
