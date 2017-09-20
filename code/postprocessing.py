@@ -133,14 +133,18 @@ def rm_node(node):
 
 
 def aggregate_node_log(node, path, lock):
-    lines = node.cat_log_cmd().splitlines()
-    lines = prefix_log(lines, node.name)
+    with open(node.path + config.bitcoin_log_file_name) as file:
+        lines = file.readlines()
+        logging.info('Read {:,} lines from node={}'.format(len(lines), node.name))
 
-    lock.acquire()
-    with open(path, 'a') as file:
-        file.write('\n'.join(lines) + '\n')
-    lock.release()
-    logging.debug('Prefixed and added {:,} lines from node={} to aggregated log'.format(len(lines), node.name))
+        lines = prefix_log(lines, node.name)
+        logging.info('Prefixed {:,} lines from node={}'.format(len(lines), node.name))
+
+        lock.acquire()
+        with open(path, 'a') as file:
+            file.write('\n'.join(lines) + '\n')
+        lock.release()
+        logging.debug('Wrote {:,} lines from node={} to aggregated log'.format(len(lines), node.name))
 
 
 def prefix_log(lines, node_name):

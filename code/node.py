@@ -39,8 +39,6 @@ class PublicNode:
 
 
 class BitcoinNode(Node):
-    log_file = '/debug.log'
-
     def __init__(self, name, group, ip, docker_image, path):
         super().__init__(name, group, ip, docker_image)
         self.path = path
@@ -121,13 +119,8 @@ class BitcoinNode(Node):
     def grep_log_for_errors(self):
         return bash.check_output_without_log(
             config.log_error_grep.format(
-                self.path + BitcoinNode.log_file
+                self.path + config.bitcoin_log_file_name
             )
-        )
-
-    def cat_log_cmd(self):
-        return bash.check_output_without_log(
-            'cat ' + self.path + BitcoinNode.log_file
         )
 
     def transfer_coinbases_to_normal_tx(self):

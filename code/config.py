@@ -46,6 +46,8 @@ transaction_fee = 1000
 
 amount_of_system_snapshots = 500
 
+bitcoin_log_file_name = '/debug.log'
+
 data_dir = '../data/'
 multi_run_dir = '{}multi-run-{}'.format(data_dir, time.time())
 
