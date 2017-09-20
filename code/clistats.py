@@ -30,18 +30,21 @@ class CliStats:
                 height += 1
             else:
                 break
-
-        with open(self.context.path.consensus_chain_csv, 'w') as file:
-            file.write('hash\n')
-            file.writelines('\n'.join(consensus_chain))
-            file.write('\n')
+        write_consensus_chain(self.context.path.consensus_chain_csv, consensus_chain)
 
     def node_stats(self):
         tips = []
         for node in self.context.all_bitcoin_nodes.values():
-            tips.extend(node.execute_rpc('getchaintips'))
+            tips.extend([Tip.from_dict(node.name, chain_tip) for chain_tip in node.execute_rpc('getchaintips')])
 
         utils.write_csv(Tip.file_name, Tip.csv_header, tips, self.context.args.tag)
+
+
+def write_consensus_chain(path, chain):
+    with open(path, 'w') as file:
+        file.write('hash\n')
+    file.writelines('\n'.join(chain))
+    file.write('\n')
 
 
 class Tip:
@@ -52,6 +55,10 @@ class Tip:
         self.node = node
         self.status = status
         self.branchlen = branchlen
+
+    @classmethod
+    def from_dict(cls, node, chain_tip):
+        return cls(node, chain_tip['status'], chain_tip['branchlen'])
 
     def vars_to_array(self):
         return [self.node, self.status, self.branchlen]

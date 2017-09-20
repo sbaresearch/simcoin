@@ -16,31 +16,32 @@ class TestCliStats(TestCase):
         self.context = MagicMock()
         self.cli_stats = CliStats(self.context)
 
-    def test_save_consensus_chain_first_node_no_block(self):
+    @patch('clistats.write_consensus_chain')
+    def test_persist_consensus_chain_first_node_no_block(self, write_chain):
         node_0 = MagicMock()
         node_0.execute_rpc.side_effect = JSONRPCException({'code': -1, 'message': 'error'})
         self.context.first_block_height = 10
         self.context.all_bitcoin_nodes = {'0': node_0}
-        self.context.consensus_chain = []
 
-        self.cli_stats.save_consensus_chain()
+        self.cli_stats.persist_consensus_chain()
 
-        self.assertEqual(len(self.context.consensus_chain), 0)
+        self.assertEqual(len(write_chain.call_args[0][1]), 0)
 
-    def test_save_consensus_chain_one_node(self):
+    @patch('clistats.write_consensus_chain')
+    def test_persist_consensus_chain_one_node(self, write_chain):
         node_0 = MagicMock()
         node_0.execute_rpc.side_effect = ['hash', JSONRPCException({'code': -1, 'message': 'error'})]
 
         self.context.first_block_height = 10
         self.context.all_bitcoin_nodes = {'0': node_0}
-        self.context.consensus_chain = []
 
-        self.cli_stats.save_consensus_chain()
+        self.cli_stats.persist_consensus_chain()
 
-        self.assertEqual(len(self.context.consensus_chain), 1)
-        self.assertEqual(self.context.consensus_chain[0], 'hash')
+        self.assertEqual(len(write_chain.call_args[0][1]), 1)
+        self.assertEqual(write_chain.call_args[0][1][0], 'hash')
 
-    def test_save_consensus_chain_multiple_nodes(self):
+    @patch('clistats.write_consensus_chain')
+    def test_persist_consensus_chain_multiple_nodes(self, write_chain):
         node_0 = MagicMock()
         node_0.execute_rpc.side_effect = ['hash1', 'hash2', JSONRPCException({'code': -1, 'message': 'error'})]
         node_1 = MagicMock()
@@ -48,15 +49,15 @@ class TestCliStats(TestCase):
 
         self.context.first_block_height = 10
         self.context.all_bitcoin_nodes = {'0': node_0, '1': node_1}
-        self.context.consensus_chain = []
 
-        self.cli_stats.save_consensus_chain()
+        self.cli_stats.persist_consensus_chain()
 
-        self.assertEqual(len(self.context.consensus_chain), 2)
-        self.assertEqual(self.context.consensus_chain[0], 'hash1')
-        self.assertEqual(self.context.consensus_chain[1], 'hash2')
+        self.assertEqual(len(write_chain.call_args[0][1]), 2)
+        self.assertEqual(write_chain.call_args[0][1][0], 'hash1')
+        self.assertEqual(write_chain.call_args[0][1][1], 'hash2')
 
-    def test_save_consensus_chain_one_node_trailing_back(self):
+    @patch('clistats.write_consensus_chain')
+    def test_persist_consensus_chain_one_node_trailing_back(self, write_chain):
         node_0 = MagicMock()
         node_0.execute_rpc.side_effect = ['hash1', 'hash2']
         node_1 = MagicMock()
@@ -64,20 +65,20 @@ class TestCliStats(TestCase):
 
         self.context.first_block_height = 10
         self.context.all_bitcoin_nodes = {'0': node_0, '1': node_1}
-        self.context.consensus_chain = []
 
-        self.cli_stats.save_consensus_chain()
+        self.cli_stats.persist_consensus_chain()
 
-        self.assertEqual(len(self.context.consensus_chain), 1)
-        self.assertEqual(self.context.consensus_chain[0], 'hash1')
+        self.assertEqual(len(write_chain.call_args[0][1]), 1)
+        self.assertEqual(write_chain.call_args[0][1][0], 'hash1')
 
-    def test_node_stats(self):
+    @patch('utils.write_csv')
+    def test_node_stats(self, write_csv):
         node_0 = MagicMock()
         node_0.name = 'name'
         node_0.execute_rpc.return_value = [{'status': 'active', 'branchlen': 2}]
         self.context.all_bitcoin_nodes = {'0': node_0}
-        self.context.tips = []
 
         self.cli_stats.node_stats()
 
-        self.assertEqual(len(self.context.tips), 1)
+        self.assertEqual(write_csv.call_args[0][1], ['node', 'status', 'branchlen'])
+        self.assertEqual(len(write_csv.call_args[0][2]), 1)

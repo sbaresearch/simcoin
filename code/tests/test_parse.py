@@ -68,6 +68,7 @@ class TestParse(TestCase):
 
         self.assertTrue("Didn't matched 'UpdateTip' log line." in str(context.exception))
 
+    @patch('utils.write_csv', lambda a, b, c, d: None)
     def test_parse_aggregated_log_first_matching(self):
         data = dedent("""
             line1
@@ -78,12 +79,14 @@ class TestParse(TestCase):
         parser_1 = Mock()
         parser_2 = Mock()
         self.parser.parsers = [parser_1, parser_2]
+        self.context.path.postprocessing_dir = '/dir'
 
         with patch('builtins.open', mock_open(read_data=data)):
             self.parser.execute1()
 
             self.assertEqual(parser_1.call_count, 3)
 
+    @patch('utils.write_csv', lambda a, b, c, d: None)
     def test_parse_aggregated_log_second_matching(self):
         data = dedent("""
             line1
@@ -93,6 +96,7 @@ class TestParse(TestCase):
         parser_2 = Mock()
         self.parser.parsers = [parser_1, parser_2]
         parser_1.side_effect = ParseException()
+        self.context.path.postprocessing_dir = '/dir'
 
         with patch('builtins.open', mock_open(read_data=data)):
             self.parser.execute1()
@@ -112,19 +116,19 @@ class TestParse(TestCase):
 
         self.parser.tip_updated_parser('line')
 
-        self.assertEqual(len(self.context.parsed_blocks), 1)
-        parsed_block = self.context.parsed_blocks['block_hash']
+        self.assertEqual(len(self.parser.parsed_blocks), 1)
+        parsed_block = self.parser.parsed_blocks['block_hash']
         self.assertEqual(parsed_block.height, 45)
         self.assertEqual(self.parser.nodes_create_blocks['node-0'], None)
 
     @patch('parse.parse_update_tip', lambda line: UpdateTipEvent(None, 'node-0', 'block_hash', 45, None))
     def test_update_tip_parser_with_block_stats_already_set(self):
-        self.context.parsed_blocks['block_hash'] = BlockEvent(None, None, None, None, None)
+        self.parser.parsed_blocks['block_hash'] = BlockEvent(None, None, None, None, None)
 
         self.parser.tip_updated_parser('line')
 
-        self.assertEqual(len(self.context.parsed_blocks), 1)
-        self.assertEqual(self.context.parsed_blocks['block_hash'].height, 45)
+        self.assertEqual(len(self.parser.parsed_blocks), 1)
+        self.assertEqual(self.parser.parsed_blocks['block_hash'].height, 45)
         self.assertEqual(self.parser.nodes_create_blocks['node-0'], None)
 
     @patch('parse.parse_update_tip', lambda line: UpdateTipEvent(None, 'node-0', None, None, None))
@@ -193,7 +197,7 @@ class TestParse(TestCase):
 
         self.parser.peer_logic_validation_parser('line')
 
-        self.assertEqual(len(self.context.parsed_blocks), 1)
+        self.assertEqual(len(self.parser.parsed_blocks), 1)
         self.assertEqual(self.parser.nodes_create_blocks['node-0'], None)
 
     @patch('parse.parse_peer_logic_validation', lambda line: UpdateTipEvent(None, 'node-0', None, None, None))
