@@ -20,7 +20,7 @@ def run(stop_event, frequency, q_cpu_time, q_memory):
 
 def collect(q_cpu_time, q_memory):
     cpu_time = bash.check_output('cat /proc/stat | head -1')
-    memory = bash.check_output('cat /proc/meminfo | head -2')
+    memory = bash.check_output('cat /proc/meminfo | head -3')
     q_cpu_time.put(CpuTimeSnapshot.from_bash(cpu_time))
     q_memory.put(MemorySnapshot.from_bash(memory))
 
@@ -59,7 +59,7 @@ class MemorySnapshot:
 
     @classmethod
     def from_bash(cls, memory):
-        memory_matched = re.match('MemTotal:\s+([0-9]+)\s+kB\nMemFree:\s+([0-9]+)\s+kB', memory)
+        memory_matched = re.match('MemTotal:\s+([0-9]+)\s+kB\n.*\nMemAvailable:\s+([0-9]+)\s+kB', memory)
         snapshot = cls(time.time(), memory_matched.group(1), memory_matched.group(2))
         return snapshot
 
