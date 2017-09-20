@@ -86,6 +86,7 @@ class Path:
 
         self.postprocessing_dir = self.run_dir + 'postprocessing/'
 
+        self.consensus_chain_csv = self.postprocessing_dir + 'consensus_chain.csv'
         self.general_infos_json = self.postprocessing_dir + 'general_infos.json'
         self.step_times = self.postprocessing_dir + step_times_csv_file_name
         self.tmp_log = self.postprocessing_dir + 'tmp.log'

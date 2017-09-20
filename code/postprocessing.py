@@ -41,7 +41,6 @@ class PostProcessing:
         parser = Parser(self.context)
         parser.execute()
 
-        self.update_parsed_blocks()
         collect_general_infos(self.context.path.general_infos_json)
 
         file_writer = FileWriter(self.context)
@@ -91,12 +90,6 @@ class PostProcessing:
             file.write('{}\n\n\n'.format(lines))
         logging.info('Grepped all logs for errors and saved matched lines to {}'
                      .format(self.context.path.log_errors_txt))
-
-    def update_parsed_blocks(self):
-        for block in self.context.parsed_blocks.values():
-            block.stale = 'Stale'
-            if block.block_hash in self.context.consensus_chain:
-                block.stale = 'Accepted'
 
 
 def collect_general_infos(path):
