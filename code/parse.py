@@ -4,6 +4,9 @@ from datetime import datetime
 import logging
 from collections import namedtuple
 import pytz
+from multiprocessing.dummy import Pool as ThreadPool
+import utils
+from itertools import repeat
 
 
 class Parser:
@@ -18,15 +21,18 @@ class Parser:
             self.tx_creation_parser,
             self.tx_received_parser,
             self.peer_logic_validation_parser,
-            self.tick_parser,
-            self.tx_exception_parser,
-            self.block_exception_parser,
-            self.rpc_exception_parser,
         ]
+        self.pool = ThreadPool(5)
 
         logging.info('Created parser with {} log parsers'.format(len(self.parsers)))
 
     def execute(self):
+        self.execute1()
+        self.execute2()
+        self.pool.close()
+        logging.info('Finished parsing aggregated log={}'.format(self.context.path.aggregated_sim_log))
+
+    def execute1(self):
         with open(self.context.path.aggregated_sim_log, 'r') as file:
             lines = file.readlines()
             for i, line in enumerate(lines):
@@ -39,6 +45,15 @@ class Parser:
                 if (i + 1) % 100000 == 0:
                     logging.info('Parsed {:,} of {:,} log lines'.format(i + 1, len(lines)))
         logging.info('Parsed aggregated log={} with {:,} lines'.format(self.context.path.aggregated_sim_log, len(lines)))
+
+    def execute2(self):
+        self.pool.starmap(parse, zip(
+            repeat(self.context.path.aggregated_sim_log),
+            [TickEvent, TxExceptionEvent, BlockExceptionEvent, RPCExceptionEvent],
+            repeat(self.context.path.postprocessing_dir),
+            repeat(self.context.args.tag)
+
+        ))
 
     def block_creation_parser(self, line):
         create_new_block = parse_create_new_block(line)
@@ -99,25 +114,22 @@ class Parser:
             self.context.parsed_blocks[block_event.block_hash] = block_event
             self.nodes_create_blocks[log_line_with_hash.node] = None
 
-    def tick_parser(self, line):
-        self.context.tick_infos.append(
-            parse_tick_log_line(line)
-        )
 
-    def tx_exception_parser(self, line):
-        self.context.tx_exceptions.append(
-            parse_tx_creation_exception(line)
-        )
+def parse(log_file, cls, postprocessing_dir, tag):
+    parsed_objects = []
+    with open(log_file, 'r') as file:
+        lines = file.readlines()
+        for i, line in enumerate(lines):
+            try:
+                parsed_objects.append(cls.from_log_line(line))
+            except ParseException:
+                pass
+            if (i + 1) % 100000 == 0:
+                logging.info('{} parser parsed {:,} of {:,} log lines'.format(cls.__name__, i + 1, len(lines)))
 
-    def block_exception_parser(self, line):
-        self.context.block_exceptions.append(
-            parse_block_creation_exception(line)
-        )
-
-    def rpc_exception_parser(self, line):
-        self.context.rpc_exceptions.append(
-            parse_rpc_exception(line)
-        )
+    utils.write_csv(postprocessing_dir + cls.file_name, cls.csv_header, parsed_objects, tag)
+    logging.info('{} parser parsed {} events out of {} lines from {} into file {}'
+                 .format(cls.__name__, len(parsed_objects), len(lines), log_file, cls.file_name))
 
 
 def parse_create_new_block(line):
@@ -206,51 +218,6 @@ def parse_peer_logic_validation(line):
     return EventWithHash(parse_datetime(matched.group(1)), str(matched.group(2)), str(matched.group(3)))
 
 
-def parse_tick_log_line(line):
-    regex = config.log_prefix_full + '\[.*\] \[.*\]  The tick started at ([0-9]+\.[0-9]+)' \
-                                     ' and took ([0-9]+\.[0-9]+)s to finish$'
-    matched = re.match(regex, line)
-
-    if matched is None:
-        raise ParseException("Didn't matched 'Tick' log line.")
-
-    return TickEvent(parse_datetime(matched.group(1)), float(matched.group(3)), float(matched.group(4)))
-
-
-def parse_tx_creation_exception(line):
-    regex = config.log_prefix_full + '\[.*\] \[.*\]  Could not generate tx for node=([a-zA-Z0-9-\.]+)\.' \
-                                     ' Exception="(.+)"$'
-    matched = re.match(regex, line)
-
-    if matched is None:
-        raise ParseException("Didn't matched 'Tx exception' log line.")
-
-    return ExceptionEvent(parse_datetime(matched.group(1)), str(matched.group(3)), str(matched.group(4)))
-
-
-def parse_block_creation_exception(line):
-    regex = config.log_prefix_full + '\[.*\] \[.*\]  Could not generate block for node=([a-zA-Z0-9-\.]+)\.' \
-                                     ' Exception="(.+)"$'
-    matched = re.match(regex, line)
-
-    if matched is None:
-        raise ParseException("Didn't matched 'Block exception' log line.")
-
-    return ExceptionEvent(parse_datetime(matched.group(1)), str(matched.group(3)), str(matched.group(4)))
-
-
-def parse_rpc_exception(line):
-    regex = config.log_prefix_full + '\[.*\] \[.*\]  Node=([a-zA-Z0-9-\.]+) could not execute RPC-call=([a-zA-Z0-9]+)' \
-                                     ' because of error="(.*)"\. Reconnecting RPC and retrying.'
-    matched = re.match(regex, line)
-
-    if matched is None:
-        raise ParseException("Didn't matched 'RPC exception' log line.")
-
-    return RPCExceptionEvent(parse_datetime(matched.group(1)), str(matched.group(3)), str(matched.group(4)),
-                             str(matched.group(5)))
-
-
 def parse_datetime(date_time):
     parsed_date_time = datetime.strptime(date_time, config.log_time_format)
     return parsed_date_time.replace(tzinfo=pytz.UTC).timestamp()
@@ -270,17 +237,81 @@ class Event:
 
 
 class RPCExceptionEvent(Event):
+    csv_header = ['timestamp', 'node', 'method', 'exception']
+    file_name = 'rpc_exceptions.csv'
+
     def __init__(self, timestamp, node, method, exception):
         super().__init__(timestamp, node)
         self.method = method
         self.exception = exception
 
-    @staticmethod
-    def csv_header():
-        return ['timestamp', 'node', 'method', 'exception']
+    @classmethod
+    def from_log_line(cls, line):
+        matched = re.match(config.log_prefix_full +
+                           '\[.*\] \[.*\]  Node=([a-zA-Z0-9-\.]+) could not execute RPC-call=([a-zA-Z0-9]+)' \
+                           ' because of error="(.*)"\. Reconnecting RPC and retrying.', line)
+
+        if matched is None:
+            raise ParseException("Didn't matched 'RPC exception' log line.")
+
+        return cls(
+            parse_datetime(matched.group(1)),
+            str(matched.group(3)),
+            str(matched.group(4)),
+            str(matched.group(5))
+        )
 
     def vars_to_array(self):
         return [self.timestamp, self.node, self.method, self.exception]
+
+
+class ExceptionEvent(Event):
+    csv_header = ['timestamp', 'node', 'exception']
+
+    def __init__(self, timestamp, node, exception):
+        super().__init__(timestamp, node)
+        self.exception = exception
+
+    def vars_to_array(self):
+        return [self.timestamp, self.node, self.exception]
+
+
+class TxExceptionEvent(ExceptionEvent):
+    file_name = 'tx_exceptions.csv'
+
+    @classmethod
+    def from_log_line(cls, line):
+        matched = re.match(config.log_prefix_full +
+                           '\[.*\] \[.*\]  Could not generate tx for node=([a-zA-Z0-9-.]+)\.'
+                           ' Exception="(.+)"$', line)
+
+        if matched is None:
+            raise ParseException("Didn't matched 'Tx exception' log line.")
+
+        return cls(parse_datetime(
+            matched.group(1)),
+            str(matched.group(3)),
+            str(matched.group(4))
+        )
+
+
+class BlockExceptionEvent(ExceptionEvent):
+    file_name = 'block_exceptions.csv'
+
+    @classmethod
+    def from_log_line(cls, line):
+        matched = re.match(config.log_prefix_full +
+                           '\[.*\] \[.*\]  Could not generate block for node=([a-zA-Z0-9-.]+)\.'
+                           ' Exception="(.+)"$', line)
+
+        if matched is None:
+            raise ParseException("Didn't matched 'Block exception' log line.")
+
+        return cls(parse_datetime(
+            matched.group(1)),
+            str(matched.group(3)),
+            str(matched.group(4))
+        )
 
 
 class ExceptionEvent(Event):
@@ -342,14 +373,28 @@ class TxEvent(Event):
 
 
 class TickEvent:
+    csv_header = ['timestamp', 'start', 'duration']
+    file_name = 'tick_infos.csv'
+
     def __init__(self, timestamp, start, duration):
         self.timestamp = timestamp
         self.start = start
         self.duration = duration
 
-    @staticmethod
-    def csv_header():
-        return ['timestamp', 'start', 'duration']
+    @classmethod
+    def from_log_line(cls, line):
+        match = re.match(
+            config.log_prefix_full + '\[.*\] \[.*\]  The tick started at ([0-9]+\.[0-9]+)'
+                                     ' and took ([0-9]+\.[0-9]+)s to finish$',
+            line)
+        if match is None:
+            raise ParseException("Didn't matched 'Tick' log line.")
+
+        return cls(
+            parse_datetime(match.group(1)),
+            float(match.group(3)),
+            float(match.group(4))
+        )
 
     def vars_to_array(self):
         return [self.timestamp, self.start, self.duration]

@@ -8,18 +8,18 @@ import os
 import config
 import bash
 from cmd import rcmd
-
+import parse
 
 files_to_concat = [
     config.blocks_csv_file_name,
     config.tips_csv_file_name,
     config.txs_csv_file_name,
-    config.tx_exceptions_csv_file_name,
-    config.block_exceptions_csv_file_name,
-    config.rpc_exceptions_csv_file_name,
+    parse.TxExceptionEvent.file_name,
+    parse.BlockExceptionEvent.file_name,
+    parse.RPCExceptionEvent.file_name,
     config.blocks_received_csv_file_name,
     config.txs_received_csv_file_name,
-    config.tick_infos_csv_file_name,
+    parse.TickEvent.file_name,
     config.memory_csv_file_name,
     config.cpu_time_csv_file_name,
     config.step_times_csv_file_name,

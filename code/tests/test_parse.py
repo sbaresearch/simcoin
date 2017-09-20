@@ -30,7 +30,6 @@ class TestParse(TestCase):
         self.context = Mock()
         self.context.parsed_blocks = {}
         self.context.parsed_txs = {}
-        self.context.tick_infos = []
         self.context.all_bitcoin_nodes.values.return_value = [node_0, node_1, node_2]
         self.parser = Parser(self.context)
 
@@ -81,7 +80,7 @@ class TestParse(TestCase):
         self.parser.parsers = [parser_1, parser_2]
 
         with patch('builtins.open', mock_open(read_data=data)):
-            self.parser.execute()
+            self.parser.execute1()
 
             self.assertEqual(parser_1.call_count, 3)
 
@@ -96,7 +95,7 @@ class TestParse(TestCase):
         parser_1.side_effect = ParseException()
 
         with patch('builtins.open', mock_open(read_data=data)):
-            self.parser.execute()
+            self.parser.execute1()
 
             self.assertEqual(parser_2.call_count, 1)
 
@@ -258,48 +257,42 @@ class TestParse(TestCase):
         self.assertEqual(len(self.context.parsed_blocks), 0)
 
     def test_parse_tick(self):
-        tick_log_line = parse.parse_tick_log_line(
+        event = parse.TickEvent.from_log_line(
             '2017-08-19 16:05:14.609000 simcoin 1 [MainThread  ] [INFO ]  The tick started at 45.12'
             ' and took 0.9823310375213623s to finish'
         )
 
-        self.assertEqual(tick_log_line.timestamp, datetime(2017, 8, 19, 16, 5, 14, 609000, pytz.UTC).timestamp())
-        self.assertEqual(tick_log_line.start, 45.12)
-        self.assertEqual(tick_log_line.duration, 0.9823310375213623)
-
-    @patch('parse.parse_tick_log_line', lambda line: TickEvent(None, None, None))
-    def test_tick_parser(self):
-        self.parser.tick_parser('line')
-
-        self.assertEqual(len(self.context.tick_infos), 1)
+        self.assertEqual(event.timestamp, datetime(2017, 8, 19, 16, 5, 14, 609000, pytz.UTC).timestamp())
+        self.assertEqual(event.start, 45.12)
+        self.assertEqual(event.duration, 0.9823310375213623)
 
     def test_parse_tx_creation_exception(self):
-        exception_log_line = parse.parse_tx_creation_exception(
+        event = parse.TxExceptionEvent.from_log_line(
             '2017-08-19 16:05:14.609000 simcoin 12 [MainThread  ] [INFO ]  Could not generate tx for node=s-node-1.1.'
             ' Exception="41: too-long-mempool-chain"'
         )
 
-        self.assertEqual(exception_log_line.timestamp, datetime(2017, 8, 19, 16, 5, 14, 609000, pytz.UTC).timestamp())
-        self.assertEqual(exception_log_line.node, 's-node-1.1')
-        self.assertEqual(exception_log_line.exception, '41: too-long-mempool-chain')
+        self.assertEqual(event.timestamp, datetime(2017, 8, 19, 16, 5, 14, 609000, pytz.UTC).timestamp())
+        self.assertEqual(event.node, 's-node-1.1')
+        self.assertEqual(event.exception, '41: too-long-mempool-chain')
 
     def test_parse_block_creation_exception(self):
-        exception_log_line = parse.parse_block_creation_exception(
+        event = parse.BlockExceptionEvent.from_log_line(
             '2017-08-19 16:05:14.609000 simcoin 1 [MainThread  ] [INFO ]  Could not generate block for node=s-node-1.2.'
             ' Exception="41: no tx"'
         )
 
-        self.assertEqual(exception_log_line.timestamp, datetime(2017, 8, 19, 16, 5, 14, 609000, pytz.UTC).timestamp())
-        self.assertEqual(exception_log_line.node, 's-node-1.2')
-        self.assertEqual(exception_log_line.exception, '41: no tx')
+        self.assertEqual(event.timestamp, datetime(2017, 8, 19, 16, 5, 14, 609000, pytz.UTC).timestamp())
+        self.assertEqual(event.node, 's-node-1.2')
+        self.assertEqual(event.exception, '41: no tx')
 
     def test_parse_rpc_exception(self):
-        rpc_exception_log_line = parse.parse_rpc_exception(
+        event = parse.RPCExceptionEvent.from_log_line(
             '2017-08-19 16:05:14.609000 simcoin 1234 [MainThread  ] [INFO ]  Node=s-node-1.1 could not execute'
             ' RPC-call=getnewaddress because of error="Connection timeout". Reconnecting RPC and retrying.'
         )
 
-        self.assertEqual(rpc_exception_log_line.timestamp, datetime(2017, 8, 19, 16, 5, 14, 609000, pytz.UTC).timestamp())
-        self.assertEqual(rpc_exception_log_line.node, 's-node-1.1')
-        self.assertEqual(rpc_exception_log_line.method, 'getnewaddress')
-        self.assertEqual(rpc_exception_log_line.exception, 'Connection timeout')
+        self.assertEqual(event.timestamp, datetime(2017, 8, 19, 16, 5, 14, 609000, pytz.UTC).timestamp())
+        self.assertEqual(event.node, 's-node-1.1')
+        self.assertEqual(event.method, 'getnewaddress')
+        self.assertEqual(event.exception, 'Connection timeout')

@@ -6,6 +6,7 @@ import os
 import re
 import json
 from collections import namedtuple
+import csv
 
 
 def sleep(seconds):
@@ -65,3 +66,15 @@ def read_json_file(file):
 
 def json_object_hook(d):
     return namedtuple('X', d.keys())(*d.values())
+
+
+def write_csv(file, header, elements, tag):
+    with open(file, 'w') as file:
+        w = csv.writer(file, delimiter=';')
+        header.append('tag')
+        w.writerow(header)
+
+        for element in elements:
+            row = element.vars_to_array()
+            row.append(tag)
+            w.writerow(row)

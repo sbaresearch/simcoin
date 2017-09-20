@@ -30,15 +30,11 @@ class Context:
 
         self.first_block_height = None
 
-        self.tx_exceptions = []
-        self.block_exceptions = []
-        self.rpc_exceptions = []
         self.consensus_chain = []
         self.parsed_blocks = {}
         self.blocks_received = []
         self.parsed_txs = {}
         self.txs_received = []
-        self.tick_infos = []
         self.general_infos = {}
         self.tips = []
         self.step_times = []
