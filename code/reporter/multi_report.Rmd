@@ -112,6 +112,9 @@ kable(unclass(summary(tick_infos$duration)), col.names = c('Duration [s]'), digi
 ## Blocks
 
 ```{r block_propagation_summary}
+blocks_received <- merge(blocks[, c('timestamp', 'hash')], blocks_received, by = 'hash')
+blocks_received$propagation_duration <- blocks_received$timestamp.y - blocks_received$timestamp.x
+
 kable(unclass(summary(blocks_received$propagation_duration * 1000)), col.names = c('Propagation [ms]'), digits = 3, caption = 'Overall block propagation', format = 'latex') %>%
   kable_styling(latex_options = c('HOLD_position'))
 ```
@@ -131,6 +134,9 @@ kable(stale_rate, col.names = c('Rate [%]'), digits = 3, caption = 'Stale block 
 ## Transactions
 
 ```{r txs_propagation_summary}
+txs_received <- merge(txs[, c('timestamp', 'hash')], txs_received, by = 'hash')
+txs_received$propagation_duration <- txs_received$timestamp.y - txs_received$timestamp.x
+
 kable(unclass(summary(txs_received$propagation_duration * 1000)), col.names = c('Propagation [ms]'), digits = 3, caption = 'Overall transactions propagation', format = 'latex') %>%
   kable_styling(latex_options = c('HOLD_position'))
 ```

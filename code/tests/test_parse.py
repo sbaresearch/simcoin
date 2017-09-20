@@ -134,101 +134,47 @@ class TestParse(TestCase):
         self.assertEqual(len(self.context.parsed_blocks), 0)
 
     def test_parse_received_block(self):
-        received_event = parse.parse_received_block(
+        event = parse.BlockReceivedEvent.from_log_line(
             '2017-07-27 15:34:58.122336 node-1 12345 received block'
             ' 4ec9b518b23d460c01abaf1c6e32ec46dbbfc8c81c599dd71c0c175e2367f278'
             ' peer=0'
         )
 
-        self.assertEqual(received_event.timestamp, datetime(2017, 7, 27, 15, 34, 58, 122336, pytz.UTC).timestamp())
-        self.assertEqual(received_event.node, 'node-1')
-        self.assertEqual(received_event.obj_hash, '4ec9b518b23d460c01abaf1c6e32ec46dbbfc8c81c599dd71c0c175e2367f278')
-        self.assertEqual(received_event.propagation_duration, -1)
+        self.assertEqual(event.timestamp, datetime(2017, 7, 27, 15, 34, 58, 122336, pytz.UTC).timestamp())
+        self.assertEqual(event.node, 'node-1')
+        self.assertEqual(event.obj_hash, '4ec9b518b23d460c01abaf1c6e32ec46dbbfc8c81c599dd71c0c175e2367f278')
 
     def test_successfully_reconstructed_block(self):
-        received_event = parse.parse_successfully_reconstructed_block(
+        event = parse.BlockReceivedEvent.from_log_line(
             '2017-07-28 08:41:43.637277 node-3 1 Successfully reconstructed'
             ' block 27ebf5f20b3860fb3a8ed82f0721300bf96c1836252fddd67b60f48d227d3a3c with 1 txn prefilled,'
             ' 0 txn from mempool (incl at least 0 from extra pool) and 0 txn requested'
         )
 
-        self.assertEqual(received_event.timestamp, datetime(2017, 7, 28, 8, 41, 43, 637277, pytz.UTC).timestamp())
-        self.assertEqual(received_event.node, 'node-3')
-        self.assertEqual(received_event.obj_hash, '27ebf5f20b3860fb3a8ed82f0721300bf96c1836252fddd67b60f48d227d3a3c')
-        self.assertEqual(received_event.propagation_duration, -1)
-
-    @patch('parse.parse_received_block', lambda line: ReceivedEvent(10, None, 'block_hash'))
-    def test_received_block_parser(self):
-        self.context.blocks_received = []
-        self.context.parsed_blocks = {'block_hash': BlockEvent(6, None, None, None, None)}
-
-        self.parser.block_received_parser('line')
-
-        self.assertEqual(len(self.context.blocks_received), 1)
-        self.assertEqual(self.context.blocks_received[0].timestamp, 10)
-        self.assertEqual(self.context.blocks_received[0].propagation_duration, 4)
-
-    @patch('parse.parse_successfully_reconstructed_block', lambda line: ReceivedEvent(10, None, 'block_hash'))
-    def test_block_reconstructed_parser(self):
-        self.context.blocks_received = []
-        self.context.parsed_blocks = {'block_hash': BlockEvent(6, None, None, None, None)}
-
-        self.parser.block_reconstructed_parser('line')
-
-        self.assertEqual(len(self.context.blocks_received), 1)
-        self.assertEqual(self.context.blocks_received[0].timestamp, 10)
-        self.assertEqual(self.context.blocks_received[0].propagation_duration, 4)
-
-    @patch('parse.parse_accept_to_memory_pool')
-    def test_tx_received_parser(self, m_parse_accept_to_memory_pool):
-        m_parse_accept_to_memory_pool.return_value = EventWithHash(10, None, 'tx_hash')
-        self.context.txs_received = []
-
-        self.parser.tx_received_parser('line')
-
-        self.assertEqual(len(self.context.txs_received), 1)
-        self.assertEqual(self.context.txs_received[0].timestamp, 10)
+        self.assertEqual(event.timestamp, datetime(2017, 7, 28, 8, 41, 43, 637277, pytz.UTC).timestamp())
+        self.assertEqual(event.node, 'node-3')
+        self.assertEqual(event.obj_hash, '27ebf5f20b3860fb3a8ed82f0721300bf96c1836252fddd67b60f48d227d3a3c')
 
     def test_parse_add_to_wallet(self):
-        log_line_with_hash = parse.parse_add_to_wallet(
+        event = parse.TxEvent.from_log_line(
             '2017-07-30 07:48:48.337577 node-1 1234 AddToWallet'
             ' 2e1b05f9248ae5f29b2234ac0eb86e0fccbacc084ed91937eee7eea248fc9a6a  new'
         )
 
-        self.assertEqual(log_line_with_hash.timestamp, datetime(2017, 7, 30, 7, 48, 48, 337577, pytz.UTC).timestamp())
-        self.assertEqual(log_line_with_hash.node, 'node-1')
-        self.assertEqual(log_line_with_hash.obj_hash, '2e1b05f9248ae5f29b2234ac0eb86e0fccbacc084ed91937eee7eea248fc9a6a')
+        self.assertEqual(event.timestamp, datetime(2017, 7, 30, 7, 48, 48, 337577, pytz.UTC).timestamp())
+        self.assertEqual(event.node, 'node-1')
+        self.assertEqual(event.tx_hash, '2e1b05f9248ae5f29b2234ac0eb86e0fccbacc084ed91937eee7eea248fc9a6a')
 
     def test_parse_accept_to_memory_pool(self):
-        received_event = parse.parse_accept_to_memory_pool(
+        event = parse.TxReceivedEvent.from_log_line(
             '2017-07-30 07:48:42.907223 node-2 45 AcceptToMemoryPool: peer=1:'
             ' accepted 701cd618d630780ac19a78325f24cdd13cbf87279103c7e9cec9fb6382e90ce7'
             ' (poolsz 11 txn, 13 kB)'
         )
 
-        self.assertEqual(received_event.timestamp, datetime(2017, 7, 30, 7, 48, 42, 907223, pytz.UTC).timestamp())
-        self.assertEqual(received_event.node, 'node-2')
-        self.assertEqual(received_event.obj_hash, '701cd618d630780ac19a78325f24cdd13cbf87279103c7e9cec9fb6382e90ce7')
-        self.assertEqual(received_event.propagation_duration, -1)
-
-    @patch('parse.parse_accept_to_memory_pool', lambda line: ReceivedEvent(10, 'node-0', 'tx_hash'))
-    def test_tx_received_parser(self):
-        self.context.txs_received = []
-        self.context.parsed_txs['tx_hash'] = TxEvent(4, 'node-1', 'tx_hash')
-
-        self.parser.tx_received_parser('line')
-
-        self.assertEqual(len(self.context.txs_received), 1)
-        self.assertEqual(self.context.txs_received[0].timestamp, 10)
-        self.assertEqual(self.context.txs_received[0].propagation_duration, 6)
-
-    @patch('parse.parse_add_to_wallet', lambda line: EventWithHash(2, 'node-0', 'tx_hash'))
-    def test_tx_creation_parser(self):
-        self.parser.tx_creation_parser('line')
-
-        self.assertTrue(self.context.parsed_txs['tx_hash'])
-
-        self.assertTrue(self.context.parsed_txs['tx_hash'].tx_hash, 'tx_hash')
+        self.assertEqual(event.timestamp, datetime(2017, 7, 30, 7, 48, 42, 907223, pytz.UTC).timestamp())
+        self.assertEqual(event.node, 'node-2')
+        self.assertEqual(event.obj_hash, '701cd618d630780ac19a78325f24cdd13cbf87279103c7e9cec9fb6382e90ce7')
 
     def test_parse_peer_logic_validation(self):
         log_line_with_hash = parse.parse_peer_logic_validation(

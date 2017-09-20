@@ -201,6 +201,9 @@ bwplot(blocks$total_size / 1000, xlab='Block size [kb]')
 ```
 
 ```{r block_propagation_summary}
+blocks_received <- merge(blocks[, c('timestamp', 'hash')], blocks_received, by = 'hash')
+blocks_received$propagation_duration <- blocks_received$timestamp.y - blocks_received$timestamp.x
+
 kable(unclass(summary(blocks_received$propagation_duration * 1000)), col.names = c('Propagation [ms]'), digits = 3, caption = 'Block propagation', format = 'latex') %>%
   kable_styling(latex_options = c('HOLD_position'))
 ```
@@ -212,6 +215,9 @@ densityplot(~propagation_duration, data=blocks_received, auto.key = list(space =
 ## Transactions
 
 ```{r txs_propagation_summary}
+txs_received <- merge(txs[, c('timestamp', 'hash')], txs_received, by = 'hash')
+txs_received$propagation_duration <- txs_received$timestamp.y - txs_received$timestamp.x
+
 kable(unclass(summary(txs_received$propagation_duration * 1000)), col.names = c('Propagation [ms]'), digits = 3, caption = 'Transactions propagation', format = 'latex') %>%
   kable_styling(latex_options = c('HOLD_position'))
 ```

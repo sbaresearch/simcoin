@@ -72,9 +72,6 @@ memory_csv_file_name = 'memory.csv'
 
 blocks_csv_file_name = 'blocks.csv'
 tips_csv_file_name = 'tips.csv'
-txs_csv_file_name = 'txs.csv'
-blocks_received_csv_file_name = 'blocks_received.csv'
-txs_received_csv_file_name = 'txs_received.csv'
 step_times_csv_file_name = 'step_times.csv'
 
 
@@ -99,9 +96,6 @@ class Path:
         self.tmp_log = self.postprocessing_dir + 'tmp.log'
         self.blocks_csv = self.postprocessing_dir + blocks_csv_file_name
         self.tips_csv = self.postprocessing_dir + tips_csv_file_name
-        self.txs_csv = self.postprocessing_dir + txs_csv_file_name
-        self.blocks_received_csv = self.postprocessing_dir + blocks_received_csv_file_name
-        self.txs_received_csv = self.postprocessing_dir + txs_received_csv_file_name
         self.log_errors_txt = self.postprocessing_dir + 'log_errors.txt'
 
     def client_dir_on_host(self, name):

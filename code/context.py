@@ -32,9 +32,6 @@ class Context:
 
         self.consensus_chain = []
         self.parsed_blocks = {}
-        self.blocks_received = []
-        self.parsed_txs = {}
-        self.txs_received = []
         self.general_infos = {}
         self.tips = []
         self.step_times = []

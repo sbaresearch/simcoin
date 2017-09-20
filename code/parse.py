@@ -16,10 +16,6 @@ class Parser:
         self.parsers = [
             self.block_creation_parser,
             self.tip_updated_parser,
-            self.block_received_parser,
-            self.block_reconstructed_parser,
-            self.tx_creation_parser,
-            self.tx_received_parser,
             self.peer_logic_validation_parser,
         ]
         self.pool = ThreadPool(5)
@@ -49,7 +45,11 @@ class Parser:
     def execute2(self):
         self.pool.starmap(parse, zip(
             repeat(self.context.path.aggregated_sim_log),
-            [TickEvent, TxExceptionEvent, BlockExceptionEvent, RPCExceptionEvent],
+            [
+                BlockReceivedEvent, BlockExceptionEvent,
+                TxEvent, TxReceivedEvent, TxExceptionEvent,
+                TickEvent, RPCExceptionEvent
+            ],
             repeat(self.context.path.postprocessing_dir),
             repeat(self.context.args.tag)
 
@@ -74,34 +74,6 @@ class Parser:
             if update_tip.block_hash in self.context.parsed_blocks:
                 block_event = self.context.parsed_blocks[update_tip.block_hash]
                 block_event.height = update_tip.height
-
-    def block_received_parser(self, line):
-        received_event = parse_received_block(line)
-        block = self.context.parsed_blocks[received_event.obj_hash]
-        received_event.propagation_duration = received_event.timestamp - block.timestamp
-
-        self.context.blocks_received.append(received_event)
-
-    def block_reconstructed_parser(self, line):
-        received_event = parse_successfully_reconstructed_block(line)
-        block = self.context.parsed_blocks[received_event.obj_hash]
-        received_event.propagation_duration = received_event.timestamp - block.timestamp
-
-        self.context.blocks_received.append(received_event)
-
-    def tx_creation_parser(self, line):
-        log_line_with_hash = parse_add_to_wallet(line)
-
-        self.context.parsed_txs[log_line_with_hash.obj_hash] = TxEvent(log_line_with_hash.timestamp,
-                                                                       log_line_with_hash.node,
-                                                                       log_line_with_hash.obj_hash)
-
-    def tx_received_parser(self, line):
-        received_event = parse_accept_to_memory_pool(line)
-        tx = self.context.parsed_txs[received_event.obj_hash]
-        received_event.propagation_duration = received_event.timestamp - tx.timestamp
-
-        self.context.txs_received.append(received_event)
 
     def peer_logic_validation_parser(self, line):
         log_line_with_hash = parse_peer_logic_validation(line)
@@ -160,50 +132,6 @@ def parse_update_tip(line):
 
     return UpdateTipEvent(parse_datetime(matched.group(1)), str(matched.group(2)), str(matched.group(3)),
                           int(matched.group(4)), int(matched.group(5)))
-
-
-def parse_received_block(line):
-    regex = config.log_prefix_full + 'received block ([a-z0-9]{64}) peer=[0-9]+$'
-    matched = re.match(regex, line)
-
-    if matched is None:
-        raise ParseException("Didn't matched 'Received block' log line.")
-
-    return ReceivedEvent(parse_datetime(matched.group(1)), str(matched.group(2)), str(matched.group(3)))
-
-
-def parse_successfully_reconstructed_block(line):
-    regex = config.log_prefix_full + 'Successfully reconstructed block ([a-z0-9]{64}) ' \
-                                     'with ([0-9]+) txn prefilled, ([0-9]+) txn from mempool' \
-                                     ' \(incl at least ([0-9]+) from extra pool\) and [0-9]+ txn requested$'
-    matched = re.match(regex, line)
-
-    if matched is None:
-        raise ParseException("Didn't matched 'Reconstructed block' log line.")
-
-    return ReceivedEvent(parse_datetime(matched.group(1)), str(matched.group(2)), str(matched.group(3)))
-
-
-def parse_add_to_wallet(line):
-    regex = config.log_prefix_full + 'AddToWallet ([a-z0-9]{64})  new$'
-    matched = re.match(regex, line)
-
-    if matched is None:
-        raise ParseException("Didn't matched 'AddToWallet' log line.")
-
-    return EventWithHash(parse_datetime(matched.group(1)), str(matched.group(2)), str(matched.group(3)))
-
-
-def parse_accept_to_memory_pool(line):
-    regex = config.log_prefix_full + 'AcceptToMemoryPool: peer=([0-9]+):' \
-                                     ' accepted ([0-9a-z]{64}) \(poolsz ([0-9]+) txn,' \
-                                     ' ([0-9]+) [a-zA-Z]+\)$'
-    matched = re.match(regex, line)
-
-    if matched is None:
-        raise ParseException("Didn't matched 'AcceptToMemoryPool' log line.")
-
-    return ReceivedEvent(parse_datetime(matched.group(1)), str(matched.group(2)), str(matched.group(4)))
 
 
 def parse_peer_logic_validation(line):
@@ -328,17 +256,62 @@ class ExceptionEvent(Event):
 
 
 class ReceivedEvent(Event):
+    csv_header = ['timestamp', 'node', 'hash']
+
     def __init__(self, timestamp, node, obj_hash):
         super().__init__(timestamp, node)
         self.obj_hash = obj_hash
-        self.propagation_duration = -1
-
-    @staticmethod
-    def csv_header():
-        return ['timestamp', 'node', 'obj_hash', 'propagation_duration']
 
     def vars_to_array(self):
-        return [self.timestamp, self.node, self.obj_hash, self.propagation_duration]
+        return [self.timestamp, self.node, self.obj_hash]
+
+
+class TxReceivedEvent(ReceivedEvent):
+    file_name = 'txs_received.csv'
+
+    @classmethod
+    def from_log_line(cls, line):
+        matched = re.match(config.log_prefix_full +
+                           'AcceptToMemoryPool: peer=([0-9]+): accepted ([0-9a-z]{64}) \(poolsz ([0-9]+) txn,'
+                           ' ([0-9]+) [a-zA-Z]+\)$', line)
+
+        if matched is None:
+            raise ParseException("Didn't matched 'AcceptToMemoryPool' log line.")
+
+        return cls(
+            parse_datetime(matched.group(1)),
+            str(matched.group(2)),
+            str(matched.group(4))
+        )
+
+
+class BlockReceivedEvent(ReceivedEvent):
+    file_name = 'blocks_received.csv'
+
+    @classmethod
+    def from_log_line(cls, line):
+        regexs = [
+            'Successfully reconstructed block ([a-z0-9]{64}) with ([0-9]+) txn prefilled,'
+            ' ([0-9]+) txn from mempool \(incl at least ([0-9]+) from extra pool\) and'
+            ' [0-9]+ txn requested$',
+            'received block ([a-z0-9]{64}) peer=[0-9]+$'
+        ]
+
+        matched = None
+        for regex in regexs:
+            matched = re.match(config.log_prefix_full + regex, line)
+
+            if matched is not None:
+                break
+
+        if matched is None:
+            raise ParseException("Didn't matched 'Reconstructed block' log line.")
+
+        return cls(
+            parse_datetime(matched.group(1)),
+            str(matched.group(2)),
+            str(matched.group(3))
+        )
 
 
 class BlockEvent(Event):
@@ -352,21 +325,32 @@ class BlockEvent(Event):
 
     @staticmethod
     def csv_header():
-        return ['timestamp', 'node', 'block_hash', 'stale', 'total_size', 'txs', 'height']
+        return ['timestamp', 'node', 'hash', 'stale', 'total_size', 'txs', 'height']
 
     def vars_to_array(self):
         return [self.timestamp, self.node, self.block_hash, self.stale, self.total_size, self.txs, self.height]
 
 
 class TxEvent(Event):
+    csv_header = ['timestamp', 'node', 'hash']
+    file_name = 'txs.csv'
 
     def __init__(self, timestamp, node, tx_hash):
         super().__init__(timestamp, node)
         self.tx_hash = tx_hash
 
-    @staticmethod
-    def csv_header():
-        return ['timestamp', 'node', 'tx_hash']
+    @classmethod
+    def from_log_line(cls, line):
+        matched = re.match(config.log_prefix_full + 'AddToWallet ([a-z0-9]{64})  new$', line)
+
+        if matched is None:
+            raise ParseException("Didn't matched 'AddToWallet' log line.")
+
+        return cls(parse_datetime(
+            matched.group(1)),
+            str(matched.group(2)),
+            str(matched.group(3))
+        )
 
     def vars_to_array(self):
         return [self.timestamp, self.node, self.tx_hash]
