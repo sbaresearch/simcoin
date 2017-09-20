@@ -121,6 +121,16 @@ build-base-image:
 rm-base-image:
 	docker rmi simcoin/base:v1
 
+cp-run-tmp:
+	rm -r /tmp/run; \
+	mkdir /tmp/run; \
+	cp -r data/last_run/* /tmp/run/.
+
+cp-multi-tmp:
+	rm -r /tmp/multi_run; \
+	mkdir /tmp/multi_run; \
+	cp -r data/last_multi_run/* /tmp/multi_run/.
+
 .PHONY : test
 test:
 	cd code; \
