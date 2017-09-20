@@ -43,8 +43,8 @@ class CliStats:
 def write_consensus_chain(path, chain):
     with open(path, 'w') as file:
         file.write('hash\n')
-    file.writelines('\n'.join(chain))
-    file.write('\n')
+        file.writelines('\n'.join(chain))
+        file.write('\n')
 
 
 class Tip:
