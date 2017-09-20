@@ -37,6 +37,7 @@ class CliStats:
             tips.extend([Tip.from_dict(node.name, chain_tip) for chain_tip in node.execute_rpc('getchaintips')])
 
         utils.write_csv(Tip.file_name, Tip.csv_header, tips, self.context.args.tag)
+        logging.info('Collected and persisted {} tips'.format(len(tips)))
 
 
 def write_consensus_chain(path, chain):
