@@ -63,7 +63,7 @@ class Runner:
             memory,
             self.context.args.tag
         )
-        logging.info('Persisted all {} CPU time and {} memory snapshots'.format(len(cpu_times), len(memory)))
+        logging.info('Persisted {} CPU time and {} memory snapshots'.format(len(cpu_times), len(memory)))
 
 
 class StepTimes:
