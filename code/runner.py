@@ -5,6 +5,9 @@ import systemmonitor
 import threading
 import queue
 import math
+import utils
+from systemmonitor import CpuTimeSnapshot
+from systemmonitor import MemorySnapshot
 
 
 class Runner:
@@ -34,16 +37,33 @@ class Runner:
             self.event.execute()
             logging.info(config.log_line_sim_end)
 
-            self.pill2kill.set()
-            self.system_monitor.join()
-            self.context.cpu_time = list(self.q_cpu_time.queue)
-            self.context.memory = list(self.q_memory.queue)
+            self.persist_system_snapshots()
 
             self.context.step_times.append(StepTimes(time.time(), 'postprocessing_start'))
             self.post_processing.execute()
         except Exception as exce:
             self.post_processing.clean_up_docker()
             logging.error('Simulation terminated because of exception={}'.format(exce))
+
+    def persist_system_snapshots(self):
+        self.pill2kill.set()
+        self.system_monitor.join()
+        cpu_times = list(self.q_cpu_time.queue)
+        memory = list(self.q_memory.queue)
+
+        utils.write_csv(
+            self.context.path.postprocessing_dir + CpuTimeSnapshot.file_name,
+            CpuTimeSnapshot.csv_header,
+            cpu_times,
+            self.context.args.tag
+        )
+        utils.write_csv(
+            self.context.path.postprocessing_dir + MemorySnapshot.file_name,
+            MemorySnapshot.csv_header,
+            memory,
+            self.context.args.tag
+        )
+        logging.info('Persisted all {} CPU time and {} memory snapshots'.format(len(cpu_times), len(memory)))
 
 
 class StepTimes:

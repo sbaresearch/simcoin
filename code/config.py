@@ -67,9 +67,6 @@ bitcoin_data_dir = '/data'
 bitcoin_regtest_dir = '/regtest'
 client_dir = bitcoin_data_dir + bitcoin_regtest_dir
 
-cpu_time_csv_file_name = 'cpu_time.csv'
-memory_csv_file_name = 'memory.csv'
-
 blocks_csv_file_name = 'blocks.csv'
 tips_csv_file_name = 'tips.csv'
 step_times_csv_file_name = 'step_times.csv'
@@ -91,8 +88,6 @@ class Path:
 
         self.general_infos_json = self.postprocessing_dir + 'general_infos.json'
         self.step_times = self.postprocessing_dir + step_times_csv_file_name
-        self.cpu_time_csv = self.postprocessing_dir + cpu_time_csv_file_name
-        self.memory_csv = self.postprocessing_dir + memory_csv_file_name
         self.tmp_log = self.postprocessing_dir + 'tmp.log'
         self.blocks_csv = self.postprocessing_dir + blocks_csv_file_name
         self.tips_csv = self.postprocessing_dir + tips_csv_file_name

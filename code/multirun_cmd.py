@@ -9,6 +9,7 @@ import config
 import bash
 from cmd import rcmd
 import parse
+import systemmonitor
 
 files_to_concat = [
     config.blocks_csv_file_name,
@@ -20,9 +21,10 @@ files_to_concat = [
     parse.BlockReceivedEvent.file_name,
     parse.TxReceivedEvent.file_name,
     parse.TickEvent.file_name,
-    config.memory_csv_file_name,
-    config.cpu_time_csv_file_name,
     config.step_times_csv_file_name,
+
+    systemmonitor.CpuTimeSnapshot.file_name,
+    systemmonitor.MemorySnapshot.file_name,
 ]
 
 
