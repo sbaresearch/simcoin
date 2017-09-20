@@ -4,7 +4,6 @@ import config
 import bash
 import re
 import logging
-from filewriter import FileWriter
 from cmd import rcmd
 from cmd import dockercmd
 import utils
@@ -46,9 +45,6 @@ class PostProcessing:
 
         self.context.step_times.append(StepTimes(time.time(), 'postprocessing_end'))
         utils.write_csv(self.context.path.step_times, StepTimes.csv_header(), self.context.step_times, self.context.args.tag)
-
-        file_writer = FileWriter(self.context)
-        file_writer.execute()
 
         bash.check_output(rcmd.create_report(self.context.path.postprocessing_dir, config.report_file_name))
         logging.info('Created {} report in folder={}'

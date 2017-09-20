@@ -29,8 +29,6 @@ class Context:
         self.one_normal_node = None
 
         self.first_block_height = None
-
-        self.tips = []
         self.step_times = []
 
     def create(self):

@@ -37,15 +37,16 @@ class CliStats:
             file.write('\n')
 
     def node_stats(self):
+        tips = []
         for node in self.context.all_bitcoin_nodes.values():
-            tips = node.execute_rpc('getchaintips')
+            tips.extend(node.execute_rpc('getchaintips'))
 
-            for tip in tips:
-                self.context.tips.append(Tip(node.name, tip['status'], tip['branchlen']))
+        utils.write_csv(Tip.file_name, Tip.csv_header, tips, self.context.args.tag)
 
 
 class Tip:
     csv_header = ['node', 'status', 'branchlen']
+    file_name = 'tips.csv'
 
     def __init__(self, node, status, branchlen):
         self.node = node
