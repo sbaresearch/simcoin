@@ -14,6 +14,8 @@ import itertools
 from threading import Lock
 from collections import namedtuple
 import json
+from runner import StepTimes
+import time
 
 
 class PostProcessing:
@@ -42,6 +44,9 @@ class PostProcessing:
         parser.execute()
 
         collect_general_infos(self.context.path.general_infos_json)
+
+        self.context.step_times.append(StepTimes(time.time(), 'postprocessing_end'))
+        utils.write_csv(self.context.path.step_times, StepTimes.csv_header(), self.context.step_times, self.context.args.tag)
 
         file_writer = FileWriter(self.context)
         file_writer.execute()
