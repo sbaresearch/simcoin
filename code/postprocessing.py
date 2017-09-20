@@ -12,7 +12,6 @@ from multiprocessing.dummy import Pool as ThreadPool
 import subprocess
 import itertools
 from threading import Lock
-from collections import namedtuple
 import json
 from runner import StepTimes
 import time
