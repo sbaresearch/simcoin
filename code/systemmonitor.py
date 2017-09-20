@@ -28,6 +28,8 @@ def collect(q_cpu_time, q_memory):
 
 
 class CpuTimeSnapshot:
+    csv_header = ['timestamp', 'user', 'nice', 'system', 'idle']
+
     def __init__(self, timestamp, user, nice, system, idle):
         self.timestamp = timestamp
         self.user = user
@@ -41,15 +43,13 @@ class CpuTimeSnapshot:
         snapshot = cls(time.time(), cpu_matched.group(1), cpu_matched.group(2), cpu_matched.group(3), cpu_matched.group(4))
         return snapshot
 
-    @staticmethod
-    def csv_header():
-        return ['timestamp', 'user', 'nice', 'system', 'idle']
-
     def vars_to_array(self):
         return [self.timestamp, self.user, self.nice, self.system, self.idle]
 
 
 class MemorySnapshot:
+    csv_header = ['timestamp', 'total', 'free']
+
     def __init__(self, timestamp, total, free):
         self.timestamp = timestamp
         self.total = total
@@ -60,10 +60,6 @@ class MemorySnapshot:
         memory_matched = re.match('MemTotal:\s+([0-9]+)\s+kB\nMemFree:\s+([0-9]+)\s+kB', memory)
         snapshot = cls(time.time(), memory_matched.group(1), memory_matched.group(2))
         return snapshot
-
-    @staticmethod
-    def csv_header():
-        return ['timestamp', 'total', 'free']
 
     def vars_to_array(self):
         return [self.timestamp, self.total, self.free]

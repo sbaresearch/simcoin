@@ -16,10 +16,10 @@ class FileWriter:
         self.args = utils.read_json_file(config.args_json)
 
     def execute(self):
-        utils.write_csv(self.context.path.blocks_csv, BlockEvent.csv_header(), self.context.parsed_blocks.values(), self.args.tag)
-        utils.write_csv(self.context.path.tips_csv, Tip.csv_header(), self.context.tips, self.args.tag)
-        utils.write_csv(self.context.path.cpu_time_csv, CpuTimeSnapshot.csv_header(), self.context.cpu_time, self.args.tag)
-        utils.write_csv(self.context.path.memory_csv, MemorySnapshot.csv_header(), self.context.memory, self.args.tag)
+        utils.write_csv(self.context.path.blocks_csv, BlockEvent.csv_header, self.context.parsed_blocks.values(), self.args.tag)
+        utils.write_csv(self.context.path.tips_csv, Tip.csv_header, self.context.tips, self.args.tag)
+        utils.write_csv(self.context.path.cpu_time_csv, CpuTimeSnapshot.csv_header, self.context.cpu_time, self.args.tag)
+        utils.write_csv(self.context.path.memory_csv, MemorySnapshot.csv_header, self.context.memory, self.args.tag)
 
         self.create_general_infos_json()
 

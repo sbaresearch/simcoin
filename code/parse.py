@@ -165,6 +165,8 @@ class Event:
 
 
 class BlockEvent(Event):
+    csv_header = ['timestamp', 'node', 'hash', 'stale', 'total_size', 'txs', 'height']
+
     def __init__(self, timestamp, node, block_hash, total_size, txs):
         super().__init__(timestamp, node)
         self.block_hash = block_hash
@@ -172,10 +174,6 @@ class BlockEvent(Event):
         self.total_size = total_size
         self.txs = txs
         self.height = -1
-
-    @staticmethod
-    def csv_header():
-        return ['timestamp', 'node', 'hash', 'stale', 'total_size', 'txs', 'height']
 
     def vars_to_array(self):
         return [self.timestamp, self.node, self.block_hash, self.stale, self.total_size, self.txs, self.height]

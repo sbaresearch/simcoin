@@ -38,14 +38,12 @@ class CliStats:
 
 
 class Tip:
+    csv_header = ['node', 'status', 'branchlen']
+
     def __init__(self, node, status, branchlen):
         self.node = node
         self.status = status
         self.branchlen = branchlen
-
-    @staticmethod
-    def csv_header():
-        return ['node', 'status', 'branchlen']
 
     def vars_to_array(self):
         return [self.node, self.status, self.branchlen]
