@@ -48,7 +48,7 @@ class Parser:
                 self.parsed_blocks.values(),
                 self.context.args.tag
             )
-            logging.info('Block parser parsed {} events out of {} lines from {} into file {}'
+            logging.info('Block parser parsed {:,} events out of {:,} lines from {} into file {}'
                          .format(len(self.parsed_blocks.values()), len(lines), self.context.path.aggregated_sim_log,
                                  BlockEvent.file_name))
 
@@ -110,7 +110,7 @@ def parse(log_file, cls, postprocessing_dir, tag):
                 logging.info('{} parser parsed {:,} of {:,} log lines'.format(cls.__name__, i + 1, len(lines)))
 
     utils.write_csv(postprocessing_dir + cls.file_name, cls.csv_header, parsed_objects, tag)
-    logging.info('{} parser parsed {} events out of {} lines from {} into file {}'
+    logging.info('{} parser parsed {:,} events out of {:,} lines from {} into file {}'
                  .format(cls.__name__, len(parsed_objects), len(lines), log_file, cls.file_name))
 
 
