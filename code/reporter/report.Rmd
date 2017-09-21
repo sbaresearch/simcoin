@@ -241,22 +241,48 @@ kable(unclass(summary(blocks$txs)), digits = 0, caption = 'Transactions per bloc
 bwplot(blocks$txs, xlab='Transactions')
 ```
 
-## Nodes
+## Tips
 
-```{r tips}
-kable(tips, format = 'latex') %>%
-  kable_styling(latex_options = c('scale_down','HOLD_position'))
-not_active_tips <- tips[!(tips$status=='active'),]
+```{r tips_setup}
+tips          <- tips[tips$status != 'active',]
+tips_per_node <- data.frame(as.matrix(table(tips$node)))
+colnames(tips_per_node) <- c('count')
+```
+
+`r if(nrow(tips) == 0) {'There were 0 tips during this simulation run.'}`
+
+```{r tips_per_node_summary, eval=nrow(tips) > 0}
+kable(unclass(summary(tips_per_node$count)), digits = 2, caption = 'Tips per node', format = 'latex') %>%
+  kable_styling(latex_options = c('HOLD_position'))
+```
+
+```{r tips_per_node_boxplot, eval=nrow(tips) > 0, fig.cap='Tips per node', fig.pos='H', fig.height=3}
+bwplot(tips_per_node$count, xlab='Tips')
+```
+
+```{r tips_branchlen_summary, eval=nrow(tips) > 0}
+kable(unclass(summary(tips$branchlen)), digits = 2, caption = 'Overall branch length of tips', format = 'latex') %>%
+  kable_styling(latex_options = c('HOLD_position'))
+```
+
+```{r tips_branchlen_boxplot, eval=nrow(tips) > 0, fig.cap='Overall branch length of tips', fig.pos='H', fig.height=3}
+bwplot(tips$branchlen, xlab='Length in blocks')
 ```
 
 ## Exceptions
-
-```{r event_exces, fig.cap='Exceptions transaction/block event', fig.pos='H', fig.height=3}
-tx_exces$type    <- 'Transaction'
+```{r event_exces_setup}
+if (nrow(tx_exces) > 0) {
+  tx_exces$type    <- 'Transaction'
+}
 if (nrow(block_exces) > 0) {
   block_exces$type <- 'Block'
 }
 event_exces      <- rbind(tx_exces, block_exces)
+```
+
+`r if(nrow(event_exces) == 0) {'There were 0 exceptions during the creation of transaction/block events.'}`
+
+```{r event_exces, eval=nrow(event_exces) > 0, fig.cap='Exceptions transaction/block event', fig.pos='H', fig.height=3}
 barchart(table(factor(event_exces$type, levels = c('Transaction', 'Block'))), ref = FALSE, xlab = 'Amount of exceptions',
          panel=function(x,y,...){
           panel.barchart(x,y,...)
