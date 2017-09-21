@@ -281,7 +281,7 @@ if (nrow(tx_exces) > 0) {
 if (nrow(block_exces) > 0) {
   block_exces$type <- 'Block'
 }
-event_exces      <- rbind(tx_exces, block_exces)
+event_exces <- rbind(tx_exces, block_exces)
 ```
 
 `r if(nrow(event_exces) == 0) {'There were 0 exceptions during the creation of transaction/block events.'}`
