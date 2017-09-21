@@ -169,7 +169,7 @@ def add_line_number(lines):
     prefixed_lines = []
     line_number = 1
     for line in lines:
-        prefixed_lines.append(re.sub(config.log_prefix_timestamp + ' ([a-zA-Z0-9-\.]+) (.*)',
+        prefixed_lines.append(re.sub(config.log_prefix_timestamp + ' ([a-zA-Z0-9-.]+) (.*)',
                                      r'\1 \2 {} \3'.format(line_number), line))
         line_number += 1
     return prefixed_lines
