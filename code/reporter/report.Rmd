@@ -249,77 +249,50 @@ kable(tips, format = 'latex') %>%
 not_active_tips <- tips[!(tips$status=='active'),]
 ```
 
-## Block exceptions
-There were `r nrow(block_exces)` exceptions catched during the execution of the RPC-call to create a block.
+## Exceptions
 
-```{r block_exces_hist, eval=nrow(block_exces) > 0, fig.pos='H'}
-hist(block_exces$rel_timestamp - sim_start, xlab = 'Time [s]')
+```{r event_exces, fig.cap='Exceptions transaction/block event', fig.pos='H', fig.height=3}
+tx_exces$type    <- 'Transaction'
+if (nrow(block_exces) > 0) {
+  block_exces$type <- 'Block'
+}
+event_exces      <- rbind(tx_exces, block_exces)
+barchart(table(factor(event_exces$type, levels = c('Transaction', 'Block'))), ref = FALSE, xlab = 'Amount of exceptions',
+         panel=function(x,y,...){
+          panel.barchart(x,y,...)
+          ltext(x=x, y=y, labels=x, pos = 4)
+})
 ```
 
-```{r block_exces_node_distribution, eval=nrow(block_exces) > 0, fig.pos='H'}
-exces_per_node <- table(block_exces$node)
-percentage     <- round(exces_per_node/sum(exces_per_node)*100)
-labels         <- paste(names(exces_per_node), ': ', exces_per_node, ', ', percentage, '%', sep='')
-pie(exces_per_node, labels)
-title(main = 'Distribution of exceptions')
+```{r tx_exces_type, eval=nrow(tx_exces) > 0, fig.cap='Transaction exception types', fig.pos='H', fig.height=nrow(tx_exces)}
+barchart(table(tx_exces$exception), ref = FALSE, xlab = 'Amount of exceptions',
+         panel=function(x,y,...){
+          panel.barchart(x,y,...)
+          ltext(x=x, y=y, labels=x, pos = 4)
+})
 ```
 
-```{r block_exces_distribution, eval=nrow(block_exces) > 0, , fig.pos='H'}
-exces_per_node <- table(block_exces$exception)
-percentage     <- round(exces_per_node/sum(exces_per_node)*100)
-labels         <- paste(names(exces_per_node), ': ', exces_per_node, ', ', percentage, '%', sep='')
-pie(exces_per_node, labels)
-title(main = 'Exception types')
+```{r block_exces_type, eval=nrow(block_exces) > 0, fig.cap='Block exception types', fig.pos='H', fig.height=nrow(block_exces)}
+barchart(table(block_exces$exception), ref = FALSE, xlab = 'Amount of exceptions',
+         panel=function(x,y,...){
+          panel.barchart(x,y,...)
+          ltext(x=x, y=y, labels=x, pos = 4)
+})
 ```
 
-## Transaction exceptions
-There were `r nrow(tx_exces)` exceptions catched during the execution of the RPC-call to send a transaction.
-
-```{r tx_exces, eval=nrow(tx_exces) > 0, fig.pos='H'}
-tx_exces$rel_timestamp <- tx_exces$timestamp - sim_start
-hist(tx_exces$rel_timestamp, xlab = 'Time [s]')
+```{r rpc_exces, eval=nrow(rpc_exces) > 0, fig.cap='RPC exceptions', fig.pos='H', fig.height=length(unique(rpc_exces$method)) + 2}
+rpc_exces_table <- table(rpc_exces$method, rpc_exces$exception)
+barchart(rpc_exces_table, ref = FALSE, xlab = 'Amount of exceptions',
+         auto.key = list(columns=2, rectangles = TRUE, points = FALSE, space='top', text=colnames(rpc_exces_table)),
+         panel=function(x,y,...){
+           panel.barchart(x,y,...)
+              xx <- unsplit(unname(lapply(split(x, y), function(t)cumsum(t)-t/2)), y)
+              xx <-  xx [! x %in% 0]
+              y <-  y [! x %in% 0]
+              x <-  x [! x %in% 0]
+              ltext(xx, y=y, labels=x)
+})
 ```
-
-```{r tx_exces_node_distribution, eval=nrow(tx_exces) > 0, fig.pos='H'}
-exces_per_node <- table(tx_exces$node)
-percentage     <- round(exces_per_node/sum(exces_per_node)*100)
-labels         <- paste(names(exces_per_node), ': ', exces_per_node, ', ', percentage, '%', sep='')
-pie(exces_per_node, labels)
-title(main = 'Distribution of exceptions')
-```
-
-```{r tx_exces_distribution, eval=nrow(tx_exces) > 0, fig.pos='H'}
-exces_per_node <- table(tx_exces$exception)
-percentage     <- round(exces_per_node/sum(exces_per_node)*100)
-labels         <- paste(names(exces_per_node), ': ', exces_per_node, ', ', percentage, '%', sep='')
-pie(exces_per_node, labels)
-title(main = 'Exception types')
-```
-
-## RPC exceptions
-There were `r nrow(rpc_exces)` exceptions catched during a RPC-call.
-
-```{r rpc_exces, eval=nrow(rpc_exces) > 0, fig.pos='H'}
-rpc_exces$rel_timestamp <- rpc_exces$timestamp - sim_start
-hist(rpc_exces$rel_timestamp, xlab = 'Time [s]')
-```
-
-```{r rpc_exces_node_distribution, eval=nrow(rpc_exces) > 0, fig.pos='H'}
-exces_per_node <- table(rpc_exces$node)
-percentage     <- round(exces_per_node/sum(exces_per_node)*100)
-labels         <- paste(names(exces_per_node), ': ', exces_per_node, ', ', percentage, '%', sep='')
-pie(exces_per_node, labels)
-title(main = 'Distribution of exceptions')
-```
-
-```{r rpc_exces_distribution, eval=nrow(rpc_exces) > 0, eval=nrow(rpc_exces), fig.pos='H'}
-exces_per_node <- table(rpc_exces$exception)
-percentage     <- round(exces_per_node/sum(exces_per_node)*100)
-labels         <- paste(names(exces_per_node), ': ', exces_per_node, ', ', percentage, '%', sep='')
-pie(exces_per_node, labels)
-title(main = 'Exception type')
-```
-
 \clearpage
 
 #### R and package versions used
