@@ -151,12 +151,24 @@ kable(unclass(summary(blocks$txs)), digits = 0, caption = 'Overall transactions 
   kable_styling(latex_options = c('HOLD_position'))
 ```
 
-## Nodes
+## Tips
 
-```{r tips}
-kable(tips, format = 'latex') %>%
-  kable_styling(latex_options = c('scale_down','HOLD_position'))
-not_active_tips <- tips[!(tips$status=='active'),]
+```{r tips_setup}
+tips          <- tips[tips$status != 'active',]
+tips_per_node <- tips %>%
+   add_count(node, tag)
+```
+
+`r if(nrow(tips) == 0) {'There were 0 tips during all simulation runs.'}`
+
+```{r tips_per_node_summary, eval=nrow(tips) > 0}
+kable(unclass(summary(tips_per_node$n)), digits = 2, caption = 'Overall tips per node', format = 'latex') %>%
+  kable_styling(latex_options = c('HOLD_position'))
+```
+
+```{r tips_branchlen_summary, eval=nrow(tips) > 0}
+kable(unclass(summary(tips$branchlen)), digits = 2, caption = 'Overall branch length of tips', format = 'latex') %>%
+  kable_styling(latex_options = c('HOLD_position'))
 ```
 
 \clearpage
@@ -248,6 +260,14 @@ densityplot(~propagation_duration, data=txs_received, groups = tag,
 
 ```{r tx_propagation_boxplot, fig.cap='Transaction propagation boxplot', fig.env='figure*'}
 bwplot(txs_received$propagation_duration ~ txs_received$tag, ylab = 'Duration [s]')
+```
+
+```{r tips_per_node_boxplot, eval=nrow(tips) > 0, fig.cap='Tips per node', fig.env='figure*'}
+bwplot(tips_per_node$n ~ tips_per_node$tag, ylab = 'Tips')
+```
+
+```{r tips_branchlen_boxplot, eval=nrow(tips) > 0, fig.cap='Overall branch length of tips', fig.env='figure*'}
+bwplot(tips$branchlen ~ tips$tag, ylab = 'Length in blocks')
 ```
 
 \clearpage
