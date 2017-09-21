@@ -56,15 +56,11 @@ class PostProcessing:
         logging.info('Executed post processing')
 
     def aggregate_logs(self):
-        self.pool.starmap(aggregate_node_log, zip(
-            [node.path for node in self.context.all_nodes.values()],
-            [node.name for node in self.context.all_nodes.values()],
+        self.pool.starmap(prefix_and_copy_log, zip(
+            [node.path + config.bitcoin_log_file_name
+             for node in self.context.all_nodes.values()] + [self.context.path.run_log],
+            [node.name for node in self.context.all_nodes.values()] + ['simcoin'],
             itertools.repeat(self.context.path.aggregated_log)))
-
-        lines = bash.check_output_without_log('cat {}'.format(self.context.path.run_log)).splitlines()
-        lines = add_line_number(lines)
-        with open(self.context.path.aggregated_log, 'a') as file:
-            file.write('\n'.join(lines) + '\n')
 
         bash.check_output('sort {} -o {}'.format(self.context.path.aggregated_log, self.context.path.aggregated_log))
 
@@ -133,23 +129,23 @@ def rm_node(node):
     node.rm()
 
 
-def aggregate_node_log(node_log_path, node_name, path):
-    with open(node_log_path + config.bitcoin_log_file_name) as file:
-        lines = file.readlines()
-        logging.info('Read {:,} lines from node={}'.format(len(lines), node_name))
+def prefix_and_copy_log(log, name, aggregated_log):
+    with open(log) as log_file:
+        lines = log_file.readlines()
+        logging.info('Read {:,} lines from node={}'.format(len(lines), name))
 
-        lines = prefix_log(lines, node_name)
-        logging.info('Prefixed {:,} lines from node={}'.format(len(lines), node_name))
+        lines = prefix_log(lines, name)
+        logging.info('Prefixed {:,} lines from node={}'.format(len(lines), name))
 
-        with open(path, 'a') as aggregated_log_file:
-            logging.debug('Waiting for lock to write log from node={} to file={}'.format(node_name, path))
+        with open(aggregated_log, 'a') as aggregated_log_file:
+            logging.debug('Waiting for lock to write log from node={} to file={}'.format(name, aggregated_log))
             fcntl.flock(aggregated_log_file, fcntl.LOCK_EX)
-            logging.debug('Received lock for writing log from node={} to file={}'.format(node_name, path))
+            logging.debug('Received lock for writing log from node={} to file={}'.format(name, aggregated_log))
 
             aggregated_log_file.write('\n'.join(lines) + '\n')
 
             fcntl.flock(aggregated_log_file, fcntl.LOCK_UN)
-    logging.debug('Wrote {:,} lines from node={} to aggregated log'.format(len(lines), node_name))
+    logging.debug('Wrote {:,} lines from node={} to aggregated log'.format(len(lines), name))
 
 
 def prefix_log(lines, node_name):
