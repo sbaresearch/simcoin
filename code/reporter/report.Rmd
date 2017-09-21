@@ -237,7 +237,7 @@ densityplot(~propagation_duration, data=txs_received, auto.key = list(space = "r
 ```
 
 ```{r txs_per_block_summary}
-kable(unclass(summary(blocks$txs)), digits = 0, caption = 'Transactions per block', format = 'latex') %>%
+kable(unclass(summary(blocks$txs)), digits = 2, caption = 'Transactions per block', format = 'latex') %>%
   kable_styling(latex_options = c('HOLD_position'))
 ```
 
