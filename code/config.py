@@ -1,5 +1,7 @@
 import time
+import multiprocessing
 
+pool_processors = multiprocessing.cpu_count()
 # IP range from RFC6890 - IP range for future use
 # it does not conflict with https://github.com/bitcoin/bitcoin/blob/master/src/netbase.h
 ip_range = "240.0.0.0/4"

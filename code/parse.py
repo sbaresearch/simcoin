@@ -4,7 +4,7 @@ from datetime import datetime
 import logging
 from collections import namedtuple
 import pytz
-from multiprocessing.dummy import Pool as ThreadPool
+from multiprocessing import Pool
 import utils
 from itertools import repeat
 
@@ -19,7 +19,7 @@ class Parser:
             self.tip_updated_parser,
             self.peer_logic_validation_parser,
         ]
-        self.pool = ThreadPool(5)
+        self.pool = Pool(config.pool_processors)
 
         logging.info('Created parser with {} log parsers'.format(len(self.parsers)))
 

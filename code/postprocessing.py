@@ -7,19 +7,21 @@ import logging
 from cmd import rcmd
 from cmd import dockercmd
 import utils
+from multiprocessing import Pool
 from multiprocessing.dummy import Pool as ThreadPool
 import subprocess
 import itertools
-from threading import Lock
 import json
 from runner import StepTimes
 import time
+import fcntl
 
 
 class PostProcessing:
     def __init__(self, context):
         self.context = context
-        self.pool = ThreadPool(5)
+        self.pool = Pool(config.pool_processors)
+        self.thread_pool = ThreadPool(5)
 
     def execute(self):
         cli_stats = CliStats(self.context)
@@ -54,11 +56,10 @@ class PostProcessing:
         logging.info('Executed post processing')
 
     def aggregate_logs(self):
-        lock = Lock()
         self.pool.starmap(aggregate_node_log, zip(
-            self.context.all_nodes.values(),
-            itertools.repeat(self.context.path.aggregated_log),
-            itertools.repeat(lock)))
+            [node.path for node in self.context.all_nodes.values()],
+            [node.name for node in self.context.all_nodes.values()],
+            itertools.repeat(self.context.path.aggregated_log)))
 
         lines = bash.check_output_without_log('cat {}'.format(self.context.path.run_log)).splitlines()
         lines = add_line_number(lines)
@@ -68,7 +69,7 @@ class PostProcessing:
         bash.check_output('sort {} -o {}'.format(self.context.path.aggregated_log, self.context.path.aggregated_log))
 
     def clean_up_docker(self):
-        self.pool.map(rm_node, self.context.all_nodes.values())
+        self.thread_pool.map(rm_node, self.context.all_nodes.values())
         logging.info('Removed all nodes')
 
         utils.sleep(3 + len(self.context.all_nodes) * 0.2)
@@ -132,19 +133,23 @@ def rm_node(node):
     node.rm()
 
 
-def aggregate_node_log(node, path, lock):
-    with open(node.path + config.bitcoin_log_file_name) as file:
+def aggregate_node_log(node_log_path, node_name, path):
+    with open(node_log_path + config.bitcoin_log_file_name) as file:
         lines = file.readlines()
-        logging.info('Read {:,} lines from node={}'.format(len(lines), node.name))
+        logging.info('Read {:,} lines from node={}'.format(len(lines), node_name))
 
-        lines = prefix_log(lines, node.name)
-        logging.info('Prefixed {:,} lines from node={}'.format(len(lines), node.name))
+        lines = prefix_log(lines, node_name)
+        logging.info('Prefixed {:,} lines from node={}'.format(len(lines), node_name))
 
-        lock.acquire()
-        with open(path, 'a') as file:
-            file.write('\n'.join(lines) + '\n')
-        lock.release()
-        logging.debug('Wrote {:,} lines from node={} to aggregated log'.format(len(lines), node.name))
+        with open(path, 'a') as aggregated_log_file:
+            logging.debug('Waiting for lock to write log from node={} to file={}'.format(node_name, path))
+            fcntl.flock(aggregated_log_file, fcntl.LOCK_EX)
+            logging.debug('Received lock for writing log from node={} to file={}'.format(node_name, path))
+
+            aggregated_log_file.write('\n'.join(lines) + '\n')
+
+            fcntl.flock(aggregated_log_file, fcntl.LOCK_UN)
+    logging.debug('Wrote {:,} lines from node={} to aggregated log'.format(len(lines), node_name))
 
 
 def prefix_log(lines, node_name):
