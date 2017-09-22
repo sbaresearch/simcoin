@@ -38,27 +38,29 @@ library(reshape2)
 library(stringr)
 Sys.setenv(TZ='UTC')
 
+blocks_create         <- read.csv2("blocks_create.csv", dec=".")
+blocks_reconstructed  <- read.csv2("blocks_reconstructed.csv", dec=".")
+blocks_received       <- read.csv2("blocks_received.csv", dec=".")
+block_exces           <- read.csv2("block_exceptions.csv", dec=".")
+peer_logic_validation <- read.csv2("peer_logic_validation.csv", dec=".")
+update_tip            <- read.csv2("update_tip.csv", dec=".")
+consensus_chain       <- read.csv2("consensus_chain.csv", dec=".")
+
+txs          <- read.csv2("txs.csv", dec=".")
+txs_received <- read.csv2("txs_received.csv", dec=".")
+tx_exces     <- read.csv2("tx_exceptions.csv", dec=".")
+
+rpc_exces <- read.csv2("rpc_exceptions.csv", dec=".")
+tips      <- read.csv2("tips.csv", dec=".")
+
 general_infos <- fromJSON(file('run-1/general_infos.json'))
-tick_infos    <- read.csv2("tick_infos.csv", dec=".")
 step_times    <-  read.csv2("step_times.csv", dec=".")
-
-ticks <- readLines('ticks.csv')
-
-txs             <- read.csv2("txs.csv", dec=".")
-blocks          <- read.csv2("blocks.csv", dec=".")
-tips            <- read.csv2("tips.csv", dec=".")
-consensus_chain <- read.csv2("consensus_chain.csv", dec=".")
-
-blocks_received <- read.csv2("blocks_received.csv", dec=".")
-txs_received    <- read.csv2("txs_received.csv", dec=".")
-
-tx_exces    <- read.csv2("tx_exceptions.csv", dec=".")
-block_exces <- read.csv2("block_exceptions.csv", dec=".")
-rpc_exces   <- read.csv2("rpc_exceptions.csv", dec=".")
+tick_infos    <- read.csv2("tick_infos.csv", dec=".")
 
 cpu_time <- read.csv2("cpu_time.csv", dec=".")
 memory <- read.csv2("memory.csv", dec=".")
 
+ticks <- readLines('ticks.csv')
 args      <- stream_in(file('args.json'))
 sim_start <- tick_infos$start[1]
 ```
@@ -75,8 +77,8 @@ planned_blocks <- sum(str_count(ticks, 'block'))
 planned_txs    <- sum(str_count(ticks, 'tx'))
 df             <- data.frame(
                     c(length(ticks), data.frame(table(tick_infos$tag))[,2]),
-                    c(planned_blocks, data.frame(table(blocks$tag))[,2]),
-                    c(planned_txs, data.frame(table(txs$tag))[,2] - data.frame(table(blocks$tag))[,2])
+                    c(planned_blocks, data.frame(table(blocks_create$tag))[,2]),
+                    c(planned_txs, data.frame(table(txs$tag))[,2] - data.frame(table(blocks_create$tag))[,2])
                   )
 row.names(df)  <- c('Planned', levels(data.frame(table(tick_infos$tag))[,1]))
 kable(df,
@@ -111,26 +113,35 @@ kable(unclass(summary(tick_infos$duration)), col.names = c('Duration [s]'), digi
 ```
 
 ## Blocks
+```{r blocks_setup}
+valid_blocks      <- rbind(peer_logic_validation, update_tip[, !(names(update_tip) %in% c('tx', 'height'))])
+block_propagation <- rbind(blocks_reconstructed, blocks_received, valid_blocks)
+
+valid_blocks <- valid_blocks %>%
+  group_by(hash) %>% filter(which.min(timestamp)==row_number())
+
+block_propagation <- block_propagation %>%
+  group_by(node, hash) %>% filter(which.min(timestamp)==row_number()) %>%
+  group_by(hash) %>% mutate(propagation_time = timestamp - min(timestamp)) %>%
+  filter(propagation_time != 0)
+```
 
 ```{r block_propagation_summary}
-blocks_received <- merge(blocks[, c('timestamp', 'hash')], blocks_received, by = 'hash')
-blocks_received$propagation_duration <- blocks_received$timestamp.y - blocks_received$timestamp.x
-
-kable(unclass(summary(blocks_received$propagation_duration * 1000)), col.names = c('Propagation [ms]'), digits = 3, caption = 'Overall block propagation', format = 'latex') %>%
+kable(unclass(summary(block_propagation$propagation_time * 1000)), col.names = c('Propagation [ms]'), digits = 3, caption = 'Overall block propagation', format = 'latex') %>%
   kable_styling(latex_options = c('HOLD_position'))
 ```
 
 ```{r block_size_summary}
-kable(unclass(summary(blocks$total_size / 1000)), col.names = c('Size [kB]'), digits = 3, caption = 'Overall block size', format = 'latex') %>%
+kable(unclass(summary(blocks_create$total_size / 1000)), col.names = c('Size [kB]'), digits = 3, caption = 'Overall block size', format = 'latex') %>%
   kable_styling(latex_options = c('HOLD_position'))
 ```
 
 ```{r block_stale_rate_summary}
 consensus_chain$stale = 'Accepted'
-blocks <- merge(blocks, consensus_chain, all.x = TRUE)
-blocks$stale[is.na(blocks$stale)] <- 'Stale'
+blocks_create <- merge(blocks_create, consensus_chain, all.x = TRUE)
+blocks_create$stale[is.na(blocks_create$stale)] <- 'Stale'
 
-stale_block <- table(blocks$tag, factor(blocks$stale, levels = c('Accepted', 'Stale')))
+stale_block <- table(blocks_create$tag, factor(blocks_create$stale, levels = c('Accepted', 'Stale')))
 stale_rate  <- data.frame(c(round(prop.table(stale_block, 1)[,2] * 100, 3)))
 kable(stale_rate, col.names = c('Rate [%]'), digits = 3, caption = 'Stale block rate', format = 'latex') %>%
   kable_styling(latex_options = c('HOLD_position'))
@@ -147,7 +158,7 @@ kable(unclass(summary(txs_received$propagation_duration * 1000)), col.names = c(
 ```
 
 ```{r txs_per_block_summary}
-kable(unclass(summary(blocks$txs)), digits = 0, caption = 'Overall transactions per block', format = 'latex') %>%
+kable(unclass(summary(blocks_create$txs)), digits = 0, caption = 'Overall transactions per block', format = 'latex') %>%
   kable_styling(latex_options = c('HOLD_position'))
 ```
 
@@ -241,8 +252,8 @@ xyplot(tick_infos$duration ~ ticks$elapsed, groups = ticks$tag,
 bwplot(tick_infos$duration ~ tick_infos$tag, ylab = 'Duration [s]')
 ```
 
-```{r block_stale_barchart, fig.cap='Stale blocks', fig.env='figure*', fig.height=length(unique(blocks$tag)) + 1}
-stale_block <- table(blocks$tag, blocks$stale)
+```{r block_stale_barchart, fig.cap='Stale blocks', fig.env='figure*', fig.height=length(unique(blocks_create$tag)) + 1}
+stale_block <- table(blocks_create$tag, blocks_create$stale)
 barchart(stale_block, stack = TRUE, ref = FALSE, xlab = 'Blocks',
          auto.key = list(columns=2, points = FALSE, rectangles = TRUE), panel=function(x,y,...){
       panel.barchart(x,y,...)
@@ -252,17 +263,17 @@ barchart(stale_block, stack = TRUE, ref = FALSE, xlab = 'Blocks',
 ```
 
 ```{r block_size_bloxplot, fig.cap='Block size', fig.env='figure*'}
-bwplot(blocks$total_size / 1000 ~ blocks$tag, ylab = 'Block size [kB]')
+bwplot(blocks_create$total_size / 1000 ~ blocks_create$tag, ylab = 'Block size [kB]')
 ```
 
 ```{r block_propagation_density, fig.cap='Block propagation density', fig.env='figure*'}
-densityplot(~propagation_duration, data=blocks_received, groups = tag,
+densityplot(~propagation_time, data=block_propagation, groups = tag,
             auto.key = list(space = "top", columns = 2),
             ref = TRUE, xlab = 'Duration [s]', plot.points = FALSE)
 ```
 
 ```{r block_propagation_boxplot, fig.cap='Block propagation boxplot', fig.env='figure*'}
-bwplot(blocks_received$propagation_duration ~ blocks_received$tag, ylab = 'Duration [s]')
+bwplot(block_propagation$propagation_time ~ block_propagation$tag, ylab = 'Duration [s]')
 ```
 
 ```{r tx_propagation_density, fig.cap='Transaction propagation density', fig.env='figure*'}

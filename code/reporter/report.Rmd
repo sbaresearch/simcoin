@@ -92,8 +92,8 @@ planned_blocks <- sum(str_count(ticks, 'block'))
 planned_txs    <- sum(str_count(ticks, 'tx'))
 df             <- data.frame(
                     c(length(ticks), nrow(tick_infos)),
-                    c(planned_blocks, nrow(blocks)),
-                    c(planned_txs, nrow(txs) - nrow(blocks))
+                    c(planned_blocks, nrow(blocks_create)),
+                    c(planned_txs, nrow(txs) - nrow(blocks_create))
                   )
 row.names(df)  <- c('Planned', 'Run')
 kable(df,
@@ -138,7 +138,7 @@ step_diff_summary              <- rbind(step_diff, apply(step_diff, 2, sum))
 step_diff_summary$duration_min <- step_diff_summary$timestamp/60
 step_diff_summary              <- step_diff_summary %>%
   mutate_at(.vars = vars(timestamp, duration_min), .funs = funs(round(.,2)))
-rownames(step_diff_summary)   <- c('Preparation step', 'Simulation step', 'Postprocessing step', 'Total')
+rownames(step_diff_summary)    <- c('Preparation step', 'Simulation step', 'Postprocessing step', 'Total')
 
 kable(step_diff_summary, col.names = c('Duration [s]', 'Duration [min]'), caption = 'Duration of different steps', format = 'latex') %>%
   kable_styling(latex_options = c('scale_down','HOLD_position'))
@@ -178,14 +178,27 @@ xyplot(tick_infos$duration ~ tick_infos$start - sim_start, xlab = 'Time [s]', yl
 
 ##  Blocks
 
-`r if(nrow(txs) == 0) {'There were 0 blocks during this simulation run.'}`
+```{r blocks_setup}
+valid_blocks      <- rbind(peer_logic_validation, update_tip[, !(names(update_tip) %in% c('tx', 'height'))])
+block_propagation <- rbind(blocks_reconstructed, blocks_received, valid_blocks)
+
+valid_blocks <- valid_blocks %>%
+  group_by(hash) %>% filter(which.min(timestamp)==row_number())
+
+block_propagation <- block_propagation %>%
+  group_by(node, hash) %>% filter(which.min(timestamp)==row_number()) %>%
+  group_by(hash) %>% mutate(propagation_time = timestamp - min(timestamp)) %>%
+  filter(propagation_time != 0)
+```
+
+`r if(nrow(blocks_create) == 0) {'There were 0 blocks during this simulation run.'}`
 
 ```{r block_stale_barchart, fig.cap='Accepted/stale blocks', fig.pos='H', fig.height=3}
 consensus_chain$stale = 'Accepted'
-blocks <- merge(blocks, consensus_chain, all.x = TRUE)
-blocks$stale[is.na(blocks$stale)] <- 'Stale'
+valid_blocks <- merge(valid_blocks, consensus_chain, all.x = TRUE)
+valid_blocks$stale[is.na(valid_blocks$stale)] <- 'Stale'
 
-stale_block <- t(table(blocks$stale))
+stale_block <- t(table(valid_blocks$stale))
 rownames(stale_block) <- c('Run')
 barchart(stale_block, stack = TRUE, ref = FALSE, xlab = 'Blocks',
          auto.key = list(columns=2, points = FALSE, rectangles = TRUE), panel=function(x,y,...){
@@ -196,7 +209,7 @@ barchart(stale_block, stack = TRUE, ref = FALSE, xlab = 'Blocks',
 ```
 
 ```{r block_stale_rate_summary}
-factor_stale_block <- t(table(factor(blocks$stale, levels = c('Accepted', 'Stale'))))
+factor_stale_block <- t(table(factor(valid_blocks$stale, levels = c('Accepted', 'Stale'))))
 stale_rate <- data.frame(c(round(prop.table(factor_stale_block)[,2] * 100, 3)))
 rownames(stale_rate) <- c('Block stale rate')
 kable(stale_rate, col.names = c('Rate [%]'), digits = 3, caption = 'Stale block rate', format = 'latex') %>%
@@ -204,24 +217,21 @@ kable(stale_rate, col.names = c('Rate [%]'), digits = 3, caption = 'Stale block 
 ```
 
 ```{r block_size_summary}
-kable(unclass(summary(blocks$total_size / 1000)), col.names = c('Size [kB]'), digits = 3, caption = 'Block size', format = 'latex') %>%
+kable(unclass(summary(blocks_create$total_size / 1000)), col.names = c('Size [kB]'), digits = 3, caption = 'Block size', format = 'latex') %>%
   kable_styling(latex_options = c('HOLD_position'))
 ```
 
 ```{r block_size_boxplot, fig.cap='Block size', fig.pos='H', fig.height=3}
-bwplot(blocks$total_size / 1000, xlab='Block size [kb]')
+bwplot(blocks_create$total_size / 1000, xlab='Block size [kb]')
 ```
 
 ```{r block_propagation_summary}
-blocks_received <- merge(blocks[, c('timestamp', 'hash')], blocks_received, by = 'hash')
-blocks_received$propagation_duration <- blocks_received$timestamp.y - blocks_received$timestamp.x
-
-kable(unclass(summary(blocks_received$propagation_duration * 1000)), col.names = c('Propagation [ms]'), digits = 3, caption = 'Block propagation', format = 'latex') %>%
+kable(unclass(summary(block_propagation$propagation_time * 1000)), col.names = c('Propagation [ms]'), digits = 3, caption = 'Block propagation', format = 'latex') %>%
   kable_styling(latex_options = c('HOLD_position'))
 ```
 
 ```{r block_propagation_density, fig.cap='Block propagation density', fig.env='figure*'}
-densityplot(~propagation_duration, data=blocks_received, auto.key = list(space = "right"), ref = TRUE, xlab = 'Duration [s]', plot.points = FALSE)
+densityplot(~propagation_time, data=block_propagation, auto.key = list(space = "right"), ref = TRUE, xlab = 'Duration [s]', plot.points = FALSE)
 ```
 
 ## Transactions
@@ -241,12 +251,12 @@ densityplot(~propagation_duration, data=txs_received, auto.key = list(space = "r
 ```
 
 ```{r txs_per_block_summary}
-kable(unclass(summary(blocks$txs)), digits = 2, caption = 'Transactions per block', format = 'latex') %>%
+kable(unclass(summary(blocks_create$txs)), digits = 2, caption = 'Transactions per block', format = 'latex') %>%
   kable_styling(latex_options = c('HOLD_position'))
 ```
 
 ```{r txs_per_block_boxplot, fig.cap='Transactions in block', fig.pos='H', fig.height=3}
-bwplot(blocks$txs, xlab='Transactions')
+bwplot(blocks_create$txs, xlab='Transactions')
 ```
 
 ## Tips
