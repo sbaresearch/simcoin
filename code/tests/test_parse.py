@@ -57,7 +57,7 @@ class TestParse(TestCase):
         self.assertEqual(event.obj_hash, '4ec9b518b23d460c01abaf1c6e32ec46dbbfc8c81c599dd71c0c175e2367f278')
 
     def test_successfully_reconstructed_block(self):
-        event = parse.BlockReceivedEvent.from_log_line(
+        event = parse.BlockReconstructEvent.from_log_line(
             '2017-07-28 08:41:43.637277 node-3 1 Successfully reconstructed'
             ' block 27ebf5f20b3860fb3a8ed82f0721300bf96c1836252fddd67b60f48d227d3a3c with 1 txn prefilled,'
             ' 0 txn from mempool (incl at least 0 from extra pool) and 0 txn requested'
