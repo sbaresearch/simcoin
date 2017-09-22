@@ -6,6 +6,9 @@ import pytz
 from multiprocessing import Pool
 import utils
 from itertools import repeat
+from chunker import Chunker
+
+chunk_size_10_MB = 10 * 1024 * 1024
 
 
 class Parser:
@@ -13,54 +16,43 @@ class Parser:
         self.context = context
         self.nodes_create_blocks = {node.name: None for node in context.all_bitcoin_nodes.values()}
         self.parsed_blocks = {}
-        self.parsers = [
-            BlockCreateEvent,
-            BlockReceivedEvent,
-            BlockReconstructEvent,
-            BlockExceptionEvent,
-            UpdateTipEvent,
-            PeerLogicValidationEvent,
-
-            TxEvent,
-            TxReceivedEvent,
-            TxExceptionEvent,
-
-            RPCExceptionEvent,
-
-            TickEvent,
-        ]
         self.pool = Pool(config.pool_processors)
 
-        logging.info('Created parser with {} log parsers'.format(len(self.parsers)))
+        logging.info('Created parser with {} log parsers'.format(len(parsers)))
 
     def execute(self):
+
+        for parser in parsers:
+            utils.write_csv(self.context.path.postprocessing_dir + parser.file_name,
+                            parser.csv_header, self.context.args.tag)
+        logging.info('Created all empty csv files')
+
         self.pool.starmap(parse, zip(
             repeat(self.context.path.aggregated_sim_log),
-            self.parsers,
+            Chunker.chunkify(self.context.path.aggregated_sim_log, chunk_size_10_MB),
             repeat(self.context.path.postprocessing_dir),
             repeat(self.context.args.tag)
-
         ))
 
         self.pool.close()
         logging.info('Finished parsing aggregated log={}'.format(self.context.path.aggregated_sim_log))
 
 
-def parse(log_file, cls, postprocessing_dir, tag):
-    parsed_objects = []
-    with open(log_file, 'r') as file:
-        lines = file.readlines()
-        for i, line in enumerate(lines):
+def parse(log_file, chunk, postprocessing_dir, tag):
+    parsed_objects = {}
+    for line in Chunker.parse(Chunker.read(log_file, chunk)):
+        for parser in parsers:
             try:
-                parsed_objects.append(cls.from_log_line(line))
+                parsed_object = parser.from_log_line(line)
+                parsed_objects.setdefault(parsed_object.file_name, []).append(parsed_object)
+                break
             except ParseException:
                 pass
-            if (i + 1) % 100000 == 0:
-                logging.info('{} parser parsed {:,} of {:,} log lines'.format(cls.__name__, i + 1, len(lines)))
 
-    utils.write_csv(postprocessing_dir + cls.file_name, cls.csv_header, parsed_objects, tag)
-    logging.info('{} parser parsed {:,} events out of {:,} lines from {} into file {}'
-                 .format(cls.__name__, len(parsed_objects), len(lines), log_file, cls.file_name))
+    for key in parsed_objects:
+        utils.write_csv(postprocessing_dir + key, parsed_objects[key], tag)
+    logging.info('Parsed {} event types out of chunk {} from file={}'
+                 .format(len(parsed_objects), chunk, log_file, log_file))
 
 
 def parse_datetime(date_time):
@@ -362,3 +354,21 @@ class RPCExceptionEvent(Event):
 
 class ParseException(Exception):
     pass
+
+
+parsers = [
+    BlockCreateEvent,
+    BlockReceivedEvent,
+    BlockReconstructEvent,
+    BlockExceptionEvent,
+    UpdateTipEvent,
+    PeerLogicValidationEvent,
+
+    TxEvent,
+    TxReceivedEvent,
+    TxExceptionEvent,
+
+    RPCExceptionEvent,
+
+    TickEvent,
+]
