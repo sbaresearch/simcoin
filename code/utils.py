@@ -76,7 +76,8 @@ def write_csv(file_name, elements, tag):
         logging.debug('Received lock for writing to file={}'.format(file_name))
 
         w = csv.writer(file, delimiter=';')
-        for element in elements:
+        for i, element in enumerate(elements):
             row = element.vars_to_array()
-            row.append(tag)
+            if i != 0:
+                row.append(tag)
             w.writerow(row)

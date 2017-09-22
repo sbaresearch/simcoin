@@ -65,7 +65,7 @@ class Runner:
 
 
 class StepTimes:
-    csv_header = ['timestamp', 'type']
+    csv_header = ['timestamp', 'type', 'tag']
 
     def __init__(self, timestamp, type):
         self.timestamp = timestamp

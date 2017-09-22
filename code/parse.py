@@ -75,7 +75,7 @@ class Event:
 
 
 class BlockCreateEvent(Event):
-    csv_header = ['timestamp', 'node', 'total_size', 'txs']
+    csv_header = ['timestamp', 'node', 'total_size', 'txs', 'tag']
     file_name = 'blocks_create.csv'
 
     def __init__(self, timestamp, node, total_size, txs):
@@ -104,7 +104,7 @@ class BlockCreateEvent(Event):
 
 
 class UpdateTipEvent(Event):
-    csv_header = ['timestamp', 'node', 'hash', 'height', 'tx']
+    csv_header = ['timestamp', 'node', 'hash', 'height', 'tx', 'tag']
     file_name = 'update_tip.csv'
 
     def __init__(self, timestamp, node, block_hash, height, tx):
@@ -137,7 +137,7 @@ class UpdateTipEvent(Event):
 
 
 class PeerLogicValidationEvent(Event):
-    csv_header = ['timestamp', 'node', 'hash']
+    csv_header = ['timestamp', 'node', 'hash', 'tag']
     file_name = 'peer_logic_validation.csv'
 
     def __init__(self, timestamp, node, block_hash):
@@ -164,7 +164,7 @@ class PeerLogicValidationEvent(Event):
 
 
 class TxEvent(Event):
-    csv_header = ['timestamp', 'node', 'hash']
+    csv_header = ['timestamp', 'node', 'hash', 'tag']
     file_name = 'txs.csv'
 
     def __init__(self, timestamp, node, tx_hash):
@@ -189,7 +189,7 @@ class TxEvent(Event):
 
 
 class TickEvent:
-    csv_header = ['timestamp', 'start', 'duration']
+    csv_header = ['timestamp', 'start', 'duration', 'tag']
     file_name = 'tick_infos.csv'
 
     def __init__(self, timestamp, start, duration):
@@ -217,7 +217,7 @@ class TickEvent:
 
 
 class ReceivedEvent(Event):
-    csv_header = ['timestamp', 'node', 'hash']
+    csv_header = ['timestamp', 'node', 'hash', 'tag']
 
     def __init__(self, timestamp, node, obj_hash):
         super().__init__(timestamp, node)
@@ -283,7 +283,7 @@ class TxReceivedEvent(ReceivedEvent):
 
 
 class ExceptionEvent(Event):
-    csv_header = ['timestamp', 'node', 'exception']
+    csv_header = ['timestamp', 'node', 'exception', 'tag']
 
     def __init__(self, timestamp, node, exception):
         super().__init__(timestamp, node)
@@ -332,7 +332,7 @@ class TxExceptionEvent(ExceptionEvent):
 
 
 class RPCExceptionEvent(Event):
-    csv_header = ['timestamp', 'node', 'method', 'exception']
+    csv_header = ['timestamp', 'node', 'method', 'exception', 'tag']
     file_name = 'rpc_exceptions.csv'
 
     def __init__(self, timestamp, node, method, exception):

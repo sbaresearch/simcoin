@@ -36,7 +36,7 @@ class CliStats:
         for node in self.context.all_bitcoin_nodes.values():
             tips.extend([Tip.from_dict(node.name, chain_tip) for chain_tip in node.execute_rpc('getchaintips')])
 
-        utils.write_csv(self.context.path.postprocessing_dir + Tip.file_name, Tip.csv_header, tips, self.context.args.tag)
+        utils.write_csv(self.context.path.postprocessing_dir + Tip.file_name, Tip.csv_header + tips, self.context.args.tag)
         logging.info('Collected and persisted {} tips'.format(len(tips)))
 
 
@@ -48,7 +48,7 @@ def write_consensus_chain(path, chain):
 
 
 class Tip:
-    csv_header = ['node', 'status', 'branchlen']
+    csv_header = ['node', 'status', 'branchlen', 'tag']
     file_name = 'tips.csv'
 
     def __init__(self, node, status, branchlen):
