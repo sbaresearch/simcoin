@@ -66,7 +66,7 @@ class Event:
 
 class BlockCreateEvent(Event):
     csv_header = ['timestamp', 'node', 'total_size', 'txs']
-    file_name = 'create_blocks.csv'
+    file_name = 'blocks_create.csv'
 
     def __init__(self, timestamp, node, total_size, txs):
         super().__init__(timestamp, node)
