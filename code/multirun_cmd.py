@@ -14,14 +14,20 @@ import clistats
 
 files_to_concat = [
     parse.BlockCreateEvent.file_name,
-    clistats.Tip.file_name,
-    parse.TxEvent.file_name,
-    parse.TxExceptionEvent.file_name,
-    parse.BlockExceptionEvent.file_name,
-    parse.RPCExceptionEvent.file_name,
     parse.BlockReceivedEvent.file_name,
+    parse.BlockExceptionEvent.file_name,
+
+    parse.UpdateTipEvent,
+    parse.PeerLogicValidationEvent,
+
+    parse.TxEvent.file_name,
     parse.TxReceivedEvent.file_name,
+    parse.TxExceptionEvent.file_name,
+
+    parse.RPCExceptionEvent.file_name,
     parse.TickEvent.file_name,
+
+    clistats.Tip.file_name,
     config.step_times_csv_file_name,
     config.consensus_chain_csv_file_name,
 
