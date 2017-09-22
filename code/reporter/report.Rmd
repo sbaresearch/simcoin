@@ -283,7 +283,7 @@ kable(unclass(summary(tips$branchlen)), digits = 2, caption = 'Overall branch le
 ```
 
 ```{r tips_branchlen_boxplot, eval=nrow(tips) > 0, fig.cap='Overall branch length of tips', fig.pos='H', fig.height=3}
-bwplot(tips$branchlen, xlab='Length in blocks')
+bwplot(tips$branchlen, xlab='Branch length')
 ```
 
 ## Exceptions

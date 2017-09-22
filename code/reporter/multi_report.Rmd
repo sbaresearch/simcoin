@@ -291,7 +291,7 @@ bwplot(tips_per_node$n ~ tips_per_node$tag, ylab = 'Tips')
 ```
 
 ```{r tips_branchlen_boxplot, eval=nrow(tips) > 0, fig.cap='Overall branch length of tips', fig.env='figure*'}
-bwplot(tips$branchlen ~ tips$tag, ylab = 'Length in blocks')
+bwplot(tips$branchlen ~ tips$tag, ylab = 'Branch length')
 ```
 
 ```{r event_exces, eval=nrow(event_exces)>0, fig.cap='Exceptions transaction/block event', fig.env='figure*', fig.height=3}
