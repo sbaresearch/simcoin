@@ -7,6 +7,7 @@ import re
 import json
 from collections import namedtuple
 import csv
+import fcntl
 
 
 def sleep(seconds):
@@ -68,12 +69,13 @@ def json_object_hook(d):
     return namedtuple('X', d.keys())(*d.values())
 
 
-def write_csv(file, header, elements, tag):
-    with open(file, 'w') as file:
-        w = csv.writer(file, delimiter=';')
-        header.append('tag')
-        w.writerow(header)
+def write_csv(file_name, elements, tag):
+    with open(file_name, 'a') as file:
+        logging.debug('Waiting for lock to write to file={}'.format(file_name))
+        fcntl.flock(file, fcntl.LOCK_EX)
+        logging.debug('Received lock for writing to file={}'.format(file_name))
 
+        w = csv.writer(file, delimiter=';')
         for element in elements:
             row = element.vars_to_array()
             row.append(tag)

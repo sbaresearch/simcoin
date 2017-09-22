@@ -53,27 +53,23 @@ class Runner:
 
         utils.write_csv(
             self.context.path.postprocessing_dir + CpuTimeSnapshot.file_name,
-            CpuTimeSnapshot.csv_header,
-            cpu_times,
+            CpuTimeSnapshot.csv_header + cpu_times,
             self.context.args.tag
         )
         utils.write_csv(
             self.context.path.postprocessing_dir + MemorySnapshot.file_name,
-            MemorySnapshot.csv_header,
-            memory,
+            MemorySnapshot.csv_header + memory,
             self.context.args.tag
         )
         logging.info('Persisted {} CPU time and {} memory snapshots'.format(len(cpu_times), len(memory)))
 
 
 class StepTimes:
+    csv_header = ['timestamp', 'type']
+
     def __init__(self, timestamp, type):
         self.timestamp = timestamp
         self.type = type
-
-    @staticmethod
-    def csv_header():
-        return ['timestamp', 'type']
 
     def vars_to_array(self):
         return [self.timestamp, self.type]

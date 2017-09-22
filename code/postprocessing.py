@@ -46,7 +46,7 @@ class PostProcessing:
         collect_general_infos(self.context.path.general_infos_json)
 
         self.context.step_times.append(StepTimes(time.time(), 'postprocessing_end'))
-        utils.write_csv(self.context.path.step_times, StepTimes.csv_header(), self.context.step_times, self.context.args.tag)
+        utils.write_csv(self.context.path.step_times, StepTimes.csv_header, self.context.step_times, self.context.args.tag)
 
         bash.check_output(rcmd.create_report(self.context.path.postprocessing_dir, config.report_file_name))
         logging.info('Created {} report in folder={}'
