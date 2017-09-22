@@ -15,6 +15,7 @@ import clistats
 files_to_concat = [
     parse.BlockCreateEvent.file_name,
     parse.BlockReceivedEvent.file_name,
+    parse.BlockReconstructEvent.file_name,
     parse.BlockExceptionEvent.file_name,
 
     parse.UpdateTipEvent,

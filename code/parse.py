@@ -14,7 +14,7 @@ class Parser:
         self.nodes_create_blocks = {node.name: None for node in context.all_bitcoin_nodes.values()}
         self.parsed_blocks = {}
         self.parsers = [
-            BlockCreateEvent, BlockReceivedEvent, BlockExceptionEvent,
+            BlockCreateEvent, BlockReceivedEvent, BlockReconstructEvent, BlockExceptionEvent,
             UpdateTipEvent, PeerLogicValidationEvent,
             TxEvent, TxReceivedEvent, TxExceptionEvent,
             TickEvent, RPCExceptionEvent
@@ -222,20 +222,27 @@ class BlockReceivedEvent(ReceivedEvent):
 
     @classmethod
     def from_log_line(cls, line):
-        regexs = [
-            'Successfully reconstructed block ([a-z0-9]{64}) with ([0-9]+) txn prefilled,'
-            ' ([0-9]+) txn from mempool \(incl at least ([0-9]+) from extra pool\) and'
-            ' [0-9]+ txn requested$',
-            'received block ([a-z0-9]{64}) peer=[0-9]+$'
-        ]
+        match = re.match(config.log_prefix_full + 'received block ([a-z0-9]{64}) peer=[0-9]+$', line)
 
-        match = None
-        for regex in regexs:
-            match = re.match(config.log_prefix_full + regex, line)
+        if match is None:
+            raise ParseException("Didn't match 'Received block' log line.")
 
-            if match is not None:
-                break
+        return cls(
+            parse_datetime(match.group(1)),
+            str(match.group(2)),
+            str(match.group(3))
+        )
 
+
+class BlockReconstructEvent(ReceivedEvent):
+    file_name = 'blocks_reconstructed.csv'
+
+    @classmethod
+    def from_log_line(cls, line):
+        match = re.match(
+            config.log_prefix_full + 'Successfully reconstructed block ([a-z0-9]{64}) with ([0-9]+) txn prefilled,'
+                                     ' ([0-9]+) txn from mempool \(incl at least ([0-9]+) from extra pool\) and'
+                                     ' [0-9]+ txn requested$', line)
         if match is None:
             raise ParseException("Didn't match 'Reconstructed block' log line.")
 
