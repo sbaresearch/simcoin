@@ -199,15 +199,15 @@ class TxEvent(Event):
 
     @classmethod
     def from_log_line(cls, line):
-        matched = re.match(config.log_prefix_full + 'AddToWallet ([a-z0-9]{64})  new$', line)
+        match = re.match(config.log_prefix_full + 'AddToWallet ([a-z0-9]{64})  new$', line)
 
-        if matched is None:
-            raise ParseException("Didn't matched 'AddToWallet' log line.")
+        if match is None:
+            raise ParseException("Didn't match 'AddToWallet' log line.")
 
         return cls(parse_datetime(
-            matched.group(1)),
-            str(matched.group(2)),
-            str(matched.group(3))
+            match.group(1)),
+            str(match.group(2)),
+            str(match.group(3))
         )
 
     def vars_to_array(self):
@@ -230,7 +230,7 @@ class TickEvent:
                                      ' and took ([0-9]+\.[0-9]+)s to finish$',
             line)
         if match is None:
-            raise ParseException("Didn't matched 'Tick' log line.")
+            raise ParseException("Didn't match 'Tick' log line.")
 
         return cls(
             parse_datetime(match.group(1)),
@@ -265,20 +265,20 @@ class BlockReceivedEvent(ReceivedEvent):
             'received block ([a-z0-9]{64}) peer=[0-9]+$'
         ]
 
-        matched = None
+        match = None
         for regex in regexs:
-            matched = re.match(config.log_prefix_full + regex, line)
+            match = re.match(config.log_prefix_full + regex, line)
 
-            if matched is not None:
+            if match is not None:
                 break
 
-        if matched is None:
-            raise ParseException("Didn't matched 'Reconstructed block' log line.")
+        if match is None:
+            raise ParseException("Didn't match 'Reconstructed block' log line.")
 
         return cls(
-            parse_datetime(matched.group(1)),
-            str(matched.group(2)),
-            str(matched.group(3))
+            parse_datetime(match.group(1)),
+            str(match.group(2)),
+            str(match.group(3))
         )
 
 
@@ -287,17 +287,17 @@ class TxReceivedEvent(ReceivedEvent):
 
     @classmethod
     def from_log_line(cls, line):
-        matched = re.match(config.log_prefix_full +
-                           'AcceptToMemoryPool: peer=([0-9]+): accepted ([0-9a-z]{64}) \(poolsz ([0-9]+) txn,'
-                           ' ([0-9]+) [a-zA-Z]+\)$', line)
+        match = re.match(config.log_prefix_full +
+                         'AcceptToMemoryPool: peer=([0-9]+): accepted ([0-9a-z]{64}) \(poolsz ([0-9]+) txn,'
+                         ' ([0-9]+) [a-zA-Z]+\)$', line)
 
-        if matched is None:
-            raise ParseException("Didn't matched 'AcceptToMemoryPool' log line.")
+        if match is None:
+            raise ParseException("Didn't match 'AcceptToMemoryPool' log line.")
 
         return cls(
-            parse_datetime(matched.group(1)),
-            str(matched.group(2)),
-            str(matched.group(4))
+            parse_datetime(match.group(1)),
+            str(match.group(2)),
+            str(match.group(4))
         )
 
 
@@ -317,17 +317,17 @@ class BlockExceptionEvent(ExceptionEvent):
 
     @classmethod
     def from_log_line(cls, line):
-        matched = re.match(config.log_prefix_full +
-                           '\[.*\] \[.*\]  Could not generate block for node=([a-zA-Z0-9-.]+)\.'
-                           ' Exception="(.+)"$', line)
+        match = re.match(config.log_prefix_full +
+                         '\[.*\] \[.*\]  Could not generate block for node=([a-zA-Z0-9-.]+)\.'
+                         ' Exception="(.+)"$', line)
 
-        if matched is None:
-            raise ParseException("Didn't matched 'Block exception' log line.")
+        if match is None:
+            raise ParseException("Didn't match 'Block exception' log line.")
 
         return cls(parse_datetime(
-            matched.group(1)),
-            str(matched.group(3)),
-            str(matched.group(4))
+            match.group(1)),
+            str(match.group(3)),
+            str(match.group(4))
         )
 
 
@@ -336,17 +336,17 @@ class TxExceptionEvent(ExceptionEvent):
 
     @classmethod
     def from_log_line(cls, line):
-        matched = re.match(config.log_prefix_full +
-                           '\[.*\] \[.*\]  Could not generate tx for node=([a-zA-Z0-9-.]+)\.'
-                           ' Exception="(.+)"$', line)
+        match = re.match(config.log_prefix_full +
+                         '\[.*\] \[.*\]  Could not generate tx for node=([a-zA-Z0-9-.]+)\.'
+                         ' Exception="(.+)"$', line)
 
-        if matched is None:
-            raise ParseException("Didn't matched 'Tx exception' log line.")
+        if match is None:
+            raise ParseException("Didn't match 'Tx exception' log line.")
 
         return cls(parse_datetime(
-            matched.group(1)),
-            str(matched.group(3)),
-            str(matched.group(4))
+            match.group(1)),
+            str(match.group(3)),
+            str(match.group(4))
         )
 
 
@@ -361,18 +361,18 @@ class RPCExceptionEvent(Event):
 
     @classmethod
     def from_log_line(cls, line):
-        matched = re.match(config.log_prefix_full +
-                           '\[.*\] \[.*\]  Node=([a-zA-Z0-9-\.]+) could not execute RPC-call=([a-zA-Z0-9]+)' \
-                           ' because of error="(.*)"\. Reconnecting RPC and retrying.', line)
+        match = re.match(config.log_prefix_full +
+                         '\[.*\] \[.*\]  Node=([a-zA-Z0-9-\.]+) could not execute RPC-call=([a-zA-Z0-9]+)' \
+                         ' because of error="(.*)"\. Reconnecting RPC and retrying.', line)
 
-        if matched is None:
-            raise ParseException("Didn't matched 'RPC exception' log line.")
+        if match is None:
+            raise ParseException("Didn't match 'RPC exception' log line.")
 
         return cls(
-            parse_datetime(matched.group(1)),
-            str(matched.group(3)),
-            str(matched.group(4)),
-            str(matched.group(5))
+            parse_datetime(match.group(1)),
+            str(match.group(3)),
+            str(match.group(4)),
+            str(match.group(5))
         )
 
     def vars_to_array(self):
