@@ -1,19 +1,8 @@
 from unittest import TestCase
 import parse
-from parse import ParseException
-from textwrap import dedent
-from mock import patch
-from mock import mock_open
 from parse import Parser
 from mock import Mock
-from parse import TickEvent
-from parse import CreateNewBlockEvent
-from parse import UpdateTipEvent
-from parse import EventWithHash
-from parse import ReceivedEvent
-from parse import BlockEvent
 from datetime import datetime
-from parse import TxEvent
 import pytz
 
 
@@ -34,108 +23,27 @@ class TestParse(TestCase):
         self.parser = Parser(self.context)
 
     def test_parse_create_new_block(self):
-        create_new_block = parse.parse_create_new_block(
+        event = parse.BlockCreateEvent.from_log_line(
             '2017-07-27 11:01:22.173139 node-1 1 CreateNewBlock(): total size: 226 block weight:'
             ' 904 txs: 1 fees: 0 sigops 400'
         )
 
-        self.assertEqual(create_new_block.timestamp, datetime(2017, 7, 27, 11, 1, 22, 173139, pytz.UTC).timestamp())
-        self.assertEqual(create_new_block.node, 'node-1')
-        self.assertEqual(create_new_block.total_size, 226)
-        self.assertEqual(create_new_block.txs, 1)
-
-    def test_parse_create_new_block_with_other_log_line(self):
-        with self.assertRaises(ParseException) as context:
-            parse.parse_create_new_block('Some other log_line')
-
-        self.assertTrue("Didn't matched 'CreateNewBlock' log line." in str(context.exception))
+        self.assertEqual(event.timestamp, datetime(2017, 7, 27, 11, 1, 22, 173139, pytz.UTC).timestamp())
+        self.assertEqual(event.node, 'node-1')
+        self.assertEqual(event.total_size, 226)
+        self.assertEqual(event.txs, 1)
 
     def test_parse_update_tip(self):
-        update_tip = parse.parse_update_tip(
+        event = parse.UpdateTipEvent.from_log_line(
             '2017-07-27 11:01:27.183575 node-1 45 UpdateTip: '
             'new best=1d205cac616c0344721d2552482024528883e9fdf7439bfbfc02567060c56d71 height=106 version=0x20000000'
             ' log2_work=7.741467 tx=113 date=\'2017-07-27 11:01:29\' progress=1.000000 cache=0.0MiB(112tx)')
 
-        self.assertEqual(update_tip.timestamp, datetime(2017, 7, 27, 11, 1, 27, 183575, pytz.UTC).timestamp())
-        self.assertEqual(update_tip.node, 'node-1')
-        self.assertEqual(update_tip.block_hash, '1d205cac616c0344721d2552482024528883e9fdf7439bfbfc02567060c56d71')
-        self.assertEqual(update_tip.height, 106)
-        self.assertEqual(update_tip.tx, 113)
-
-    def test_parse_update_tip_with_other_log_line(self):
-        with self.assertRaises(ParseException) as context:
-            parse.parse_update_tip('Some other log_line')
-
-        self.assertTrue("Didn't matched 'UpdateTip' log line." in str(context.exception))
-
-    @patch('utils.write_csv', lambda a, b, c, d: None)
-    def test_parse_aggregated_log_first_matching(self):
-        data = dedent("""
-            line1
-            line2
-            line3
-        """).strip()
-
-        parser_1 = Mock()
-        parser_2 = Mock()
-        self.parser.parsers = [parser_1, parser_2]
-        self.context.path.postprocessing_dir = '/dir'
-
-        with patch('builtins.open', mock_open(read_data=data)):
-            self.parser.execute1()
-
-            self.assertEqual(parser_1.call_count, 3)
-
-    @patch('utils.write_csv', lambda a, b, c, d: None)
-    def test_parse_aggregated_log_second_matching(self):
-        data = dedent("""
-            line1
-        """).strip()
-
-        parser_1 = Mock()
-        parser_2 = Mock()
-        self.parser.parsers = [parser_1, parser_2]
-        parser_1.side_effect = ParseException()
-        self.context.path.postprocessing_dir = '/dir'
-
-        with patch('builtins.open', mock_open(read_data=data)):
-            self.parser.execute1()
-
-            self.assertEqual(parser_2.call_count, 1)
-
-    @patch('parse.parse_create_new_block', lambda line: CreateNewBlockEvent(None, 'node-0', None, None))
-    def test_create_new_block_parser(self):
-
-        self.parser.block_creation_parser('line')
-
-        self.assertTrue(self.parser.nodes_create_blocks['node-0'])
-
-    @patch('parse.parse_update_tip', lambda line: UpdateTipEvent(None, 'node-0', 'block_hash', 45, None))
-    def test_update_tip_parser_with_previous_create_new_block(self):
-        self.parser.nodes_create_blocks['node-0'] = CreateNewBlockEvent(None, None, None, None)
-
-        self.parser.tip_updated_parser('line')
-
-        self.assertEqual(len(self.parser.parsed_blocks), 1)
-        parsed_block = self.parser.parsed_blocks['block_hash']
-        self.assertEqual(parsed_block.height, 45)
-        self.assertEqual(self.parser.nodes_create_blocks['node-0'], None)
-
-    @patch('parse.parse_update_tip', lambda line: UpdateTipEvent(None, 'node-0', 'block_hash', 45, None))
-    def test_update_tip_parser_with_block_stats_already_set(self):
-        self.parser.parsed_blocks['block_hash'] = BlockEvent(None, None, None, None, None)
-
-        self.parser.tip_updated_parser('line')
-
-        self.assertEqual(len(self.parser.parsed_blocks), 1)
-        self.assertEqual(self.parser.parsed_blocks['block_hash'].height, 45)
-        self.assertEqual(self.parser.nodes_create_blocks['node-0'], None)
-
-    @patch('parse.parse_update_tip', lambda line: UpdateTipEvent(None, 'node-0', None, None, None))
-    def test_update_tip_parser_with_previous_no_create_new_block(self):
-        self.parser.tip_updated_parser('line')
-
-        self.assertEqual(len(self.context.parsed_blocks), 0)
+        self.assertEqual(event.timestamp, datetime(2017, 7, 27, 11, 1, 27, 183575, pytz.UTC).timestamp())
+        self.assertEqual(event.node, 'node-1')
+        self.assertEqual(event.block_hash, '1d205cac616c0344721d2552482024528883e9fdf7439bfbfc02567060c56d71')
+        self.assertEqual(event.height, 106)
+        self.assertEqual(event.tx, 113)
 
     def test_parse_received_block(self):
         event = parse.BlockReceivedEvent.from_log_line(
@@ -181,30 +89,15 @@ class TestParse(TestCase):
         self.assertEqual(event.obj_hash, '701cd618d630780ac19a78325f24cdd13cbf87279103c7e9cec9fb6382e90ce7')
 
     def test_parse_peer_logic_validation(self):
-        log_line_with_hash = parse.parse_peer_logic_validation(
+        event = parse.PeerLogicValidationEvent.from_log_line(
             '2017-07-31 16:09:28.663985 node-0 1 PeerLogicValidation::NewPoWValidBlock'
             ' sending header-and-ids 107692460326feaa6f0c6c35bb218bdb3ff2adbc0d10a3a36b8252acf54e0c03'
             ' to peer=0'
         )
 
-        self.assertEqual(log_line_with_hash.timestamp, datetime(2017, 7, 31, 16, 9, 28, 663985, pytz.UTC).timestamp())
-        self.assertEqual(log_line_with_hash.node, 'node-0')
-        self.assertEqual(log_line_with_hash.obj_hash, '107692460326feaa6f0c6c35bb218bdb3ff2adbc0d10a3a36b8252acf54e0c03')
-
-    @patch('parse.parse_peer_logic_validation', lambda line: EventWithHash(None, 'node-0', 'block_hash'))
-    def test_peer_logic_validation_parse(self):
-        self.parser.nodes_create_blocks['node-0'] = CreateNewBlockEvent(None, None, None, None)
-
-        self.parser.peer_logic_validation_parser('line')
-
-        self.assertEqual(len(self.parser.parsed_blocks), 1)
-        self.assertEqual(self.parser.nodes_create_blocks['node-0'], None)
-
-    @patch('parse.parse_peer_logic_validation', lambda line: UpdateTipEvent(None, 'node-0', None, None, None))
-    def test_update_tip_parser_with_previous_no_create_new_block(self):
-        self.parser.peer_logic_validation_parser('line')
-
-        self.assertEqual(len(self.context.parsed_blocks), 0)
+        self.assertEqual(event.timestamp, datetime(2017, 7, 31, 16, 9, 28, 663985, pytz.UTC).timestamp())
+        self.assertEqual(event.node, 'node-0')
+        self.assertEqual(event.block_hash, '107692460326feaa6f0c6c35bb218bdb3ff2adbc0d10a3a36b8252acf54e0c03')
 
     def test_parse_tick(self):
         event = parse.TickEvent.from_log_line(

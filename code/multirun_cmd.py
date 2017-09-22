@@ -13,7 +13,7 @@ import systemmonitor
 import clistats
 
 files_to_concat = [
-    parse.BlockEvent.file_name,
+    parse.BlockCreateEvent.file_name,
     clistats.Tip.file_name,
     parse.TxEvent.file_name,
     parse.TxExceptionEvent.file_name,
