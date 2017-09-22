@@ -50,12 +50,12 @@ class CpuTimeSnapshot:
 
 class MemorySnapshot:
     file_name = 'memory.csv'
-    csv_header = ['timestamp', 'total', 'free']
+    csv_header = ['timestamp', 'total', 'available']
 
-    def __init__(self, timestamp, total, free):
+    def __init__(self, timestamp, total, available):
         self.timestamp = timestamp
         self.total = total
-        self.free = free
+        self.available = available
 
     @classmethod
     def from_bash(cls, memory):
@@ -64,4 +64,4 @@ class MemorySnapshot:
         return snapshot
 
     def vars_to_array(self):
-        return [self.timestamp, self.total, self.free]
+        return [self.timestamp, self.total, self.available]

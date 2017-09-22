@@ -16,9 +16,9 @@ class TestBash(TestCase):
         self.assertEqual(snapshot.idle, '6905504')
 
     def test_memory_snapshot_from_bash(self):
-        memory = 'MemTotal:        7577060 kB\nMemFree:         1568016 kB'
+        memory = 'MemTotal:        7577060 kB\nMemFree:         8316 kB\nMemAvailable:         1568016 kB'
 
         snapshot = MemorySnapshot.from_bash(memory)
 
         self.assertEqual(snapshot.total, '7577060')
-        self.assertEqual(snapshot.free, '1568016')
+        self.assertEqual(snapshot.available, '1568016')

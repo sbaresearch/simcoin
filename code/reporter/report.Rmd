@@ -121,7 +121,7 @@ xyplot(cpu_time_diff$usage ~ cpu_time_diff$timestamp - sim_start, xlab = 'Time [
 ```
 
 ```{r memory_usage_over_time, fig.cap='Memory usage over time', fig.env='figure*', fig.height=3}
-memory$usage <- (1 - memory$free/memory$total) * 100
+memory$usage <- (1 - memory$available/memory$total) * 100
 xyplot(memory$usage ~ memory$timestamp - sim_start, xlab = 'Time [s]', ylab = 'Memory usage [%]', t = 'l' )
 ```
 
