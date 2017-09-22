@@ -17,20 +17,19 @@ files_to_concat = [
     parse.BlockReceivedEvent.file_name,
     parse.BlockReconstructEvent.file_name,
     parse.BlockExceptionEvent.file_name,
-
     parse.UpdateTipEvent.file_name,
     parse.PeerLogicValidationEvent.file_name,
+    config.consensus_chain_csv_file_name,
 
     parse.TxEvent.file_name,
     parse.TxReceivedEvent.file_name,
     parse.TxExceptionEvent.file_name,
 
     parse.RPCExceptionEvent.file_name,
-    parse.TickEvent.file_name,
-
     clistats.Tip.file_name,
+
     config.step_times_csv_file_name,
-    config.consensus_chain_csv_file_name,
+    parse.TickEvent.file_name,
 
     systemmonitor.CpuTimeSnapshot.file_name,
     systemmonitor.MemorySnapshot.file_name,

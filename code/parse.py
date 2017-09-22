@@ -14,10 +14,20 @@ class Parser:
         self.nodes_create_blocks = {node.name: None for node in context.all_bitcoin_nodes.values()}
         self.parsed_blocks = {}
         self.parsers = [
-            BlockCreateEvent, BlockReceivedEvent, BlockReconstructEvent, BlockExceptionEvent,
-            UpdateTipEvent, PeerLogicValidationEvent,
-            TxEvent, TxReceivedEvent, TxExceptionEvent,
-            TickEvent, RPCExceptionEvent
+            BlockCreateEvent,
+            BlockReceivedEvent,
+            BlockReconstructEvent,
+            BlockExceptionEvent,
+            UpdateTipEvent,
+            PeerLogicValidationEvent,
+
+            TxEvent,
+            TxReceivedEvent,
+            TxExceptionEvent,
+
+            RPCExceptionEvent,
+
+            TickEvent,
         ]
         self.pool = Pool(config.pool_processors)
 

@@ -37,27 +37,24 @@ library(lattice)
 library(stringr)
 Sys.setenv(TZ='UTC')
 
-general_infos <- fromJSON(file('general_infos.json'))
-step_times    <-  read.csv2("step_times.csv", dec=".")
-
-blocks_create        <- read.csv2("blocks_create.csv", dec=".")
-blocks_reconstructed <- read.csv2("blocks_reconstructed.csv", dec=".")
-blocks_received      <- read.csv2("blocks_received.csv", dec=".")
-block_exces          <- read.csv2("block_exceptions.csv", dec=".")
-
+blocks_create         <- read.csv2("blocks_create.csv", dec=".")
+blocks_reconstructed  <- read.csv2("blocks_reconstructed.csv", dec=".")
+blocks_received       <- read.csv2("blocks_received.csv", dec=".")
+block_exces           <- read.csv2("block_exceptions.csv", dec=".")
 peer_logic_validation <- read.csv2("peer_logic_validation.csv", dec=".")
 update_tip            <- read.csv2("update_tip.csv", dec=".")
+consensus_chain       <- read.csv2("consensus_chain.csv", dec=".")
 
 txs          <- read.csv2("txs.csv", dec=".")
 txs_received <- read.csv2("txs_received.csv", dec=".")
 tx_exces     <- read.csv2("tx_exceptions.csv", dec=".")
 
 rpc_exces <- read.csv2("rpc_exceptions.csv", dec=".")
-tick_infos    <- read.csv2("tick_infos.csv", dec=".")
-ticks     <- readLines('../ticks.csv')
+tips      <- read.csv2("tips.csv", dec=".")
 
-tips            <- read.csv2("tips.csv", dec=".")
-consensus_chain <- read.csv2("consensus_chain.csv", dec=".")
+general_infos <- fromJSON(file('general_infos.json'))
+step_times    <-  read.csv2("step_times.csv", dec=".")
+tick_infos    <- read.csv2("tick_infos.csv", dec=".")
 
 memory   <- read.csv2("memory.csv", dec=".")
 cpu_time <- read.csv2("cpu_time.csv", dec=".")
@@ -65,6 +62,7 @@ cpu_time <- read.csv2("cpu_time.csv", dec=".")
 
 log_errors  <- readChar("log_errors.txt", file.info("log_errors.txt")$size)
 
+ticks     <- readLines('../ticks.csv')
 args      <- stream_in(file('../args.json'))
 sim_start <- tick_infos$start[1]
 ```
