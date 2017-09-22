@@ -59,7 +59,6 @@ tick_infos    <- read.csv2("tick_infos.csv", dec=".")
 memory   <- read.csv2("memory.csv", dec=".")
 cpu_time <- read.csv2("cpu_time.csv", dec=".")
 
-
 log_errors  <- readChar("log_errors.txt", file.info("log_errors.txt")$size)
 
 ticks     <- readLines('../ticks.csv')
