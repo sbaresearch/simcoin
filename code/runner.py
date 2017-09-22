@@ -43,7 +43,7 @@ class Runner:
             self.post_processing.execute()
         except Exception as exce:
             self.post_processing.clean_up_docker()
-            logging.error('Simulation terminated because of exception={}'.format(exce))
+            raise exce
 
     def persist_system_snapshots(self):
         self.pill2kill.set()
