@@ -18,8 +18,8 @@ files_to_concat = [
     parse.BlockReconstructEvent.file_name,
     parse.BlockExceptionEvent.file_name,
 
-    parse.UpdateTipEvent,
-    parse.PeerLogicValidationEvent,
+    parse.UpdateTipEvent.file_name,
+    parse.PeerLogicValidationEvent.file_name,
 
     parse.TxEvent.file_name,
     parse.TxReceivedEvent.file_name,
