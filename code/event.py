@@ -15,7 +15,7 @@ class Event:
             utils.check_for_file(config.ticks_csv)
             with open(config.ticks_csv, 'r') as file:
 
-                for line in file.readlines():
+                for i, line in enumerate(file):
                     start_time = time.time()
 
                     line = line.rstrip()
@@ -26,16 +26,16 @@ class Event:
                     next_tick = start_time + self.context.args.tick_duration
                     current_time = time.time()
                     tick_duration = current_time - start_time
-                    logging.info('The tick started at {} and took {}s to finish'.format(start_time, tick_duration))
+                    logging.info('Tick={} started at {} and took {}s to finish'.format(i, start_time, tick_duration))
 
                     if current_time < next_tick:
                         difference = next_tick - current_time
-                        logging.info('Sleep {} seconds for next tick'.format(difference))
+                        logging.info('Sleep {} seconds for next tick={}'.format(difference, i))
                         utils.sleep(difference)
                     else:
-                        logging.error('Events took {}s to execute.'
+                        logging.error('Events in tick={} took {}s to execute.'
                                       ' Consider to raise the tick_duration which is currently {}s.'
-                                      .format(current_time - next_tick,
+                                      .format(i, current_time - next_tick,
                                               self.context.args.tick_duration))
                         raise SimulationException('Events took to long to execute')
         except Exception as exce:
