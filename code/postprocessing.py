@@ -18,13 +18,14 @@ import fcntl
 
 
 class PostProcessing:
-    def __init__(self, context):
+    def __init__(self, context, writer):
         self.context = context
+        self.writer = writer
         self.pool = Pool(config.pool_processors)
         self.thread_pool = ThreadPool(5)
 
     def execute(self):
-        cli_stats = CliStats(self.context)
+        cli_stats = CliStats(self.context, self.writer)
         cli_stats.execute()
 
         self.clean_up_docker()
@@ -40,13 +41,13 @@ class PostProcessing:
         extract_from_file(self.context.path.aggregated_log, self.context.path.aggregated_sim_log,
                           config.log_line_sim_start, config.log_line_sim_end)
 
-        parser = Parser(self.context)
+        parser = Parser(self.context, self.writer)
         parser.execute()
 
         collect_general_infos(self.context.path.general_infos_json)
 
         self.context.step_times.append(StepTimes(time.time(), 'postprocessing_end'))
-        utils.write_csv(self.context.path.step_times, StepTimes.csv_header + self.context.step_times, self.context.args.tag)
+        self.writer.write_csv(config.step_times_csv_file_name, StepTimes.csv_header, self.context.step_times)
 
         bash.check_output(rcmd.create_report(self.context.path.postprocessing_dir, config.report_file_name))
         logging.info('Created {} report in folder={}'

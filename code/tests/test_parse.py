@@ -1,7 +1,7 @@
 from unittest import TestCase
 import parse
 from parse import Parser
-from mock import Mock
+from mock import MagicMock
 from datetime import datetime
 import pytz
 
@@ -9,18 +9,16 @@ import pytz
 class TestParse(TestCase):
 
     def setUp(self):
-        node_0 = Mock()
+        node_0 = MagicMock()
         node_0.name = 'node-0'
-        node_1 = Mock()
+        node_1 = MagicMock()
         node_1.name = 'node-1'
-        node_2 = Mock()
+        node_2 = MagicMock()
         node_2.name = 'node-2'
 
-        self.context = Mock()
-        self.context.parsed_blocks = {}
-        self.context.parsed_txs = {}
-        self.context.all_bitcoin_nodes.values.return_value = [node_0, node_1, node_2]
-        self.parser = Parser(self.context)
+        self.context = MagicMock()
+        self.writer = MagicMock()
+        self.parser = Parser(self.context, self.writer)
 
     def test_parse_create_new_block(self):
         event = parse.BlockCreateEvent.from_log_line(

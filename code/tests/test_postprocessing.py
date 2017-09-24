@@ -12,7 +12,8 @@ from collections import OrderedDict
 class TestPostProcessing(TestCase):
     def setUp(self):
         self.context = MagicMock()
-        self.postprocessing = PostProcessing(self.context)
+        self.writer = MagicMock()
+        self.postprocessing = PostProcessing(self.context, self.writer)
 
     def test_prefix_log_no_changes(self):
         lines = ['2017-07-05 14:33:35.324000 test', '2017-07-05 14:33:35.324000 test']

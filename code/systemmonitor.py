@@ -29,7 +29,7 @@ def collect(q_cpu_time, q_memory):
 
 class CpuTimeSnapshot:
     file_name = 'cpu_time.csv'
-    csv_header = ['timestamp', 'user', 'nice', 'system', 'idle', 'tag']
+    csv_header = ['timestamp', 'user', 'nice', 'system', 'idle']
 
     def __init__(self, timestamp, user, nice, system, idle):
         self.timestamp = timestamp
@@ -50,7 +50,7 @@ class CpuTimeSnapshot:
 
 class MemorySnapshot:
     file_name = 'memory.csv'
-    csv_header = ['timestamp', 'total', 'available', 'tag']
+    csv_header = ['timestamp', 'total', 'available']
 
     def __init__(self, timestamp, total, available):
         self.timestamp = timestamp

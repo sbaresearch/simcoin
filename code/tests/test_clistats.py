@@ -14,7 +14,8 @@ class TestCliStats(TestCase):
 
     def setUp(self):
         self.context = MagicMock()
-        self.cli_stats = CliStats(self.context)
+        self.writer = MagicMock()
+        self.cli_stats = CliStats(self.context, self.writer)
 
     @patch('clistats.write_consensus_chain')
     def test_persist_consensus_chain_first_node_no_block(self, write_chain):
@@ -71,8 +72,7 @@ class TestCliStats(TestCase):
         self.assertEqual(len(write_chain.call_args[0][1]), 1)
         self.assertEqual(write_chain.call_args[0][1][0], 'hash1')
 
-    @patch('utils.write_csv')
-    def test_node_stats(self, write_csv):
+    def test_node_stats(self):
         node_0 = MagicMock()
         node_0.name = 'name'
         node_0.execute_rpc.return_value = [{'status': 'active', 'branchlen': 2}]
@@ -80,5 +80,5 @@ class TestCliStats(TestCase):
 
         self.cli_stats.persist_node_stats()
 
-        self.assertEqual(write_csv.call_args[0][1], ['node', 'status', 'branchlen'])
-        self.assertEqual(len(write_csv.call_args[0][2]), 1)
+        self.assertEqual(self.writer.write_csv.call_args[0][1], ['node', 'status', 'branchlen'])
+        self.assertEqual(len(self.writer.write_csv.call_args[0][2]), 1)

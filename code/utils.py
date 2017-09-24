@@ -67,17 +67,3 @@ def read_json_file(file):
 
 def json_object_hook(d):
     return namedtuple('X', d.keys())(*d.values())
-
-
-def write_csv(file_name, elements, tag):
-    with open(file_name, 'a') as file:
-        logging.debug('Waiting for lock to write to file={}'.format(file_name))
-        fcntl.flock(file, fcntl.LOCK_EX)
-        logging.debug('Received lock for writing to file={}'.format(file_name))
-
-        w = csv.writer(file, delimiter=';')
-        for i, element in enumerate(elements):
-            row = element.vars_to_array()
-            if i != 0:
-                row.append(tag)
-            w.writerow(row)

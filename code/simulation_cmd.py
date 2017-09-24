@@ -7,6 +7,7 @@ import config
 from context import Context
 from prepare import Prepare
 from config import Path
+from write import Writer
 
 
 def run():
@@ -17,12 +18,13 @@ def run():
 
     logging.info(config.log_line_run_start + context.run_name)
 
-    runner = Runner(context)
+    writer = Writer(path.postprocessing_dir, context.args.tag)
+    runner = Runner(context, writer)
 
     prepare = Prepare(context)
     runner.prepare = prepare
 
-    post_processing = PostProcessing(context)
+    post_processing = PostProcessing(context, writer)
     runner.post_processing = post_processing
 
     event = Event(context)

@@ -11,8 +11,9 @@ from systemmonitor import MemorySnapshot
 
 
 class Runner:
-    def __init__(self, context):
+    def __init__(self, context, writer):
         self.context = context
+        self.writer = writer
         self.prepare = None
         self.event = None
         self.post_processing = None
@@ -51,21 +52,21 @@ class Runner:
         cpu_times = list(self.q_cpu_time.queue)
         memory = list(self.q_memory.queue)
 
-        utils.write_csv(
-            self.context.path.postprocessing_dir + CpuTimeSnapshot.file_name,
-            CpuTimeSnapshot.csv_header + cpu_times,
-            self.context.args.tag
+        self.writer.write_csv(
+            CpuTimeSnapshot.file_name,
+            CpuTimeSnapshot.csv_header,
+            cpu_times,
         )
-        utils.write_csv(
-            self.context.path.postprocessing_dir + MemorySnapshot.file_name,
-            MemorySnapshot.csv_header + memory,
-            self.context.args.tag
+        self.writer.write_csv(
+            MemorySnapshot.file_name,
+            MemorySnapshot.csv_header,
+            memory,
         )
         logging.info('Persisted {} CPU time and {} memory snapshots'.format(len(cpu_times), len(memory)))
 
 
 class StepTimes:
-    csv_header = ['timestamp', 'type', 'tag']
+    csv_header = ['timestamp', 'type']
 
     def __init__(self, timestamp, type):
         self.timestamp = timestamp
