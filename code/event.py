@@ -3,6 +3,7 @@ import logging
 import time
 import utils
 from bitcoinrpc.authproxy import JSONRPCException
+import math
 
 
 class Event:
@@ -60,6 +61,10 @@ class Event:
             pass
         else:
             raise SimulationException('Unknown cmd={} in {}-file'.format(cmd_parts[0], config.ticks_csv))
+
+
+def calc_analyze_skip_ticks(blocks_per_tick, tx_per_tick):
+    return max([1, math.ceil(1/blocks_per_tick), math.ceil(1/tx_per_tick)])
 
 
 class SimulationException(Exception):

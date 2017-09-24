@@ -4,6 +4,7 @@ from unittest.mock import patch
 from unittest.mock import MagicMock
 from unittest.mock import mock_open
 from bitcoinrpc.authproxy import JSONRPCException
+import event
 
 
 class TestEvent(TestCase):
@@ -143,3 +144,15 @@ class TestEvent(TestCase):
 
         e = Event(context)
         e.execute_cmd('tx node-1')
+
+    def test_calc_analyze_skip_ticks_1(self):
+        tick_count = event.calc_analyze_skip_ticks(.1, 50)
+        self.assertEqual(tick_count, 10)
+
+    def test_calc_analyze_skip_ticks_2(self):
+        tick_count = event.calc_analyze_skip_ticks(.1, .05)
+        self.assertEqual(tick_count, 20)
+
+    def test_calc_analyze_skip_ticks_3(self):
+        tick_count = event.calc_analyze_skip_ticks(100, 50)
+        self.assertEqual(tick_count, 1)
