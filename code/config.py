@@ -40,8 +40,6 @@ log_error_grep = 'grep -E -i "WARN|FATAL|ERROR|CRITICAL|EXCEPTION" {} || true'
 log_time_format = '%Y-%m-%d %H:%M:%S.%f'
 log_line_run_start = 'RUN START '
 log_line_run_end = 'RUN END '
-log_line_sim_start = 'SIMULATION START'
-log_line_sim_end = 'SIMULATION END'
 
 smallest_amount = 1
 smallest_amount_btc = 0.00000001

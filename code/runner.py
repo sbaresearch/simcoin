@@ -34,9 +34,9 @@ class Runner:
 
             self.system_monitor.start()
             self.context.step_times.append(StepTimes(time.time(), 'simulation_start'))
-            logging.info(config.log_line_sim_start)
+            logging.info('Start of simulation')
             self.event.execute()
-            logging.info(config.log_line_sim_end)
+            logging.info('End of simulation')
 
             self.persist_system_snapshots()
 
