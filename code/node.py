@@ -94,15 +94,14 @@ class BitcoinNode(Node):
 
                 return method_to_call(*args[1:])
             except IOError as error:
-                if error.errno == errno.EPIPE:
-                    retry -= 1
-                    self.connect_to_rpc()
-                    logging.warning(
-                        'Node={} could not execute RPC-call={} '
-                        'because of error="{}". '
-                        ' Reconnecting RPC and retrying.'
-                        .format(self.name, args[0], error)
-                    )
+                retry -= 1
+                self.connect_to_rpc()
+                logging.warning(
+                    'Node={} could not execute RPC-call={} '
+                    'because of error="{}". '
+                    ' Reconnecting RPC and retrying.'
+                    .format(self.name, args[0], error)
+                )
             except CannotSendRequest as exce:
                 retry -= 1
                 self.connect_to_rpc()
