@@ -83,16 +83,12 @@ class Path:
     def __init__(self, run_name):
         self.run_dir = data_dir + run_name + '/'
 
-        self.aggregated_log = self.run_dir + 'aggregated.log'
-        self.aggregated_sim_log = self.run_dir + 'aggregated_sim.log'
         self.run_log = self.run_dir + 'run.log'
 
         self.postprocessing_dir = self.run_dir + 'postprocessing/'
 
         self.consensus_chain_csv = self.postprocessing_dir + consensus_chain_csv_file_name
         self.general_infos_json = self.postprocessing_dir + 'general_infos.json'
-        self.step_times = self.postprocessing_dir + step_times_csv_file_name
-        self.tmp_log = self.postprocessing_dir + 'tmp.log'
         self.log_errors_txt = self.postprocessing_dir + 'log_errors.txt'
 
     def client_dir_on_host(self, name):
