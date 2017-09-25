@@ -26,7 +26,7 @@ class TestCliStats(TestCase):
 
         self.cli_stats.persist_consensus_chain()
 
-        self.assertEqual(len(write_chain.call_args[0][1]), 0)
+        self.assertEqual(len(write_chain.call_args[0][0]), 0)
 
     @patch('clistats.write_consensus_chain')
     def test_persist_consensus_chain_one_node(self, write_chain):
@@ -38,8 +38,8 @@ class TestCliStats(TestCase):
 
         self.cli_stats.persist_consensus_chain()
 
-        self.assertEqual(len(write_chain.call_args[0][1]), 1)
-        self.assertEqual(write_chain.call_args[0][1][0], 'hash')
+        self.assertEqual(len(write_chain.call_args[0][0]), 1)
+        self.assertEqual(write_chain.call_args[0][0][0], 'hash')
 
     @patch('clistats.write_consensus_chain')
     def test_persist_consensus_chain_multiple_nodes(self, write_chain):
@@ -53,9 +53,9 @@ class TestCliStats(TestCase):
 
         self.cli_stats.persist_consensus_chain()
 
-        self.assertEqual(len(write_chain.call_args[0][1]), 2)
-        self.assertEqual(write_chain.call_args[0][1][0], 'hash1')
-        self.assertEqual(write_chain.call_args[0][1][1], 'hash2')
+        self.assertEqual(len(write_chain.call_args[0][0]), 2)
+        self.assertEqual(write_chain.call_args[0][0][0], 'hash1')
+        self.assertEqual(write_chain.call_args[0][0][1], 'hash2')
 
     @patch('clistats.write_consensus_chain')
     def test_persist_consensus_chain_one_node_trailing_back(self, write_chain):
@@ -69,8 +69,8 @@ class TestCliStats(TestCase):
 
         self.cli_stats.persist_consensus_chain()
 
-        self.assertEqual(len(write_chain.call_args[0][1]), 1)
-        self.assertEqual(write_chain.call_args[0][1][0], 'hash1')
+        self.assertEqual(len(write_chain.call_args[0][0]), 1)
+        self.assertEqual(write_chain.call_args[0][0][0], 'hash1')
 
     def test_node_stats(self):
         node_0 = MagicMock()
