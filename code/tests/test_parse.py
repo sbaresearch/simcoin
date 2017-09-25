@@ -107,8 +107,8 @@ class TestParse(TestCase):
 
     def test_parse_tick(self):
         event = parse.TickEvent.from_log_line(
-            '2017-08-19 16:05:14.609000 [MainThread  ] [INFO ]  Tick=11 started at 45.12'
-            ' and took 0.9823310375213623s to finish',
+            '2017-08-19 16:05:14.609000 [MainThread  ] [INFO ]  Tick=11 started at=45.12,'
+            ' created txs=101, blocks=45 and took 0.9823310375213623s to finish',
             'simcoin'
         )
 
@@ -116,6 +116,8 @@ class TestParse(TestCase):
         self.assertEqual(event.source, 'simcoin')
         self.assertEqual(event.number, 11)
         self.assertEqual(event.start, 45.12)
+        self.assertEqual(event.txs, 101)
+        self.assertEqual(event.blocks, 45)
         self.assertEqual(event.duration, 0.9823310375213623)
 
     def test_parse_tx_creation_exception(self):

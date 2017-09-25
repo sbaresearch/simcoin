@@ -10,6 +10,7 @@ class Event:
 
     def __init__(self, context):
         self.context = context
+        self.txs_count = self.blocks_count = 0
 
     def execute(self):
         try:
@@ -18,6 +19,7 @@ class Event:
 
                 for i, line in enumerate(file):
                     start_time = time.time()
+                    self.txs_count = self.blocks_count = 0
 
                     line = line.rstrip()
                     cmds = line.split(',')
@@ -27,7 +29,8 @@ class Event:
                     next_tick = start_time + self.context.args.tick_duration
                     current_time = time.time()
                     tick_duration = current_time - start_time
-                    logging.info('Tick={} started at {} and took {}s to finish'.format(i, start_time, tick_duration))
+                    logging.info('Tick={} started at={}, created txs={}, blocks={} and took {}s to finish'
+                                 .format(i, start_time, self.txs_count, self.blocks_count, tick_duration))
 
                     if current_time < next_tick:
                         difference = next_tick - current_time
@@ -51,12 +54,14 @@ class Event:
                 node.generate_tx()
             except JSONRPCException as exce:
                 logging.info('Could not generate tx for node={}. Exception="{}"'.format(node.name, exce.message))
+            self.txs_count += 1
         elif cmd_parts[0] == 'block':
             node = self.context.all_bitcoin_nodes[cmd_parts[1]]
             try:
                 node.generate_block()
             except JSONRPCException as exce:
                 logging.info('Could not generate block for node={}. Exception="{}"'.format(node.name, exce.message))
+            self.blocks_count += 1
         elif len(cmd) == 0:
             pass
         else:

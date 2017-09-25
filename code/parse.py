@@ -192,22 +192,24 @@ class TxEvent(Event):
 
 
 class TickEvent:
-    csv_header = ['timestamp', 'source', 'number', 'start', 'duration']
+    csv_header = ['timestamp', 'source', 'number', 'start', 'txs', 'blocks', 'duration']
     file_name = 'tick_infos.csv'
 
-    def __init__(self, timestamp, source, number, start, duration):
+    def __init__(self, timestamp, source, number, start, txs, blocks, duration):
         self.timestamp = timestamp
         self.source = source
         self.number = number
         self.start = start
+        self.txs = txs
+        self.blocks = blocks
         self.duration = duration
 
     @classmethod
     def from_log_line(cls, line, source):
         match = re.match(
-            config.log_prefix_timestamp + '\[.*\] \[.*\]  Tick=([0-9]+) started at ([0-9]+\.[0-9]+)'
-                                          ' and took ([0-9]+\.[0-9]+)s to finish$',
-            line)
+            config.log_prefix_timestamp + '\[.*\] \[.*\]  Tick=([0-9]+) started at=([0-9]+\.[0-9]+),'
+                                          ' created txs=([0-9]+), blocks=([0-9]+) and'
+                                          ' took ([0-9]+\.[0-9]+)s to finish$', line)
         if match is None:
             raise ParseException("Didn't match 'Tick' log line.")
 
@@ -216,11 +218,13 @@ class TickEvent:
             source,
             int(match.group(2)),
             float(match.group(3)),
-            float(match.group(4))
+            int(match.group(4)),
+            int(match.group(5)),
+            float(match.group(6)),
         )
 
     def vars_to_array(self):
-        return [self.timestamp, self.source, self.number, self.start, self.duration]
+        return [self.timestamp, self.source, self.number, self.start, self.txs, self.blocks, self.duration]
 
 
 class ReceivedEvent(Event):
