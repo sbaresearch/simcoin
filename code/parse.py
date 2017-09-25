@@ -68,13 +68,15 @@ def parse_datetime(date_time):
 
 
 class Event:
+    csv_header = ['timestamp', 'node']
+
     def __init__(self, timestamp, node):
         self.timestamp = timestamp
         self.node = node
 
 
 class BlockCreateEvent(Event):
-    csv_header = ['timestamp', 'node', 'total_size', 'txs']
+    csv_header = Event.csv_header + ['total_size', 'txs']
     file_name = 'blocks_create_raw.csv'
     file_name_after_R_filter = 'blocks_create.csv'
 
@@ -104,7 +106,7 @@ class BlockCreateEvent(Event):
 
 
 class UpdateTipEvent(Event):
-    csv_header = ['timestamp', 'node', 'hash', 'height', 'tx']
+    csv_header = Event.csv_header + ['hash', 'height', 'tx']
     file_name = 'update_tip_raw.csv'
     file_name_after_R_filter = 'update_tip.csv'
 
@@ -138,7 +140,7 @@ class UpdateTipEvent(Event):
 
 
 class PeerLogicValidationEvent(Event):
-    csv_header = ['timestamp', 'node', 'hash']
+    csv_header = Event.csv_header + ['hash']
     file_name = 'peer_logic_validation_raw.csv'
     file_name_after_R_filter = 'peer_logic_validation.csv'
 
@@ -166,7 +168,7 @@ class PeerLogicValidationEvent(Event):
 
 
 class TxEvent(Event):
-    csv_header = ['timestamp', 'node', 'hash']
+    csv_header = Event.csv_header + ['hash']
     file_name = 'txs_raw.csv'
     file_name_after_R_filter = 'txs.csv'
 
@@ -228,7 +230,7 @@ class TickEvent:
 
 
 class ReceivedEvent(Event):
-    csv_header = ['timestamp', 'node', 'hash']
+    csv_header = Event.csv_header + ['hash']
 
     def __init__(self, timestamp, node, obj_hash):
         super().__init__(timestamp, node)
@@ -297,7 +299,7 @@ class TxReceivedEvent(ReceivedEvent):
 
 
 class ExceptionEvent(Event):
-    csv_header = ['timestamp', 'node', 'source', 'exception']
+    csv_header = Event.csv_header + ['source', 'exception']
 
     def __init__(self, timestamp, node, source, exception):
         super().__init__(timestamp, node)
@@ -349,7 +351,7 @@ class TxExceptionEvent(ExceptionEvent):
 
 
 class RPCExceptionEvent(Event):
-    csv_header = ['timestamp', 'node', 'source', 'method', 'exception']
+    csv_header = Event.csv_header + ['source', 'method', 'exception']
     file_name = 'rpc_exceptions.csv'
 
     def __init__(self, timestamp, node, source, method, exception):
