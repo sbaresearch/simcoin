@@ -97,7 +97,7 @@ def extract_from_file(source, destination, start, end):
     with open(source, 'r') as source_file:
         with open(destination, 'w') as destination_file:
             write = False
-            for line in source_file.readlines():
+            for line in source_file:
                 if write:
                     if end in line:
                         destination_file.write(line)
