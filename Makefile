@@ -18,6 +18,10 @@ report:
 	cd code; \
 		cp reporter/report.Rmd ../data/last_run/postprocessing/;cd ../data/last_run/postprocessing/;R -e library\(rmarkdown\)\;rmarkdown::render\(\"report.Rmd\",\"pdf_document\"\)\;q\(\);rm report.Rmd
 
+multi-report:
+	cd code; \
+		cp reporter/multiReport.Rmd ../data/last_multi_run/;cd ../data/last_multi_run/;R -e library\(rmarkdown\)\;rmarkdown::render\(\"multiReport.Rmd\",\"pdf_document\"\)\;q\(\);rm multiReport.Rmd
+
 demo1:
 	cd code; \
 		python3 simcoin.py \
@@ -92,6 +96,42 @@ multidemo1:
 				--system-snapshots-frequency 1 \
 				--verbose
 
+multidemo2:
+	cd code; \
+		python3 simcoin.py \
+			multi-run \
+				--repeat 2 \
+				--node-group-a bitcoin 5 1 10 simcoin/patched:v1 \
+				--blocks-per-tick 0.5 \
+				--amount-of-ticks 100 \
+				--txs-per-tick 2 \
+				--tick-duration .3 \
+				--verbose
+
+multidemo3:
+	cd code; \
+		python3 simcoin.py \
+			multi-run \
+				--repeat 10 \
+				--node-group-a bitcoin 50 1 10 simcoin/patched:v1 \
+				--blocks-per-tick 0.05 \
+				--amount-of-ticks 200 \
+				--txs-per-tick 2 \
+				--tick-duration 2 \
+				--verbose
+
+multidemo4:
+	cd code; \
+		python3 simcoin.py \
+			multi-run \
+				--repeat 1 \
+				--node-group-a bitcoin 100 1 10 simcoin/patched:v1 \
+				--blocks-per-tick 0.05 \
+				--amount-of-ticks 5 \
+				--txs-per-tick 2 \
+				--tick-duration 2 \
+				--verbose
+
 install:
 	# for kableExtra
 	sudo apt install libmagick++-dev
@@ -141,3 +181,4 @@ test:
 .PHONY : clean
 clean:
 	rm -rf data/*
+	docker stop `docker ps --quiet --filter name=simcoin`
