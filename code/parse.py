@@ -7,8 +7,6 @@ from multiprocessing import Pool
 from itertools import repeat
 from chunker import Chunker
 
-chunk_size_10_MB = 10 * 1024 * 1024
-
 
 class Parser:
     def __init__(self, context, writer):
@@ -29,7 +27,7 @@ class Parser:
             repeat(self.writer,),
             repeat(self.context.path.run_log),
             repeat('simcoin'),
-            Chunker.chunkify(self.context.path.run_log, chunk_size_10_MB),
+            Chunker.chunkify(self.context.path.run_log, config.file_chunk_size),
             repeat(host_parsers),
         ))
 
@@ -38,7 +36,7 @@ class Parser:
                 repeat(self.writer),
                 repeat(node.get_log_file()),
                 repeat(node.name),
-                Chunker.chunkify(node.get_log_file(), chunk_size_10_MB),
+                Chunker.chunkify(node.get_log_file(), config.file_chunk_size),
                 repeat(node_parsers),
             ))
 

@@ -2,6 +2,8 @@ import time
 import multiprocessing
 
 pool_processors = multiprocessing.cpu_count()
+file_chunk_size = 10 * 1024 * 1024  # 10MB
+
 # IP range from RFC6890 - IP range for future use
 # it does not conflict with https://github.com/bitcoin/bitcoin/blob/master/src/netbase.h
 ip_range = "240.0.0.0/4"
