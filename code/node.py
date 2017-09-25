@@ -63,6 +63,9 @@ class BitcoinNode(Node):
                 logging.debug('Wait until container stops')
         super(BitcoinNode, self).rm()
 
+    def get_log_file(self):
+        return self.path + config.bitcoin_log_file_name
+
     def wait_until_rpc_ready(self):
         while True:
             try:
@@ -119,7 +122,7 @@ class BitcoinNode(Node):
     def grep_log_for_errors(self):
         return bash.check_output_without_log(
             config.log_error_grep.format(
-                self.path + config.bitcoin_log_file_name
+                self.get_log_file()
             )
         )
 

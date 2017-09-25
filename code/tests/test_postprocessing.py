@@ -15,20 +15,6 @@ class TestPostProcessing(TestCase):
         self.writer = MagicMock()
         self.postprocessing = PostProcessing(self.context, self.writer)
 
-    def test_prefix_log_no_changes(self):
-        lines = ['2017-07-05 14:33:35.324000 test', '2017-07-05 14:33:35.324000 test']
-        received = postprocessing.prefix_log(lines, 'node-0')
-
-        expected = ['2017-07-05 14:33:35.324000 node-0 1 test', '2017-07-05 14:33:35.324000 node-0 2 test']
-        self.assertEqual(received, expected)
-
-    def test_prefix_log(self):
-        lines = ['2017-07-05 14:33:35.324000 test', 'test']
-        received = postprocessing.prefix_log(lines, 'node-0')
-
-        expected = ['2017-07-05 14:33:35.324000 node-0 1 test', '2017-07-05 14:33:35.324000 node-0 2 test']
-        self.assertEqual(received, expected)
-
     def test_cut_log(self):
         data = dedent("""
             line1
