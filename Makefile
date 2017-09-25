@@ -85,10 +85,10 @@ multidemo1:
 			multi-run \
 				--repeat 2 \
 				--node-group-a bitcoin 3 1 10 simcoin/patched:v1 \
-				--blocks-per-tick 0.5 \
-				--amount-of-ticks 5 \
+				--blocks-per-tick 0.9 \
+				--amount-of-ticks 7 \
 				--txs-per-tick 10 \
-				--tick-duration .3 \
+				--tick-duration 1 \
 				--system-snapshots-frequency 1 \
 				--verbose
 
