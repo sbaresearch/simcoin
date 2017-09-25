@@ -18,7 +18,7 @@ class Writer:
             fcntl.flock(file, fcntl.LOCK_EX)
             logging.debug('Received lock for writing to file={}'.format(file_name))
 
-            w = csv.writer(file, delimiter=';')
+            w = csv.writer(file)
             for element in elements:
                 row = element.vars_to_array()
                 row.append(self.tag)
@@ -30,5 +30,5 @@ class Writer:
             fcntl.flock(file, fcntl.LOCK_EX)
             logging.debug('Received lock for writing to file={}'.format(file_name))
 
-            w = csv.writer(file, delimiter=';')
+            w = csv.writer(file)
             w.writerow(header + ['tag'])

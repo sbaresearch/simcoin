@@ -24,5 +24,5 @@ class TestUtils(TestCase):
         self.assertEqual(m_open.call_args_list[1][0], ('/postprocessing_dir/file.name', 'a'))
 
         handle = m_open()
-        self.assertEqual(handle.write.call_args_list[0][0][0], 'header_1;header_2;tag\r\n')
-        self.assertEqual(handle.write.call_args_list[1][0][0], 'content_1;content_2;test_tag\r\n')
+        self.assertEqual(handle.write.call_args_list[0][0][0], 'header_1,header_2,tag\r\n')
+        self.assertEqual(handle.write.call_args_list[1][0][0], 'content_1,content_2,test_tag\r\n')

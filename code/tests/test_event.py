@@ -14,7 +14,7 @@ class TestEvent(TestCase):
     @patch('utils.check_for_file', lambda file: None)
     def test_execute_multiple_cmds(self, m_sleep, m_time):
         m_file = mock_open(read_data=''.join(
-            'cmd1;cmd2;cmd3'
+            'cmd1,cmd2,cmd3'
         ))
         m_file.return_value.__iter__ = lambda self: self
         m_file.return_value.__next__ = lambda self: next(iter(self.readline, ''))
@@ -61,7 +61,7 @@ class TestEvent(TestCase):
     @patch('logging.error')
     def test_execute(self, m_error, m_time):
         m_file = mock_open(read_data=''.join(
-            'cmd1;cmd2;cmd3'
+            'cmd1,cmd2,cmd3'
         ))
         m_file.return_value.__iter__ = lambda self: self
         m_file.return_value.__next__ = lambda self: next(iter(self.readline, ''))

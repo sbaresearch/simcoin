@@ -20,7 +20,7 @@ class Event:
                     start_time = time.time()
 
                     line = line.rstrip()
-                    cmds = line.split(';')
+                    cmds = line.split(',')
                     for cmd in cmds:
                         self.execute_cmd(cmd)
 

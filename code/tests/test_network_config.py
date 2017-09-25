@@ -38,10 +38,10 @@ class TestNetworkConfig(TestCase):
                     self.assertEqual(matrix[i][j], 0)
 
     DATA_1 = dedent("""
-        ;node-0;node-1;selfish-node-0
-        node-0;1;1;0
-        node-1;1;2;1
-        selfish-node-0;0;1;3
+        ,node-0,node-1,selfish-node-0
+        node-0,1,1,0
+        node-1,1,2,1
+        selfish-node-0,0,1,3
         """).strip()
 
     @patch("builtins.open", mock_open(read_data=DATA_1))

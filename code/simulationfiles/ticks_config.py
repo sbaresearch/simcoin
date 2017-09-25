@@ -69,7 +69,7 @@ def create(unknown_arguments=False):
     print(pandas.DataFrame(ticks))
 
     with open(config.ticks_csv, "w") as file:
-        writer = csv.writer(file, delimiter=';')
+        writer = csv.writer(file)
         writer.writerows(ticks)
     logging.info('End ticks config')
 

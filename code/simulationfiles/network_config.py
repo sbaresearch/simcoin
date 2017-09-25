@@ -54,7 +54,7 @@ def create(unknown_arguments=False):
     print(pandas.DataFrame(matrix))
 
     with open(config.network_csv, "w") as file:
-        writer = csv.writer(file, delimiter=';')
+        writer = csv.writer(file)
         writer.writerows(matrix)
     logging.info('End network config')
 
@@ -109,7 +109,7 @@ def recursive_check(matrix, visited=None, start=1):
 def read_connections():
     utils.check_for_file(config.network_csv)
     connections = {}
-    network_config = pandas.read_csv(open(config.network_csv), delimiter=';', index_col=0)
+    network_config = pandas.read_csv(open(config.network_csv), index_col=0)
 
     for node_row, row in network_config.iterrows():
         if node_row.startswith(config.selfish_node_prefix):
