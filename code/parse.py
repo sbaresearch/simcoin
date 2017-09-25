@@ -74,6 +74,9 @@ class Event:
         self.timestamp = timestamp
         self.node = node
 
+    def vars_to_array(self):
+        return [self.timestamp, self.node]
+
 
 class BlockCreateEvent(Event):
     csv_header = Event.csv_header + ['total_size', 'txs']
@@ -102,7 +105,7 @@ class BlockCreateEvent(Event):
         )
 
     def vars_to_array(self):
-        return [self.timestamp, self.node, self.total_size, self.txs]
+        return Event.vars_to_array(self) + [self.total_size, self.txs]
 
 
 class UpdateTipEvent(Event):
@@ -136,7 +139,7 @@ class UpdateTipEvent(Event):
         )
 
     def vars_to_array(self):
-        return [self.timestamp, self.node, self.block_hash, self.height, self.tx]
+        return Event.vars_to_array(self) + [self.block_hash, self.height, self.tx]
 
 
 class PeerLogicValidationEvent(Event):
@@ -164,7 +167,7 @@ class PeerLogicValidationEvent(Event):
         )
 
     def vars_to_array(self):
-        return [self.timestamp, self.node, self.block_hash]
+        return Event.vars_to_array(self) + [self.block_hash]
 
 
 class TxEvent(Event):
@@ -190,7 +193,7 @@ class TxEvent(Event):
         )
 
     def vars_to_array(self):
-        return [self.timestamp, self.node, self.tx_hash]
+        return Event.vars_to_array(self) + [self.tx_hash]
 
 
 class TickEvent:
@@ -237,7 +240,7 @@ class ReceivedEvent(Event):
         self.obj_hash = obj_hash
 
     def vars_to_array(self):
-        return [self.timestamp, self.node, self.obj_hash]
+        return Event.vars_to_array(self) + [self.obj_hash]
 
 
 class BlockReceivedEvent(ReceivedEvent):
@@ -307,7 +310,7 @@ class ExceptionEvent(Event):
         self.source = source
 
     def vars_to_array(self):
-        return [self.timestamp, self.node, self.source, self.exception]
+        return Event.vars_to_array(self) + [self.source, self.exception]
 
 
 class BlockExceptionEvent(ExceptionEvent):
@@ -378,7 +381,7 @@ class RPCExceptionEvent(Event):
         )
 
     def vars_to_array(self):
-        return [self.timestamp, self.node, self.source, self.method, self.exception]
+        return Event.vars_to_array(self) + [self.source, self.method, self.exception]
 
 
 class ParseException(Exception):
