@@ -24,8 +24,8 @@ def run():
     prepare = Prepare(context)
     runner.prepare = prepare
 
-    post_processing = PostProcessing(context, writer)
-    runner.post_processing = post_processing
+    postprocessing = PostProcessing(context, writer)
+    runner.postprocessing = postprocessing
 
     event = Event(context)
     runner.event = event

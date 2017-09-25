@@ -16,7 +16,7 @@ class Runner:
         self.writer = writer
         self.prepare = None
         self.event = None
-        self.post_processing = None
+        self.postprocessing = None
         self.pill2kill = threading.Event()
         self.q_cpu_time = queue.Queue()
         self.q_memory = queue.Queue()
@@ -41,9 +41,9 @@ class Runner:
             self.persist_system_snapshots()
 
             self.context.step_times.append(StepTimes(time.time(), 'postprocessing_start'))
-            self.post_processing.execute()
+            self.postprocessing.execute()
         except Exception as exce:
-            self.post_processing.clean_up_docker()
+            self.postprocessing.clean_up_docker()
             raise exce
 
     def persist_system_snapshots(self):
