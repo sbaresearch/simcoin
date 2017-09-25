@@ -74,7 +74,8 @@ class Event:
 
 class BlockCreateEvent(Event):
     csv_header = ['timestamp', 'node', 'total_size', 'txs']
-    file_name = 'blocks_create.csv'
+    file_name = 'blocks_create_raw.csv'
+    file_name_after_R_filter = 'blocks_create.csv'
 
     def __init__(self, timestamp, node, total_size, txs):
         super().__init__(timestamp, node)
@@ -103,7 +104,8 @@ class BlockCreateEvent(Event):
 
 class UpdateTipEvent(Event):
     csv_header = ['timestamp', 'node', 'hash', 'height', 'tx']
-    file_name = 'update_tip.csv'
+    file_name = 'update_tip_raw.csv'
+    file_name_after_R_filter = 'update_tip.csv'
 
     def __init__(self, timestamp, node, block_hash, height, tx):
         super().__init__(timestamp, node)
@@ -136,7 +138,8 @@ class UpdateTipEvent(Event):
 
 class PeerLogicValidationEvent(Event):
     csv_header = ['timestamp', 'node', 'hash']
-    file_name = 'peer_logic_validation.csv'
+    file_name = 'peer_logic_validation_raw.csv'
+    file_name_after_R_filter = 'peer_logic_validation.csv'
 
     def __init__(self, timestamp, node, block_hash):
         super().__init__(timestamp, node)
@@ -163,7 +166,8 @@ class PeerLogicValidationEvent(Event):
 
 class TxEvent(Event):
     csv_header = ['timestamp', 'node', 'hash']
-    file_name = 'txs.csv'
+    file_name = 'txs_raw.csv'
+    file_name_after_R_filter = 'txs.csv'
 
     def __init__(self, timestamp, node, tx_hash):
         super().__init__(timestamp, node)
@@ -230,7 +234,8 @@ class ReceivedEvent(Event):
 
 
 class BlockReceivedEvent(ReceivedEvent):
-    file_name = 'blocks_received.csv'
+    file_name = 'blocks_received_raw.csv'
+    file_name_after_R_filter = 'blocks_received.csv'
 
     @classmethod
     def from_log_line(cls, line, node):
@@ -247,7 +252,8 @@ class BlockReceivedEvent(ReceivedEvent):
 
 
 class BlockReconstructEvent(ReceivedEvent):
-    file_name = 'blocks_reconstructed.csv'
+    file_name = 'blocks_reconstructed_raw.csv'
+    file_name_after_R_filter = 'blocks_reconstructed.csv'
 
     @classmethod
     def from_log_line(cls, line, node):
@@ -266,7 +272,8 @@ class BlockReconstructEvent(ReceivedEvent):
 
 
 class TxReceivedEvent(ReceivedEvent):
-    file_name = 'txs_received.csv'
+    file_name = 'txs_received_raw.csv'
+    file_name_after_R_filter = 'txs_received.csv'
 
     @classmethod
     def from_log_line(cls, line, node):

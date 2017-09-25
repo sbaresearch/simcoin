@@ -28,7 +28,7 @@ knitr::opts_chunk$set(
 # set working directory for development: knitr::opts_knit$set(root.dir = '/tmp/multi_run/')
 ```
 
-```{r setup, include=FALSE}
+```{r imports}
 library(jsonlite)
 library(anytime)
 library(dplyr)
@@ -37,32 +37,35 @@ library(lattice)
 library(reshape2)
 library(stringr)
 Sys.setenv(TZ='UTC')
+```
 
-blocks_create         <- read.csv2("blocks_create.csv", dec=".")
-blocks_reconstructed  <- read.csv2("blocks_reconstructed.csv", dec=".")
-blocks_received       <- read.csv2("blocks_received.csv", dec=".")
-block_exces           <- read.csv2("block_exceptions.csv", dec=".")
-peer_logic_validation <- read.csv2("peer_logic_validation.csv", dec=".")
-update_tip            <- read.csv2("update_tip.csv", dec=".")
-consensus_chain       <- read.csv2("consensus_chain.csv", dec=".")
+```{r setup, include=FALSE}
 
-txs          <- read.csv2("txs.csv", dec=".")
-txs_received <- read.csv2("txs_received.csv", dec=".")
-tx_exces     <- read.csv2("tx_exceptions.csv", dec=".")
+blocks                <- read.csv("blocks.csv", dec=".")
+blocks_create         <- read.csv("blocks_create.csv", dec=".")
+blocks_reconstructed  <- read.csv("blocks_reconstructed.csv", dec=".")
+blocks_received       <- read.csv("blocks_received.csv", dec=".")
+block_exces           <- read.csv("block_exceptions.csv", dec=".")
+peer_logic_validation <- read.csv("peer_logic_validation.csv", dec=".")
+update_tip            <- read.csv("update_tip.csv", dec=".")
+consensus_chain       <- read.csv("consensus_chain.csv", dec=".")
 
-rpc_exces <- read.csv2("rpc_exceptions.csv", dec=".")
-tips      <- read.csv2("tips.csv", dec=".")
+txs          <- read.csv("txs.csv", dec=".")
+txs_received <- read.csv("txs_received.csv", dec=".")
+tx_exces     <- read.csv("tx_exceptions.csv", dec=".")
+
+rpc_exces <- read.csv("rpc_exceptions.csv", dec=".")
+tips      <- read.csv("tips.csv", dec=".")
 
 general_infos <- fromJSON(file('run-1/general_infos.json'))
-step_times    <-  read.csv2("step_times.csv", dec=".")
-tick_infos    <- read.csv2("tick_infos.csv", dec=".")
+step_times    <- read.csv("step_times.csv", dec=".")
+tick_infos    <- read.csv("tick_infos.csv", dec=".")
 
-cpu_time <- read.csv2("cpu_time.csv", dec=".")
-memory <- read.csv2("memory.csv", dec=".")
+cpu_time <- read.csv("cpu_time.csv", dec=".")
+memory   <- read.csv("memory.csv", dec=".")
 
 ticks <- readLines('ticks.csv')
-args      <- stream_in(file('args.json'))
-sim_start <- tick_infos$start[1]
+args  <- stream_in(file('args.json'))
 ```
 
 ## Simulation
@@ -114,11 +117,9 @@ kable(unclass(summary(tick_infos$duration)), col.names = c('Duration [s]'), digi
 
 ## Blocks
 ```{r blocks_setup}
-valid_blocks      <- rbind(peer_logic_validation, update_tip[, !(names(update_tip) %in% c('tx', 'height'))])
-block_propagation <- rbind(blocks_reconstructed, blocks_received, valid_blocks)
+block_propagation <- rbind(blocks_reconstructed, blocks_received, peer_logic_validation, update_tip[, !(names(update_tip) %in% c('tx', 'height'))])
 
-valid_blocks <- valid_blocks %>%
-  group_by(hash) %>% filter(which.min(timestamp)==row_number())
+block_propagation <- merge(block_propagation, blocks$hash)[colnames(block_propagation)]
 
 block_propagation <- block_propagation %>%
   group_by(node, hash) %>% filter(which.min(timestamp)==row_number()) %>%
@@ -138,10 +139,10 @@ kable(unclass(summary(blocks_create$total_size / 1000)), col.names = c('Size [kB
 
 ```{r block_stale_rate_summary}
 consensus_chain$stale = 'Accepted'
-blocks_create <- merge(blocks_create, consensus_chain, all.x = TRUE)
-blocks_create$stale[is.na(blocks_create$stale)] <- 'Stale'
+blocks <- merge(blocks, consensus_chain, all.x = TRUE)
+blocks$stale[is.na(blocks$stale)] <- 'Stale'
 
-stale_block <- table(blocks_create$tag, factor(blocks_create$stale, levels = c('Accepted', 'Stale')))
+stale_block <- table(blocks$tag, factor(blocks$stale, levels = c('Accepted', 'Stale')))
 stale_rate  <- data.frame(c(round(prop.table(stale_block, 1)[,2] * 100, 3)))
 kable(stale_rate, col.names = c('Rate [%]'), digits = 3, caption = 'Stale block rate', format = 'latex') %>%
   kable_styling(latex_options = c('HOLD_position'))
@@ -253,7 +254,7 @@ bwplot(tick_infos$duration ~ tick_infos$tag, ylab = 'Duration [s]')
 ```
 
 ```{r block_stale_barchart, fig.cap='Stale blocks', fig.env='figure*', fig.height=length(unique(blocks_create$tag)) + 1}
-stale_block <- table(blocks_create$tag, blocks_create$stale)
+stale_block <- table(blocks$tag, blocks$stale)
 barchart(stale_block, stack = TRUE, ref = FALSE, xlab = 'Blocks',
          auto.key = list(columns=2, points = FALSE, rectangles = TRUE), panel=function(x,y,...){
       panel.barchart(x,y,...)

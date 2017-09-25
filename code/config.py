@@ -78,6 +78,7 @@ consensus_chain_csv_file_name = 'consensus_chain.csv'
 report_file_name = 'report.Rmd'
 multi_report_file_name = 'multi_report.Rmd'
 
+blocks_file_name = 'blocks.csv'
 
 class Path:
     def __init__(self, run_name):

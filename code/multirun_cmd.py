@@ -13,16 +13,17 @@ import systemmonitor
 import clistats
 
 files_to_concat = [
-    parse.BlockCreateEvent.file_name,
-    parse.BlockReceivedEvent.file_name,
-    parse.BlockReconstructEvent.file_name,
+    config.blocks_file_name,
+    parse.BlockCreateEvent.file_name_after_R_filter,
+    parse.BlockReceivedEvent.file_name_after_R_filter,
+    parse.BlockReconstructEvent.file_name_after_R_filter,
     parse.BlockExceptionEvent.file_name,
-    parse.UpdateTipEvent.file_name,
-    parse.PeerLogicValidationEvent.file_name,
+    parse.UpdateTipEvent.file_name_after_R_filter,
+    parse.PeerLogicValidationEvent.file_name_after_R_filter,
     config.consensus_chain_csv_file_name,
 
-    parse.TxEvent.file_name,
-    parse.TxReceivedEvent.file_name,
+    parse.TxEvent.file_name_after_R_filter,
+    parse.TxReceivedEvent.file_name_after_R_filter,
     parse.TxExceptionEvent.file_name,
 
     parse.RPCExceptionEvent.file_name,
