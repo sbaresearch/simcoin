@@ -29,8 +29,8 @@ class Event:
                     next_tick = start_time + self.context.args.tick_duration
                     current_time = time.time()
                     tick_duration = current_time - start_time
-                    logging.info('Tick={} started at={}, created txs={}, blocks={} and took {}s to finish'
-                                 .format(i, start_time, self.txs_count, self.blocks_count, tick_duration))
+                    logging.info('Tick={} from={} to={}, created txs={}, blocks={} and took {}s to finish'
+                                 .format(i, start_time, next_tick, self.txs_count, self.blocks_count, tick_duration))
 
                     if current_time < next_tick:
                         difference = next_tick - current_time

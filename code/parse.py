@@ -197,14 +197,15 @@ class TxEvent(Event):
 
 
 class TickEvent:
-    csv_header = ['timestamp', 'source', 'number', 'start', 'txs', 'blocks', 'duration']
+    csv_header = ['timestamp', 'source', 'number', 'start', 'end', 'txs', 'blocks', 'duration']
     file_name = 'tick_infos.csv'
 
-    def __init__(self, timestamp, source, number, start, txs, blocks, duration):
+    def __init__(self, timestamp, source, number, start, end, txs, blocks, duration):
         self.timestamp = timestamp
         self.source = source
         self.number = number
         self.start = start
+        self.end = end
         self.txs = txs
         self.blocks = blocks
         self.duration = duration
@@ -212,7 +213,7 @@ class TickEvent:
     @classmethod
     def from_log_line(cls, line, source):
         match = re.match(
-            config.log_prefix_timestamp + '\[.*\] \[.*\]  Tick=([0-9]+) started at=([0-9]+\.[0-9]+),'
+            config.log_prefix_timestamp + '\[.*\] \[.*\]  Tick=([0-9]+) from=([0-9]+\.[0-9]+) to=([0-9]+\.[0-9]+),'
                                           ' created txs=([0-9]+), blocks=([0-9]+) and'
                                           ' took ([0-9]+\.[0-9]+)s to finish$', line)
         if match is None:
@@ -223,13 +224,14 @@ class TickEvent:
             source,
             int(match.group(2)),
             float(match.group(3)),
-            int(match.group(4)),
+            float(match.group(4)),
             int(match.group(5)),
-            float(match.group(6)),
+            int(match.group(6)),
+            float(match.group(7)),
         )
 
     def vars_to_array(self):
-        return [self.timestamp, self.source, self.number, self.start, self.txs, self.blocks, self.duration]
+        return [self.timestamp, self.source, self.number, self.start, self.end, self.txs, self.blocks, self.duration]
 
 
 class ReceivedEvent(Event):
