@@ -41,7 +41,7 @@ class Parser:
             ))
 
         self.pool.close()
-        logging.info('Finished parsing aggregated log={}'.format(self.context.path.aggregated_sim_log))
+        logging.info('Finished parsing of run_log and all node logs')
 
 
 def parse(writer, log_file, name, chunk, parsers):
