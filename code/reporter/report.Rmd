@@ -38,7 +38,7 @@ library(stringr)
 Sys.setenv(TZ='UTC')
 ```
 
-```{r preprocessing}
+```{r preprocessing, include=FALSE}
 tick_infos <- read.csv("tick_infos.csv")
 args       <- stream_in(file('../args.json'))
 
