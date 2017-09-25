@@ -50,11 +50,6 @@ amount_of_system_snapshots = 500
 bitcoin_log_file_name = '/debug.log'
 
 data_dir = '../data/'
-multi_run_dir = '{}multi-run-{}'.format(data_dir, time.time())
-
-log_file = data_dir + 'debug.log'
-soft_link_to_run_dir = '{}last_run'.format(data_dir)
-soft_link_to_multi_run_dir = '{}last_multi_run'.format(data_dir)
 
 network_csv_file_name = 'network.csv'
 ticks_csv_file_name = 'ticks.csv'
@@ -70,26 +65,21 @@ bitcoin_data_dir = '/data'
 bitcoin_regtest_dir = '/regtest'
 client_dir = bitcoin_data_dir + bitcoin_regtest_dir
 
-step_times_csv_file_name = 'step_times.csv'
-consensus_chain_csv_file_name = 'consensus_chain.csv'
-
 report_file_name = 'report.Rmd'
 multi_report_file_name = 'multi_report.Rmd'
 
+multi_run_dir = '{}multi-run-{}'.format(data_dir, time.time())
+
+log_file = data_dir + 'debug.log'
+soft_link_to_run_dir = '{}last_run'.format(data_dir)
+soft_link_to_multi_run_dir = '{}last_multi_run'.format(data_dir)
+run_log = soft_link_to_run_dir + '/run.log'
+
 blocks_file_name = 'blocks.csv'
+step_times_csv_file_name = 'step_times.csv'
+consensus_chain_csv_file_name = 'consensus_chain.csv'
 
-class Path:
-    def __init__(self, run_name):
-        self.run_dir = data_dir + run_name + '/'
-
-        self.run_log = self.run_dir + 'run.log'
-
-        self.postprocessing_dir = self.run_dir + 'postprocessing/'
-
-        self.consensus_chain_csv = self.postprocessing_dir + consensus_chain_csv_file_name
-        self.general_infos_json = self.postprocessing_dir + 'general_infos.json'
-        self.log_errors_txt = self.postprocessing_dir + 'log_errors.txt'
-
-    def client_dir_on_host(self, name):
-        return self.run_dir + name + bitcoin_regtest_dir
-
+postprocessing_dir = soft_link_to_run_dir + '/postprocessing/'
+consensus_chain_csv = postprocessing_dir + consensus_chain_csv_file_name
+general_infos_json = postprocessing_dir + 'general_infos.json'
+log_errors_txt = postprocessing_dir + 'log_errors.txt'

@@ -5,12 +5,13 @@ from mock import mock_open
 from mock import Mock
 import argparse
 from write import Writer
+import config
 
 
 class TestUtils(TestCase):
 
     def setUp(self):
-        self.writer = Writer('/postprocessing_dir/', 'test_tag')
+        self.writer = Writer('test_tag')
 
     @patch('fcntl.flock', lambda file, lock: None)
     @patch('builtins.open', new_callable=mock_open)
@@ -20,8 +21,8 @@ class TestUtils(TestCase):
         self.writer.write_csv('file.name', ['header_1', 'header_2'], [elements])
 
         self.assertEqual(m_open.call_count, 2)
-        self.assertEqual(m_open.call_args_list[0][0], ('/postprocessing_dir/file.name', 'w'))
-        self.assertEqual(m_open.call_args_list[1][0], ('/postprocessing_dir/file.name', 'a'))
+        self.assertEqual(m_open.call_args_list[0][0], (config.postprocessing_dir + 'file.name', 'w'))
+        self.assertEqual(m_open.call_args_list[1][0], (config.postprocessing_dir + 'file.name', 'a'))
 
         handle = m_open()
         self.assertEqual(handle.write.call_args_list[0][0][0], 'header_1,header_2,tag\r\n')

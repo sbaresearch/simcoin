@@ -6,6 +6,7 @@ import pytz
 from multiprocessing import Pool
 from itertools import repeat
 from chunker import Chunker
+import write
 
 
 class Parser:
@@ -20,14 +21,14 @@ class Parser:
     def execute(self):
 
         for parser in host_parsers + node_parsers:
-            self.writer.write_header_csv(parser.file_name, parser.csv_header)
+            write.write_header_csv(parser.file_name, parser.csv_header)
         logging.info('Created all empty csv files')
 
         self.pool.starmap(parse, zip(
             repeat(self.writer,),
-            repeat(self.context.path.run_log),
+            repeat(config.run_log),
             repeat('simcoin'),
-            Chunker.chunkify(self.context.path.run_log, config.file_chunk_size),
+            Chunker.chunkify(config.run_log, config.file_chunk_size),
             repeat(host_parsers),
         ))
 

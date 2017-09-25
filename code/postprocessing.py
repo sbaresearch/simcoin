@@ -31,21 +31,21 @@ class PostProcessing:
 
         logging.info(config.log_line_run_end + self.context.run_name)
         flush_log_handlers()
-        extract_from_file(config.log_file, self.context.path.run_log,
+        extract_from_file(config.log_file, config.run_log,
                           config.log_line_run_start + self.context.run_name,
                           config.log_line_run_end + self.context.run_name)
 
         parser = Parser(self.context, self.writer)
         parser.execute()
 
-        collect_general_infos(self.context.path.general_infos_json)
+        collect_general_infos()
 
         self.context.step_times.append(StepTimes(time.time(), 'postprocessing_end'))
         self.writer.write_csv(config.step_times_csv_file_name, StepTimes.csv_header, self.context.step_times)
 
-        bash.check_output(rcmd.create_report(self.context.path.postprocessing_dir, config.report_file_name))
+        bash.check_output(rcmd.create_report(config.postprocessing_dir, config.report_file_name))
         logging.info('Created {} report in folder={}'
-                     .format(config.report_file_name, self.context.path.postprocessing_dir))
+                     .format(config.report_file_name, config.postprocessing_dir))
 
         self.pool.close()
         logging.info('Executed post processing')
@@ -59,11 +59,11 @@ class PostProcessing:
         bash.check_output(dockercmd.rm_network())
         logging.info('Deleted docker network')
 
-        bash.check_output(dockercmd.fix_data_dirs_permissions(self.context.path.run_dir))
+        bash.check_output(dockercmd.fix_data_dirs_permissions(self.context.run_dir))
         logging.info('Fixed permissions of dirs used by docker')
 
     def grep_log_for_errors(self):
-        with open(self.context.path.log_errors_txt, 'a') as file:
+        with open(config.log_errors_txt, 'a') as file:
             for node in self.context.all_nodes.values():
                 file.write('{}:\n\n'.format(node.name))
                 file.write('{}\n\n\n'.format(node.grep_log_for_errors()))
@@ -72,10 +72,10 @@ class PostProcessing:
             lines = bash.check_output_without_log(config.log_error_grep.format(config.log_file))
             file.write('{}\n\n\n'.format(lines))
         logging.info('Grepped all logs for errors and saved matched lines to {}'
-                     .format(self.context.path.log_errors_txt))
+                     .format(config.log_errors_txt))
 
 
-def collect_general_infos(path):
+def collect_general_infos():
     general_infos = {
         'current_commit': try_cmd('git log -n 1 --pretty=format:"%H"'),
         'total_memory': try_cmd('cat /proc/meminfo | sed -n 1p | grep -ohE [0-9]+'),
@@ -83,7 +83,7 @@ def collect_general_infos(path):
         'cpus': try_cmd("lscpu | grep -oP 'CPU\(s\):\s+\K([0-9]+)$'"),
     }
 
-    with open(path, 'w') as file:
+    with open(config.general_infos_json, 'w') as file:
         file.write('{}\n'.format(json.dumps(general_infos)))
 
 

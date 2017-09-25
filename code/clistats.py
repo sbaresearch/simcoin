@@ -1,6 +1,7 @@
 import logging
 from bitcoinrpc.authproxy import JSONRPCException
 import utils
+import config
 
 
 class CliStats:
@@ -30,7 +31,7 @@ class CliStats:
                 height += 1
             else:
                 break
-        write_consensus_chain(self.context.path.consensus_chain_csv, consensus_chain)
+        write_consensus_chain(consensus_chain)
 
     def persist_node_stats(self):
         tips = []
@@ -41,8 +42,8 @@ class CliStats:
         logging.info('Collected and persisted {} tips'.format(len(tips)))
 
 
-def write_consensus_chain(path, chain):
-    with open(path, 'w') as file:
+def write_consensus_chain(chain):
+    with open(config.consensus_chain_csv, 'w') as file:
         file.write('hash\n')
         file.writelines('\n'.join(chain))
         file.write('\n')

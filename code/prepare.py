@@ -97,18 +97,18 @@ class Prepare:
         utils.sleep(3 + len(self.context.all_nodes) * 0.2)
 
     def prepare_simulation_dir(self):
-        if not os.path.exists(self.context.path.run_dir):
-            os.makedirs(self.context.path.run_dir)
-        os.makedirs(self.context.path.postprocessing_dir)
+        if not os.path.exists(self.context.run_dir):
+            os.makedirs(self.context.run_dir)
 
         if os.path.islink(config.soft_link_to_run_dir):
             bash.check_output('unlink {}'.format(config.soft_link_to_run_dir))
-        bash.check_output('ln -s {} {}'.format(self.context.path.run_dir, config.soft_link_to_run_dir))
+        bash.check_output('ln -s {} {}'.format(self.context.run_dir, config.soft_link_to_run_dir))
+        os.makedirs(config.postprocessing_dir)
 
-        bash.check_output('cp {} {}'.format(config.network_csv, self.context.path.run_dir))
-        bash.check_output('cp {} {}'.format(config.ticks_csv, self.context.path.run_dir))
-        bash.check_output('cp {} {}'.format(config.nodes_json, self.context.path.run_dir))
-        bash.check_output('cp {} {}'.format(config.args_json, self.context.path.run_dir))
+        bash.check_output('cp {} {}'.format(config.network_csv, self.context.run_dir))
+        bash.check_output('cp {} {}'.format(config.ticks_csv, self.context.run_dir))
+        bash.check_output('cp {} {}'.format(config.nodes_json, self.context.run_dir))
+        bash.check_output('cp {} {}'.format(config.args_json, self.context.run_dir))
         logging.info('Simulation directory created')
 
 

@@ -14,9 +14,9 @@ import time
 class Context:
     def __init__(self):
         self.run_name = 'run-' + str(time.time())
+        self.run_dir = config.data_dir + self.run_name + '/'
         self.args = utils.read_json_file(config.args_json)
         self.zone = Zone()
-        self.path = None
 
         self.config_nodes = None
 
@@ -41,7 +41,7 @@ class Context:
             self.nodes.update({node.name: PublicBitcoinNode(node.name, node.group,
                                                             self.zone.get_ip(node.latency),
                                                             node.latency, node.docker_image,
-                                                            self.path.client_dir_on_host(node.name))})
+                                                            self.run_dir + node.name + config.bitcoin_regtest_dir)})
 
         self.selfish_node_private_nodes = OrderedDict([])
         self.selfish_node_proxies = OrderedDict([])
