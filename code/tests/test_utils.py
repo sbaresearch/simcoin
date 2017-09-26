@@ -3,6 +3,7 @@ import utils
 from mock import patch
 from mock import mock_open
 import argparse
+from textwrap import dedent
 
 
 class TestUtils(TestCase):
@@ -79,3 +80,26 @@ class TestUtils(TestCase):
         utils.update_args_json(args)
 
         self.assertEqual(m_dump.call_args[0][0], {'test': 0, 'unknown_arg': 1})
+
+    def test_read(self):
+        data = dedent("""
+            int,float,string
+            1,45.5,node-1
+        """).strip()
+
+        m = mock_open(read_data=data)
+        m.return_value.__iter__ = lambda self: self
+        m.return_value.__next__ = lambda self: next(iter(self.readline, ''))
+        with patch('builtins.open', m):
+            data = utils.read_args()
+            self.assertEqual(data.int, 1)
+            self.assertEqual(data.float, 45.5)
+            self.assertEqual(data.string, 'node-1')
+
+    def test_read_empty_file(self):
+        m = mock_open(read_data='')
+        m.return_value.__iter__ = lambda self: self
+        m.return_value.__next__ = lambda self: next(iter(self.readline, ''))
+        with patch('builtins.open', m):
+            data = utils.read_args()
+            self.assertEqual(data, None)

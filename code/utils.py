@@ -7,6 +7,7 @@ import re
 import json
 from collections import namedtuple
 import csv
+from ast import literal_eval
 
 
 def sleep(seconds):
@@ -62,6 +63,23 @@ def update_args_json(args):
 def read_json_file(file):
     with open(file) as file:
         return json.loads(file.read(), object_hook=json_object_hook)
+
+
+def read_args():
+    with open(config.args_json) as file:
+        try:
+            reader = csv.reader(file)
+            Args = namedtuple("Args", next(reader))
+            line = next(reader)
+            for i, var in enumerate(line):
+                try:
+                    line[i] = literal_eval(var)
+                except ValueError:
+                    pass
+            return Args._make(line)
+        except StopIteration:
+            logging.debug('File={} has not enough lines'.format(config.args_json))
+            return None
 
 
 def json_object_hook(d):
