@@ -7,7 +7,6 @@ import re
 import json
 from collections import namedtuple
 import csv
-import fcntl
 
 
 def sleep(seconds):

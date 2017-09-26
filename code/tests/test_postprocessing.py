@@ -3,10 +3,8 @@ from mock import patch
 from mock import mock_open
 from postprocessing import PostProcessing
 from mock import MagicMock
-import config
 import postprocessing
 from textwrap import dedent
-from collections import OrderedDict
 
 
 class TestPostProcessing(TestCase):
