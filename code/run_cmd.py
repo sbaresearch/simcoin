@@ -18,7 +18,7 @@ def parse_args():
                         )
 
     parser.add_argument('--tag'
-                        , default='default_tag'
+                        , default='run'
                         , help='A tag that will be added to every csv file.'
                         )
 

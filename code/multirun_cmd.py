@@ -61,7 +61,7 @@ def run():
     for i in range(args.repeat):
         logging.info('Starting {}/{} simulation'.format(i + 1, args.repeat))
 
-        run_cmd.run('_run_' + str(i + 1))
+        run_cmd.run('_' + str(i + 1))
         bash.check_output('cp -r {}/postprocessing {}/run-{}'
                           .format(config.soft_link_to_run_dir, config.multi_run_dir, i + 1))
         logging.info('Finished {}/{} simulation'.format(i + 1, args.repeat))
