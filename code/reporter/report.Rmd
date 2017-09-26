@@ -164,11 +164,11 @@ kable(summary,
 ```
 
 ```{r step_times_barchart, fig.cap='Step times', fig.pos='H', fig.height=3}
-step_diff             <- data.frame(diff(step_times$timestamp))
+step_diff             <- round(data.frame(diff(step_times$timestamp))/60, 1)
 t_step_diff           <- t(step_diff)
 colnames(t_step_diff) <- c('Preparation', 'Simulation', 'Postprocessing')
 rownames(t_step_diff) <- c('Run')
-barchart(t_step_diff, stack = TRUE, ref = FALSE, xlab = 'Time [s]',
+barchart(t_step_diff, stack = TRUE, ref = FALSE, xlab = 'Time [min]',
          auto.key = list(columns=2, rectangles = TRUE, points = FALSE, space='top', text=colnames(t_step_diff)),
          panel=function(x,y,...){
       panel.barchart(x,y,...)

@@ -114,8 +114,9 @@ step_diff <- dcast(step_diff, tag~type, value.var = 'diff')
 rownames(step_diff) <- step_diff[,1]
 step_diff           <- step_diff[,-1]
 step_diff           <- step_diff[, c(3,2,1)]
+step_diff           <- round(step_diff/60, 1)
 colnames(step_diff) <- c('Preparation', 'Simulation', 'Postprocessing')
-barchart(as.matrix(step_diff), stack = TRUE, ref = FALSE, xlab = 'Time [s]',
+barchart(as.matrix(step_diff), stack = TRUE, ref = FALSE, xlab = 'Time [min]',
          auto.key = list(columns=2, rectangles = TRUE, points = FALSE, space='top', text=colnames(step_diff)),
          panel=function(x,y,...){
       panel.barchart(x,y,...)
