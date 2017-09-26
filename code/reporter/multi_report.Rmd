@@ -29,7 +29,6 @@ knitr::opts_chunk$set(
 ```
 
 ```{r imports}
-library(jsonlite)
 library(anytime)
 library(dplyr)
 library(kableExtra)
@@ -68,7 +67,7 @@ analysed_tick_infos  <- read.csv('analysed_tick_infos.csv', dec='.')
 cpu_time <- read.csv("cpu_time.csv", dec=".")
 memory   <- read.csv("memory.csv", dec=".")
 
-args                <- stream_in(file('args.json'))
+args                <- read.csv('args.csv')
 ticks               <- readLines(file('ticks.csv'))
 analysed_ticks      <- readLines(file('analysed_ticks.csv'))
 ```

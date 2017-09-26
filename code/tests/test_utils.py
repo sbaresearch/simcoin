@@ -2,8 +2,9 @@ from unittest import TestCase
 import utils
 from mock import patch
 from mock import mock_open
-import argparse
 from textwrap import dedent
+from collections import namedtuple
+from argparse import Namespace
 
 
 class TestUtils(TestCase):
@@ -51,36 +52,7 @@ class TestUtils(TestCase):
 
         self.assertFalse(m_exit.called)
 
-    @patch('os.path.isfile')
-    @patch('builtins.open', new_callable=mock_open)
-    @patch('json.load')
-    @patch('json.dumps')
-    def test_update_args_json_update_args(self, m_dump, m_load, m_open, m_is_file):
-        m_is_file.return_value = True
-        args = argparse.Namespace()
-        args.test = 1
-
-        m_load.return_value = {'test': 0}
-
-        utils.update_args_json(args)
-
-        self.assertEqual(m_dump.call_args[0][0], {'test': 1})
-
-    @patch('os.path.isfile')
-    @patch('builtins.open', new_callable=mock_open)
-    @patch('json.load')
-    @patch('json.dumps')
-    def test_update_args_json_add_args(self, m_dump, m_load, m_open, m_is_file):
-        m_is_file.return_value = True
-        args = argparse.Namespace()
-        args.unknown_arg = 1
-
-        m_load.return_value = {'test': 0}
-
-        utils.update_args_json(args)
-
-        self.assertEqual(m_dump.call_args[0][0], {'test': 0, 'unknown_arg': 1})
-
+    @patch('os.path.isfile', lambda path: True)
     def test_read(self):
         data = dedent("""
             int,float,string
@@ -103,3 +75,33 @@ class TestUtils(TestCase):
         with patch('builtins.open', m):
             data = utils.read_args()
             self.assertEqual(data, None)
+
+    @patch('utils.read_args', lambda: None)
+    @patch('builtins.open', new_callable=mock_open)
+    def test_update_args_1(self, m_open):
+        utils.update_args(Namespace(int=1, float=1.1, string='test'))
+
+        handle = m_open()
+        self.assertEqual(handle.write.call_count, 2)
+        self.assertIn('string', handle.write.call_args_list[0][0][0])
+        self.assertIn('float', handle.write.call_args_list[0][0][0])
+        self.assertIn('int', handle.write.call_args_list[0][0][0])
+
+        self.assertIn('1', handle.write.call_args_list[1][0][0])
+        self.assertIn('1.1', handle.write.call_args_list[1][0][0])
+        self.assertIn('test', handle.write.call_args_list[1][0][0])
+
+    @patch('utils.read_args')
+    @patch('builtins.open', new_callable=mock_open)
+    def test_update_args_2(self, m_open, m_read):
+        Args = namedtuple('Args', 'int float')
+        m_read.return_value = Args(2, 2.2)
+
+        utils.update_args(Namespace(int=1, string='test'))
+
+        handle = m_open()
+        self.assertEqual(handle.write.call_count, 2)
+
+        self.assertIn('1', handle.write.call_args_list[1][0][0])
+        self.assertIn('2.2', handle.write.call_args_list[1][0][0])
+        self.assertIn('test', handle.write.call_args_list[1][0][0])

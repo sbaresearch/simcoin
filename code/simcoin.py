@@ -34,7 +34,7 @@ def parse_args():
                         )
 
     args = parser.parse_known_args(sys.argv[2:])[0]
-    utils.update_args_json(args)
+    utils.update_args(args)
 
     return args
 

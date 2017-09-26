@@ -4,7 +4,6 @@ import config
 import sys
 import os
 import re
-import json
 from collections import namedtuple
 import csv
 from ast import literal_eval
@@ -47,39 +46,36 @@ def check_for_file(file):
         exit(-1)
 
 
-def update_args_json(args):
-    raw_data = {}
-    if os.path.isfile(config.args_json):
-        with open(config.args_json, 'r') as file:
-            raw_data = json.load(file)
-
-    raw_data.update(vars(args))
-    data = {k: v for k, v in raw_data.items() if v is not None}
-
-    with open(config.args_json, 'w') as file:
-        file.write('{}\n'.format(json.dumps(data)))
-
-
-def read_json_file(file):
-    with open(file) as file:
-        return json.loads(file.read(), object_hook=json_object_hook)
-
-
 def read_args():
-    with open(config.args_json) as file:
-        try:
-            reader = csv.reader(file)
-            Args = namedtuple("Args", next(reader))
-            line = next(reader)
-            for i, var in enumerate(line):
-                try:
-                    line[i] = literal_eval(var)
-                except ValueError:
-                    pass
-            return Args._make(line)
-        except StopIteration:
-            logging.debug('File={} has not enough lines'.format(config.args_json))
-            return None
+    if os.path.isfile(config.args_csv):
+        with open(config.args_csv, 'r') as file:
+            try:
+                reader = csv.reader(file)
+                Args = namedtuple("Args", next(reader))
+                line = next(reader)
+                for i, var in enumerate(line):
+                    try:
+                        line[i] = literal_eval(var)
+                    except ValueError:
+                        pass
+                return Args._make(line)
+            except StopIteration:
+                logging.debug('File={} has not enough lines'.format(config.args_csv))
+                return None
+
+
+def update_args(args):
+    persisted_args = {}
+    persisted_tuple = read_args()
+    if persisted_tuple:
+        persisted_args = dict(persisted_tuple._asdict())
+
+    data = {**persisted_args, **vars(args)}
+    cleaned_data = {k: v for k, v in data.items() if v is not None}
+    with open(config.args_csv, 'w') as file:
+        writer = csv.writer(file)
+        writer.writerow(cleaned_data.keys())
+        writer.writerow(cleaned_data.values())
 
 
 def json_object_hook(d):

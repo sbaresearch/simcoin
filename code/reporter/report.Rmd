@@ -29,7 +29,6 @@ knitr::opts_chunk$set(
 ```
 
 ```{r imports}
-library(jsonlite)
 library(anytime)
 library(dplyr)
 library(kableExtra)
@@ -39,7 +38,7 @@ Sys.setenv(TZ='UTC')
 ```
 
 ```{r preprocessing, include=FALSE}
-args       <- stream_in(file('../args.json'))
+args <- read.csv('../args.csv', stringsAsFactors=FALSE)
 
 tick_infos <- read.csv("tick_infos.csv")
 tick_infos <- tick_infos %>% arrange(timestamp)
@@ -110,7 +109,6 @@ cpu_time <- read.csv("cpu_time.csv", dec=".")
 log_errors  <- readChar("log_errors.txt", file.info("log_errors.txt")$size)
 
 ticks     <- readLines(file('../ticks.csv'))
-args      <- stream_in(file('../args.json'))
 sim_start <- tick_infos$start[1]
 ```
 

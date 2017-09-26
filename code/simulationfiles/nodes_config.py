@@ -39,7 +39,7 @@ def create(unknown_arguments=False):
     else:
         args = parser.parse_args(sys.argv[2:])
     logging.info("Parsed arguments in {}: {}".format(__name__, args))
-    utils.update_args_json(args)
+    utils.update_args(args)
 
     nodes = []
     for index, node_group in enumerate(node_groups):

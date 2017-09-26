@@ -15,7 +15,7 @@ class Context:
     def __init__(self):
         self.run_name = 'run-' + str(time.time())
         self.run_dir = config.data_dir + self.run_name + '/'
-        self.args = utils.read_json_file(config.args_json)
+        self.args = utils.read_args()
         self.zone = Zone()
 
         self.config_nodes = None

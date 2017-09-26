@@ -48,7 +48,7 @@ def parse_args():
                         )
 
     args = parser.parse_known_args(sys.argv[2:])[0]
-    utils.update_args_json(args)
+    utils.update_args(args)
     return args
 
 
@@ -66,7 +66,7 @@ def run():
                           .format(config.soft_link_to_run_dir, config.multi_run_dir, i + 1))
         logging.info('Finished {}/{} simulation'.format(i + 1, args.repeat))
 
-    for file in [config.args_json, config.ticks_csv, config.analysed_ticks_csv, config.general_infos_csv]:
+    for file in [config.args_csv, config.ticks_csv, config.analysed_ticks_csv, config.general_infos_csv]:
         bash.check_output('cp {} {}/.'.format(file, config.soft_link_to_multi_run_dir))
     concat_files()
 

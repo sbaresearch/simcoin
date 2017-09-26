@@ -23,7 +23,7 @@ def parse_args():
                         )
 
     args = parser.parse_known_args(sys.argv[2:])[0]
-    utils.update_args_json(args)
+    utils.update_args(args)
     return args
 
 
@@ -33,7 +33,7 @@ def run(tag_appendix=None):
 
     if tag_appendix:
         args.tag = args.tag + tag_appendix
-    utils.update_args_json(args)
+    utils.update_args(args)
 
     nodes_config.create(unknown_arguments=True)
 
