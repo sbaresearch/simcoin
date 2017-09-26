@@ -46,9 +46,9 @@ def check_for_file(file):
         exit(-1)
 
 
-def read_args():
-    if os.path.isfile(config.args_csv):
-        with open(config.args_csv, 'r') as file:
+def read_csv(file_name):
+    if os.path.isfile(file_name):
+        with open(file_name, 'r') as file:
             try:
                 reader = csv.reader(file)
                 Args = namedtuple("Args", next(reader))
@@ -66,7 +66,7 @@ def read_args():
 
 def update_args(args):
     persisted_args = {}
-    persisted_tuple = read_args()
+    persisted_tuple = read_csv(config.args_csv)
     if persisted_tuple:
         persisted_args = dict(persisted_tuple._asdict())
 
