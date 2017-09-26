@@ -40,6 +40,8 @@ Sys.setenv(TZ='UTC')
 
 ```{r preprocessing, include=FALSE}
 tick_infos <- read.csv("tick_infos.csv")
+tick_infos <- tick_infos %>% arrange(timestamp)
+write.csv(tick_infos, 'tick_infos.csv', row.names=FALSE, quote=FALSE)
 args       <- stream_in(file('../args.json'))
 
 skip_ticks       <- ceiling(max(1/args$blocks_per_tick, 1/args$txs_per_tick, 1/args$tick_duration))
@@ -50,21 +52,28 @@ peer_logic_validation <- read.csv("peer_logic_validation_raw.csv")
 update_tip            <- read.csv("update_tip_raw.csv")
 
 blocks <- rbind(peer_logic_validation, update_tip[, !(names(update_tip) %in% c('tx', 'height'))])
-blocks <- blocks %>% filter(timestamp > head(analysed_ticks$start, 1) & timestamp < tail(analysed_ticks$end, 1)) %>%
-  group_by(hash) %>% filter(which.min(timestamp)==row_number())
+blocks <- blocks %>%
+  arrange(timestamp) %>%
+  filter(timestamp > head(analysed_ticks$start, 1) & timestamp < tail(analysed_ticks$end, 1)) %>%
+  group_by(hash) %>%
+  filter(which.min(timestamp)==row_number())
 write.csv(blocks, 'blocks.csv', row.names=FALSE, quote=FALSE)
 
 files = c("blocks_create", "txs")
 for (i in 1:length(files)) {
   data <- read.csv(paste(files[i], '_raw.csv', sep = ''))
-  data <- data %>% filter(timestamp > head(analysed_ticks$start, 1) & timestamp < tail(analysed_ticks$end, 1))
+  data <- data %>%
+    arrange(timestamp) %>%
+    filter(timestamp > head(analysed_ticks$start, 1) & timestamp < tail(analysed_ticks$end, 1))
   write.csv(data, paste(files[i], 'csv', sep = '.'), row.names=FALSE, quote=FALSE)
 }
 
 files = c("blocks_reconstructed", "txs_received", "blocks_received", "peer_logic_validation", "update_tip")
 for (i in 1:length(files)) {
   data <- read.csv(paste(files[i], '_raw.csv', sep = ''))
-  data <- data %>% filter(timestamp > head(analysed_ticks$start, 1))
+  data <- data %>%
+    arrange(timestamp) %>%
+    filter(timestamp > head(analysed_ticks$start, 1))
   write.csv(data, paste(files[i], 'csv', sep = '.'), row.names=FALSE, quote=FALSE)
 }
 ```
