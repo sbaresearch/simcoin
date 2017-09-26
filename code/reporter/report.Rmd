@@ -159,9 +159,11 @@ kable(infos, col.names = c('Value'), format = 'latex', caption = 'System hardwar
 ```
 
 ```{r cpu_usage_over_time, fig.cap='CPU usage over time', fig.pos='H'}
-cpu_time$total          <- cpu_time$user + cpu_time$nice + cpu_time$system
-cpu_time_diff           <- data.frame(cpu_time$timestamp[-1], diff(cpu_time$total), diff(cpu_time$idle))
-colnames(cpu_time_diff) <- c('timestamp', 'total', 'idle')
+cpu_time_diff <- cpu_time %>%
+  mutate(idle = c(NA, diff(idle)), user = c(NA, diff(user)), nice = c(NA, diff(nice)), system = c(NA, diff(system))) %>%
+  filter(!is.na(idle))
+
+cpu_time_diff$total     <- cpu_time_diff$user + cpu_time_diff$nice + cpu_time_diff$system
 cpu_time_diff$usage     <- (1 - cpu_time_diff$idle / (cpu_time_diff$total + cpu_time_diff$idle)) * 100
 
 xyplot(cpu_time_diff$usage ~ cpu_time_diff$timestamp - sim_start, xlab = 'Time [s]', ylab = 'CPU usage [%]', t = 'l')

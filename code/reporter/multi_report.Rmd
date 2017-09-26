@@ -208,11 +208,12 @@ event_exces <- rbind(tx_exces, block_exces)
 \clearpage
 
 ```{r cpu_time_plot, fig.cap='CPU usage over time', fig.env='figure*', fig.height=3}
-cpu_time$total <- cpu_time$user + cpu_time$nice + cpu_time$system
 cpu_time_diff <- cpu_time %>%
- group_by(tag) %>%
- mutate(diff = c(NA, diff(idle))) %>%
- filter(!is.na(diff))
+  group_by(tag) %>%
+  mutate(idle = c(NA, diff(idle)), user = c(NA, diff(user)), nice = c(NA, diff(nice)), system = c(NA, diff(system))) %>%
+  filter(!is.na(idle))
+cpu_time_diff$total <- cpu_time_diff$user + cpu_time_diff$nice + cpu_time_diff$system
+
 cpu_time_diff$usage   <- (1 - cpu_time_diff$idle / (cpu_time_diff$total + cpu_time_diff$idle)) * 100
 cpu_time_diff         <- merge(cpu_time_diff, simulation_starts)
 cpu_time_diff$elapsed <- cpu_time_diff$timestamp - cpu_time_diff$run_start
