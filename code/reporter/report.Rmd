@@ -163,6 +163,19 @@ kable(summary,
   kable_styling(latex_options = c('scale_down','HOLD_position'))
 ```
 
+```{r simulation}
+step_diff                      <- data.frame(diff(step_times$timestamp))
+colnames(step_diff)            <- c('timestamp')
+step_diff_summary              <- rbind(step_diff, apply(step_diff, 2, sum))
+step_diff_summary$duration_min <- step_diff_summary$timestamp/60
+step_diff_summary              <- step_diff_summary %>%
+  mutate_at(.vars = vars(timestamp, duration_min), .funs = funs(round(.,2)))
+rownames(step_diff_summary)    <- c('Preparation step', 'Simulation step', 'Postprocessing step', 'Total')
+
+kable(step_diff_summary, col.names = c('Duration [s]', 'Duration [min]'), caption = 'Duration of different steps', format = 'latex') %>%
+  kable_styling(latex_options = c('scale_down','HOLD_position'))
+```
+
 ```{r step_times_barchart, fig.cap='Step times', fig.pos='H', fig.height=3}
 step_diff             <- round(data.frame(diff(step_times$timestamp))/60, 1)
 t_step_diff           <- t(step_diff)
@@ -208,19 +221,6 @@ xyplot(memory$usage ~ memory$timestamp - sim_start, xlab = 'Time [s]', ylab = 'M
 ```
 
 ## Ticks
-
-```{r simulation}
-step_diff                      <- data.frame(diff(step_times$timestamp))
-colnames(step_diff)            <- c('timestamp')
-step_diff_summary              <- rbind(step_diff, apply(step_diff, 2, sum))
-step_diff_summary$duration_min <- step_diff_summary$timestamp/60
-step_diff_summary              <- step_diff_summary %>%
-  mutate_at(.vars = vars(timestamp, duration_min), .funs = funs(round(.,2)))
-rownames(step_diff_summary)    <- c('Preparation step', 'Simulation step', 'Postprocessing step', 'Total')
-
-kable(step_diff_summary, col.names = c('Duration [s]', 'Duration [min]'), caption = 'Duration of different steps', format = 'latex') %>%
-  kable_styling(latex_options = c('scale_down','HOLD_position'))
-```
 
 ```{r tick_duration_summary}
 kable(unclass(summary(tick_infos$duration)), col.names = c('Duration [s]'), digits = 3, caption = 'Tick duration', format = 'latex')  %>%
