@@ -208,16 +208,6 @@ block_propagation <- block_propagation %>%
   filter(propagation_time != 0)
 ```
 
-```{r block_propagation_summary}
-kable(unclass(summary(block_propagation$propagation_time * 1000)), col.names = c('Propagation [ms]'), digits = 3, caption = 'Overall block propagation', format = 'latex') %>%
-  kable_styling(latex_options = c('HOLD_position'))
-```
-
-```{r block_size_summary}
-kable(unclass(summary(blocks_create$total_size / 1000)), col.names = c('Size [kB]'), digits = 3, caption = 'Overall block size', format = 'latex') %>%
-  kable_styling(latex_options = c('HOLD_position'))
-```
-
 ```{r block_stale_rate_summary}
 consensus_chain$stale = 'Accepted'
 blocks <- merge(blocks, consensus_chain, all.x = TRUE)
@@ -239,8 +229,18 @@ barchart(stale_block, stack = TRUE, ref = FALSE, xlab = 'Blocks',
 })
 ```
 
+```{r block_size_summary}
+kable(unclass(summary(blocks_create$total_size / 1000)), col.names = c('Size [kB]'), digits = 3, caption = 'Overall block size', format = 'latex') %>%
+  kable_styling(latex_options = c('HOLD_position'))
+```
+
 ```{r block_size_bloxplot, fig.cap='Block size', fig.pos='H'}
 bwplot(blocks_create$total_size / 1000 ~ blocks_create$tag, ylab = 'Block size [kB]')
+```
+
+```{r block_propagation_summary}
+kable(unclass(summary(block_propagation$propagation_time * 1000)), col.names = c('Propagation [ms]'), digits = 3, caption = 'Overall block propagation', format = 'latex') %>%
+  kable_styling(latex_options = c('HOLD_position'))
 ```
 
 ```{r block_propagation_density, fig.cap='Block propagation density', fig.pos='H'}
@@ -262,11 +262,6 @@ kable(unclass(summary(txs_received$propagation_duration * 1000)), col.names = c(
   kable_styling(latex_options = c('HOLD_position'))
 ```
 
-```{r txs_per_block_summary}
-kable(unclass(summary(blocks_create$txs)), digits = 0, caption = 'Overall transactions per block', format = 'latex') %>%
-  kable_styling(latex_options = c('HOLD_position'))
-```
-
 ```{r tx_propagation_density, fig.cap='Transaction propagation density', fig.pos='H'}
 densityplot(~propagation_duration, data=txs_received, groups = tag,
             auto.key = list(space = "top", columns = 2), ref = TRUE,
@@ -275,6 +270,15 @@ densityplot(~propagation_duration, data=txs_received, groups = tag,
 
 ```{r tx_propagation_boxplot, fig.cap='Transaction propagation boxplot', fig.pos='H'}
 bwplot(txs_received$propagation_duration ~ txs_received$tag, ylab = 'Duration [s]')
+```
+
+```{r txs_per_block_summary}
+kable(unclass(summary(blocks_create$txs)), digits = 0, caption = 'Overall transactions per block', format = 'latex') %>%
+  kable_styling(latex_options = c('HOLD_position'))
+```
+
+```{r txs_per_block_boxplot, fig.cap='Transaction per block boxplot', fig.pos='H'}
+bwplot(blocks_create$txs ~ blocks_create$tag, ylab = 'Transactions')
 ```
 
 ## Tips
@@ -291,13 +295,13 @@ kable(unclass(summary(tips_per_node$n)), digits = 2, caption = 'Overall tips per
   kable_styling(latex_options = c('HOLD_position'))
 ```
 
+```{r tips_per_node_boxplot, eval=nrow(tips) > 0, fig.cap='Tips per node', fig.pos='H'}
+bwplot(tips_per_node$n ~ tips_per_node$tag, ylab = 'Tips')
+```
+
 ```{r tips_branchlen_summary, eval=nrow(tips) > 0}
 kable(unclass(summary(tips$branchlen)), digits = 2, caption = 'Overall branch length of tips', format = 'latex') %>%
   kable_styling(latex_options = c('HOLD_position'))
-```
-
-```{r tips_per_node_boxplot, eval=nrow(tips) > 0, fig.cap='Tips per node', fig.pos='H'}
-bwplot(tips_per_node$n ~ tips_per_node$tag, ylab = 'Tips')
 ```
 
 ```{r tips_branchlen_boxplot, eval=nrow(tips) > 0, fig.cap='Overall branch length of tips', fig.pos='H'}
