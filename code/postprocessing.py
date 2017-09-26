@@ -12,6 +12,7 @@ import subprocess
 import json
 from runner import StepTimes
 import time
+import csv
 
 
 class PostProcessing:
@@ -83,8 +84,10 @@ def collect_general_infos():
         'cpus': try_cmd("lscpu | grep -oP 'CPU\(s\):\s+\K([0-9]+)$'"),
     }
 
-    with open(config.general_infos_json, 'w') as file:
-        file.write('{}\n'.format(json.dumps(general_infos)))
+    with open(config.general_infos_csv, 'w') as file:
+        writer = csv.writer(file)
+        writer.writerow(general_infos.keys())
+        writer.writerow(general_infos.values())
 
 
 def flush_log_handlers():

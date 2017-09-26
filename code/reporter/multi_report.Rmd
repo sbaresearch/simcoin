@@ -56,7 +56,7 @@ tx_exces     <- read.csv("tx_exceptions.csv", dec=".")
 rpc_exces <- read.csv("rpc_exceptions.csv", dec=".")
 tips      <- read.csv("tips.csv", dec=".")
 
-general_infos <- fromJSON(file('general_infos.json'))
+general_infos <- read.csv('general_infos.csv', stringsAsFactors=FALSE)
 step_times    <- read.csv("step_times.csv", dec=".")
 
 tick_infos           <- read.csv("tick_infos.csv", dec=".")
