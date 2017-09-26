@@ -114,9 +114,9 @@ kable(infos, col.names = c('Value'), format = 'latex', caption = 'System hardwar
 
 ## Ticks
 
-```{r simulation_starts}
-simulation_starts           <- aggregate(tick_infos$timestamp, by=list(tick_infos$tag), FUN=min)
-colnames(simulation_starts) <- c('tag', 'run_start')
+```{r sim_starts}
+sim_starts           <- aggregate(tick_infos$timestamp, by=list(tick_infos$tag), FUN=min)
+colnames(sim_starts) <- c('tag', 'run_start')
 ```
 
 ```{r tick_duration_summary}
@@ -215,7 +215,7 @@ cpu_time_diff <- cpu_time %>%
 cpu_time_diff$total <- cpu_time_diff$user + cpu_time_diff$nice + cpu_time_diff$system
 
 cpu_time_diff$usage   <- (1 - cpu_time_diff$idle / (cpu_time_diff$total + cpu_time_diff$idle)) * 100
-cpu_time_diff         <- merge(cpu_time_diff, simulation_starts)
+cpu_time_diff         <- merge(cpu_time_diff, sim_starts)
 cpu_time_diff$elapsed <- cpu_time_diff$timestamp - cpu_time_diff$run_start
 xyplot(cpu_time_diff$usage ~ cpu_time_diff$elapsed, groups = cpu_time_diff$tag,
        auto.key = list(space = "top", columns = 2, points = FALSE, lines = TRUE),
@@ -224,7 +224,7 @@ xyplot(cpu_time_diff$usage ~ cpu_time_diff$elapsed, groups = cpu_time_diff$tag,
 
 ```{r memory_xyplot, fig.cap='Memory usage over time', fig.env='figure*', fig.height=3}
 memory$usage   <- (1 - memory$available/memory$total) * 100
-memory         <- merge(memory, simulation_starts)
+memory         <- merge(memory, sim_starts)
 memory$elapsed <- memory$timestamp - memory$run_start
 xyplot(memory$usage ~ memory$elapsed, groups = memory$tag,
        auto.key = list(space = "top", columns = 2, points = FALSE, lines = TRUE),
@@ -252,7 +252,7 @@ barchart(as.matrix(step_diff), stack = TRUE, ref = FALSE, xlab = 'Time [s]',
 ```
 
 ```{r tick_duration_xyplot, fig.cap='Tick duration over time', fig.env='figure*'}
-ticks         <- merge(tick_infos, simulation_starts)
+ticks         <- merge(tick_infos, sim_starts)
 ticks$elapsed <- ticks$timestamp - ticks$run_start
 xyplot(ticks$duration ~ ticks$elapsed, groups = ticks$tag,
        auto.key = list(space = "top", columns = 2, points = FALSE, lines = TRUE),
