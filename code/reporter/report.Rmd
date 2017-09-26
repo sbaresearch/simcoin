@@ -45,8 +45,8 @@ write.csv(tick_infos, 'tick_infos.csv', row.names=FALSE, quote=FALSE)
 args       <- stream_in(file('../args.json'))
 
 skip_ticks       <- ceiling(max(1/args$blocks_per_tick, 1/args$txs_per_tick, 1/args$tick_duration))
-analysed_ticks   <- head(tail(tick_infos, -skip_ticks), -skip_ticks)
-write.csv(analysed_ticks, 'analysed_ticks.csv', row.names=FALSE, quote=FALSE)
+analysed_tick_infos   <- head(tail(tick_infos, -skip_ticks), -skip_ticks)
+write.csv(analysed_tick_infos, 'analysed_tick_infos.csv', row.names=FALSE, quote=FALSE)
 
 peer_logic_validation <- read.csv("peer_logic_validation_raw.csv")
 update_tip            <- read.csv("update_tip_raw.csv")
@@ -54,7 +54,7 @@ update_tip            <- read.csv("update_tip_raw.csv")
 blocks <- rbind(peer_logic_validation, update_tip[, !(names(update_tip) %in% c('tx', 'height'))])
 blocks <- blocks %>%
   arrange(timestamp) %>%
-  filter(timestamp > head(analysed_ticks$start, 1) & timestamp < tail(analysed_ticks$end, 1)) %>%
+  filter(timestamp > head(analysed_tick_infos$start, 1) & timestamp < tail(analysed_tick_infos$end, 1)) %>%
   group_by(hash) %>%
   filter(which.min(timestamp)==row_number())
 write.csv(blocks, 'blocks.csv', row.names=FALSE, quote=FALSE)
@@ -64,7 +64,7 @@ for (i in 1:length(files)) {
   data <- read.csv(paste(files[i], '_raw.csv', sep = ''))
   data <- data %>%
     arrange(timestamp) %>%
-    filter(timestamp > head(analysed_ticks$start, 1) & timestamp < tail(analysed_ticks$end, 1))
+    filter(timestamp > head(analysed_tick_infos$start, 1) & timestamp < tail(analysed_tick_infos$end, 1))
   write.csv(data, paste(files[i], 'csv', sep = '.'), row.names=FALSE, quote=FALSE)
 }
 
@@ -73,7 +73,7 @@ for (i in 1:length(files)) {
   data <- read.csv(paste(files[i], '_raw.csv', sep = ''))
   data <- data %>%
     arrange(timestamp) %>%
-    filter(timestamp > head(analysed_ticks$start, 1))
+    filter(timestamp > head(analysed_tick_infos$start, 1))
   write.csv(data, paste(files[i], 'csv', sep = '.'), row.names=FALSE, quote=FALSE)
 }
 ```
@@ -118,7 +118,7 @@ general_infos_table <- data.frame(
                       format(utctime(step_times$timestamp[length(step_times)]), '%Y-%m-%d %H:%M:%S %Z'),
                       general_infos$current_commit,
                       nrow(tick_infos),
-                      nrow(analysed_ticks),
+                      nrow(analysed_tick_infos),
                       skip_ticks * 2)
                   )
 row.names(general_infos_table)  <- c('Start', 'End', 'Commit', 'Executed ticks', 'Analysed ticks','Skipped ticks')
@@ -135,8 +135,8 @@ kable(args_transposed, col.names = c('Value'), caption = 'Start arguments', form
 
 ```{r events_summary}
 events <- data.frame(
-  c(sum(analysed_ticks$blocks), nrow(blocks_create)),
-  c(sum(analysed_ticks$txs), nrow(txs) - nrow(blocks_create))
+  c(sum(analysed_tick_infos$blocks), nrow(blocks_create)),
+  c(sum(analysed_tick_infos$txs), nrow(txs) - nrow(blocks_create))
 )
 row.names(events)  <- c('Planned', 'Run')
 kable(events,
