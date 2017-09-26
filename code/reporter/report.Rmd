@@ -235,9 +235,6 @@ bwplot(tick_infos$duration, xlab='Tick duration [s]')
 xyplot(tick_infos$duration ~ tick_infos$start - sim_start, xlab = 'Time [s]', ylab = 'Duration [s]', t = 'l' )
 ```
 
-```{r tick_duration_median, fig.cap='Tick duration over time with boxplot', fig.env='figure*'}
-# par(mar=c(7,5,1,1)) # increase plot margins to fit longer labels on the x-axis
-# boxplot(tick_infos$duration ~ cut(tick_infos$start - sim_start, 25), las=2)
 ```
 
 ##  Blocks
