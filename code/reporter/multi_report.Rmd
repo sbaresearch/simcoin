@@ -66,7 +66,7 @@ cpu_time <- read.csv("cpu_time.csv", dec=".")
 memory   <- read.csv("memory.csv", dec=".")
 
 analysed_tick_infos <- read.csv('analysed_tick_infos.csv', dec='.')
-args           <- stream_in(file('args.json'))
+args                <- stream_in(file('args.json'))
 ```
 
 ## Simulation

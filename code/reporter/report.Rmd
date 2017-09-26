@@ -79,7 +79,6 @@ for (i in 1:length(files)) {
 ```
 
 ```{r setup, include=FALSE}
-
 blocks                <- read.csv("blocks.csv", dec=".")
 blocks_create         <- read.csv("blocks_create.csv", dec=".")
 blocks_reconstructed  <- read.csv("blocks_reconstructed.csv", dec=".")
