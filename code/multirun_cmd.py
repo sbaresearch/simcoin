@@ -14,6 +14,7 @@ import clistats
 
 files_to_concat = [
     config.blocks_file_name,
+    config.analysed_ticks_file_name,
     parse.BlockCreateEvent.file_name_after_R_filter,
     parse.BlockReceivedEvent.file_name_after_R_filter,
     parse.BlockReconstructEvent.file_name_after_R_filter,

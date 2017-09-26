@@ -42,29 +42,29 @@ Sys.setenv(TZ='UTC')
 tick_infos <- read.csv("tick_infos.csv")
 args       <- stream_in(file('../args.json'))
 
-skip_ticks    <- ceiling(max(1/args$blocks_per_tick, 1/args$txs_per_tick, 1/args$tick_duration))
-analyze_start <- tick_infos$start[skip_ticks + 1]
-analyze_end   <- tick_infos$start[nrow(tick_infos) - skip_ticks - 1]
+skip_ticks       <- ceiling(max(1/args$blocks_per_tick, 1/args$txs_per_tick, 1/args$tick_duration))
+analysed_ticks   <- head(tail(tick_infos, -skip_ticks), -skip_ticks)
+write.csv(analysed_ticks, 'analysed_ticks.csv', row.names=FALSE, quote=FALSE)
 
 peer_logic_validation <- read.csv("peer_logic_validation_raw.csv")
 update_tip            <- read.csv("update_tip_raw.csv")
 
 blocks <- rbind(peer_logic_validation, update_tip[, !(names(update_tip) %in% c('tx', 'height'))])
-blocks <- blocks %>% filter(timestamp > analyze_start & timestamp < analyze_end) %>% 
+blocks <- blocks %>% filter(timestamp > head(analysed_ticks$start, 1) & timestamp < tail(analysed_ticks$end, 1)) %>%
   group_by(hash) %>% filter(which.min(timestamp)==row_number())
 write.csv(blocks, 'blocks.csv', row.names=FALSE, quote=FALSE)
 
 files = c("blocks_create", "txs")
 for (i in 1:length(files)) {
   data <- read.csv(paste(files[i], '_raw.csv', sep = ''))
-  data <- data %>% filter(timestamp > analyze_start & timestamp < analyze_end)
+  data <- data %>% filter(timestamp > head(analysed_ticks$start, 1) & timestamp < tail(analysed_ticks$end, 1))
   write.csv(data, paste(files[i], 'csv', sep = '.'), row.names=FALSE, quote=FALSE)
 }
 
 files = c("blocks_reconstructed", "txs_received", "blocks_received", "peer_logic_validation", "update_tip")
 for (i in 1:length(files)) {
   data <- read.csv(paste(files[i], '_raw.csv', sep = ''))
-  data <- data %>% filter(timestamp > analyze_start)
+  data <- data %>% filter(timestamp > head(analysed_ticks$start, 1))
   write.csv(data, paste(files[i], 'csv', sep = '.'), row.names=FALSE, quote=FALSE)
 }
 ```
@@ -96,7 +96,7 @@ cpu_time <- read.csv("cpu_time.csv", dec=".")
 
 log_errors  <- readChar("log_errors.txt", file.info("log_errors.txt")$size)
 
-ticks     <- readLines('../ticks.csv')
+ticks     <- readLines(file('../ticks.csv'))
 args      <- stream_in(file('../args.json'))
 sim_start <- tick_infos$start[1]
 ```
@@ -107,9 +107,12 @@ sim_start <- tick_infos$start[1]
 general_infos_table <- data.frame(
                     c(format(utctime(step_times$timestamp[1]), '%Y-%m-%d %H:%M:%S %Z'),
                       format(utctime(step_times$timestamp[length(step_times)]), '%Y-%m-%d %H:%M:%S %Z'),
-                      general_infos$current_commit)
+                      general_infos$current_commit,
+                      nrow(tick_infos),
+                      nrow(analysed_ticks),
+                      skip_ticks * 2)
                   )
-row.names(general_infos_table)  <- c('Start', 'End', 'Commit')
+row.names(general_infos_table)  <- c('Start', 'End', 'Commit', 'Executed ticks', 'Analysed ticks','Skipped ticks')
 kable(general_infos_table,
       col.names = c('Value'), caption = 'General information', format = 'latex') %>%
   kable_styling(latex_options = c('scale_down','HOLD_position'))
@@ -122,17 +125,14 @@ kable(args_transposed, col.names = c('Value'), caption = 'Start arguments', form
 ```
 
 ```{r events_summary}
-planned_blocks <- sum(str_count(ticks, 'block'))
-planned_txs    <- sum(str_count(ticks, 'tx'))
-df             <- data.frame(
-                    c(length(ticks), nrow(tick_infos)),
-                    c(planned_blocks, nrow(blocks_create)),
-                    c(planned_txs, nrow(txs) - nrow(blocks_create))
-                  )
-row.names(df)  <- c('Planned', 'Run')
-kable(df,
-      col.names = c('Ticks', 'Blocks', 'Transactions'), caption = 'Events summary', format = 'latex') %>%
-  kable_styling(latex_options = c('scale_down','HOLD_position'))
+events <- data.frame(
+  c(sum(analysed_ticks$blocks), nrow(blocks_create)),
+  c(sum(analysed_ticks$txs), nrow(txs) - nrow(blocks_create))
+)
+row.names(events)  <- c('Planned', 'Run')
+kable(events,
+      col.names = c('Blocks', 'Transactions'), caption = 'Events summary', format = 'latex') %>%
+  kable_styling(full_width= TRUE, latex_options = c('HOLD_position'))
 ```
 
 ## System
