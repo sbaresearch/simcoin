@@ -56,23 +56,39 @@ tx_exces     <- read.csv("tx_exceptions.csv", dec=".")
 rpc_exces <- read.csv("rpc_exceptions.csv", dec=".")
 tips      <- read.csv("tips.csv", dec=".")
 
-general_infos <- fromJSON(file('run-1/general_infos.json'))
+general_infos <- fromJSON(file('general_infos.json'))
 step_times    <- read.csv("step_times.csv", dec=".")
 
 tick_infos           <- read.csv("tick_infos.csv", dec=".")
 number_of_runs       <- length(unique(tick_infos$tag))
 sim_starts           <- aggregate(tick_infos$timestamp, by=list(tick_infos$tag), FUN=min)
 colnames(sim_starts) <- c('tag', 'run_start')
+analysed_tick_infos  <- read.csv('analysed_tick_infos.csv', dec='.')
 
 cpu_time <- read.csv("cpu_time.csv", dec=".")
 memory   <- read.csv("memory.csv", dec=".")
 
-analysed_tick_infos <- read.csv('analysed_tick_infos.csv', dec='.')
 args                <- stream_in(file('args.json'))
+ticks               <- readLines(file('ticks.csv'))
 analysed_ticks      <- readLines(file('analysed_ticks.csv'))
 ```
 
 ## Simulation
+```{r general_infos}
+general_infos_table <- data.frame(
+                    c(format(utctime(step_times$timestamp[1]), '%Y-%m-%d %H:%M:%S %Z'),
+                      format(utctime(step_times$timestamp[length(step_times)]), '%Y-%m-%d %H:%M:%S %Z'),
+                      general_infos$current_commit,
+                      length(ticks),
+                      length(analysed_ticks),
+                      length(ticks) - length(analysed_tick_infos))
+                  )
+row.names(general_infos_table)  <- c('Start', 'End', 'Commit', 'Planned ticks', 'Planned analysed ticks', 'Skipped ticks')
+kable(general_infos_table,
+      col.names = c('Value'), caption = 'General information', format = 'latex') %>%
+  kable_styling(latex_options = c('scale_down','HOLD_position'))
+```
+
 ```{r start_arguments}
 args_transposed <- as.data.frame(t(args))
 kable(args_transposed, col.names = c('Value'), format = 'latex', caption ='Start arguments') %>%
