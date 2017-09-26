@@ -149,7 +149,7 @@ kable(infos, col.names = c('Value'), format = 'latex', caption = 'System hardwar
   kable_styling(latex_options = c('scale_down','HOLD_position'))
 ```
 
-```{r cpu_usage_over_time, fig.cap='CPU usage over time', fig.env='figure*', fig.height=3}
+```{r cpu_usage_over_time, fig.cap='CPU usage over time', fig.pos='H'}
 cpu_time$total          <- cpu_time$user + cpu_time$nice + cpu_time$system
 cpu_time_diff           <- data.frame(cpu_time$timestamp[-1], diff(cpu_time$total), diff(cpu_time$idle))
 colnames(cpu_time_diff) <- c('timestamp', 'total', 'idle')
@@ -158,7 +158,7 @@ cpu_time_diff$usage     <- (1 - cpu_time_diff$idle / (cpu_time_diff$total + cpu_
 xyplot(cpu_time_diff$usage ~ cpu_time_diff$timestamp - sim_start, xlab = 'Time [s]', ylab = 'CPU usage [%]', t = 'l')
 ```
 
-```{r memory_usage_over_time, fig.cap='Memory usage over time', fig.env='figure*', fig.height=3}
+```{r memory_usage_over_time, fig.cap='Memory usage over time', fig.pos='H'}
 memory$usage <- (1 - memory$available/memory$total) * 100
 xyplot(memory$usage ~ memory$timestamp - sim_start, xlab = 'Time [s]', ylab = 'Memory usage [%]', t = 'l' )
 ```
@@ -201,7 +201,7 @@ kable(unclass(summary(tick_infos$duration)), col.names = c('Duration [s]'), digi
 bwplot(tick_infos$duration, xlab='Tick duration [s]')
 ```
 
-```{r tick_duration_xyplot, fig.cap='Tick duration over time', fig.env='figure*'}
+```{r tick_duration_xyplot, fig.cap='Tick duration over time', fig.pos='H'}
 xyplot(tick_infos$duration ~ tick_infos$start - sim_start, xlab = 'Time [s]', ylab = 'Duration [s]', t = 'l' )
 ```
 
@@ -262,7 +262,7 @@ kable(unclass(summary(block_propagation$propagation_time * 1000)), col.names = c
   kable_styling(latex_options = c('HOLD_position'))
 ```
 
-```{r block_propagation_density, fig.cap='Block propagation density', fig.env='figure*'}
+```{r block_propagation_density, fig.cap='Block propagation density', fig.pos='H'}
 densityplot(~propagation_time, data=block_propagation, auto.key = list(space = "right"), ref = TRUE, xlab = 'Duration [s]', plot.points = FALSE)
 ```
 
@@ -278,7 +278,7 @@ kable(unclass(summary(txs_received$propagation_duration * 1000)), col.names = c(
   kable_styling(latex_options = c('HOLD_position'))
 ```
 
-```{r tx_propagation_density, fig.cap='Transaction propagation density', fig.env='figure*'}
+```{r tx_propagation_density, fig.cap='Transaction propagation density', fig.pos='H'}
 densityplot(~propagation_duration, data=txs_received, auto.key = list(space = "right"), ref = TRUE, xlab = 'Duration [s]', plot.points = FALSE)
 ```
 
