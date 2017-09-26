@@ -249,10 +249,6 @@ densityplot(~propagation_time, data=block_propagation, groups = tag,
             ref = TRUE, xlab = 'Duration [s]', plot.points = FALSE)
 ```
 
-```{r block_propagation_boxplot, fig.cap='Block propagation boxplot', fig.pos='H'}
-bwplot(block_propagation$propagation_time ~ block_propagation$tag, ylab = 'Duration [s]')
-```
-
 ## Transactions
 ```{r txs_propagation_summary}
 txs_received <- merge(txs[, c('timestamp', 'hash')], txs_received, by = 'hash')
@@ -266,10 +262,6 @@ kable(unclass(summary(txs_received$propagation_duration * 1000)), col.names = c(
 densityplot(~propagation_duration, data=txs_received, groups = tag,
             auto.key = list(space = "top", columns = 2), ref = TRUE,
             xlab = 'Duration [s]', plot.points = FALSE)
-```
-
-```{r tx_propagation_boxplot, fig.cap='Transaction propagation boxplot', fig.pos='H'}
-bwplot(txs_received$propagation_duration ~ txs_received$tag, ylab = 'Duration [s]')
 ```
 
 ```{r txs_per_block_summary}
