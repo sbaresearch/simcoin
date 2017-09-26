@@ -39,14 +39,19 @@ Sys.setenv(TZ='UTC')
 ```
 
 ```{r preprocessing, include=FALSE}
+args       <- stream_in(file('../args.json'))
+
 tick_infos <- read.csv("tick_infos.csv")
 tick_infos <- tick_infos %>% arrange(timestamp)
 write.csv(tick_infos, 'tick_infos.csv', row.names=FALSE, quote=FALSE)
-args       <- stream_in(file('../args.json'))
 
-skip_ticks       <- ceiling(max(1/args$blocks_per_tick, 1/args$txs_per_tick, 1/args$tick_duration))
+skip_ticks            <- ceiling(max(1/args$blocks_per_tick, 1/args$txs_per_tick, 1/args$tick_duration))
 analysed_tick_infos   <- head(tail(tick_infos, -skip_ticks), -skip_ticks)
 write.csv(analysed_tick_infos, 'analysed_tick_infos.csv', row.names=FALSE, quote=FALSE)
+
+ticks            <- readLines(file('../ticks.csv'))
+analysed_ticks   <- head(tail(ticks, -skip_ticks), -skip_ticks)
+write(analysed_ticks, 'analysed_ticks.csv')
 
 peer_logic_validation <- read.csv("peer_logic_validation_raw.csv")
 update_tip            <- read.csv("update_tip_raw.csv")

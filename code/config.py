@@ -84,3 +84,4 @@ postprocessing_dir = soft_link_to_run_dir + '/postprocessing/'
 consensus_chain_csv = postprocessing_dir + consensus_chain_csv_file_name
 general_infos_json = postprocessing_dir + 'general_infos.json'
 log_errors_txt = postprocessing_dir + 'log_errors.txt'
+analysed_ticks_csv = postprocessing_dir + 'analysed_ticks.csv'

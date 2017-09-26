@@ -67,6 +67,7 @@ memory   <- read.csv("memory.csv", dec=".")
 
 analysed_tick_infos <- read.csv('analysed_tick_infos.csv', dec='.')
 args                <- stream_in(file('args.json'))
+analysed_ticks      <- readLines(file('analysed_ticks.csv'))
 ```
 
 ## Simulation
