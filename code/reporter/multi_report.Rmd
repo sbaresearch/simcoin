@@ -253,7 +253,7 @@ barchart(as.matrix(step_diff), stack = TRUE, ref = FALSE, xlab = 'Time [s]',
 ```{r tick_duration_xyplot, fig.cap='Tick duration over time', fig.env='figure*'}
 ticks         <- merge(tick_infos, simulation_starts)
 ticks$elapsed <- ticks$timestamp - ticks$run_start
-xyplot(tick_infos$duration ~ ticks$elapsed, groups = ticks$tag,
+xyplot(ticks$duration ~ ticks$elapsed, groups = ticks$tag,
        auto.key = list(space = "top", columns = 2, points = FALSE, lines = TRUE),
        xlab = 'Time [s]', ylab = 'Duration [s]', t = 'l')
 ```
