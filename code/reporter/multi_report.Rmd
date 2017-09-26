@@ -25,7 +25,7 @@ knitr::opts_chunk$set(
   fig.align='center'
   )
 
-# set working directory for development: knitr::opts_knit$set(root.dir = '/tmp/multi_run/')
+# set working directory for development: knitr::opts_knit$set(root.dir = '/tmp/multi/')
 ```
 
 ```{r imports}

@@ -167,9 +167,9 @@ cp-run-tmp:
 	cp -r data/last_run/* /tmp/run/.
 
 cp-multi-tmp:
-	rm -r /tmp/multi_run; \
-	mkdir /tmp/multi_run; \
-	cp -r data/last_multi_run/* /tmp/multi_run/.
+	rm -r /tmp/multi; \
+	mkdir /tmp/multi; \
+	cp -r data/last_multi_run/* /tmp/multi/.
 
 .PHONY : test
 test:
