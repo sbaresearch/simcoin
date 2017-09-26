@@ -82,10 +82,11 @@ analysed_blocks  <- analysed_tick_infos %>% group_by(tag) %>% summarise(blocks =
 summary_create   <- blocks_create %>% group_by(tag) %>% summarise(n = n())
 summary_blocks   <- blocks %>% group_by(tag) %>% summarise(n = n())
 
-summary           <- data.frame(analysed_blocks$blocks, summary_create$n, summary_blocks$n)
+block_count = sum(str_count(analysed_ticks, 'block'))
+summary           <- data.frame(rep(block_count, number_of_runs), analysed_blocks$blocks, summary_create$n, summary_blocks$n)
 rownames(summary) <- analysed_blocks$tag
 kable(summary,
-      col.names = c('Created blocks', 'Parsed create logs', 'Parsed block logs'), caption = 'Blocks events summary', format = 'latex') %>%
+      col.names = c('Planned', 'Created', 'Parsed create', 'Parsed block'), caption = 'Blocks events summary', format = 'latex') %>%
   kable_styling(latex_options = c('scale_down','HOLD_position'))
 ```
 
@@ -94,10 +95,11 @@ analysed_txs     <- analysed_tick_infos %>% group_by(tag) %>% summarise(txs = su
 summary_txs      <- txs %>% group_by(tag) %>% summarise(n = n())
 summary_txs$n    <- summary_txs$n - analysed_blocks$blocks
 
-summary           <- data.frame(analysed_txs$txs, summary_txs$n)
+tx_count = sum(str_count(analysed_ticks, 'tx'))
+summary           <- data.frame(rep(tx_count, number_of_runs), analysed_txs$txs, summary_txs$n)
 rownames(summary) <- analysed_txs$tag
 kable(summary,
-      col.names = c('Created transactions', 'Parsed transactions'), caption = 'Transaction events summary', format = 'latex') %>%
+      col.names = c('Planned', 'Created', 'Parsed'), caption = 'Transaction events summary', format = 'latex') %>%
   kable_styling(latex_options = c('scale_down','HOLD_position'))
 ```
 

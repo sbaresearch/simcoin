@@ -137,15 +137,30 @@ kable(args_transposed, col.names = c('Value'), caption = 'Start arguments', form
   kable_styling(latex_options = c('scale_down','HOLD_position'))
 ```
 
-```{r events_summary}
-events <- data.frame(
-  c(sum(analysed_tick_infos$blocks), nrow(blocks_create)),
-  c(sum(analysed_tick_infos$txs), nrow(txs) - nrow(blocks_create))
-)
-row.names(events)  <- c('Planned', 'Run')
-kable(events,
-      col.names = c('Blocks', 'Transactions'), caption = 'Events summary', format = 'latex') %>%
-  kable_styling(full_width= TRUE, latex_options = c('HOLD_position'))
+```{r block_events_summary}
+analysed_blocks  <- analysed_tick_infos %>% summarise(blocks = sum(blocks))
+summary_create   <- blocks_create %>% summarise(n = n())
+summary_blocks   <- blocks %>% summarise(n = n())
+
+block_count = sum(str_count(analysed_ticks, 'block'))
+summary           <- data.frame(block_count, analysed_blocks$blocks, summary_create$n, summary_blocks$n)
+rownames(summary) <- args$tag
+kable(summary,
+      col.names = c('Planned', 'Created', 'Parsed create', 'Parsed block'), caption = 'Blocks events summary', format = 'latex') %>%
+  kable_styling(latex_options = c('scale_down','HOLD_position'))
+```
+
+```{r tx_events_summary}
+analysed_txs     <- analysed_tick_infos %>% summarise(txs = sum(txs))
+summary_txs      <- txs %>% summarise(n = n())
+summary_txs$n    <- summary_txs$n - analysed_blocks$blocks
+
+tx_count = sum(str_count(analysed_ticks, 'tx'))
+summary           <- data.frame(tx_count, analysed_txs$txs, summary_txs$n)
+rownames(summary) <- args$tag
+kable(summary,
+      col.names = c('Planned', 'Created', 'Parsed'), caption = 'Transaction events summary', format = 'latex') %>%
+  kable_styling(latex_options = c('scale_down','HOLD_position'))
 ```
 
 ## System
