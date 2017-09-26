@@ -58,7 +58,9 @@ tips      <- read.csv("tips.csv", dec=".")
 
 general_infos <- fromJSON(file('run-1/general_infos.json'))
 step_times    <- read.csv("step_times.csv", dec=".")
-tick_infos    <- read.csv("tick_infos.csv", dec=".")
+
+tick_infos     <- read.csv("tick_infos.csv", dec=".")
+number_of_runs <- length(unique(tick_infos$tag))
 
 cpu_time <- read.csv("cpu_time.csv", dec=".")
 memory   <- read.csv("memory.csv", dec=".")
