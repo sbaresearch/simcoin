@@ -18,9 +18,14 @@ report:
 	cd code; \
 		cp reporter/report.Rmd ../data/last_run/postprocessing/;cd ../data/last_run/postprocessing/;R -e library\(rmarkdown\)\;rmarkdown::render\(\"report.Rmd\",\"pdf_document\"\)\;q\(\);rm report.Rmd
 
+RSCRPT=library\(rmarkdown\)\;rmarkdown::render\(\"multi_report.Rmd\",\"pdf_document\"\)\;q\(\);
+
 multi-report:
 	cd code; \
-		cp reporter/multiReport.Rmd ../data/last_multi_run/;cd ../data/last_multi_run/;R -e library\(rmarkdown\)\;rmarkdown::render\(\"multiReport.Rmd\",\"pdf_document\"\)\;q\(\);rm multiReport.Rmd
+		cp reporter/multi_report.Rmd ../data/last_multi_run/; \
+		cd ../data/last_multi_run/; \
+		R -e $(RSCRPT)
+		rm multi_report.Rmd
 
 demo1:
 	cd code; \
@@ -130,6 +135,18 @@ multidemo4:
 				--amount-of-ticks 5 \
 				--txs-per-tick 2 \
 				--tick-duration 2 \
+				--verbose
+
+multidemo5:
+	cd code; \
+		python3 simcoin.py \
+			multi-run \
+				--repeat 5 \
+				--node-group-a bitcoin 150 1 10 simcoin/patched:v1 \
+				--blocks-per-tick 0.05 \
+				--amount-of-ticks 200 \
+				--txs-per-tick 2 \
+				--tick-duration 1 \
 				--verbose
 
 install:
