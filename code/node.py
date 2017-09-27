@@ -308,9 +308,9 @@ class ProxyNode(Node, PublicNode):
 
     def wait_for_highest_tip_of_node(self, node):
         block_hash = node.execute_rpc('getbestblockhash')
-        best_block_hash = bash.check_output(
-            proxycmd.get_best_public_block_hash(self.name))
-        while block_hash != best_block_hash:
+        utils.sleep(1)
+        cmd = proxycmd.get_best_public_block_hash(self.name)
+        while block_hash != bash.check_output(cmd):
             utils.sleep(1)
             logging.debug('Waiting for  blocks to spread...')
 
