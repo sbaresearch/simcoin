@@ -53,10 +53,10 @@ class Context:
                                                                                   ip_private_node,
                                                                                   node.docker_image,
                                                                                   self.run_dir + node.name)})
-
-            self.selfish_node_proxies.update({node.name_proxy: ProxyNode(node.name_proxy, node.group, ip_proxy,
-                                                                         ip_private_node, node.selfish_nodes_args,
-                                                                         node.latency, node.docker_image)})
+            name_proxy = node.name + '-proxy'
+            self.selfish_node_proxies.update({name_proxy: ProxyNode(name_proxy, node.group, ip_proxy,
+                                                                    ip_private_node, node.selfish_nodes_args,
+                                                                    node.latency, node.docker_image)})
 
         self.all_bitcoin_nodes = copy(self.nodes)
         self.all_bitcoin_nodes.update(self.selfish_node_private_nodes)
