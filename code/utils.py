@@ -41,7 +41,7 @@ def config_logger(verbose):
 def check_for_file(file):
     if not os.path.isfile(file):
         command = re.split('\.|/', file)[-2]
-        print("File={} not found. Please generate this with the command `python3 simcoin.py {} [args]."
+        print("File={} not found. Please generate this with the command `python3 simcoin.py {} [args].`"
               .format(file, command))
         exit(-1)
 
