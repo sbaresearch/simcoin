@@ -175,6 +175,7 @@ def wait_until_height_reached(node, height):
         logging.debug('Waiting until node={} reached height={}...'.format(node.name, str(height)))
         utils.sleep(0.2)
 
+
 def wait_until_height_reached_cli(node, height):
     msg = bash.check_output(
         "docker exec simcoin-{} sh -c '"
