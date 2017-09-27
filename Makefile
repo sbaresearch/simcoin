@@ -31,7 +31,7 @@ demo1:
 	cd code; \
 		python3 simcoin.py \
 			run \
-				--node-group-a bitcoin 3 1 0 simcoin/normal:v3\
+				--node-group-a bitcoin 3 1 0 simcoin/normal:v3 \
 				--amount-of-ticks 1 \
 				--tx-per-tick 90 \
 				--verbose
@@ -40,7 +40,7 @@ demo2:
 	cd code; \
 		python3 simcoin.py \
 			run \
-				--node-group-a bitcoin 50 1 0 simcoin/normal:v3\
+				--node-group-a bitcoin 50 1 0 simcoin/normal:v3 \
 				--amount-of-ticks 100 \
 				--tx-per-tick 9 \
 				--verbose
@@ -49,7 +49,7 @@ demo3:
 	cd code; \
 		python3 simcoin.py \
 			run \
-				--node-group-a bitcoin 2 1 0 simcoin/normal:v3\
+				--node-group-a bitcoin 2 1 0 simcoin/normal:v3 \
 				--amount-of-ticks 100 \
 				--tx-per-tick 1 \
 				--verbose
@@ -58,7 +58,7 @@ demo4:
 	cd code; \
 		python3 simcoin.py \
 			run \
-				--node-group-a bitcoin 3 1 0 simcoin/patched:v1\
+				--node-group-a bitcoin 3 1 0 simcoin/patched:v1 \
 				--amount-of-ticks 10 \
 				--tx-per-tick 2 \
 				--blocks-per-tick 0.7 \
