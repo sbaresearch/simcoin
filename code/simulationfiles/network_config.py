@@ -62,7 +62,11 @@ def create(unknown_arguments=False):
 
 def create_header(nodes):
     header = ['']
-    header.extend([node.name for node in nodes])
+    for node in nodes:
+        name = node.name
+        if node.node_type == 'selfish':
+            name += '-proxy'
+        header.append(name)
 
     return header
 
