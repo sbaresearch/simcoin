@@ -39,7 +39,7 @@ class Event:
                     else:
                         logging.error('Events in tick={} took {}s to execute.'
                                       ' Consider to raise the tick_duration which is currently {}s.'
-                                      .format(i, current_time - next_tick,
+                                      .format(i + 1, current_time - next_tick,
                                               self.context.args.tick_duration))
                         raise SimulationException('Events took to long to execute')
         except Exception as exce:
