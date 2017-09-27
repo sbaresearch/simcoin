@@ -15,7 +15,10 @@ def run():
 
     logging.info(config.log_line_run_start + context.run_name)
 
-    writer = Writer(context.args.tag)
+    tag = context.args.tag
+    if hasattr(context.args, 'tag_appendix'):
+        tag += context.args.tag_appendix
+    writer = Writer(tag)
     runner = Runner(context, writer)
 
     prepare = Prepare(context)

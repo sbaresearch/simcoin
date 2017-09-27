@@ -33,6 +33,11 @@ def parse_args():
                         , help='Verbose log.'
                         )
 
+    parser.add_argument('--tag'
+                        , default='run'
+                        , help='A tag that will be added to every csv file.'
+                        )
+
     args = parser.parse_known_args(sys.argv[2:])[0]
     utils.update_args(args)
 

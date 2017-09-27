@@ -9,32 +9,7 @@ import sys
 from simulationfiles import checkargs
 
 
-def parse_args():
-    parser = argparse.ArgumentParser()
-
-    parser.add_argument('--verbose'
-                        , action="store_true"
-                        , help='Verbose log.'
-                        )
-
-    parser.add_argument('--tag'
-                        , default='run'
-                        , help='A tag that will be added to every csv file.'
-                        )
-
-    args = parser.parse_known_args(sys.argv[2:])[0]
-    utils.update_args(args)
-    return args
-
-
-def run(tag_appendix=None):
-    args = parse_args()
-    logging.info("Parsed arguments in {}: {}".format(__name__, args))
-
-    if tag_appendix:
-        args.tag = args.tag + tag_appendix
-    utils.update_args(args)
-
+def run():
     nodes_config.create(unknown_arguments=True)
 
     ticks_config.create(unknown_arguments=True)
