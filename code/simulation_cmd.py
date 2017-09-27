@@ -7,9 +7,13 @@ import config
 from context import Context
 from prepare import Prepare
 from write import Writer
+import utils
 
 
 def run():
+    for file in [config.ticks_csv, config.network_csv, config.nodes_csv]:
+        utils.check_for_file(file)
+
     context = Context()
     context.create()
 

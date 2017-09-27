@@ -48,6 +48,8 @@ def create_parser():
 
 def create(unknown_arguments=False):
     logging.info('Called ticks config')
+
+    utils.check_for_file(config.nodes_csv)
     nodes = utils.read_csv(config.nodes_csv)
 
     parser = create_parser()

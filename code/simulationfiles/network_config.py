@@ -31,6 +31,9 @@ def create_parser():
 def create(unknown_arguments=False):
     logging.info('Called network config')
 
+    utils.check_for_file(config.nodes_csv)
+    nodes = utils.read_csv(config.nodes_csv)
+
     parser = create_parser()
     if unknown_arguments:
         args = parser.parse_known_args(sys.argv[2:])[0]
@@ -38,8 +41,6 @@ def create(unknown_arguments=False):
         args = parser.parse_args(sys.argv[2:])
     logging.info("Parsed arguments in {}: {}".format(__name__, args))
     utils.update_args(args)
-
-    nodes = utils.read_csv(config.nodes_csv)
 
     random.seed(args.seed)
 
