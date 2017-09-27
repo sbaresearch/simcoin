@@ -117,7 +117,7 @@ summary           <- data.frame(rep(tx_count, number_of_runs), analysed_txs$txs,
 rownames(summary) <- analysed_txs$tag
 kable(summary,
       col.names = c('Planned', 'Created', 'Parsed'), caption = 'Transaction events summary', format = 'latex') %>%
-  kable_styling(latex_options = c('scale_down','HOLD_position'))
+  kable_styling(latex_options = c('HOLD_position'))
 ```
 
 ```{r step_times_barchart, fig.cap='Step times', fig.pos='H'}

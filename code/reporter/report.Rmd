@@ -156,7 +156,7 @@ summary           <- data.frame(tx_count, analysed_txs$txs, summary_txs$n)
 rownames(summary) <- args$tag
 kable(summary,
       col.names = c('Planned', 'Created', 'Parsed'), caption = 'Transaction events summary', format = 'latex') %>%
-  kable_styling(latex_options = c('scale_down','HOLD_position'))
+  kable_styling(latex_options = c('HOLD_position'))
 ```
 
 ```{r simulation}
