@@ -58,7 +58,8 @@ demo4:
 	cd code; \
 		python3 simcoin.py \
 			run \
-				--group-a bitcoin 3 .5 0 simcoin/patched:v1 \
+				--group-a bitcoin 2 .6 0 simcoin/patched:v1 \
+				--group-b bitcoin 1 .4 0 simcoin/patched:v1 \
 				--amount-of-ticks 10 \
 				--tx-per-tick 2 \
 				--blocks-per-tick 0.7 \
@@ -93,7 +94,8 @@ multidemo1:
 		python3 simcoin.py \
 			multi-run \
 				--repeat 2 \
-				--group-a bitcoin 3 1 10 simcoin/patched:v1 \
+				--group-a bitcoin 2 .6 10 simcoin/patched:v1 \
+				--group-b bitcoin 1 .4 10 simcoin/patched:v1 \
 				--blocks-per-tick 0.9 \
 				--amount-of-ticks 7 \
 				--txs-per-tick 10 \
