@@ -48,7 +48,7 @@ def create_parser():
 
 def create(unknown_arguments=False):
     logging.info('Called ticks config')
-    nodes = nodes_config.read()
+    nodes = utils.read_csv(config.nodes_csv)
 
     parser = create_parser()
     if unknown_arguments:

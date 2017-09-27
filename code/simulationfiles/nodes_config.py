@@ -6,6 +6,8 @@ import utils
 import bash
 from cmd import dockercmd
 import logging
+import csv
+from collections import namedtuple
 
 node_groups = [
         {'argparse': '--node-group-a', 'variable': 'node_group_a', 'default':
@@ -54,23 +56,15 @@ def create(unknown_arguments=False):
 
     check_if_share_sum_is_1(nodes)
 
-    logging.info('Created {}:'.format(config.nodes_json))
-    print(json.dumps([node.__dict__ for node in nodes], indent=4))
+    logging.info('Created {}:'.format(config.nodes_csv))
+    print(json.dumps([node for node in nodes], indent=4))
 
-    with open(config.nodes_json, 'w') as file:
-        file.write(json.dumps([node.__dict__ for node in nodes], indent=4))
+    with open(config.nodes_csv, 'w') as file:
+        writer = csv.writer(file)
+        writer.writerow(['node_type', 'group', 'name', 'share', 'latency', 'docker_image'])
+        writer.writerows(
+            [[node.node_type, node.group, node.name, node.share, node.latency, node.docker_image] for node in nodes])
     logging.info('End nodes config')
-
-
-def read():
-    utils.check_for_file(config.nodes_json)
-    with open(config.nodes_json) as data_file:
-        nodes = json.load(data_file, object_hook=object_decoder)
-    return nodes
-
-
-def object_decoder(obj):
-    return NodeConfig(obj['node_type'], obj['group'], obj['name'], obj['share'], obj['latency'], obj['docker_image'])
 
 
 def check_if_image_exists(node_args):
@@ -108,11 +102,4 @@ def create_node_group(node_args, group, index):
     return nodes
 
 
-class NodeConfig:
-    def __init__(self, node_type, group, name, share, latency, docker_image):
-        self.node_type = node_type
-        self.group = group
-        self.name = name
-        self.share = share
-        self.latency = latency
-        self.docker_image = docker_image
+NodeConfig = namedtuple('NodeConfig', 'node_type group name share latency docker_image')

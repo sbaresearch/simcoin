@@ -41,7 +41,7 @@ def config_logger(verbose):
 def check_for_file(file):
     if not os.path.isfile(file):
         command = re.split('\.|/', file)[-2]
-        print("{} file not found. Please generate this with the command `python3 simcoin.py {} [args]."
+        print("File={} not found. Please generate this with the command `python3 simcoin.py {} [args]."
               .format(file, command))
         exit(-1)
 
@@ -51,24 +51,48 @@ def read_csv(file_name):
         with open(file_name, 'r') as file:
             try:
                 reader = csv.reader(file)
-                Args = namedtuple("Args", next(reader))
-                line = next(reader)
-                for i, var in enumerate(line):
-                    try:
-                        line[i] = literal_eval(var)
-                    except ValueError:
-                        pass
-                return Args._make(line)
+                Object = namedtuple("Object", next(reader))
+                objects = []
+                for line in reader:
+                    for i, var in enumerate(line):
+                        try:
+                            line[i] = literal_eval(var)
+                        except ValueError:
+                            pass
+                        except SyntaxError:
+                            pass
+                    objects.append(Object._make(line))
+                return objects
             except StopIteration:
                 logging.debug('File={} has not enough lines'.format(config.args_csv))
-                return None
+                return []
+    else:
+        return []
+
+
+def read_args():
+    objects = read_csv(config.args_csv)
+    if len(objects) == 0:
+        print("File={} is empty. Generate the file first with commands provided by"
+              " `python3 simcoin.py`".format(config.args_csv))
+        exit(-1)
+    elif len(objects) == 1:
+        return objects[0]
+    else:
+        print("File={} has to many entries. Deleter the file and regenerate it with commands provided by"
+              " `python3 simcoin.py`".format(config.args_csv))
+        exit(-1)
 
 
 def update_args(args):
     persisted_args = {}
-    persisted_tuple = read_csv(config.args_csv)
-    if persisted_tuple:
-        persisted_args = dict(persisted_tuple._asdict())
+    persisted_tuples = read_csv(config.args_csv)
+    if len(persisted_tuples) == 1:
+        persisted_args = dict(persisted_tuples[0]._asdict())
+    elif len(persisted_tuples) > 1:
+        print("File={} has to many entries. Deleter the file and regenerate it with commands provided by"
+              " `python3 simcoin.py`".format(config.args_csv))
+        exit(-1)
 
     data = {**persisted_args, **vars(args)}
     cleaned_data = {k: v for k, v in data.items() if v is not None}

@@ -15,7 +15,7 @@ class Context:
     def __init__(self):
         self.run_name = 'run-' + str(time.time())
         self.run_dir = config.data_dir + self.run_name + '/'
-        self.args = utils.read_csv()
+        self.args = utils.read_args()
         self.zone = Zone()
 
         self.config_nodes = None
@@ -32,7 +32,7 @@ class Context:
         self.step_times = []
 
     def create(self):
-        self.config_nodes = nodes_config.read()
+        self.config_nodes = utils.read_csv(config.nodes_csv)
         nodes = [node for node in self.config_nodes if node.node_type == 'bitcoin']
         selfish_nodes = [node for node in self.config_nodes if node.node_type == 'selfish']
 

@@ -107,7 +107,7 @@ class Prepare:
 
         bash.check_output('cp {} {}'.format(config.network_csv, self.context.run_dir))
         bash.check_output('cp {} {}'.format(config.ticks_csv, self.context.run_dir))
-        bash.check_output('cp {} {}'.format(config.nodes_json, self.context.run_dir))
+        bash.check_output('cp {} {}'.format(config.nodes_csv, self.context.run_dir))
         bash.check_output('cp {} {}'.format(config.args_csv, self.context.run_dir))
         logging.info('Simulation directory created')
 

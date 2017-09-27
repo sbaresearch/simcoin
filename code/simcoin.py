@@ -52,10 +52,10 @@ def main():
         run         runs all above commands
         multi-run   run the simulation multiple times
         '''.format(
-            config.nodes_json_file_name,
+            config.nodes_csv_file_name,
             config.network_csv_file_name,
             config.ticks_csv_file_name,
-            config.nodes_json_file_name,
+            config.nodes_csv_file_name,
             config.network_csv_file_name,
             config.ticks_csv_file_name,
         ))

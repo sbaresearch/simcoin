@@ -39,7 +39,7 @@ def create(unknown_arguments=False):
     logging.info("Parsed arguments in {}: {}".format(__name__, args))
     utils.update_args(args)
 
-    nodes = nodes_config.read()
+    nodes = utils.read_csv(config.nodes_csv)
 
     random.seed(args.seed)
 

@@ -53,12 +53,12 @@ data_dir = '../data/'
 
 network_csv_file_name = 'network.csv'
 ticks_csv_file_name = 'ticks.csv'
-nodes_json_file_name = 'nodes.json'
+nodes_csv_file_name = 'nodes.csv'
 args_csv_file_name = 'args.csv'
 
 network_csv = data_dir + network_csv_file_name
 ticks_csv = data_dir + ticks_csv_file_name
-nodes_json = data_dir + nodes_json_file_name
+nodes_csv = data_dir + nodes_csv_file_name
 args_csv = data_dir + args_csv_file_name
 
 bitcoin_data_dir = '/data'

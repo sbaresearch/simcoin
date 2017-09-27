@@ -63,7 +63,7 @@ class TestUtils(TestCase):
         m.return_value.__iter__ = lambda self: self
         m.return_value.__next__ = lambda self: next(iter(self.readline, ''))
         with patch('builtins.open', m):
-            data = utils.read_csv('/some.csv')
+            data = utils.read_csv('/some.csv')[0]
             self.assertEqual(data.int, 1)
             self.assertEqual(data.float, 45.5)
             self.assertEqual(data.string, 'node-1')
@@ -74,9 +74,9 @@ class TestUtils(TestCase):
         m.return_value.__next__ = lambda self: next(iter(self.readline, ''))
         with patch('builtins.open', m):
             data = utils.read_csv('/some.csv')
-            self.assertEqual(data, None)
+            self.assertEqual(data, [])
 
-    @patch('utils.read_csv', lambda file: None)
+    @patch('utils.read_csv', lambda file: [])
     @patch('builtins.open', new_callable=mock_open)
     def test_update_args_1(self, m_open):
         utils.update_args(Namespace(int=1, float=1.1, string='test'))
@@ -95,7 +95,7 @@ class TestUtils(TestCase):
     @patch('builtins.open', new_callable=mock_open)
     def test_update_args_2(self, m_open, m_read):
         Args = namedtuple('Args', 'int float')
-        m_read.return_value = Args(2, 2.2)
+        m_read.return_value = [Args(2, 2.2)]
 
         utils.update_args(Namespace(int=1, string='test'))
 
