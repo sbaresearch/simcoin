@@ -290,8 +290,8 @@ class PublicBitcoinNode(BitcoinNode, PublicNode):
 
 
 class SelfishPrivateNode(BitcoinNode):
-    def __init__(self, name, group, ip, docker_image):
-        super().__init__(name, group, ip, docker_image)
+    def __init__(self, name, group, ip, docker_image, path):
+        super().__init__(name, group, ip, docker_image, path)
 
 
 class ProxyNode(Node, PublicNode):

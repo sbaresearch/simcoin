@@ -51,7 +51,8 @@ class Context:
 
             self.selfish_node_private_nodes.update({node.name: SelfishPrivateNode(node.name, node.group,
                                                                                   ip_private_node,
-                                                                                  node.docker_image)})
+                                                                                  node.docker_image,
+                                                                                  self.run_dir + node.name)})
 
             self.selfish_node_proxies.update({node.name_proxy: ProxyNode(node.name_proxy, node.group, ip_proxy,
                                                                          ip_private_node, node.selfish_nodes_args,
