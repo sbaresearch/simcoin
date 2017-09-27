@@ -54,8 +54,11 @@ class Context:
                                                                                   node.docker_image,
                                                                                   self.run_dir + node.name)})
             name_proxy = node.name + '-proxy'
+            selfish_args = None
+            if hasattr(self.args, 'selfish_args'):
+                selfish_args = self.args.selfish_args
             self.selfish_node_proxies.update({name_proxy: ProxyNode(name_proxy, node.group, ip_proxy,
-                                                                    ip_private_node, node.selfish_nodes_args,
+                                                                    ip_private_node, selfish_args,
                                                                     node.latency, node.docker_image)})
 
         self.all_bitcoin_nodes = copy(self.nodes)

@@ -38,6 +38,10 @@ def parse_args():
                         , help='A tag that will be added to every csv file.'
                         )
 
+    parser.add_argument('--selfish-args'
+                        , help='General selfish args for selfish mining nodes.'
+                        )
+
     args = parser.parse_known_args(sys.argv[2:])[0]
     utils.update_args(args)
 
