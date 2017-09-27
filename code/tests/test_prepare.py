@@ -29,8 +29,8 @@ class TestPrepare(TestCase):
 
         self.prepare.give_nodes_spendable_coins()
 
-        self.assertEqual(node_0.execute_rpc.call_count, 3)
-        self.assertEqual(node_1.execute_rpc.call_count, 3)
+        self.assertEqual(node_0.execute_rpc.call_count, 1)
+        self.assertEqual(node_1.execute_rpc.call_count, 2)
 
     @patch('os.path.exists')
     @patch('os.makedirs')
@@ -83,7 +83,7 @@ class TestPrepare(TestCase):
     @patch('utils.sleep')
     def test_wait_until_height_reached(self, m_sleep):
         node = MagicMock()
-        node.execute_rpc.side_effect = ['0', '9', '10']
+        node.execute_cli.side_effect = ['0', '9', '10']
         prepare.wait_until_height_reached(node, 10)
 
         self.assertEqual(m_sleep.call_count, 2)
@@ -91,7 +91,7 @@ class TestPrepare(TestCase):
     @patch('utils.sleep')
     def test_wait_until_height_reached_already_reached(self, m_sleep):
         node = MagicMock()
-        node.execute_rpc.return_value = '10'
+        node.execute_cli.return_value = '10'
         prepare.wait_until_height_reached(node, 10)
 
         self.assertFalse(m_sleep.called)
