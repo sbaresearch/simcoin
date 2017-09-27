@@ -315,9 +315,8 @@ class ProxyNode(Node, PublicNode):
             logging.debug('Waiting for  blocks to spread...')
 
     def grep_log_for_errors(self):
-        raise NotImplemented(
-            'Attach proxy dir to host and then grep for errors.'
-        )
+        # TODO consider to implement this
+        return 'Not yet implemented'
 
     def add_latency(self, zones):
         for cmd in tccmd.create(self.name, zones, self.latency):
