@@ -154,7 +154,7 @@ selfdemo1:
 		python3 simcoin.py \
 			run \
 				--node-group-a bitcoin 3 .75 0 simcoin/patched:v1 \
-				--node-group-b selfish 1 .25 0 simcoin/patched:v1 \
+				--node-group-b selfish 1 .25 0 simcoin/proxy:v1 \
 				--amount-of-ticks 10 \
 				--tx-per-tick 2 \
 				--blocks-per-tick 0.7 \
