@@ -172,7 +172,7 @@ kable(step_diff_summary, col.names = c('Duration [s]', 'Duration [min]'), captio
   kable_styling(latex_options = c('scale_down','HOLD_position'))
 ```
 
-```{r step_times_barchart, fig.cap='Step times', fig.pos='H', fig.height=3}
+```{r step_times_barchart, fig.cap='Step times', fig.pos='H'}
 step_diff             <- round(data.frame(diff(step_times$timestamp))/60, 1)
 t_step_diff           <- t(step_diff)
 colnames(t_step_diff) <- c('Preparation', 'Simulation', 'Postprocessing')
@@ -227,7 +227,7 @@ kable(unclass(summary(tick_infos$duration)), col.names = c('Duration [s]'), digi
 xyplot(tick_infos$duration ~ tick_infos$start - sim_start, xlab = 'Time [s]', ylab = 'Duration [s]', t = 'l' )
 ```
 
-```{r tick_duration_boxplot, fig.cap='Tick duration', fig.pos='H', fig.height=3}
+```{r tick_duration_boxplot, fig.cap='Tick duration', fig.pos='H'}
 bwplot(tick_infos$duration, xlab='Tick duration [s]')
 ```
 
@@ -254,7 +254,7 @@ kable(stale_rate, col.names = c('Rate [%]'), digits = 3, caption = 'Stale block 
   kable_styling(latex_options = c('HOLD_position'))
 ```
 
-```{r block_stale_barchart, fig.cap='Accepted/stale blocks', fig.pos='H', fig.height=3}
+```{r block_stale_barchart, fig.cap='Accepted/stale blocks', fig.pos='H'}
 consensus_chain$stale = 'Accepted'
 blocks <- merge(blocks, consensus_chain, all.x = TRUE)
 blocks$stale[is.na(blocks$stale)] <- 'Stale'
@@ -274,7 +274,7 @@ kable(unclass(summary(blocks_create$total_size / 1000)), col.names = c('Size [kB
   kable_styling(latex_options = c('HOLD_position'))
 ```
 
-```{r block_size_boxplot, fig.cap='Block size', fig.pos='H', fig.height=3}
+```{r block_size_boxplot, fig.cap='Block size', fig.pos='H'}
 bwplot(blocks_create$total_size / 1000, xlab='Block size [kb]')
 ```
 
@@ -308,7 +308,7 @@ kable(unclass(summary(blocks_create$txs)), digits = 2, caption = 'Transactions p
   kable_styling(latex_options = c('HOLD_position'))
 ```
 
-```{r txs_per_block_boxplot, fig.cap='Transactions in block', fig.pos='H', fig.height=3}
+```{r txs_per_block_boxplot, fig.cap='Transactions in block', fig.pos='H'}
 bwplot(blocks_create$txs, xlab='Transactions')
 ```
 
@@ -327,7 +327,7 @@ kable(unclass(summary(tips_per_node$count)), digits = 2, caption = 'Tips per nod
   kable_styling(latex_options = c('HOLD_position'))
 ```
 
-```{r tips_per_node_boxplot, eval=nrow(tips) > 0, fig.cap='Tips per node', fig.pos='H', fig.height=3}
+```{r tips_per_node_boxplot, eval=nrow(tips) > 0, fig.cap='Tips per node', fig.pos='H'}
 bwplot(tips_per_node$count, xlab='Tips')
 ```
 
@@ -336,7 +336,7 @@ kable(unclass(summary(tips$branchlen)), digits = 2, caption = 'Overall branch le
   kable_styling(latex_options = c('HOLD_position'))
 ```
 
-```{r tips_branchlen_boxplot, eval=nrow(tips) > 0, fig.cap='Overall branch length of tips', fig.pos='H', fig.height=3}
+```{r tips_branchlen_boxplot, eval=nrow(tips) > 0, fig.cap='Overall branch length of tips', fig.pos='H'}
 bwplot(tips$branchlen, xlab='Branch length')
 ```
 
@@ -353,7 +353,7 @@ event_exces <- rbind(tx_exces, block_exces)
 
 `r if(nrow(event_exces) == 0) {'There were 0 exceptions during the creation of transaction/block events.'}`
 
-```{r event_exces, eval=nrow(event_exces) > 0, fig.cap='Exceptions transaction/block event', fig.pos='H', fig.height=3}
+```{r event_exces, eval=nrow(event_exces) > 0, fig.cap='Exceptions transaction/block event', fig.pos='H'}
 barchart(table(factor(event_exces$type, levels = c('Transaction', 'Block'))), ref = FALSE, xlab = 'Amount of exceptions',
          panel=function(x,y,...){
           panel.barchart(x,y,...)
@@ -361,7 +361,7 @@ barchart(table(factor(event_exces$type, levels = c('Transaction', 'Block'))), re
 })
 ```
 
-```{r tx_exces_type, eval=nrow(tx_exces) > 0, fig.cap='Transaction exception types', fig.pos='H', fig.height=nrow(tx_exces)}
+```{r tx_exces_type, eval=nrow(tx_exces) > 0, fig.cap='Transaction exception types', fig.pos='H'}
 barchart(table(tx_exces$exception), ref = FALSE, xlab = 'Amount of exceptions',
          panel=function(x,y,...){
           panel.barchart(x,y,...)
@@ -369,7 +369,7 @@ barchart(table(tx_exces$exception), ref = FALSE, xlab = 'Amount of exceptions',
 })
 ```
 
-```{r block_exces_type, eval=nrow(block_exces) > 0, fig.cap='Block exception types', fig.pos='H', fig.height=nrow(block_exces)}
+```{r block_exces_type, eval=nrow(block_exces) > 0, fig.cap='Block exception types', fig.pos='H'}
 barchart(table(block_exces$exception), ref = FALSE, xlab = 'Amount of exceptions',
          panel=function(x,y,...){
           panel.barchart(x,y,...)
@@ -377,7 +377,7 @@ barchart(table(block_exces$exception), ref = FALSE, xlab = 'Amount of exceptions
 })
 ```
 
-```{r rpc_exces, eval=nrow(rpc_exces) > 0, fig.cap='RPC exceptions', fig.pos='H', fig.height=length(unique(rpc_exces$method)) + 2}
+```{r rpc_exces, eval=nrow(rpc_exces) > 0, fig.cap='RPC exceptions', fig.pos='H'}
 rpc_exces_table <- table(rpc_exces$method, rpc_exces$exception)
 barchart(rpc_exces_table, ref = FALSE, xlab = 'Amount of exceptions',
          auto.key = list(columns=2, rectangles = TRUE, points = FALSE, space='top', text=colnames(rpc_exces_table)),

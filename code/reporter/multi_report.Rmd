@@ -168,7 +168,7 @@ xyplot(cpu_time_diff$usage ~ cpu_time_diff$elapsed, groups = cpu_time_diff$tag,
        xlab = 'Time [s]', ylab = 'CPU usage [%]', t = 'l' )
 ```
 
-```{r memory_xyplot, fig.cap='Memory usage over time', fig.pos='H', fig.height=3}
+```{r memory_xyplot, fig.cap='Memory usage over time', fig.pos='H'}
 memory$usage   <- (1 - memory$available/memory$total) * 100
 memory         <- merge(memory, sim_starts)
 memory$elapsed <- memory$timestamp - memory$run_start
