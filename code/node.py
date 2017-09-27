@@ -314,9 +314,6 @@ class ProxyNode(Node, PublicNode):
             utils.sleep(1)
             logging.debug('Waiting for  blocks to spread...')
 
-    def cat_log_cmd(self):
-        raise NotImplemented('Attach proxy dir to host and then cat log.')
-
     def grep_log_for_errors(self):
         raise NotImplemented(
             'Attach proxy dir to host and then grep for errors.'
