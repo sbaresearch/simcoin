@@ -10,8 +10,7 @@ class TestProxycmd(TestCase):
         args = 'args1 args2'
         node = ProxyNode('name', 'group', ipaddress.ip_address('1.1.1.1'), ipaddress.ip_address('2.2.2.1'), args, 0, 'image')
         node.outgoing_ips = ['ip1', 'ip2']
-        cmd = proxycmd.run_proxy(node, 'hash')
-        self.assertTrue('  ' not in cmd)
+        proxycmd.run_proxy(node, 'hash')
 
     def test_get_best_public_block_hash(self):
         cmd = proxycmd.get_best_public_block_hash('node-0')
