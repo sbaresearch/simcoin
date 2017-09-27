@@ -108,7 +108,6 @@ cpu_time <- read.csv("cpu_time.csv", dec=".")
 
 log_errors  <- readChar("log_errors.txt", file.info("log_errors.txt")$size)
 
-ticks     <- readLines(file('../ticks.csv'))
 sim_start <- tick_infos$start[1]
 ```
 
