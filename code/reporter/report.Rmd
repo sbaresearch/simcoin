@@ -247,6 +247,10 @@ block_propagation <- block_propagation %>%
 `r if(nrow(blocks_create) == 0) {'There were 0 blocks during this simulation run.'}`
 
 ```{r block_stale_rate_summary}
+consensus_chain$stale = 'Accepted'
+blocks <- merge(blocks, consensus_chain, all.x = TRUE)
+blocks$stale[is.na(blocks$stale)] <- 'Stale'
+
 factor_stale_block <- t(table(factor(blocks$stale, levels = c('Accepted', 'Stale'))))
 stale_rate <- data.frame(c(round(prop.table(factor_stale_block)[,2] * 100, 3)))
 rownames(stale_rate) <- c('Block stale rate')
@@ -255,10 +259,6 @@ kable(stale_rate, col.names = c('Rate [%]'), digits = 3, caption = 'Stale block 
 ```
 
 ```{r block_stale_barchart, fig.cap='Accepted/stale blocks', fig.pos='H'}
-consensus_chain$stale = 'Accepted'
-blocks <- merge(blocks, consensus_chain, all.x = TRUE)
-blocks$stale[is.na(blocks$stale)] <- 'Stale'
-
 stale_block <- t(table(blocks$stale))
 rownames(stale_block) <- c('Run')
 barchart(stale_block, stack = TRUE, ref = FALSE, xlab = 'Blocks',
