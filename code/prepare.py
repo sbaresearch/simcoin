@@ -44,15 +44,22 @@ class Prepare:
         )
         logging.info('Each node receives {} tx-chains'.format(amount_of_tx_chains))
 
+
         for i, node in enumerate(nodes):
             for node_to_be_connected in nodes[max(0, i - 5):i]:
-                node.execute_rpc('addnode', str(node_to_be_connected.ip), 'add')
+                node.execute_rpc('addnode', str(node_to_be_connected.ip),
+                                 'add')
+
+        utils.sleep(3)
+
+        for i, node in enumerate(nodes):
             wait_until_height_reached(node, i * amount_of_tx_chains)
-            node.execute_rpc('generate', amount_of_tx_chains)
+            node.execute_cli('generate', amount_of_tx_chains)
             logging.info('Generated {} blocks for node={} for their tx-chains'.format(amount_of_tx_chains, node.name))
 
         wait_until_height_reached(nodes[0], amount_of_tx_chains * len(nodes))
-        nodes[0].execute_rpc('generate', config.blocks_needed_to_make_coinbase_spendable)
+        nodes[0].execute_cli('generate',
+                           config.blocks_needed_to_make_coinbase_spendable)
         current_height = config.blocks_needed_to_make_coinbase_spendable + amount_of_tx_chains * len(nodes)
 
         self.pool.starmap(wait_until_height_reached, zip(nodes, itertools.repeat(current_height)))
@@ -68,7 +75,11 @@ class Prepare:
 
         self.pool.starmap(wait_until_height_reached, zip(nodes, itertools.repeat(current_height)))
 
-        self.pool.map(rm_node, nodes)
+        for i, node in enumerate(nodes):
+            node.rm()
+            logging.info('node.rm {}'.format(node.name))
+
+        # self.pool.map(rm_node, nodes)
 
     def start_nodes(self):
         nodes = self.context.all_bitcoin_nodes.values()
@@ -160,9 +171,24 @@ def recreate_network():
 
 
 def wait_until_height_reached(node, height):
-    while int(node.execute_rpc('getblockcount')) < height:
+    while int(node.execute_cli('getblockcount')) < height:
         logging.debug('Waiting until node={} reached height={}...'.format(node.name, str(height)))
         utils.sleep(0.2)
+
+def wait_until_height_reached_cli(node, height):
+    msg = bash.check_output(
+        "docker exec simcoin-{} sh -c '"
+        "  while "
+        "    [[ "
+        "      $(bitcoin-cli "
+        "        -regtest "
+        "        --conf=/data/bitcoin.conf "
+        "        getblockcount) -le {} "
+        "    ]]; "
+        "    do sleep 0.2; "
+        "done; "
+        "echo Block Height reached'".format(node.name, str(height)))
+    logging.debug('Waiting until {}'.format(str(msg)))
 
 
 def calc_number_of_tx_chains(txs_per_tick, blocks_per_tick, number_of_nodes):

@@ -54,19 +54,46 @@ class BitcoinNode(Node):
         # in bitcoinrpc
         utils.sleep(0.2)
 
+    def is_running(self):
+        return bash.check_output(
+            dockercmd.check_if_running(
+                self.name
+            )
+        ) == 'true'
+
     def rm(self):
-        if bash.check_output(dockercmd.check_if_running(self.name)) == 'true':
-            self.execute_rpc('stop')
-            while bash.check_output(dockercmd.check_if_running(self.name)) \
-                    == 'true':
-                utils.sleep(0.4)
-                logging.debug('Wait until container stops')
+        if self.is_running():
+            try:
+                self.execute_cli('stop')
+            except Exception as error:
+                logging.debug(
+                    "Could not stop container {} with error={}"
+                        .format(self.name, error)
+                )
+        while self.is_running():
+
+            utils.sleep(1)
+            logging.debug(
+                'Wait until container {} stops'
+                .format(self.name)
+            )
         super(BitcoinNode, self).rm()
 
     def get_log_file(self):
         return self.path + config.bitcoin_log_file_name
 
     def wait_until_rpc_ready(self):
+        """ Block till port ready """
+        while True:
+            try:
+                bash.check_output(
+                    "nc -z -w1 {} {}"
+                    .format(self.ip, config.rpc_port)
+                )
+                break
+            except Exception:
+                logging.debug("Waiting with netcat until port is open")
+
         while True:
             try:
                 self.execute_rpc('getnetworkinfo')
@@ -77,17 +104,30 @@ class BitcoinNode(Node):
                     'Waiting until RPC of node={} is ready.'
                     .format(exce, self.name)
                 )
-                utils.sleep(0.2)
+                utils.sleep(1)
 
     def connect_to_rpc(self, timeout=HTTP_TIMEOUT):
         self.rpc_connection = AuthServiceProxy(
-            config.create_rpc_connection_string(self.ip), timeout=timeout)
+            config.create_rpc_connection_string(self.ip),
+            timeout=timeout
+        )
 
     def delete_peers_file(self):
         return bash.check_output(bitcoincmd.rm_peers(self.name))
 
+    def execute_cli(self, *args):
+        return bash.check_output(
+            "docker exec simcoin-{} bitcoin-cli "
+            "-regtest "
+            "-conf=/data/bitcoin.conf {}"
+            .format(
+              self.name,
+              ' '.join(list(map(str, args)))
+            )
+        )
+
     def execute_rpc(self,  *args):
-        retry = 1
+        retry = 30
         while retry >= 0:
             try:
                 method_to_call = getattr(self.rpc_connection, args[0])
@@ -104,12 +144,13 @@ class BitcoinNode(Node):
                 )
             except CannotSendRequest as exce:
                 retry -= 1
-                self.connect_to_rpc()
+                self.connect_to_rpc(10)
                 logging.warning(
                     'Node={} could not execute RPC-call={} '
-                    'because of error="{}".'
+                    'because of an CannotSendRequest exception with'
+                    ' error="{}".'
                     ' Reconnecting RPC and retrying.'
-                    .format(self.name, args[0], exce)
+                    .format(self.name, args[0], getmembers(exce))
                 )
 
         logging.error(
@@ -270,7 +311,7 @@ class ProxyNode(Node, PublicNode):
         best_block_hash = bash.check_output(
             proxycmd.get_best_public_block_hash(self.name))
         while block_hash != best_block_hash:
-            utils.sleep(0.2)
+            utils.sleep(1)
             logging.debug('Waiting for  blocks to spread...')
 
     def cat_log_cmd(self):
