@@ -31,7 +31,7 @@ demo1:
 	cd code; \
 		python3 simcoin.py \
 			run \
-				--node-group-a bitcoin 3 1 0 simcoin/normal:v3 \
+				--group-a bitcoin 3 1 0 simcoin/normal:v3 \
 				--amount-of-ticks 1 \
 				--tx-per-tick 90 \
 				--verbose
@@ -40,7 +40,7 @@ demo2:
 	cd code; \
 		python3 simcoin.py \
 			run \
-				--node-group-a bitcoin 50 1 0 simcoin/normal:v3 \
+				--group-a bitcoin 50 1 0 simcoin/normal:v3 \
 				--amount-of-ticks 100 \
 				--tx-per-tick 9 \
 				--verbose
@@ -49,7 +49,7 @@ demo3:
 	cd code; \
 		python3 simcoin.py \
 			run \
-				--node-group-a bitcoin 2 1 0 simcoin/normal:v3 \
+				--group-a bitcoin 2 1 0 simcoin/normal:v3 \
 				--amount-of-ticks 100 \
 				--tx-per-tick 1 \
 				--verbose
@@ -58,7 +58,7 @@ demo4:
 	cd code; \
 		python3 simcoin.py \
 			run \
-				--node-group-a bitcoin 3 1 0 simcoin/patched:v1 \
+				--group-a bitcoin 3 .5 0 simcoin/patched:v1 \
 				--amount-of-ticks 10 \
 				--tx-per-tick 2 \
 				--blocks-per-tick 0.7 \
@@ -70,7 +70,7 @@ demo5:
 	cd code; \
 		python3 simcoin.py \
 			run \
-				--node-group-a bitcoin 500 1 0 simcoin/patched:v1 \
+				--group-a bitcoin 500 1 0 simcoin/patched:v1 \
 				--blocks-per-tick 0.0833333333333333 \
 				--amount-of-ticks 5000 \
 				--txs-per-tick 100 \
@@ -81,7 +81,7 @@ demo6:
 	cd code; \
 		python3 simcoin.py \
 			run \
-				--node-group-a bitcoin 100 1 0 simcoin/patched:v1 \
+				--group-a bitcoin 100 1 0 simcoin/patched:v1 \
 				--blocks-per-tick 0.01 \
 				--amount-of-ticks 10 \
 				--txs-per-tick 10 \
@@ -93,7 +93,7 @@ multidemo1:
 		python3 simcoin.py \
 			multi-run \
 				--repeat 2 \
-				--node-group-a bitcoin 3 1 10 simcoin/patched:v1 \
+				--group-a bitcoin 3 1 10 simcoin/patched:v1 \
 				--blocks-per-tick 0.9 \
 				--amount-of-ticks 7 \
 				--txs-per-tick 10 \
@@ -106,7 +106,7 @@ multidemo2:
 		python3 simcoin.py \
 			multi-run \
 				--repeat 2 \
-				--node-group-a bitcoin 5 1 10 simcoin/patched:v1 \
+				--group-a bitcoin 5 1 10 simcoin/patched:v1 \
 				--blocks-per-tick 0.5 \
 				--amount-of-ticks 100 \
 				--txs-per-tick 2 \
@@ -118,7 +118,7 @@ multidemo3:
 		python3 simcoin.py \
 			multi-run \
 				--repeat 10 \
-				--node-group-a bitcoin 50 1 10 simcoin/patched:v1 \
+				--group-a bitcoin 50 1 10 simcoin/patched:v1 \
 				--blocks-per-tick 0.05 \
 				--amount-of-ticks 200 \
 				--txs-per-tick 2 \
@@ -130,7 +130,7 @@ multidemo4:
 		python3 simcoin.py \
 			multi-run \
 				--repeat 1 \
-				--node-group-a bitcoin 100 1 10 simcoin/patched:v1 \
+				--group-a bitcoin 100 1 10 simcoin/patched:v1 \
 				--blocks-per-tick 0.05 \
 				--amount-of-ticks 5 \
 				--txs-per-tick 2 \
@@ -142,7 +142,7 @@ multidemo5:
 		python3 simcoin.py \
 			multi-run \
 				--repeat 5 \
-				--node-group-a bitcoin 150 1 10 simcoin/patched:v1 \
+				--group-a bitcoin 150 1 10 simcoin/patched:v1 \
 				--blocks-per-tick 0.05 \
 				--amount-of-ticks 200 \
 				--txs-per-tick 2 \
@@ -153,8 +153,8 @@ selfdemo1:
 	cd code; \
 		python3 simcoin.py \
 			run \
-				--node-group-a bitcoin 3 .75 0 simcoin/patched:v1 \
-				--node-group-b selfish 1 .25 0 simcoin/proxy:v1 \
+				--group-a bitcoin 3 .75 0 simcoin/patched:v1 \
+				--group-b selfish 1 .25 0 simcoin/proxy:v1 \
 				--amount-of-ticks 10 \
 				--tx-per-tick 2 \
 				--blocks-per-tick 0.7 \
@@ -165,8 +165,8 @@ selfdemo2:
 	cd code; \
 		python3 simcoin.py \
 			run \
-				--node-group-a bitcoin 3 .75 0 simcoin/patched:v1 \
-				--node-group-b selfish 1 .25 0 simcoin/proxy:v1 \
+				--group-a bitcoin 3 .75 0 simcoin/patched:v1 \
+				--group-b selfish 1 .25 0 simcoin/proxy:v1 \
 				--amount-of-ticks 100 \
 				--tx-per-tick 2 \
 				--blocks-per-tick 0.7 \

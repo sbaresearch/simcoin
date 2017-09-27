@@ -10,12 +10,12 @@ import csv
 from collections import namedtuple
 
 node_groups = [
-        {'argparse': '--node-group-a', 'variable': 'node_group_a', 'default':
+        {'argparse': '--group-a', 'variable': 'group_a', 'default':
             ['bitcoin', 10, 1, 200, config.standard_image]},
-        {'argparse': '--node-group-b', 'variable': 'node_group_b', 'default': None},
-        {'argparse': '--node-group-c', 'variable': 'node_group_c', 'default': None},
-        {'argparse': '--node-group-d', 'variable': 'node_group_d', 'default': None},
-        {'argparse': '--node-group-e', 'variable': 'node_group_e', 'default': None},
+        {'argparse': '--group-b', 'variable': 'group_b', 'default': None},
+        {'argparse': '--group-c', 'variable': 'group_c', 'default': None},
+        {'argparse': '--group-d', 'variable': 'group_d', 'default': None},
+        {'argparse': '--group-e', 'variable': 'group_e', 'default': None},
     ]
 
 
