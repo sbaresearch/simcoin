@@ -41,7 +41,7 @@ class Context:
             self.nodes.update({node.name: PublicBitcoinNode(node.name, node.group,
                                                             self.zone.get_ip(node.latency),
                                                             node.latency, node.docker_image,
-                                                            self.run_dir + node.name + config.bitcoin_regtest_dir)})
+                                                            self.run_dir + node.name)})
 
         self.selfish_node_private_nodes = OrderedDict([])
         self.selfish_node_proxies = OrderedDict([])
