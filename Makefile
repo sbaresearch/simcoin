@@ -201,12 +201,12 @@ build-base-image:
 rm-base-image:
 	docker rmi simcoin/base:v1
 
-cp-run-tmp:
+cp-run:
 	rm -r /tmp/run; \
 	mkdir /tmp/run; \
 	cp -r data/last_run/* /tmp/run/.
 
-cp-multi-tmp:
+cp-multi:
 	rm -r /tmp/multi; \
 	mkdir /tmp/multi; \
 	cp -r data/last_multi_run/* /tmp/multi/.
