@@ -21,6 +21,16 @@ class TestParse(TestCase):
         self.parser = Parser(self.context, self.writer)
 
     def test_parse_stats_block(self):
+        event = parse.BlockCreateEvent.from_log_line(
+            '2017-07-27 11:01:22.173139 Simcoin CreateNewBlock():'
+            ' hash:45205cac616c0344721d2552482024528883e9fdf7439bfbfc02567060c56d71', 'node-1'
+        )
+
+        self.assertEqual(event.timestamp, datetime(2017, 7, 27, 11, 1, 22, 173139, pytz.UTC).timestamp())
+        self.assertEqual(event.node, 'node-1')
+        self.assertEqual(event.hash, '45205cac616c0344721d2552482024528883e9fdf7439bfbfc02567060c56d71')
+
+    def test_parse_stats_block(self):
         event = parse.BlockStatsEvent.from_log_line(
             '2017-07-27 11:01:22.173139 CreateNewBlock(): total size: 226 block weight:'
             ' 904 txs: 1 fees: 0 sigops 400',

@@ -75,7 +75,6 @@ soft_link_to_run_dir = '{}last_run'.format(data_dir)
 soft_link_to_multi_run_dir = '{}last_multi_run'.format(data_dir)
 run_log = soft_link_to_run_dir + '/run.log'
 
-blocks_file_name = 'blocks.csv'
 analysed_tick_infos_file_name = 'analysed_tick_infos.csv'
 step_times_csv_file_name = 'step_times.csv'
 consensus_chain_csv_file_name = 'consensus_chain.csv'

@@ -55,15 +55,7 @@ write(analysed_ticks, 'analysed_ticks.csv')
 peer_logic_validation <- read.csv("peer_logic_validation_raw.csv")
 update_tip            <- read.csv("update_tip_raw.csv")
 
-blocks <- rbind(peer_logic_validation, update_tip[, !(names(update_tip) %in% c('tx', 'height'))])
-blocks <- blocks %>%
-  arrange(timestamp) %>%
-  filter(timestamp > head(analysed_tick_infos$actual_start, 1) & timestamp < tail(analysed_tick_infos$end, 1)) %>%
-  group_by(hash) %>%
-  filter(which.min(timestamp)==row_number())
-write.csv(blocks, 'blocks.csv', row.names=FALSE, quote=FALSE)
-
-files = c("blocks_stats", "txs")
+files = c("blocks_create", "blocks_stats", "txs")
 for (i in 1:length(files)) {
   data <- read.csv(paste(files[i], '_raw.csv', sep = ''))
   data <- data %>%
@@ -83,7 +75,7 @@ for (i in 1:length(files)) {
 ```
 
 ```{r setup, include=FALSE}
-blocks                <- read.csv("blocks.csv", dec=".")
+blocks_create         <- read.csv("blocks_create.csv", dec=".")
 blocks_stats          <- read.csv("blocks_stats.csv", dec=".")
 blocks_reconstructed  <- read.csv("blocks_reconstructed.csv", dec=".")
 blocks_received       <- read.csv("blocks_received.csv", dec=".")
@@ -136,15 +128,14 @@ kable(args_transposed, col.names = c('Value'), caption = 'Start arguments', form
 
 ```{r block_events_summary}
 analysed_blocks  <- analysed_tick_infos %>% summarise(blocks = sum(blocks))
-summary_create   <- blocks_stats %>% summarise(n = n())
-summary_blocks   <- blocks %>% summarise(n = n())
+parsed_blocks   <- blocks_create %>% summarise(n = n())
 
 block_count = sum(str_count(analysed_ticks, 'block'))
-summary           <- data.frame(block_count, analysed_blocks$blocks, summary_create$n, summary_blocks$n)
+summary           <- data.frame(block_count, analysed_blocks$blocks, parsed_blocks$n)
 rownames(summary) <- args$tag
 kable(summary,
-      col.names = c('Planned', 'Created', 'Parsed create', 'Parsed block'), caption = 'Blocks events summary', format = 'latex') %>%
-  kable_styling(latex_options = c('scale_down','HOLD_position'))
+      col.names = c('Planned', 'Created', 'Parsed'), caption = 'Blocks events summary', format = 'latex') %>%
+  kable_styling(latex_options = c('HOLD_position'))
 ```
 
 ```{r tx_events_summary}
@@ -237,22 +228,22 @@ bwplot(tick_infos$duration, xlab='Tick duration [s]')
 ```{r blocks_setup}
 block_propagation <- rbind(blocks_reconstructed, blocks_received, peer_logic_validation, update_tip[, !(names(update_tip) %in% c('tx', 'height'))])
 
-block_propagation <- merge(block_propagation, blocks$hash)[colnames(block_propagation)]
-
+block_propagation <- merge(block_propagation, blocks_create[,c('timestamp', 'node', 'hash')], by = 'hash')
 block_propagation <- block_propagation %>%
-  group_by(node, hash) %>% filter(which.min(timestamp)==row_number()) %>%
-  group_by(hash) %>% mutate(propagation_time = timestamp - min(timestamp)) %>%
-  filter(propagation_time != 0)
+  filter(as.character(node.x) != as.character(node.y)) %>%
+  select(-node.y, node = node.x) %>% group_by(hash, node) %>%
+  filter(which.min(timestamp.x)==row_number()) %>%
+  mutate(propagation_time = timestamp.x - timestamp.y)
 ```
 
-`r if(nrow(blocks_stats) == 0) {'There were 0 blocks during this simulation run.'}`
+`r if(nrow(blocks_create) == 0) {'There were 0 blocks during this simulation run.'}`
 
 ```{r block_stale_rate_summary}
 consensus_chain$stale = 'Accepted'
-blocks <- merge(blocks, consensus_chain, all.x = TRUE)
-blocks$stale[is.na(blocks$stale)] <- 'Stale'
+blocks_create <- merge(blocks_create, consensus_chain, all.x = TRUE)
+blocks_create$stale[is.na(blocks_create$stale)] <- 'Stale'
 
-factor_stale_block <- t(table(factor(blocks$stale, levels = c('Accepted', 'Stale'))))
+factor_stale_block <- t(table(factor(blocks_create$stale, levels = c('Accepted', 'Stale'))))
 stale_rate <- data.frame(c(round(prop.table(factor_stale_block)[,2] * 100, 3)))
 rownames(stale_rate) <- c('Block stale rate')
 kable(stale_rate, col.names = c('Rate [%]'), digits = 3, caption = 'Stale block rate', format = 'latex') %>%
@@ -260,7 +251,7 @@ kable(stale_rate, col.names = c('Rate [%]'), digits = 3, caption = 'Stale block 
 ```
 
 ```{r block_stale_barchart, fig.cap='Accepted/stale blocks', fig.pos='H'}
-stale_block <- t(table(blocks$stale))
+stale_block <- t(table(blocks_create$stale))
 rownames(stale_block) <- c('Run')
 barchart(stale_block, stack = TRUE, ref = FALSE, xlab = 'Blocks',
          auto.key = list(columns=2, points = FALSE, rectangles = TRUE), panel=function(x,y,...){
@@ -274,10 +265,10 @@ barchart(stale_block, stack = TRUE, ref = FALSE, xlab = 'Blocks',
 group_share       <- nodes %>%
   group_by(group) %>%
   summarise(share = round(sum(share) * 100, 2))
-blocks_with_group <- merge(blocks, nodes, by.x = 'node', by.y = 'name')
+blocks_with_group <- merge(blocks_create, nodes, by.x = 'node', by.y = 'name')
 group_blocks      <- blocks_with_group %>%
   group_by(group) %>%
-  summarise(block_count = n(), block_share = round(n()/nrow(blocks) * 100, 2))
+  summarise(block_count = n(), block_share = round(n()/nrow(blocks_create) * 100, 2))
 
 block_dist_summary                            <- merge(group_share, group_blocks, all.x = TRUE)
 block_dist_summary[is.na(block_dist_summary)] <- 0

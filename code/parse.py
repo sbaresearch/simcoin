@@ -78,6 +78,33 @@ class Event:
         return [self.timestamp, self.node]
 
 
+class BlockCreateEvent(Event):
+    csv_header = Event.csv_header + ['hash']
+    file_name = 'blocks_create_raw.csv'
+    file_name_after_R_preprocessing = 'blocks_create.csv'
+
+    def __init__(self, timestamp, node, hash):
+        super().__init__(timestamp, node)
+        self.hash = hash
+
+    @classmethod
+    def from_log_line(cls, line, node):
+        match = re.match(
+            config.log_prefix_timestamp + 'Simcoin CreateNewBlock\(\): hash:([0-9,a-z]{64})$', line)
+
+        if match is None:
+            raise ParseException("Didn't match 'CreateNewBlock' log line.")
+
+        return cls(
+            parse_datetime(match.group(1)),
+            node,
+            str(match.group(2)),
+        )
+
+    def vars_to_array(self):
+        return Event.vars_to_array(self) + [self.hash]
+
+
 class BlockStatsEvent(Event):
     csv_header = Event.csv_header + ['total_size', 'txs']
     file_name = 'blocks_stats_raw.csv'
@@ -392,6 +419,7 @@ class ParseException(Exception):
 
 
 node_parsers = [
+    BlockCreateEvent,
     BlockStatsEvent,
     BlockReceivedEvent,
     BlockReconstructEvent,

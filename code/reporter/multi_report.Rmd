@@ -39,7 +39,7 @@ Sys.setenv(TZ='UTC')
 ```
 
 ```{r setup, include=FALSE}
-blocks                <- read.csv("blocks.csv", dec=".")
+blocks_create         <- read.csv("blocks_create.csv", dec=".")
 blocks_stats          <- read.csv("blocks_stats.csv", dec=".")
 blocks_reconstructed  <- read.csv("blocks_reconstructed.csv", dec=".")
 blocks_received       <- read.csv("blocks_received.csv", dec=".")
@@ -96,16 +96,15 @@ kable(args_transposed, col.names = c('Value'), format = 'latex', caption ='Start
 ```
 
 ```{r block_events_summary}
-analysed_blocks  <- analysed_tick_infos %>% group_by(tag) %>% summarise(blocks = sum(blocks))
-summary_create   <- blocks_stats %>% group_by(tag) %>% summarise(n = n())
-summary_blocks   <- blocks %>% group_by(tag) %>% summarise(n = n())
+analysed_blocks <- analysed_tick_infos %>% group_by(tag) %>% summarise(blocks = sum(blocks))
+parsed_blocks   <- blocks_create %>% group_by(tag) %>% summarise(n = n())
 
 block_count = sum(str_count(analysed_ticks, 'block'))
-summary           <- data.frame(rep(block_count, number_of_runs), analysed_blocks$blocks, summary_create$n, summary_blocks$n)
+summary           <- data.frame(rep(block_count, number_of_runs), analysed_blocks$blocks, parsed_blocks$n)
 rownames(summary) <- analysed_blocks$tag
 kable(summary,
-      col.names = c('Planned', 'Created', 'Parsed create', 'Parsed block'), caption = 'Blocks events summary', format = 'latex') %>%
-  kable_styling(latex_options = c('scale_down','HOLD_position'))
+      col.names = c('Planned', 'Created', 'Parsed'), caption = 'Blocks events summary', format = 'latex') %>%
+  kable_styling(latex_options = c('HOLD_position'))
 ```
 
 ```{r tx_events_summary}
@@ -200,27 +199,28 @@ bwplot(tick_infos$duration ~ tick_infos$tag, ylab = 'Duration [s]')
 ```{r blocks_setup}
 block_propagation <- rbind(blocks_reconstructed, blocks_received, peer_logic_validation, update_tip[, !(names(update_tip) %in% c('tx', 'height'))])
 
-block_propagation <- merge(block_propagation, blocks$hash)[colnames(block_propagation)]
+block_propagation <- merge(block_propagation, blocks_create[,c('timestamp', 'node', 'hash')], by = 'hash')
 
 block_propagation <- block_propagation %>%
-  group_by(node, hash) %>% filter(which.min(timestamp)==row_number()) %>%
-  group_by(hash) %>% mutate(propagation_time = timestamp - min(timestamp)) %>%
-  filter(propagation_time != 0)
+  filter(as.character(node.x) != as.character(node.y)) %>%
+  select(-node.y, node = node.x) %>% group_by(hash, node) %>%
+  filter(which.min(timestamp.x)==row_number()) %>%
+  mutate(propagation_time = timestamp.x - timestamp.y)
 ```
 
 ```{r block_stale_rate_summary}
 consensus_chain$stale = 'Accepted'
-blocks <- merge(blocks, consensus_chain, all.x = TRUE)
-blocks$stale[is.na(blocks$stale)] <- 'Stale'
+blocks_create <- merge(blocks_create, consensus_chain, all.x = TRUE)
+blocks_create$stale[is.na(blocks_create$stale)] <- 'Stale'
 
-stale_block <- table(blocks$tag, factor(blocks$stale, levels = c('Accepted', 'Stale')))
+stale_block <- table(blocks_create$tag, factor(blocks_create$stale, levels = c('Accepted', 'Stale')))
 stale_rate  <- data.frame(c(round(prop.table(stale_block, 1)[,2] * 100, 3)))
 kable(stale_rate, col.names = c('Rate [%]'), digits = 3, caption = 'Stale block rate', format = 'latex') %>%
   kable_styling(latex_options = c('HOLD_position'))
 ```
 
 ```{r block_stale_barchart, fig.cap='Stale blocks', fig.pos='H'}
-stale_block <- table(blocks$tag, blocks$stale)
+stale_block <- table(blocks_create$tag, blocks_create$stale)
 barchart(stale_block, stack = TRUE, ref = FALSE, xlab = 'Blocks',
          auto.key = list(columns=2, points = FALSE, rectangles = TRUE), panel=function(x,y,...){
       panel.barchart(x,y,...)
@@ -234,7 +234,7 @@ group_share       <- nodes %>%
   group_by(group) %>%
   summarise(share = round(sum(share) * 100, 2))
 
-blocks_with_group <- merge(blocks, nodes, by.x = 'node', by.y = 'name')
+blocks_with_group <- merge(blocks_create, nodes, by.x = 'node', by.y = 'name')
 tag_size          <- blocks_with_group %>% group_by(tag) %>% summarise(tag_size = n())
 blocks_with_group <- merge(blocks_with_group, tag_size)
 

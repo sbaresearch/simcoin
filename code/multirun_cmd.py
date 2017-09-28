@@ -14,8 +14,8 @@ import clistats
 from argparse import Namespace
 
 files_to_concat = [
-    config.blocks_file_name,
     config.analysed_tick_infos_file_name,
+    parse.BlockCreateEvent.file_name_after_R_preprocessing,
     parse.BlockStatsEvent.file_name_after_R_preprocessing,
     parse.BlockReceivedEvent.file_name_after_R_preprocessing,
     parse.BlockReconstructEvent.file_name_after_R_preprocessing,
