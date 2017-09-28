@@ -32,6 +32,8 @@ class CliStats:
             else:
                 break
         write_consensus_chain(consensus_chain)
+        logging.info('Persisted {} block long consensus chain from height={} and {} nodes'
+                     .format(len(consensus_chain), height, len(nodes)))
 
     def persist_node_stats(self):
         tips = []
