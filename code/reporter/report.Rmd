@@ -107,6 +107,8 @@ sim_start <- tick_infos$start[1]
 memory   <- read.csv("memory.csv", dec=".")
 cpu_time <- read.csv("cpu_time.csv", dec=".")
 
+nodes <- read.csv('../nodes.csv', dec='.')
+
 log_errors  <- readChar("log_errors.txt", file.info("log_errors.txt")$size)
 ```
 
@@ -265,6 +267,39 @@ barchart(stale_block, stack = TRUE, ref = FALSE, xlab = 'Blocks',
          auto.key = list(columns=2, points = FALSE, rectangles = TRUE), panel=function(x,y,...){
        panel.barchart(x,y,...)
        xx <- do.call('c', unname(lapply(split(x, y), function(t)cumsum(t)-t/2)))
+       ltext(xx, y=y, labels=x)
+})
+```
+
+```{r block_distribution_summary, eval=nlevels(nodes$group)>0}
+group_share       <- nodes %>%
+  group_by(group) %>%
+  summarise(share = round(sum(share) * 100, 2))
+blocks_with_group <- merge(blocks, nodes, by.x = 'node', by.y = 'name')
+group_blocks      <- blocks_with_group %>%
+  group_by(group) %>%
+  summarise(block_count = n(), block_share = round(n()/nrow(blocks) * 100, 2))
+
+block_dist_summary                            <- merge(group_share, group_blocks, all.x = TRUE)
+block_dist_summary[is.na(block_dist_summary)] <- 0
+
+rownames(block_dist_summary) <- block_dist_summary$group
+block_dist_summary           <- block_dist_summary[ , !(names(block_dist_summary) %in% c('group'))]
+
+kable(block_dist_summary, col.names = c('Share [%]', 'Blocks', 'Blocks share [%]'), digits = 2, caption = 'Block distribution summary', format = 'latex') %>%
+  kable_styling(latex_options = c('HOLD_position'))
+```
+
+```{r block_distribution, eval=nlevels(nodes$group)>0, fig.cap='Block distribution', fig.pos='H'}
+block_dist <- t(block_dist_summary[, 'block_count', drop=FALSE])
+rownames(block_dist) <- c('Run')
+barchart(block_dist, stack = TRUE, ref = FALSE, xlab = 'Blocks',
+         auto.key = list(columns=2, points = FALSE, rectangles = TRUE), panel=function(x,y,...){
+       panel.barchart(x,y,...)
+       xx <- unsplit(unname(lapply(split(x, y), function(t)cumsum(t)-t/2)), y)
+       xx <-  xx [! x %in% 0]
+       y <-  y [! x %in% 0]
+       x <-  x [! x %in% 0]
        ltext(xx, y=y, labels=x)
 })
 ```

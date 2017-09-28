@@ -69,7 +69,8 @@ def run():
                           .format(config.soft_link_to_run_dir, config.multi_run_dir, i + 1))
         logging.info('Finished {}/{} simulation'.format(i + 1, args.repeat))
 
-    for file in [config.args_csv, config.ticks_csv, config.analysed_ticks_csv, config.general_infos_csv]:
+    for file in [config.args_csv, config.ticks_csv, config.analysed_ticks_csv,
+                 config.general_infos_csv, config.nodes_csv]:
         bash.check_output('cp {} {}/.'.format(file, config.soft_link_to_multi_run_dir))
     concat_files()
 

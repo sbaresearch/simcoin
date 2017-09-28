@@ -70,6 +70,8 @@ memory   <- read.csv("memory.csv", dec=".")
 args                <- read.csv('args.csv')
 ticks               <- readLines(file('ticks.csv'))
 analysed_ticks      <- readLines(file('analysed_ticks.csv'))
+
+nodes <- read.csv('nodes.csv', dec='.')
 ```
 
 ## Simulation
@@ -225,6 +227,48 @@ barchart(stale_block, stack = TRUE, ref = FALSE, xlab = 'Blocks',
       panel.barchart(x,y,...)
       xx <- unsplit(unname(lapply(split(x, y), function(t)cumsum(t)-t/2)), y)
       ltext(xx, y=y, labels=x)
+})
+```
+
+```{r block_distribution_summary}
+group_share       <- nodes %>%
+  group_by(group) %>%
+  summarise(share = round(sum(share) * 100, 2))
+
+blocks_with_group <- merge(blocks, nodes, by.x = 'node', by.y = 'name')
+tag_size          <- blocks_with_group %>% group_by(tag) %>% summarise(tag_size = n())
+blocks_with_group <- merge(blocks_with_group, tag_size)
+
+group_blocks <- blocks_with_group %>%
+  group_by(tag, group, tag_size) %>%
+  summarise(block_count = n()) %>%
+  mutate(block_share = round(block_count/tag_size * 100, 2))
+
+block_dist_summary                            <- merge(group_share, group_blocks, all.x = TRUE)
+block_dist_summary[is.na(block_dist_summary)] <- 0
+
+block_dist_summary <- block_dist_summary %>% arrange(tag) %>% select(tag, group, share, block_count, block_share)
+
+kable(block_dist_summary, col.names = c('', 'Group', 'Share [%]', 'Blocks', 'Blocks share [%]'), digits = 2, caption = 'Block distribution summary', format = 'latex') %>%
+  kable_styling(latex_options = c('scale_down', 'HOLD_position')) %>%
+  collapse_rows(columns = 1)
+```
+
+```{r block_distribution, fig.cap='Block distribution', fig.pos='H'}
+block_dist <- dcast(group_blocks, tag~group, value.var = 'block_count')
+block_dist[is.na(block_dist)] <- 0
+
+rownames(block_dist) <- block_dist$tag
+block_dist           <- block_dist[ , !(names(block_dist) %in% c('tag'))]
+
+barchart(as.matrix(block_dist), stack = TRUE, ref = FALSE, xlab = 'Blocks',
+         auto.key = list(columns=2, points = FALSE, rectangles = TRUE), panel=function(x,y,...){
+       panel.barchart(x,y,...)
+       xx <- unsplit(unname(lapply(split(x, y), function(t)cumsum(t)-t/2)), y)
+       xx <-  xx [! x %in% 0]
+       y <-  y [! x %in% 0]
+       x <-  x [! x %in% 0]
+       ltext(xx, y=y, labels=x)
 })
 ```
 
