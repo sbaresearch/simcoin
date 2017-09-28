@@ -191,7 +191,7 @@ rm-image:
 
 build-patched-image : build-base-image
 	cd ./code/docker/patched; \
-	docker build --tag simcoin/patched:v2 .
+	docker build --no-cache --tag simcoin/patched:v2 .
 
 rm-patched-image:
 	docker rmi simcoin/patched:v2
