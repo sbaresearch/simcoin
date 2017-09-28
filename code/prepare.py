@@ -44,7 +44,6 @@ class Prepare:
         )
         logging.info('Each node receives {} tx-chains'.format(amount_of_tx_chains))
 
-
         for i, node in enumerate(nodes):
             for node_to_be_connected in nodes[max(0, i - 5):i]:
                 node.execute_rpc('addnode', str(node_to_be_connected.ip),
