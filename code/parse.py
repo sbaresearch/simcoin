@@ -78,10 +78,10 @@ class Event:
         return [self.timestamp, self.node]
 
 
-class BlockCreateEvent(Event):
+class BlockStatsEvent(Event):
     csv_header = Event.csv_header + ['total_size', 'txs']
-    file_name = 'blocks_create_raw.csv'
-    file_name_after_R_filter = 'blocks_create.csv'
+    file_name = 'blocks_stats_raw.csv'
+    file_name_after_R_filter = 'blocks_stats.csv'
 
     def __init__(self, timestamp, node, total_size, txs):
         super().__init__(timestamp, node)
@@ -392,7 +392,7 @@ class ParseException(Exception):
 
 
 node_parsers = [
-    BlockCreateEvent,
+    BlockStatsEvent,
     BlockReceivedEvent,
     BlockReconstructEvent,
     UpdateTipEvent,

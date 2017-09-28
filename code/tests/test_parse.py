@@ -20,8 +20,8 @@ class TestParse(TestCase):
         self.writer = MagicMock()
         self.parser = Parser(self.context, self.writer)
 
-    def test_parse_create_new_block(self):
-        event = parse.BlockCreateEvent.from_log_line(
+    def test_parse_stats_block(self):
+        event = parse.BlockStatsEvent.from_log_line(
             '2017-07-27 11:01:22.173139 CreateNewBlock(): total size: 226 block weight:'
             ' 904 txs: 1 fees: 0 sigops 400',
             'node-1'

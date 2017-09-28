@@ -63,7 +63,7 @@ blocks <- blocks %>%
   filter(which.min(timestamp)==row_number())
 write.csv(blocks, 'blocks.csv', row.names=FALSE, quote=FALSE)
 
-files = c("blocks_create", "txs")
+files = c("blocks_stats", "txs")
 for (i in 1:length(files)) {
   data <- read.csv(paste(files[i], '_raw.csv', sep = ''))
   data <- data %>%
@@ -84,7 +84,7 @@ for (i in 1:length(files)) {
 
 ```{r setup, include=FALSE}
 blocks                <- read.csv("blocks.csv", dec=".")
-blocks_create         <- read.csv("blocks_create.csv", dec=".")
+blocks_stats          <- read.csv("blocks_stats.csv", dec=".")
 blocks_reconstructed  <- read.csv("blocks_reconstructed.csv", dec=".")
 blocks_received       <- read.csv("blocks_received.csv", dec=".")
 block_exces           <- read.csv("block_exceptions.csv", dec=".")
@@ -136,7 +136,7 @@ kable(args_transposed, col.names = c('Value'), caption = 'Start arguments', form
 
 ```{r block_events_summary}
 analysed_blocks  <- analysed_tick_infos %>% summarise(blocks = sum(blocks))
-summary_create   <- blocks_create %>% summarise(n = n())
+summary_create   <- blocks_stats %>% summarise(n = n())
 summary_blocks   <- blocks %>% summarise(n = n())
 
 block_count = sum(str_count(analysed_ticks, 'block'))
@@ -245,7 +245,7 @@ block_propagation <- block_propagation %>%
   filter(propagation_time != 0)
 ```
 
-`r if(nrow(blocks_create) == 0) {'There were 0 blocks during this simulation run.'}`
+`r if(nrow(blocks_stats) == 0) {'There were 0 blocks during this simulation run.'}`
 
 ```{r block_stale_rate_summary}
 consensus_chain$stale = 'Accepted'
@@ -304,12 +304,12 @@ barchart(block_dist, stack = TRUE, ref = FALSE, xlab = 'Blocks',
 ```
 
 ```{r block_size_summary}
-kable(unclass(summary(blocks_create$total_size / 1000)), col.names = c('Size [kB]'), digits = 3, caption = 'Block size', format = 'latex') %>%
+kable(unclass(summary(blocks_stats$total_size / 1000)), col.names = c('Size [kB]'), digits = 3, caption = 'Block size', format = 'latex') %>%
   kable_styling(latex_options = c('HOLD_position'))
 ```
 
 ```{r block_size_boxplot, fig.cap='Block size', fig.pos='H'}
-bwplot(blocks_create$total_size / 1000, xlab='Block size [kb]')
+bwplot(blocks_stats$total_size / 1000, xlab='Block size [kb]')
 ```
 
 ```{r block_propagation_summary}
@@ -338,12 +338,12 @@ densityplot(~propagation_duration, data=txs_received, auto.key = list(space = "r
 ```
 
 ```{r txs_per_block_summary}
-kable(unclass(summary(blocks_create$txs)), digits = 2, caption = 'Transactions per block', format = 'latex') %>%
+kable(unclass(summary(blocks_stats$txs)), digits = 2, caption = 'Transactions per block', format = 'latex') %>%
   kable_styling(latex_options = c('HOLD_position'))
 ```
 
 ```{r txs_per_block_boxplot, fig.cap='Transactions in block', fig.pos='H'}
-bwplot(blocks_create$txs, xlab='Transactions')
+bwplot(blocks_stats$txs, xlab='Transactions')
 ```
 
 ## Tips

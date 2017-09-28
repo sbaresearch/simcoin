@@ -40,7 +40,7 @@ Sys.setenv(TZ='UTC')
 
 ```{r setup, include=FALSE}
 blocks                <- read.csv("blocks.csv", dec=".")
-blocks_create         <- read.csv("blocks_create.csv", dec=".")
+blocks_stats          <- read.csv("blocks_stats.csv", dec=".")
 blocks_reconstructed  <- read.csv("blocks_reconstructed.csv", dec=".")
 blocks_received       <- read.csv("blocks_received.csv", dec=".")
 block_exces           <- read.csv("block_exceptions.csv", dec=".")
@@ -97,7 +97,7 @@ kable(args_transposed, col.names = c('Value'), format = 'latex', caption ='Start
 
 ```{r block_events_summary}
 analysed_blocks  <- analysed_tick_infos %>% group_by(tag) %>% summarise(blocks = sum(blocks))
-summary_create   <- blocks_create %>% group_by(tag) %>% summarise(n = n())
+summary_create   <- blocks_stats %>% group_by(tag) %>% summarise(n = n())
 summary_blocks   <- blocks %>% group_by(tag) %>% summarise(n = n())
 
 block_count = sum(str_count(analysed_ticks, 'block'))
@@ -272,12 +272,12 @@ barchart(as.matrix(block_dist), stack = TRUE, ref = FALSE, xlab = 'Blocks',
 ```
 
 ```{r block_size_summary}
-kable(unclass(summary(blocks_create$total_size / 1000)), col.names = c('Size [kB]'), digits = 3, caption = 'Overall block size', format = 'latex') %>%
+kable(unclass(summary(blocks_stats$total_size / 1000)), col.names = c('Size [kB]'), digits = 3, caption = 'Overall block size', format = 'latex') %>%
   kable_styling(latex_options = c('HOLD_position'))
 ```
 
 ```{r block_size_bloxplot, fig.cap='Block size', fig.pos='H'}
-bwplot(blocks_create$total_size / 1000 ~ blocks_create$tag, ylab = 'Block size [kB]')
+bwplot(blocks_stats$total_size / 1000 ~ blocks_stats$tag, ylab = 'Block size [kB]')
 ```
 
 ```{r block_propagation_summary}
@@ -307,12 +307,12 @@ densityplot(~propagation_duration, data=txs_received, groups = tag,
 ```
 
 ```{r txs_per_block_summary}
-kable(unclass(summary(blocks_create$txs)), digits = 0, caption = 'Overall transactions per block', format = 'latex') %>%
+kable(unclass(summary(blocks_stats$txs)), digits = 0, caption = 'Overall transactions per block', format = 'latex') %>%
   kable_styling(latex_options = c('HOLD_position'))
 ```
 
 ```{r txs_per_block_boxplot, fig.cap='Transaction per block boxplot', fig.pos='H'}
-bwplot(blocks_create$txs ~ blocks_create$tag, ylab = 'Transactions')
+bwplot(blocks_stats$txs ~ blocks_stats$tag, ylab = 'Transactions')
 ```
 
 ## Tips
