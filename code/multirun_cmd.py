@@ -16,16 +16,16 @@ from argparse import Namespace
 files_to_concat = [
     config.blocks_file_name,
     config.analysed_tick_infos_file_name,
-    parse.BlockStatsEvent.file_name_after_R_filter,
-    parse.BlockReceivedEvent.file_name_after_R_filter,
-    parse.BlockReconstructEvent.file_name_after_R_filter,
+    parse.BlockStatsEvent.file_name_after_R_preprocessing,
+    parse.BlockReceivedEvent.file_name_after_R_preprocessing,
+    parse.BlockReconstructEvent.file_name_after_R_preprocessing,
     parse.BlockExceptionEvent.file_name,
-    parse.UpdateTipEvent.file_name_after_R_filter,
-    parse.PeerLogicValidationEvent.file_name_after_R_filter,
+    parse.UpdateTipEvent.file_name_after_R_preprocessing,
+    parse.PeerLogicValidationEvent.file_name_after_R_preprocessing,
     config.consensus_chain_csv_file_name,
 
-    parse.TxEvent.file_name_after_R_filter,
-    parse.TxReceivedEvent.file_name_after_R_filter,
+    parse.TxEvent.file_name_after_R_preprocessing,
+    parse.TxReceivedEvent.file_name_after_R_preprocessing,
     parse.TxExceptionEvent.file_name,
 
     parse.RPCExceptionEvent.file_name,
