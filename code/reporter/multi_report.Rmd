@@ -60,7 +60,7 @@ step_times    <- read.csv("step_times.csv", dec=".")
 
 tick_infos           <- read.csv("tick_infos.csv", dec=".")
 number_of_runs       <- length(unique(tick_infos$tag))
-sim_starts           <- aggregate(tick_infos$timestamp, by=list(tick_infos$tag), FUN=min)
+sim_starts           <- aggregate(tick_infos$actual_start, by=list(tick_infos$tag), FUN=min)
 colnames(sim_starts) <- c('tag', 'run_start')
 analysed_tick_infos  <- read.csv('analysed_tick_infos.csv', dec='.')
 

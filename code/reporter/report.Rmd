@@ -41,7 +41,7 @@ Sys.setenv(TZ='UTC')
 args <- read.csv('../args.csv', stringsAsFactors=FALSE)
 
 tick_infos <- read.csv("tick_infos.csv")
-tick_infos <- tick_infos %>% arrange(timestamp) %>% mutate(end = actual_start + duration)
+tick_infos <- tick_infos %>% arrange(actual_start) %>% mutate(end = actual_start + duration)
 write.csv(tick_infos, 'tick_infos.csv', row.names=FALSE, quote=FALSE)
 
 skip_ticks            <- ceiling(max(1/args$blocks_per_tick, 1/args$txs_per_tick, 1/args$tick_duration))
