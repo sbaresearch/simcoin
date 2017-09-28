@@ -197,25 +197,25 @@ class TxEvent(Event):
 
 
 class TickEvent:
-    csv_header = ['timestamp', 'source', 'number', 'start', 'end', 'txs', 'blocks', 'duration']
+    csv_header = ['timestamp', 'source', 'number', 'planned_start', 'actual_start', 'duration', 'txs', 'blocks']
     file_name = 'tick_infos.csv'
 
-    def __init__(self, timestamp, source, number, start, end, txs, blocks, duration):
+    def __init__(self, timestamp, source, number, planned_start, actual_start, duration, txs, blocks):
         self.timestamp = timestamp
         self.source = source
         self.number = number
-        self.start = start
-        self.end = end
+        self.planned_start = planned_start
+        self.actual_start = actual_start
+        self.duration = duration
         self.txs = txs
         self.blocks = blocks
-        self.duration = duration
 
     @classmethod
     def from_log_line(cls, line, source):
         match = re.match(
-            config.log_prefix_timestamp + '\[.*\] \[.*\]  Tick=([0-9]+) from=([0-9]+\.[0-9]+) to=([0-9]+\.[0-9]+),'
-                                          ' created txs=([0-9]+), blocks=([0-9]+) and'
-                                          ' took ([0-9]+\.[0-9]+)s to finish$', line)
+            config.log_prefix_timestamp + '\[.*\] \[.*\]  Tick=([0-9]+) with planned_start=([0-9]+\.[0-9]+),'
+                                          ' actual_start=([0-9]+\.[0-9]+) and duration=([0-9]+\.[0-9]+),'
+                                          ' created txs=([0-9]+) and blocks=([0-9]+)$', line)
         if match is None:
             raise ParseException("Didn't match 'Tick' log line.")
 
@@ -225,13 +225,14 @@ class TickEvent:
             int(match.group(2)),
             float(match.group(3)),
             float(match.group(4)),
-            int(match.group(5)),
+            float(match.group(5)),
             int(match.group(6)),
-            float(match.group(7)),
+            int(match.group(7)),
         )
 
     def vars_to_array(self):
-        return [self.timestamp, self.source, self.number, self.start, self.end, self.txs, self.blocks, self.duration]
+        return [self.timestamp, self.source, self.number, self.planned_start, self.actual_start, self.duration,
+                self.txs, self.blocks]
 
 
 class ReceivedEvent(Event):

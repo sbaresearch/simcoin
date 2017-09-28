@@ -56,27 +56,6 @@ class TestEvent(TestCase):
             self.assertEqual(e.execute_cmd.call_count, 2)
             self.assertTrue(m_sleep.call_count, 2)
 
-    @patch('time.time')
-    @patch('utils.check_for_file', lambda file: None)
-    @patch('logging.error')
-    def test_execute(self, m_error, m_time):
-        m_file = mock_open(read_data=''.join(
-            'cmd1,cmd2,cmd3'
-        ))
-        m_file.return_value.__iter__ = lambda self: self
-        m_file.return_value.__next__ = lambda self: next(iter(self.readline, ''))
-
-        with patch('builtins.open', m_file):
-            mock = MagicMock()
-            mock.args.tick_duration = 0
-            e = Event(mock)
-            e.execute_cmd = MagicMock()
-
-            m_time.side_effect = [0, 1, 10]
-
-            e.execute()
-            self.assertRegex(m_error.call_args[0][0], '.*Events took to long to execute.*')
-
     @patch('utils.check_for_file', lambda file: None)
     @patch('logging.error')
     def test_execute_with_exce_execute_cmd(self, m_error):

@@ -106,19 +106,19 @@ class TestParse(TestCase):
         self.assertEqual(event.block_hash, '107692460326feaa6f0c6c35bb218bdb3ff2adbc0d10a3a36b8252acf54e0c03')
 
     def test_parse_tick(self):
-        event = parse.TickEvent.from_log_line('2017-08-19 16:05:14.609000 [MainThread  ] [INFO ]  Tick=11 from=45.12'
-                                              ' to=110.01, created txs=101, blocks=45'
-                                              ' and took 0.9823310375213623s to finish', 'simcoin'
+        event = parse.TickEvent.from_log_line('2017-08-19 16:05:14.609000 [MainThread  ] [INFO ]  Tick=11 with'
+                                              ' planned_start=45.12, actual_start=110.01 and duration=0.9823310375213623,'
+                                              ' created txs=101 and blocks=45', 'simcoin'
         )
 
         self.assertEqual(event.timestamp, datetime(2017, 8, 19, 16, 5, 14, 609000, pytz.UTC).timestamp())
         self.assertEqual(event.source, 'simcoin')
         self.assertEqual(event.number, 11)
-        self.assertEqual(event.start, 45.12)
-        self.assertEqual(event.end, 110.01)
+        self.assertEqual(event.planned_start, 45.12)
+        self.assertEqual(event.actual_start, 110.01)
+        self.assertEqual(event.duration, 0.9823310375213623)
         self.assertEqual(event.txs, 101)
         self.assertEqual(event.blocks, 45)
-        self.assertEqual(event.duration, 0.9823310375213623)
 
     def test_parse_tx_creation_exception(self):
         event = parse.TxExceptionEvent.from_log_line(

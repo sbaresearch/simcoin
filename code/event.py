@@ -17,8 +17,11 @@ class Event:
             utils.check_for_file(config.ticks_csv)
             with open(config.ticks_csv, 'r') as file:
 
+                start_time = time.time()
                 for i, line in enumerate(file):
-                    start_time = time.time()
+                    actual_start = time.time()
+                    planned_start = start_time + i * self.context.args.tick_duration
+
                     self.txs_count = self.blocks_count = 0
 
                     line = line.rstrip()
@@ -26,22 +29,18 @@ class Event:
                     for cmd in cmds:
                         self.execute_cmd(cmd)
 
-                    next_tick = start_time + self.context.args.tick_duration
+                    planned_start_next_tick = start_time + (i + 1) * self.context.args.tick_duration
                     current_time = time.time()
-                    tick_duration = current_time - start_time
-                    logging.info('Tick={} from={} to={}, created txs={}, blocks={} and took {}s to finish'
-                                 .format(i, start_time, next_tick, self.txs_count, self.blocks_count, tick_duration))
+                    duration = current_time - actual_start
+                    logging.info('Tick={} with planned_start={}, actual_start={} and duration={},'
+                                 ' created txs={} and blocks={}'
+                                 .format(i, planned_start, actual_start, duration,
+                                         self.txs_count, self.blocks_count))
 
-                    if current_time < next_tick:
-                        difference = next_tick - current_time
+                    if current_time < planned_start_next_tick:
+                        difference = planned_start_next_tick - current_time
                         logging.info('Sleep {} seconds for next tick={}'.format(difference, i))
                         utils.sleep(difference)
-                    else:
-                        logging.error('Events in tick={} took {}s to execute.'
-                                      ' Consider to raise the tick_duration which is currently {}s.'
-                                      .format(i + 1, current_time - next_tick,
-                                              self.context.args.tick_duration))
-                        raise SimulationException('Events took to long to execute')
         except Exception as exce:
             logging.error('Simulation could not execute all events because of exception={}'.format(exce))
 
