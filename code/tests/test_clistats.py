@@ -68,6 +68,36 @@ class TestCliStats(TestCase):
         self.assertEqual(len(chain), 1)
         self.assertEqual(chain[0], 'hash1')
 
+    def test_calc_consensus_chain_different_chains(self):
+        node_0 = MagicMock()
+        node_0.execute_rpc.side_effect = ['hash1', 'hash2', 'hash4']
+        node_1 = MagicMock()
+        node_1.execute_rpc.side_effect = ['hash1', 'hash3', 'hash4']
+
+        self.context.first_block_height = 10
+        self.context.all_bitcoin_nodes = {'0': node_0, '1': node_1}
+
+        chain = self.cli_stats.calc_consensus_chain()
+
+        self.assertEqual(len(chain), 1)
+        self.assertEqual(chain[0], 'hash1')
+
+    def test_calc_consensus_chain_three_nodes(self):
+        node_0 = MagicMock()
+        node_0.execute_rpc.side_effect = ['hash1', 'hash2', 'hash5']
+        node_1 = MagicMock()
+        node_1.execute_rpc.side_effect = ['hash1', 'hash3', 'hash4']
+        node_2 = MagicMock()
+        node_2.execute_rpc.side_effect = ['hash1', 'hash3', 'hash4']
+
+        self.context.first_block_height = 10
+        self.context.all_bitcoin_nodes = {'0': node_0, '1': node_1, '2': node_2}
+
+        chain = self.cli_stats.calc_consensus_chain()
+
+        self.assertEqual(len(chain), 1)
+        self.assertEqual(chain[0], 'hash1')
+
     def test_node_stats(self):
         node_0 = MagicMock()
         node_0.name = 'name'
