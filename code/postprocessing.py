@@ -78,7 +78,6 @@ class PostProcessing:
 
 def collect_general_infos():
     general_infos = {
-        'current_commit': try_cmd('git log -n 1 --pretty=format:"%H"'),
         'total_memory': try_cmd('cat /proc/meminfo | sed -n 1p | grep -ohE [0-9]+'),
         'cpu_model': try_cmd("lscpu | grep -oP 'Model name:\s+\K(.*)'"),
         'cpus': try_cmd("lscpu | grep -oP 'CPU\(s\):\s+\K([0-9]+)$'"),

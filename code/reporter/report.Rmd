@@ -118,12 +118,11 @@ log_errors  <- readChar("log_errors.txt", file.info("log_errors.txt")$size)
 general_infos_table <- data.frame(
                     c(format(utctime(step_times$timestamp[1]), '%Y-%m-%d %H:%M:%S %Z'),
                       format(utctime(step_times$timestamp[length(step_times)]), '%Y-%m-%d %H:%M:%S %Z'),
-                      general_infos$current_commit,
                       nrow(tick_infos),
                       nrow(analysed_tick_infos),
                       skip_ticks * 2)
                   )
-row.names(general_infos_table)  <- c('Start', 'End', 'Commit', 'Executed ticks', 'Analysed ticks','Skipped ticks')
+row.names(general_infos_table)  <- c('Start', 'End', 'Executed ticks', 'Analysed ticks','Skipped ticks')
 kable(general_infos_table,
       col.names = c('Value'), caption = 'General information', format = 'latex') %>%
   kable_styling(latex_options = c('scale_down','HOLD_position'))
