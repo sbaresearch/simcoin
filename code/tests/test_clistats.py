@@ -17,32 +17,29 @@ class TestCliStats(TestCase):
         self.writer = MagicMock()
         self.cli_stats = CliStats(self.context, self.writer)
 
-    @patch('clistats.write_consensus_chain')
-    def test_persist_consensus_chain_first_node_no_block(self, write_chain):
+    def test_calc_consensus_chain_first_node_no_block(self):
         node_0 = MagicMock()
         node_0.execute_rpc.side_effect = JSONRPCException({'code': -1, 'message': 'error'})
         self.context.first_block_height = 10
         self.context.all_bitcoin_nodes = {'0': node_0}
 
-        self.cli_stats.persist_consensus_chain()
+        chain = self.cli_stats.calc_consensus_chain()
 
-        self.assertEqual(len(write_chain.call_args[0][0]), 0)
+        self.assertEqual(len(chain), 0)
 
-    @patch('clistats.write_consensus_chain')
-    def test_persist_consensus_chain_one_node(self, write_chain):
+    def test_calc_consensus_chain_one_node(self):
         node_0 = MagicMock()
         node_0.execute_rpc.side_effect = ['hash', JSONRPCException({'code': -1, 'message': 'error'})]
 
         self.context.first_block_height = 10
         self.context.all_bitcoin_nodes = {'0': node_0}
 
-        self.cli_stats.persist_consensus_chain()
+        chain = self.cli_stats.calc_consensus_chain()
 
-        self.assertEqual(len(write_chain.call_args[0][0]), 1)
-        self.assertEqual(write_chain.call_args[0][0][0], 'hash')
+        self.assertEqual(len(chain), 1)
+        self.assertEqual(chain[0], 'hash')
 
-    @patch('clistats.write_consensus_chain')
-    def test_persist_consensus_chain_multiple_nodes(self, write_chain):
+    def test_calc_consensus_chain_multiple_nodes(self):
         node_0 = MagicMock()
         node_0.execute_rpc.side_effect = ['hash1', 'hash2', JSONRPCException({'code': -1, 'message': 'error'})]
         node_1 = MagicMock()
@@ -51,14 +48,13 @@ class TestCliStats(TestCase):
         self.context.first_block_height = 10
         self.context.all_bitcoin_nodes = {'0': node_0, '1': node_1}
 
-        self.cli_stats.persist_consensus_chain()
+        chain = self.cli_stats.calc_consensus_chain()
 
-        self.assertEqual(len(write_chain.call_args[0][0]), 2)
-        self.assertEqual(write_chain.call_args[0][0][0], 'hash1')
-        self.assertEqual(write_chain.call_args[0][0][1], 'hash2')
+        self.assertEqual(len(chain), 2)
+        self.assertEqual(chain[0], 'hash1')
+        self.assertEqual(chain[1], 'hash2')
 
-    @patch('clistats.write_consensus_chain')
-    def test_persist_consensus_chain_one_node_trailing_back(self, write_chain):
+    def test_calc_consensus_chain_one_node_trailing_back(self):
         node_0 = MagicMock()
         node_0.execute_rpc.side_effect = ['hash1', 'hash2']
         node_1 = MagicMock()
@@ -67,10 +63,10 @@ class TestCliStats(TestCase):
         self.context.first_block_height = 10
         self.context.all_bitcoin_nodes = {'0': node_0, '1': node_1}
 
-        self.cli_stats.persist_consensus_chain()
+        chain = self.cli_stats.calc_consensus_chain()
 
-        self.assertEqual(len(write_chain.call_args[0][0]), 1)
-        self.assertEqual(write_chain.call_args[0][0][0], 'hash1')
+        self.assertEqual(len(chain), 1)
+        self.assertEqual(chain[0], 'hash1')
 
     def test_node_stats(self):
         node_0 = MagicMock()
