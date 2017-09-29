@@ -75,6 +75,7 @@ class Prepare:
         self.pool.starmap(wait_until_height_reached, zip(nodes, itertools.repeat(current_height)))
 
         for i, node in enumerate(nodes):
+            node.delete_peers_file()
             node.rm()
             logging.info('node.rm {}'.format(node.name))
 
