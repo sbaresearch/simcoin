@@ -41,7 +41,7 @@ class PublicNode:
 class BitcoinNode(Node):
     def __init__(self, name, group, ip, docker_image, path):
         super().__init__(name, group, ip, docker_image)
-        self.path = path + config.bitcoin_regtest_dir
+        self.path = path
         self.spent_to = None
         self.rpc_connection = None
         self.current_tx_chain_index = 0

@@ -62,8 +62,7 @@ nodes_csv = data_dir + nodes_csv_file_name
 args_csv = data_dir + args_csv_file_name
 
 bitcoin_data_dir = '/data'
-bitcoin_regtest_dir = '/regtest'
-client_dir = bitcoin_data_dir + bitcoin_regtest_dir
+client_dir = bitcoin_data_dir + '/regtest'
 
 report_file_name = 'report.Rmd'
 multi_report_file_name = 'multi_report.Rmd'
