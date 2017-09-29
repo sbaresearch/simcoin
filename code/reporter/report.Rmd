@@ -216,7 +216,12 @@ kable(unclass(summary(tick_infos$duration)), col.names = c('Duration [s]'), digi
 ```
 
 ```{r tick_duration_xyplot, fig.cap='Tick duration over time', fig.pos='H'}
-xyplot(tick_infos$duration ~ tick_infos$actual_start - sim_start, xlab = 'Time [s]', ylab = 'Duration [s]', t = 'l' )
+xyplot(tick_infos$duration ~ tick_infos$actual_start - sim_start,
+      xlab = 'Time [s]', ylim = c(0, max(max(tick_infos$duration), args$tick_duration) * 1.1), ylab = 'Duration [s]', t = 'l',
+      panel = function(...) {
+        panel.xyplot(...)
+         panel.abline(h = args$tick_duration)
+        })
 ```
 
 ```{r tick_duration_boxplot, fig.cap='Tick duration', fig.pos='H'}
