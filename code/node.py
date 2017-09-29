@@ -295,16 +295,16 @@ class SelfishPrivateNode(BitcoinNode):
 
 
 class ProxyNode(Node, PublicNode):
-    log_file = '/tmp/selfish_proxy.log'
 
-    def __init__(self, name, group, ip, private_ip, args, latency, docker_image):
+    def __init__(self, name, group, ip, private_ip, args, latency, docker_image, path):
         Node.__init__(self, name, group, ip, docker_image)
         PublicNode.__init__(self, latency)
         self.private_ip = private_ip
         self.args = args
+        self.path = path
 
     def run(self, start_hash):
-        return bash.check_output(proxycmd.run_proxy(self, start_hash))
+        return bash.check_output(proxycmd.run_proxy(self, start_hash, self.path))
 
     def wait_for_highest_tip_of_node(self, node):
         block_hash = node.execute_rpc('getbestblockhash')

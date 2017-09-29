@@ -63,6 +63,7 @@ args_csv = data_dir + args_csv_file_name
 
 bitcoin_data_dir = '/data'
 client_dir = bitcoin_data_dir + '/regtest'
+proxy_client_dir = '/tmp'
 
 report_file_name = 'report.Rmd'
 multi_report_file_name = 'multi_report.Rmd'

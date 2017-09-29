@@ -14,7 +14,7 @@ def run_node(node, cmd, path):
             ' bash -c "' + cmd + '"')
 
 
-def run_selfish_proxy(node, cmd):
+def run_selfish_proxy(node, cmd, path):
     return (
         'docker run'
         ' --cap-add=NET_ADMIN'  # for `tc`
@@ -23,6 +23,7 @@ def run_selfish_proxy(node, cmd):
         ' --ip=' + str(node.ip) +
         ' --name=' + config.prefix + node.name +
         ' --hostname=' + config.prefix + node.name +
+        ' --volume $PWD/' + path + ':' + config.proxy_client_dir +
         ' ' + node.docker_image +
         ' bash -c "' + cmd + '"')
 

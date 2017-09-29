@@ -59,7 +59,8 @@ class Context:
                 selfish_args = self.args.selfish_args
             self.selfish_node_proxies.update({name_proxy: ProxyNode(name_proxy, node.group, ip_proxy,
                                                                     ip_private_node, selfish_args,
-                                                                    node.latency, node.docker_image)})
+                                                                    node.latency, node.docker_image,
+                                                                    self.run_dir + name_proxy)})
 
         self.all_bitcoin_nodes = copy(self.nodes)
         self.all_bitcoin_nodes.update(self.selfish_node_private_nodes)
