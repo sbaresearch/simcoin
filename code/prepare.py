@@ -76,8 +76,6 @@ class Prepare:
             node.rm()
             logging.info('node.rm {}'.format(node.name))
 
-        # self.pool.map(rm_node, nodes)
-
     def start_nodes(self):
         nodes = self.context.all_bitcoin_nodes.values()
 
@@ -139,11 +137,6 @@ def transfer_coinbase_tx_to_normal_tx(node):
 
 def add_latency(node, zones):
     node.add_latency(zones)
-
-
-def rm_node(node):
-    node.delete_peers_file()
-    node.rm()
 
 
 def remove_old_containers_if_exists():
