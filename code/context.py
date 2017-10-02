@@ -50,7 +50,7 @@ class Context:
             ip_proxy = self.zone.get_ip(node.latency)
 
             self.selfish_node_private_nodes.update({node.name: SelfishPrivateNode(node.name, node.group,
-                                                                                  ip_private_node,
+                                                                                  ip_private_node, ip_proxy,
                                                                                   config.standard_image,
                                                                                   self.run_dir + node.name)})
             name_proxy = node.name + '-proxy'

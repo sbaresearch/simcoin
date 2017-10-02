@@ -9,6 +9,7 @@ args = {
     'logips':             '-logips',  # enable ip loging
     'logtimemicros':      '-logtimemicros',  # add microseconds to logging flag: DEFAULT_LOGTIMEMICROS
 
+    'listen':             '-listen=1',
     'listenonion':        '-listenonion=0',  # disable tor
     'onlynet':            '-onlynet=ipv4',  # disable ipv6
     'dnsseed':            '-dnsseed=0',
@@ -19,9 +20,12 @@ args = {
 }
 
 
-def start(node, path):
+def start(node, path, connect_to_ips):
     return_args = args.copy()
-    return dockercmd.run_node(node, transform_to_cmd(return_args), path)
+    cmd = transform_to_cmd(return_args)
+    for ip in connect_to_ips:
+        cmd += ' -connect=' + ip
+    return dockercmd.run_node(node, cmd, path)
 
 
 def transform_to_cmd(args_to_transform):

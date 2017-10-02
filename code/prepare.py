@@ -35,7 +35,11 @@ class Prepare:
     def give_nodes_spendable_coins(self):
         nodes = list(self.context.all_bitcoin_nodes.values())
 
-        self.pool.map(start_node, nodes)
+        for i, node in enumerate(nodes):
+            node.run([str(node.ip) for node in nodes[max(0, i - 5):i]])
+            node.connect_to_rpc(HTTP_TIMEOUT)
+            node.wait_until_rpc_ready()
+            wait_until_height_reached(node, 0)
 
         amount_of_tx_chains = calc_number_of_tx_chains(
             self.context.args.txs_per_tick,
@@ -43,13 +47,6 @@ class Prepare:
             len(nodes)
         )
         logging.info('Each node receives {} tx-chains'.format(amount_of_tx_chains))
-
-        for i, node in enumerate(nodes):
-            for node_to_be_connected in nodes[max(0, i - 5):i]:
-                node.execute_rpc('addnode', str(node_to_be_connected.ip),
-                                 'add')
-
-        utils.sleep(3)
 
         for i, node in enumerate(nodes):
             wait_until_height_reached(node, i * amount_of_tx_chains)
@@ -97,8 +94,6 @@ class Prepare:
             itertools.repeat(self.context.one_normal_node)
         ))
 
-        self.pool.map(connect, self.context.nodes.values())
-
         self.pool.starmap(add_latency, zip(
             self.context.all_public_nodes.values(),
             itertools.repeat(self.context.zone.zones)
@@ -140,10 +135,6 @@ def transfer_coinbase_tx_to_normal_tx(node):
     node.create_tx_chains()
     node.transfer_coinbases_to_normal_tx()
     logging.info("Transferred all coinbase-tx to normal tx for node={}".format(node.name))
-
-
-def connect(node):
-    node.connect()
 
 
 def add_latency(node, zones):
