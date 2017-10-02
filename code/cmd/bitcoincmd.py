@@ -8,7 +8,6 @@ args = {
     'debug':              '-debug',  # log all events
     'logips':             '-logips',  # enable ip loging
     'logtimemicros':      '-logtimemicros',  # add microseconds to logging flag: DEFAULT_LOGTIMEMICROS
-    'listen':             '-listen',  # ensure listening even if 'connect' is given
     'listenonion':        '-listenonion=0',  # disable tor
     'onlynet':            '-onlynet=ipv4',  # disable ipv6
     'reindex':            '-reindex',
