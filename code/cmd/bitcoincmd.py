@@ -8,9 +8,11 @@ args = {
     'debug':              '-debug',  # log all events
     'logips':             '-logips',  # enable ip loging
     'logtimemicros':      '-logtimemicros',  # add microseconds to logging flag: DEFAULT_LOGTIMEMICROS
+
     'listenonion':        '-listenonion=0',  # disable tor
     'onlynet':            '-onlynet=ipv4',  # disable ipv6
     'dnsseed':            '-dnsseed=0',
+
     'reindex':            '-reindex',
     'checkmempool':       '-checkmempool=0',
     'keypool':            '-keypool=1',
