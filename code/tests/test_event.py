@@ -3,7 +3,7 @@ from event import Event
 from unittest.mock import patch
 from unittest.mock import MagicMock
 from unittest.mock import mock_open
-from bitcoinrpc.authproxy import JSONRPCException
+from bitcoin.rpc import JSONRPCError
 import event
 
 
@@ -118,7 +118,7 @@ class TestEvent(TestCase):
     def test_execute_cmd_with_exception(self):
         context = MagicMock()
         node = MagicMock()
-        node.generate_tx.side_effect = JSONRPCException({'code': -1, 'message': 'test_message'})
+        node.generate_tx.side_effect = JSONRPCError({'code': -1, 'message': 'test_message'})
         context.all_bitcoin_nodes = {'node-1': node}
 
         e = Event(context)

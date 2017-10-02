@@ -2,7 +2,7 @@ import config
 import logging
 import time
 import utils
-from bitcoinrpc.authproxy import JSONRPCException
+from bitcoin.rpc import JSONRPCError
 import math
 
 
@@ -51,15 +51,15 @@ class Event:
             node = self.context.all_bitcoin_nodes[cmd_parts[1]]
             try:
                 node.generate_tx()
-            except JSONRPCException as exce:
-                logging.info('Could not generate tx for node={}. Exception="{}"'.format(node.name, exce.message))
+            except JSONRPCError as exce:
+                logging.info('Could not generate tx for node={}. Exception="{}"'.format(node.name, exce.error))
             self.txs_count += 1
         elif cmd_parts[0] == 'block':
             node = self.context.all_bitcoin_nodes[cmd_parts[1]]
             try:
                 node.generate_block()
-            except JSONRPCException as exce:
-                logging.info('Could not generate block for node={}. Exception="{}"'.format(node.name, exce.message))
+            except JSONRPCError as exce:
+                logging.info('Could not generate block for node={}. Exception="{}"'.format(node.name, exce.error))
             self.blocks_count += 1
         elif len(cmd) == 0:
             pass

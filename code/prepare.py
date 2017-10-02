@@ -7,7 +7,7 @@ import utils
 import math
 from multiprocessing.dummy import Pool as ThreadPool
 import itertools
-from bitcoinrpc.authproxy import HTTP_TIMEOUT
+from bitcoin.rpc import DEFAULT_HTTP_TIMEOUT
 
 
 class Prepare:
@@ -40,7 +40,7 @@ class Prepare:
             cbs.append(
                 self.pool.apply_async(
                     start_node,
-                    args=(node, HTTP_TIMEOUT, 0, (str(node.ip) for node in nodes[max(0, i - 5):i])))
+                    args=(node, DEFAULT_HTTP_TIMEOUT, 0, (str(node.ip) for node in nodes[max(0, i - 5):i])))
             )
         for cb in cbs:
             cb.get()
@@ -120,7 +120,7 @@ class Prepare:
         logging.info('Simulation directory created')
 
 
-def start_node(node, timeout=HTTP_TIMEOUT, height=0, connect_to_ips=None):
+def start_node(node, timeout=DEFAULT_HTTP_TIMEOUT, height=0, connect_to_ips=None):
     node.run(connect_to_ips)
     node.connect_to_rpc(timeout)
     node.wait_until_rpc_ready()

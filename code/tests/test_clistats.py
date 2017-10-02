@@ -1,10 +1,7 @@
 from unittest import TestCase
-from mock import patch
-from mock import mock_open
 from clistats import CliStats
 from mock import MagicMock
-import config
-from bitcoinrpc.authproxy import JSONRPCException
+from bitcoin.rpc import JSONRPCError
 
 
 class TestCliStats(TestCase):
@@ -19,7 +16,7 @@ class TestCliStats(TestCase):
 
     def test_calc_consensus_chain_first_node_no_block(self):
         node_0 = MagicMock()
-        node_0.execute_rpc.side_effect = JSONRPCException({'code': -1, 'message': 'error'})
+        node_0.execute_rpc.side_effect = JSONRPCError({'code': -1, 'message': 'error'})
         self.context.first_block_height = 10
         self.context.all_bitcoin_nodes = {'0': node_0}
 
@@ -29,7 +26,7 @@ class TestCliStats(TestCase):
 
     def test_calc_consensus_chain_one_node(self):
         node_0 = MagicMock()
-        node_0.execute_rpc.side_effect = ['hash', JSONRPCException({'code': -1, 'message': 'error'})]
+        node_0.execute_rpc.side_effect = ['hash', JSONRPCError({'code': -1, 'message': 'error'})]
 
         self.context.first_block_height = 10
         self.context.all_bitcoin_nodes = {'0': node_0}
@@ -41,9 +38,9 @@ class TestCliStats(TestCase):
 
     def test_calc_consensus_chain_multiple_nodes(self):
         node_0 = MagicMock()
-        node_0.execute_rpc.side_effect = ['hash1', 'hash2', JSONRPCException({'code': -1, 'message': 'error'})]
+        node_0.execute_rpc.side_effect = ['hash1', 'hash2', JSONRPCError({'code': -1, 'message': 'error'})]
         node_1 = MagicMock()
-        node_1.execute_rpc.side_effect = ['hash1', 'hash2', JSONRPCException({'code': -1, 'message': 'error'})]
+        node_1.execute_rpc.side_effect = ['hash1', 'hash2', JSONRPCError({'code': -1, 'message': 'error'})]
 
         self.context.first_block_height = 10
         self.context.all_bitcoin_nodes = {'0': node_0, '1': node_1}
@@ -58,7 +55,7 @@ class TestCliStats(TestCase):
         node_0 = MagicMock()
         node_0.execute_rpc.side_effect = ['hash1', 'hash2']
         node_1 = MagicMock()
-        node_1.execute_rpc.side_effect = ['hash1', JSONRPCException({'code': -1, 'message': 'error'})]
+        node_1.execute_rpc.side_effect = ['hash1', JSONRPCError({'code': -1, 'message': 'error'})]
 
         self.context.first_block_height = 10
         self.context.all_bitcoin_nodes = {'0': node_0, '1': node_1}

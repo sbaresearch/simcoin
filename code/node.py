@@ -2,23 +2,22 @@ from cmd import dockercmd
 from cmd import bitcoincmd
 import config
 import bash
-from bitcoinrpc.authproxy import AuthServiceProxy
 import logging
 from cmd import tccmd
 from cmd import proxycmd
 import utils
-import errno
 from collections import OrderedDict
 from collections import namedtuple
 from bitcoin.wallet import CBitcoinSecret
-from bitcoinrpc.authproxy import JSONRPCException
 from bitcoin.core import lx, b2x, COutPoint, CMutableTxOut, CMutableTxIn, \
     CMutableTransaction, Hash160
 from bitcoin.core.script import CScript, OP_DUP, OP_HASH160, OP_EQUALVERIFY,\
     OP_CHECKSIG, SignatureHash, SIGHASH_ALL
 from bitcoin.wallet import CBitcoinAddress
 from http.client import CannotSendRequest
-from bitcoinrpc.authproxy import HTTP_TIMEOUT
+from bitcoin.rpc import Proxy
+from bitcoin.rpc import JSONRPCError
+from bitcoin.rpc import DEFAULT_HTTP_TIMEOUT
 
 
 class Node:
@@ -50,7 +49,7 @@ class BitcoinNode(Node):
     def run(self, connect_to_ips):
         bash.check_output(bitcoincmd.start(self, self.path, connect_to_ips))
 
-        # sleep small amount to avoid 'CannotSendRequest: Request-sent' in bitcoinrpc
+        # sleep small amount to avoid 'CannotSendRequest: Request-sent' in bitcoin.rpc
         utils.sleep(0.2)
 
     def is_running(self):
@@ -97,7 +96,7 @@ class BitcoinNode(Node):
             try:
                 self.execute_rpc('getnetworkinfo')
                 break
-            except JSONRPCException as exce:
+            except JSONRPCError as exce:
                 logging.debug(
                     'Exception="{}" while calling RPC. '
                     'Waiting until RPC of node={} is ready.'
@@ -105,8 +104,8 @@ class BitcoinNode(Node):
                 )
                 utils.sleep(1)
 
-    def connect_to_rpc(self, timeout=HTTP_TIMEOUT):
-        self.rpc_connection = AuthServiceProxy(
+    def connect_to_rpc(self, timeout=DEFAULT_HTTP_TIMEOUT):
+        self.rpc_connection = Proxy(
             config.create_rpc_connection_string(self.ip),
             timeout=timeout
         )
@@ -129,9 +128,7 @@ class BitcoinNode(Node):
         retry = 30
         while retry >= 0:
             try:
-                method_to_call = getattr(self.rpc_connection, args[0])
-
-                return method_to_call(*args[1:])
+                return self.rpc_connection.call(args[0], *args[1:])
             except IOError as error:
                 retry -= 1
                 self.connect_to_rpc()
@@ -176,8 +173,8 @@ class BitcoinNode(Node):
                     'vout': 0,
                 }],
                 OrderedDict([
-                    (tx_chain.address, tx_chain.amount / 100000000),
-                    (self.spent_to.address, tx_chain.amount / 100000000)
+                    (tx_chain.address, str(tx_chain.amount / 100000000)),
+                    (self.spent_to.address, str(tx_chain.amount / 100000000))
                 ])
             )
             signed_raw_transaction = self.execute_rpc(

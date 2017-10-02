@@ -1,5 +1,4 @@
 numpy>=1.12
 mock
 pandas
-python-bitcoinrpc
 python-bitcoinlib
