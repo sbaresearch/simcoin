@@ -13,13 +13,13 @@ args = {
     'onlynet':            '-onlynet=ipv4',  # disable ipv6
     'reindex':            '-reindex',
     'checkmempool':       '-checkmempool=0',
+    'keypool':            '-keypool=1',
 }
 
 
 def start(node, path):
     specific_args = {
         'dnsseed':          '-dnsseed=0',  # disable dns seed lookups, otherwise this gets seeds even with docker --internal network
-        'keypool':          '-keypool=1'
     }
     return_args = args.copy()
     return_args.update(specific_args)
