@@ -26,17 +26,6 @@ def start(node, path):
     return dockercmd.run_node(node, transform_to_cmd(return_args), path)
 
 
-def start_selfish_mining():
-    specific_args = {
-        'keypool':          '-keypool=1',
-        'dnsseed':          '-dnsseed=0',
-    }
-    return_args = args.copy()
-    return_args.update(specific_args)
-    return_args.pop('listen', None)
-    return transform_to_cmd(return_args)
-
-
 def transform_to_cmd(args_to_transform):
     return daemon + ' '.join(args_to_transform.values())
 

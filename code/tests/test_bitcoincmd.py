@@ -6,11 +6,6 @@ import config
 
 class TestBitcoincmd(TestCase):
 
-    def test_start_selfish_mining(self):
-        cmd = bitcoincmd.start_selfish_mining()
-
-        self.assertTrue('  ' not in cmd)
-
     def test_start(self):
         node = MagicMock()
         cmd = bitcoincmd.start(node, '/path')
