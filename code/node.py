@@ -47,6 +47,12 @@ class BitcoinNode(Node):
         self.current_tx_chain_index = 0
         self.tx_chains = []
 
+    def run(self, connect_to_ips):
+        bash.check_output(bitcoincmd.start(self, self.path, connect_to_ips))
+
+        # sleep small amount to avoid 'CannotSendRequest: Request-sent' in bitcoinrpc
+        utils.sleep(0.2)
+
     def is_running(self):
         return bash.check_output(
             dockercmd.check_if_running(
@@ -278,13 +284,10 @@ class PublicBitcoinNode(BitcoinNode, PublicNode):
             bash.check_output(cmd)
 
     def run(self, connect_to_ips=None):
-        if connect_to_ips is None
+        if connect_to_ips is None:
             connect_to_ips = self.outgoing_ips
-        bash.check_output(bitcoincmd.start(self, self.path, connect_to_ips))
-        # sleep small amount to avoid
-        # 'CannotSendRequest: Request-sent'
-        # in bitcoinrpc
-        utils.sleep(0.2)
+
+        super(PublicBitcoinNode, self).run(connect_to_ips)
 
 
 class SelfishPrivateNode(BitcoinNode):
@@ -295,11 +298,8 @@ class SelfishPrivateNode(BitcoinNode):
     def run(self, connect_to_ips=None):
         if connect_to_ips is None:
             connect_to_ips = [self.ip_proxy]
-        bash.check_output(bitcoincmd.start(self, self.path, connect_to_ips))
-        # sleep small amount to avoid
-        # 'CannotSendRequest: Request-sent'
-        # in bitcoinrpc
-        utils.sleep(0.2)
+
+        super(SelfishPrivateNode, self).run(connect_to_ips)
 
 
 class ProxyNode(Node, PublicNode):
