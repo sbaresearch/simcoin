@@ -10,6 +10,7 @@ args = {
     'logtimemicros':      '-logtimemicros',  # add microseconds to logging flag: DEFAULT_LOGTIMEMICROS
     'listenonion':        '-listenonion=0',  # disable tor
     'onlynet':            '-onlynet=ipv4',  # disable ipv6
+    'dnsseed':            '-dnsseed=0',
     'reindex':            '-reindex',
     'checkmempool':       '-checkmempool=0',
     'keypool':            '-keypool=1',
@@ -17,11 +18,7 @@ args = {
 
 
 def start(node, path):
-    specific_args = {
-        'dnsseed':          '-dnsseed=0',  # disable dns seed lookups, otherwise this gets seeds even with docker --internal network
-    }
     return_args = args.copy()
-    return_args.update(specific_args)
     return dockercmd.run_node(node, transform_to_cmd(return_args), path)
 
 
