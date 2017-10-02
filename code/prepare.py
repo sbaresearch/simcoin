@@ -35,11 +35,15 @@ class Prepare:
     def give_nodes_spendable_coins(self):
         nodes = list(self.context.all_bitcoin_nodes.values())
 
+        cbs = []
         for i, node in enumerate(nodes):
-            node.run([str(node.ip) for node in nodes[max(0, i - 5):i]])
-            node.connect_to_rpc(HTTP_TIMEOUT)
-            node.wait_until_rpc_ready()
-            wait_until_height_reached(node, 0)
+            cbs.append(
+                self.pool.apply_async(
+                    start_node,
+                    args=(node, HTTP_TIMEOUT, 0, (str(node.ip) for node in nodes[max(0, i - 5):i])))
+            )
+        for cb in cbs:
+            cb.get()
 
         amount_of_tx_chains = calc_number_of_tx_chains(
             self.context.args.txs_per_tick,
@@ -116,8 +120,8 @@ class Prepare:
         logging.info('Simulation directory created')
 
 
-def start_node(node, timeout=HTTP_TIMEOUT, height=0):
-    node.run()
+def start_node(node, timeout=HTTP_TIMEOUT, height=0, connect_to_ips=None):
+    node.run(connect_to_ips)
     node.connect_to_rpc(timeout)
     node.wait_until_rpc_ready()
     wait_until_height_reached(node, height)
