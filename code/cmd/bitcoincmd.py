@@ -24,7 +24,7 @@ def start(node, path, connect_to_ips):
     return_args = args.copy()
     cmd = transform_to_cmd(return_args)
     for ip in connect_to_ips:
-        cmd += ' -connect=' + ip
+        cmd += ' -connect=' + str(ip)
     return dockercmd.run_node(node, cmd, path)
 
 
