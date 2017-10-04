@@ -26,11 +26,19 @@ class CliStats:
                     blocks.append(node.execute_rpc('getblockhash', height))
                 except JSONRPCError:
                     break
-            if len(blocks) == len(nodes) and utils.check_equal(blocks):
+            if len(blocks) != len(nodes):
+                logging.info('Stopped calculating consensus chain on height={} because'
+                             ' only {} of {} nodes have a block on this height'.format(height, len(blocks), len(nodes)))
+                break
+            elif utils.check_equal(blocks) is False:
+                logging.info('Stopped calculating consensus chain on height={} because'
+                             ' not all {} nodes have the same block on this height'.format(height, len(nodes)))
+                break
+            else:
                 consensus_chain.append(blocks[0])
                 height += 1
-            else:
-                break
+
+                logging.info('Added block with hash={} to consensus chain'.format(blocks[0]))
 
         logging.info('Calculated {} block long consensus chain from height={} and {} nodes'
                      .format(len(consensus_chain), height, len(nodes)))
