@@ -33,7 +33,7 @@ demo1:
 			run \
 				--group-a bitcoin 3 1 0 simcoin/normal:v3 \
 				--amount-of-ticks 1 \
-				--tx-per-tick 90 \
+				--txs-per-tick 90 \
 				--verbose
 
 demo2:
@@ -42,7 +42,7 @@ demo2:
 			run \
 				--group-a bitcoin 50 1 0 simcoin/normal:v3 \
 				--amount-of-ticks 100 \
-				--tx-per-tick 9 \
+				--txs-per-tick 9 \
 				--verbose
 
 demo3:
@@ -51,7 +51,7 @@ demo3:
 			run \
 				--group-a bitcoin 2 1 0 simcoin/normal:v3 \
 				--amount-of-ticks 100 \
-				--tx-per-tick 1 \
+				--txs-per-tick 1 \
 				--verbose
 
 demo4:
@@ -61,7 +61,7 @@ demo4:
 				--group-a bitcoin 2 .6 0 simcoin/patched:v2 \
 				--group-b bitcoin 1 .4 0 simcoin/patched:v2 \
 				--amount-of-ticks 10 \
-				--tx-per-tick 2 \
+				--txs-per-tick 2 \
 				--blocks-per-tick 0.7 \
 				--system-snapshots-frequency 1 \
 				--verbose
@@ -158,7 +158,7 @@ selfdemo1:
 				--group-a bitcoin 3 .75 0 simcoin/patched:v2 \
 				--group-b selfish 1 .25 0 simcoin/proxy:v1 \
 				--amount-of-ticks 10 \
-				--tx-per-tick 2 \
+				--txs-per-tick 2 \
 				--blocks-per-tick 0.7 \
 				--system-snapshots-frequency 1 \
 				--verbose
@@ -170,7 +170,7 @@ selfdemo2:
 				--group-a bitcoin 3 .75 0 simcoin/patched:v2 \
 				--group-b selfish 1 .25 0 simcoin/proxy:v1 \
 				--amount-of-ticks 100 \
-				--tx-per-tick 2 \
+				--txs-per-tick 2 \
 				--blocks-per-tick 0.7 \
 				--verbose
 

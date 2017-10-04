@@ -229,6 +229,18 @@ barchart(stale_block, stack = TRUE, ref = FALSE, xlab = 'Blocks',
 })
 ```
 
+```{r block_stale_distribution, fig.cap='Stale blocks distribution', fig.pos='H'}
+stale_block_nodes  <- blocks_create %>% filter(stale == 'Stale') %>% select(node, tag)
+stale_block_groups <- merge(stale_block_nodes, nodes, by.x = 'node', by.y = 'name') %>% select(group, tag)
+stale_per_group <- table(stale_block_groups$tag, stale_block_groups$group)
+barchart(stale_per_group, stack = TRUE, ref = FALSE, xlab = 'Blocks',
+         auto.key = list(columns=2, points = FALSE, rectangles = TRUE), panel=function(x,y,...){
+       panel.barchart(x,y,...)
+       xx <- unsplit(unname(lapply(split(x, y), function(t)cumsum(t)-t/2)), y)
+       ltext(xx, y=y, labels=x)
+})
+```
+
 ```{r block_distribution_summary}
 group_share       <- nodes %>%
   group_by(group) %>%
