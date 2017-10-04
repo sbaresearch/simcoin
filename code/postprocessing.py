@@ -28,8 +28,6 @@ class PostProcessing:
 
         self.clean_up_docker()
 
-        self.grep_log_for_errors()
-
         logging.info(config.log_line_run_end + self.context.run_name)
         flush_log_handlers()
         extract_from_file(config.log_file, config.run_log,
@@ -62,18 +60,6 @@ class PostProcessing:
 
         bash.check_output(dockercmd.fix_data_dirs_permissions(self.context.run_dir))
         logging.info('Fixed permissions of dirs used by docker')
-
-    def grep_log_for_errors(self):
-        with open(config.log_errors_txt, 'a') as file:
-            for node in self.context.all_nodes.values():
-                file.write('{}:\n\n'.format(node.name))
-                file.write('{}\n\n\n'.format(node.grep_log_for_errors()))
-
-            file.write('Simcoin:\n\n')
-            lines = bash.check_output_without_log(config.log_error_grep.format(config.log_file))
-            file.write('{}\n\n\n'.format(lines))
-        logging.info('Grepped all logs for errors and saved matched lines to {}'
-                     .format(config.log_errors_txt))
 
 
 def collect_general_infos():

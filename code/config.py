@@ -82,5 +82,4 @@ consensus_chain_csv_file_name = 'consensus_chain.csv'
 postprocessing_dir = soft_link_to_run_dir + '/postprocessing/'
 consensus_chain_csv = postprocessing_dir + consensus_chain_csv_file_name
 general_infos_csv = postprocessing_dir + 'general_infos.csv'
-log_errors_txt = postprocessing_dir + 'log_errors.txt'
 analysed_ticks_csv = postprocessing_dir + 'analysed_ticks.csv'

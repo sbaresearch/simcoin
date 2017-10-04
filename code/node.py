@@ -155,13 +155,6 @@ class BitcoinNode(Node):
         )
         exit(-1)
 
-    def grep_log_for_errors(self):
-        return bash.check_output_without_log(
-            config.log_error_grep.format(
-                self.get_log_file()
-            )
-        )
-
     def transfer_coinbases_to_normal_tx(self):
         for tx_chain in self.tx_chains:
             tx_chain.amount /= 2
@@ -319,9 +312,6 @@ class ProxyNode(Node, PublicNode):
             utils.sleep(1)
             logging.debug('Waiting for  blocks to spread...')
 
-    def grep_log_for_errors(self):
-        # TODO consider to implement this
-        return 'Not yet implemented'
 
     def add_latency(self, zones):
         for cmd in tccmd.create(self.name, zones, self.latency):
