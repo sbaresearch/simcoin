@@ -247,7 +247,7 @@ blocks_create <- merge(blocks_create, consensus_chain, all.x = TRUE)
 blocks_create$stale[is.na(blocks_create$stale)] <- 'Stale'
 
 factor_stale_block <- t(table(factor(blocks_create$stale, levels = c('Accepted', 'Stale'))))
-stale_rate <- data.frame(c(round(prop.table(factor_stale_block)[,2] * 100, 3)))
+stale_rate <- data.frame(c(round(prop.table(factor_stale_block)[, c('Stale')] * 100, 3)))
 rownames(stale_rate) <- c('Block stale rate')
 kable(stale_rate, col.names = c('Rate [%]'), digits = 3, caption = 'Stale block rate', format = 'latex') %>%
   kable_styling(latex_options = c('HOLD_position'))
