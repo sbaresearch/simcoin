@@ -100,8 +100,6 @@ memory   <- read.csv("memory.csv", dec=".")
 cpu_time <- read.csv("cpu_time.csv", dec=".")
 
 nodes <- read.csv('../nodes.csv', dec='.')
-
-log_errors  <- readChar("log_errors.txt", file.info("log_errors.txt")$size)
 ```
 
 ## Simulation
