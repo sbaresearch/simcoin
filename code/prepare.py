@@ -75,10 +75,7 @@ class Prepare:
 
         self.pool.starmap(wait_until_height_reached, zip(nodes, itertools.repeat(current_height)))
 
-        for i, node in enumerate(nodes):
-            node.delete_peers_file()
-            node.rm()
-            logging.info('node.rm {}'.format(node.name))
+        self.pool.map(delete_node, nodes)
 
     def start_nodes(self):
         nodes = self.context.all_bitcoin_nodes.values()
@@ -125,6 +122,12 @@ def start_node(node, timeout=DEFAULT_HTTP_TIMEOUT, height=0, connect_to_ips=None
     node.connect_to_rpc(timeout)
     node.wait_until_rpc_ready()
     wait_until_height_reached(node, height)
+
+
+def delete_node(node):
+    node.delete_peers_file()
+    node.rm()
+    logging.info('node.rm {}'.format(node.name))
 
 
 def start_proxy_node(node, start_hash, normal_node):
