@@ -281,8 +281,10 @@ barchart(stale_per_group, stack = TRUE, ref = FALSE, xlab = 'Blocks',
 group_share       <- nodes %>%
   group_by(group) %>%
   summarise(share = round(sum(share) * 100, 2))
-blocks_with_group <- merge(blocks_create, nodes, by.x = 'node', by.y = 'name')
-group_blocks      <- blocks_with_group %>%
+
+accepted_block_nodes  <- blocks_create %>% filter(stale == 'Accepted')
+blocks_with_group     <- merge(accepted_block_nodes, nodes, by.x = 'node', by.y = 'name')
+group_blocks          <- blocks_with_group %>%
   group_by(group) %>%
   summarise(block_count = n(), block_share = round(n()/nrow(blocks_create) * 100, 2))
 
@@ -292,11 +294,11 @@ block_dist_summary[is.na(block_dist_summary)] <- 0
 rownames(block_dist_summary) <- block_dist_summary$group
 block_dist_summary           <- block_dist_summary[ , !(names(block_dist_summary) %in% c('group'))]
 
-kable(block_dist_summary, col.names = c('Share [%]', 'Blocks', 'Blocks share [%]'), digits = 2, caption = 'Block distribution summary', format = 'latex') %>%
+kable(block_dist_summary, col.names = c('Share [%]', 'Blocks', 'Blocks share [%]'), digits = 2, caption = 'Accepted block distribution summary', format = 'latex') %>%
   kable_styling(latex_options = c('HOLD_position'))
 ```
 
-```{r block_distribution, eval=nlevels(nodes$group)>0, fig.cap='Block distribution', fig.pos='H'}
+```{r block_distribution, eval=nlevels(nodes$group)>0, fig.cap='Accepted block distribution', fig.pos='H'}
 block_dist <- t(block_dist_summary[, 'block_count', drop=FALSE])
 rownames(block_dist) <- c('Run')
 barchart(block_dist, stack = TRUE, ref = FALSE, xlab = 'Blocks',

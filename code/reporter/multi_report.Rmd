@@ -246,9 +246,10 @@ group_share       <- nodes %>%
   group_by(group) %>%
   summarise(share = round(sum(share) * 100, 2))
 
-blocks_with_group <- merge(blocks_create, nodes, by.x = 'node', by.y = 'name')
-tag_size          <- blocks_with_group %>% group_by(tag) %>% summarise(tag_size = n())
-blocks_with_group <- merge(blocks_with_group, tag_size)
+accepted_block_nodes  <- blocks_create %>% filter(stale == 'Accepted')
+blocks_with_group     <- merge(accepted_block_nodes, nodes, by.x = 'node', by.y = 'name')
+tag_size              <- blocks_with_group %>% group_by(tag) %>% summarise(tag_size = n())
+blocks_with_group     <- merge(blocks_with_group, tag_size)
 
 group_blocks <- blocks_with_group %>%
   group_by(tag, group, tag_size) %>%
@@ -260,12 +261,12 @@ block_dist_summary[is.na(block_dist_summary)] <- 0
 
 block_dist_summary <- block_dist_summary %>% arrange(tag) %>% select(tag, group, share, block_count, block_share)
 
-kable(block_dist_summary, col.names = c('', 'Group', 'Share [%]', 'Blocks', 'Blocks share [%]'), digits = 2, caption = 'Block distribution summary', format = 'latex') %>%
+kable(block_dist_summary, col.names = c('', 'Group', 'Share [%]', 'Blocks', 'Blocks share [%]'), digits = 2, caption = 'Accepted block distribution summary', format = 'latex') %>%
   kable_styling(latex_options = c('scale_down', 'HOLD_position')) %>%
   collapse_rows(columns = 1)
 ```
 
-```{r block_distribution, fig.cap='Block distribution', fig.pos='H'}
+```{r block_distribution, fig.cap='Accepted block distribution', fig.pos='H'}
 block_dist <- dcast(group_blocks, tag~group, value.var = 'block_count')
 block_dist[is.na(block_dist)] <- 0
 
