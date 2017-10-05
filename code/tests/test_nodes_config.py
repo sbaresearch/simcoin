@@ -9,12 +9,15 @@ class TestNodesConfig(TestCase):
     def test_check_if_share_sum_is_1_false(self):
         nodes = [NodeConfig('type', 'group', 'node-0', 0.4, 0, None), NodeConfig('type', 'group', 'node-1', 0.4, 0, None)]
 
-        self.assertFalse(nodes_config.check_if_share_sum_is_1(nodes))
+        with self.assertRaises(SystemExit) as cm:
+            nodes_config.check_if_share_sum_is_1(nodes)
+
+        self.assertEqual(cm.exception.code, -1)
 
     def test_check_if_share_sum_is_1_true(self):
         nodes = [NodeConfig('type', 'group', 'node-0', 0.4, 0, None), NodeConfig('type', 'group', 'node-1', 0.6, 0, None)]
 
-        self.assertTrue(nodes_config.check_if_share_sum_is_1(nodes))
+        nodes_config.check_if_share_sum_is_1(nodes)
 
     @patch('bash.call_silent')
     def test_check_if_image_exists(self, m_call_silent):

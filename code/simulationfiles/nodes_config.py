@@ -84,9 +84,7 @@ def check_if_share_sum_is_1(nodes):
     sum_of_shares = round(sum_of_shares, 2)
     if sum_of_shares != 1:
         logging.error('Sum of shares should be 1. It was {} instead.'.format(sum_of_shares))
-        return False
-    else:
-        return True
+        exit(-1)
 
 
 def create_node_group(node_args, group, index):
