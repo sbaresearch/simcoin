@@ -225,6 +225,9 @@ barchart(stale_block, stack = TRUE, ref = FALSE, xlab = 'Blocks',
          auto.key = list(columns=2, points = FALSE, rectangles = TRUE), panel=function(x,y,...){
       panel.barchart(x,y,...)
       xx <- unsplit(unname(lapply(split(x, y), function(t)cumsum(t)-t/2)), y)
+      xx <-  xx [! x %in% 0]
+      y <-  y [! x %in% 0]
+      x <-  x [! x %in% 0]
       ltext(xx, y=y, labels=x)
 })
 ```
@@ -237,6 +240,9 @@ barchart(stale_per_group, stack = TRUE, ref = FALSE, xlab = 'Blocks',
          auto.key = list(columns=2, points = FALSE, rectangles = TRUE), panel=function(x,y,...){
        panel.barchart(x,y,...)
        xx <- unsplit(unname(lapply(split(x, y), function(t)cumsum(t)-t/2)), y)
+       xx <-  xx [! x %in% 0]
+       y <-  y [! x %in% 0]
+       x <-  x [! x %in% 0]
        ltext(xx, y=y, labels=x)
 })
 ```
