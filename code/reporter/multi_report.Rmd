@@ -277,7 +277,7 @@ block_dist <- dcast(group_blocks, tag~group, value.var = 'block_count')
 block_dist[is.na(block_dist)] <- 0
 
 rownames(block_dist) <- block_dist$tag
-block_dist           <- block_dist[ , !(names(block_dist) %in% c('tag'))]
+block_dist           <- block_dist[ , !(names(block_dist) %in% c('tag')), drop = FALSE]
 
 barchart(as.matrix(block_dist), stack = TRUE, ref = FALSE, xlab = 'Blocks',
          auto.key = list(columns=2, points = FALSE, rectangles = TRUE), panel=function(x,y,...){
