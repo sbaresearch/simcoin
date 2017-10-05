@@ -286,7 +286,7 @@ accepted_block_nodes  <- blocks_create %>% filter(stale == 'Accepted')
 blocks_with_group     <- merge(accepted_block_nodes, nodes, by.x = 'node', by.y = 'name')
 group_blocks          <- blocks_with_group %>%
   group_by(group) %>%
-  summarise(block_count = n(), block_share = round(n()/nrow(blocks_create) * 100, 2))
+  summarise(block_count = n(), block_share = round(n()/nrow(accepted_block_nodes) * 100, 2))
 
 block_dist_summary                            <- merge(group_share, group_blocks, all.x = TRUE)
 block_dist_summary[is.na(block_dist_summary)] <- 0
