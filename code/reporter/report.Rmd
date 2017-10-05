@@ -264,7 +264,7 @@ barchart(stale_block, stack = TRUE, ref = FALSE, xlab = 'Blocks',
 })
 ```
 
-```{r block_stale_distribution, fig.cap='Stale blocks distribution', fig.pos='H'}
+```{r block_stale_distribution, eval=nlevels(nodes$group)>1, fig.cap='Stale blocks distribution', fig.pos='H'}
 stale_block_nodes  <- blocks_create %>% filter(stale == 'Stale') %>% select(node)
 stale_block_groups <- merge(stale_block_nodes, nodes, by.x = 'node', by.y = 'name') %>% select(group)
 stale_per_group <- t(table(stale_block_groups$group))
@@ -277,7 +277,7 @@ barchart(stale_per_group, stack = TRUE, ref = FALSE, xlab = 'Blocks',
 })
 ```
 
-```{r block_distribution_summary, eval=nlevels(nodes$group)>0}
+```{r block_distribution_summary, eval=nlevels(nodes$group)>1}
 group_share       <- nodes %>%
   group_by(group) %>%
   summarise(share = round(sum(share) * 100, 2))
@@ -298,7 +298,7 @@ kable(block_dist_summary, col.names = c('Share [%]', 'Blocks', 'Blocks share [%]
   kable_styling(latex_options = c('HOLD_position'))
 ```
 
-```{r block_distribution, eval=nlevels(nodes$group)>0, fig.cap='Accepted block distribution', fig.pos='H'}
+```{r block_distribution, eval=nlevels(nodes$group)>1, fig.cap='Accepted block distribution', fig.pos='H'}
 block_dist <- t(block_dist_summary[, 'block_count', drop=FALSE])
 rownames(block_dist) <- c('Run')
 barchart(block_dist, stack = TRUE, ref = FALSE, xlab = 'Blocks',

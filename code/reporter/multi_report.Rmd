@@ -219,7 +219,7 @@ kable(stale_rate, col.names = c('Rate [%]'), digits = 3, caption = 'Stale block 
   kable_styling(latex_options = c('HOLD_position'))
 ```
 
-```{r block_stale_barchart, fig.cap='Stale blocks', fig.pos='H'}
+```{r block_stale_barchart, fig.cap='Accepted/stale blocks', fig.pos='H'}
 stale_block <- table(blocks_create$tag, blocks_create$stale)
 barchart(stale_block, stack = TRUE, ref = FALSE, xlab = 'Blocks',
          auto.key = list(columns=2, points = FALSE, rectangles = TRUE), panel=function(x,y,...){
@@ -229,7 +229,7 @@ barchart(stale_block, stack = TRUE, ref = FALSE, xlab = 'Blocks',
 })
 ```
 
-```{r block_stale_distribution, fig.cap='Stale blocks distribution', fig.pos='H'}
+```{r block_stale_distribution, eval=nlevels(nodes$group)>1, fig.cap='Stale blocks distribution', fig.pos='H'}
 stale_block_nodes  <- blocks_create %>% filter(stale == 'Stale') %>% select(node, tag)
 stale_block_groups <- merge(stale_block_nodes, nodes, by.x = 'node', by.y = 'name') %>% select(group, tag)
 stale_per_group <- table(stale_block_groups$tag, stale_block_groups$group)
@@ -241,7 +241,7 @@ barchart(stale_per_group, stack = TRUE, ref = FALSE, xlab = 'Blocks',
 })
 ```
 
-```{r block_distribution_summary}
+```{r block_distribution_summary, eval=nlevels(nodes$group)>1}
 group_share       <- nodes %>%
   group_by(group) %>%
   summarise(share = round(sum(share) * 100, 2))
@@ -266,7 +266,7 @@ kable(block_dist_summary, col.names = c('', 'Group', 'Share [%]', 'Blocks', 'Blo
   collapse_rows(columns = 1)
 ```
 
-```{r block_distribution, fig.cap='Accepted block distribution', fig.pos='H'}
+```{r block_distribution, eval=nlevels(nodes$group)>1, fig.cap='Accepted block distribution', fig.pos='H'}
 block_dist <- dcast(group_blocks, tag~group, value.var = 'block_count')
 block_dist[is.na(block_dist)] <- 0
 
