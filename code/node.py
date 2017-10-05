@@ -68,13 +68,11 @@ class BitcoinNode(Node):
                     "Could not stop container {} with error={}"
                         .format(self.name, error)
                 )
+        logging.debug('Waiting for container {} to stop').format(self.name)
         while self.is_running():
-
             utils.sleep(1)
-            logging.debug(
-                'Wait until container {} stops'
-                .format(self.name)
-            )
+        logging.debug('Container {}  has stopped').format(self.name)
+
         super(BitcoinNode, self).rm()
 
     def get_log_file(self):
@@ -146,7 +144,7 @@ class BitcoinNode(Node):
                     'because of an CannotSendRequest exception with'
                     ' error="{}".'
                     ' Reconnecting RPC and retrying.'
-                    .format(self.name, args[0], getmembers(exce))
+                    .format(self.name, args[0], exce)
                 )
 
         logging.error(

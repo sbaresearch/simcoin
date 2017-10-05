@@ -19,6 +19,7 @@ class Prepare:
         logging.info('Begin of prepare step')
 
         self.prepare_simulation_dir()
+
         remove_old_containers_if_exists()
         recreate_network()
 
@@ -54,7 +55,7 @@ class Prepare:
 
         for i, node in enumerate(nodes):
             wait_until_height_reached(node, i * amount_of_tx_chains)
-            node.execute_cli('generate', amount_of_tx_chains)
+            node.execute_rpc('generate', amount_of_tx_chains)
             logging.info('Generated {} blocks for node={} for their tx-chains'.format(amount_of_tx_chains, node.name))
 
         wait_until_height_reached(nodes[0], amount_of_tx_chains * len(nodes))
@@ -142,8 +143,17 @@ def transfer_coinbase_tx_to_normal_tx(node):
     logging.info("Transferred all coinbase-tx to normal tx for node={}".format(node.name))
 
 
+def connect(node):
+    node.connect()
+
+
 def add_latency(node, zones):
     node.add_latency(zones)
+
+
+def rm_node(node):
+    node.delete_peers_file()
+    node.rm()
 
 
 def remove_old_containers_if_exists():
@@ -159,6 +169,7 @@ def recreate_network():
         bash.check_output(dockercmd.rm_network())
     bash.check_output(dockercmd.create_network())
     logging.info('Docker network {} created'.format(config.network_name))
+    utils.sleep(1)
 
 
 def wait_until_height_reached(node, height):
@@ -169,13 +180,13 @@ def wait_until_height_reached(node, height):
 
 def wait_until_height_reached_cli(node, height):
     msg = bash.check_output(
-        "docker exec simcoin-{} sh -c '"
+        "docker exec simcoin-{} bash -c '"
         "  while "
         "    [[ "
         "      $(bitcoin-cli "
         "        -regtest "
         "        --conf=/data/bitcoin.conf "
-        "        getblockcount) -le {} "
+        "        getblockcount) -lt {} "
         "    ]]; "
         "    do sleep 0.2; "
         "done; "

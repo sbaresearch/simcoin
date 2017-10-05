@@ -6,7 +6,6 @@ import prepare
 from prepare import Prepare
 import config
 import bitcoin
-from bitcoin.wallet import CBitcoinSecret
 from mock import Mock
 
 
@@ -29,8 +28,8 @@ class TestPrepare(TestCase):
 
         self.prepare.give_nodes_spendable_coins()
 
-        self.assertEqual(node_0.execute_rpc.call_count, 1)
-        self.assertEqual(node_1.execute_rpc.call_count, 1)
+        self.assertEqual(node_0.execute_rpc.call_count, 2)
+        self.assertEqual(node_1.execute_rpc.call_count, 2)
 
     @patch('os.path.exists')
     @patch('os.makedirs')
