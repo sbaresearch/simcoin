@@ -18,6 +18,7 @@ from http.client import CannotSendRequest
 from bitcoin.rpc import Proxy
 from bitcoin.rpc import JSONRPCError
 from bitcoin.rpc import DEFAULT_HTTP_TIMEOUT
+import traceback
 
 
 class Node:
@@ -60,18 +61,24 @@ class BitcoinNode(Node):
         ) == 'true'
 
     def rm(self):
+
         if self.is_running():
             try:
-                self.execute_cli('stop')
+                self.execute_rpc('stop')
+
             except Exception as error:
                 logging.debug(
                     "Could not stop container {} with error={}"
-                        .format(self.name, error)
+                    .format(self.name, error)
                 )
-        logging.debug('Waiting for container {} to stop').format(self.name)
+                raise Exception("Could not stop container")
+        logging.debug(
+            'Waiting for container {} to stop'
+            .format(self.name)
+        )
         while self.is_running():
             utils.sleep(1)
-        logging.debug('Container {}  has stopped').format(self.name)
+        logging.debug('Container {}  has stopped'.format(self.name))
 
         super(BitcoinNode, self).rm()
 

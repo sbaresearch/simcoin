@@ -50,7 +50,7 @@ class PostProcessing:
         logging.info('Executed post processing')
 
     def clean_up_docker(self):
-        self.thread_pool.map(rm_node, self.context.all_nodes.values())
+        self.thread_pool.map(self.rm_node, self.context.all_nodes.values())
         logging.info('Removed all nodes')
 
         utils.sleep(3 + len(self.context.all_nodes) * 0.2)
@@ -60,6 +60,11 @@ class PostProcessing:
 
         bash.check_output(dockercmd.fix_data_dirs_permissions(self.context.run_dir))
         logging.info('Fixed permissions of dirs used by docker')
+
+    @staticmethod
+    def rm_node(node):
+        logging.info("XXX")
+        node.rm()
 
 
 def collect_general_infos():
@@ -97,10 +102,6 @@ def extract_from_file(source, destination, start, end):
                     write = True
     logging.debug('Extracted from file={} lines between start={} and end={} into file {}'
                   .format(source, destination, start, end))
-
-
-def rm_node(node):
-    node.rm()
 
 
 def try_cmd(cmd):
