@@ -74,7 +74,7 @@ class TestPrepare(TestCase):
     @patch('utils.sleep', lambda t: None)
     @patch('bash.call_silent')
     @patch('bash.check_output')
-    def test_recreate_network(self, m_check_output, m_call_silent):
+    def test_recreate_network_no_network(self, m_check_output, m_call_silent):
         m_call_silent.return_value = -1
 
         prepare.recreate_network()
