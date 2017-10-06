@@ -60,6 +60,7 @@ class TestPrepare(TestCase):
 
         self.assertEqual(m_check_output.call_count, 1)
 
+    @patch('utils.sleep', lambda t: None)
     @patch('bash.call_silent')
     @patch('bash.check_output')
     def test_recreate_network(self, m_check_output, m_call_silent):
@@ -70,6 +71,7 @@ class TestPrepare(TestCase):
         self.assertEqual(m_check_output.call_count, 2)
         self.assertEqual(m_call_silent.call_count, 1)
 
+    @patch('utils.sleep', lambda t: None)
     @patch('bash.call_silent')
     @patch('bash.check_output')
     def test_recreate_network(self, m_check_output, m_call_silent):
