@@ -43,6 +43,10 @@ def create(node, zones, latency):
             .format(index + 2, (index + 2) * 10, aggregated_latency)
         )
 
-    docker_cmds = [dockercmd.exec_cmd(node, cmd) for cmd in cmds]
+
+    # docker_cmds = [dockercmd.exec_cmd(node, cmd) for cmd in cmds]
+    batch_cmd = " sh -c '" + " ; ".join(cmds) + "'"
+    docker_cmds = [dockercmd.exec_cmd(node, batch_cmd)]
 
     return docker_cmds
+

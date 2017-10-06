@@ -31,6 +31,7 @@ class Runner:
         try:
             self.context.step_times.append(StepTimes(time.time(), 'preparation_start'))
             self.prepare.execute()
+            logging.info('End of Preparation')
 
             self.system_monitor.start()
             self.context.step_times.append(StepTimes(time.time(), 'simulation_start'))

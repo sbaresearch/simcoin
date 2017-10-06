@@ -19,28 +19,40 @@ class Prepare:
         logging.info('Begin of prepare step')
 
         self.prepare_simulation_dir()
+
         remove_old_containers_if_exists()
         recreate_network()
 
         utils.sleep(1)
+        nodes = list(self.context.all_bitcoin_nodes.values())
 
-        self.give_nodes_spendable_coins()
+        self.give_nodes_spendable_coins(
+            nodes
+        )
 
         self.start_nodes()
 
-        self.pool.close()
+        # self.pool.close()
 
         logging.info('End of prepare step')
 
-    def give_nodes_spendable_coins(self):
-        nodes = list(self.context.all_bitcoin_nodes.values())
+    def give_nodes_spendable_coins(self, nodes):
 
         cbs = []
         for i, node in enumerate(nodes):
             cbs.append(
                 self.pool.apply_async(
                     start_node,
-                    args=(node, DEFAULT_HTTP_TIMEOUT, 0, (str(node.ip) for node in nodes[max(0, i - 5):i])))
+                    args=(node,
+                          DEFAULT_HTTP_TIMEOUT,
+                          0,
+                          (
+                              str(node.ip)
+                              for node
+                              in nodes[max(0, i - 5):i]
+                          )
+                          )
+                )
             )
         for cb in cbs:
             cb.get()
@@ -54,7 +66,7 @@ class Prepare:
 
         for i, node in enumerate(nodes):
             wait_until_height_reached(node, i * amount_of_tx_chains)
-            node.execute_cli('generate', amount_of_tx_chains)
+            node.execute_rpc('generate', amount_of_tx_chains)
             logging.info('Generated {} blocks for node={} for their tx-chains'.format(amount_of_tx_chains, node.name))
 
         wait_until_height_reached(nodes[0], amount_of_tx_chains * len(nodes))
@@ -73,9 +85,15 @@ class Prepare:
         current_height += len(nodes)
         self.context.first_block_height = current_height
 
-        self.pool.starmap(wait_until_height_reached, zip(nodes, itertools.repeat(current_height)))
+        self.pool.starmap(
+            wait_until_height_reached,
+            zip(
+                nodes,
+                itertools.repeat(current_height)
+            )
+        )
 
-        self.pool.map(delete_node, nodes)
+        self.pool.map(self.rm_node, nodes)
 
     def start_nodes(self):
         nodes = self.context.all_bitcoin_nodes.values()
@@ -116,18 +134,16 @@ class Prepare:
         bash.check_output('cp {} {}'.format(config.args_csv, self.context.run_dir))
         logging.info('Simulation directory created')
 
+    @staticmethod
+    def rm_node(node):
+        node.delete_peers_file()
+        node.rm()
 
 def start_node(node, timeout=DEFAULT_HTTP_TIMEOUT, height=0, connect_to_ips=None):
     node.run(connect_to_ips)
     node.connect_to_rpc(timeout)
     node.wait_until_rpc_ready()
     wait_until_height_reached(node, height)
-
-
-def delete_node(node):
-    node.delete_peers_file()
-    node.rm()
-    logging.info('node.rm {}'.format(node.name))
 
 
 def start_proxy_node(node, start_hash, normal_node):
@@ -142,8 +158,15 @@ def transfer_coinbase_tx_to_normal_tx(node):
     logging.info("Transferred all coinbase-tx to normal tx for node={}".format(node.name))
 
 
+def connect(node):
+    node.connect()
+
+
 def add_latency(node, zones):
     node.add_latency(zones)
+
+
+
 
 
 def remove_old_containers_if_exists():
@@ -159,23 +182,24 @@ def recreate_network():
         bash.check_output(dockercmd.rm_network())
     bash.check_output(dockercmd.create_network())
     logging.info('Docker network {} created'.format(config.network_name))
+    utils.sleep(1)
 
 
 def wait_until_height_reached(node, height):
-    while int(node.execute_cli('getblockcount')) < height:
+    while int(node.execute_rpc('getblockcount')) < height:
         logging.debug('Waiting until node={} reached height={}...'.format(node.name, str(height)))
         utils.sleep(0.2)
 
 
 def wait_until_height_reached_cli(node, height):
     msg = bash.check_output(
-        "docker exec simcoin-{} sh -c '"
+        "docker exec simcoin-{} bash -c '"
         "  while "
         "    [[ "
         "      $(bitcoin-cli "
         "        -regtest "
         "        --conf=/data/bitcoin.conf "
-        "        getblockcount) -le {} "
+        "        getblockcount) -lt {} "
         "    ]]; "
         "    do sleep 0.2; "
         "done; "
