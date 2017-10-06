@@ -3,15 +3,19 @@ import config
 
 daemon = 'bitcoind '
 args = {
-    'regtest':            '-regtest',  # activate regtest mode
-    'datadir':            '-datadir=' + config.bitcoin_data_dir,  # change the datadir
-    'debug':              '-debug=cmpctblock -debug=net -debug=mempool',  # make sure bitcoind logs all needed events
-    'logips':             '-logips',  # enable ip loging
-    'logtimemicros':      '-logtimemicros',  # add microseconds to logging flag: DEFAULT_LOGTIMEMICROS
+    'regtest':            '-regtest',
+    'datadir':            '-datadir=' + config.bitcoin_data_dir,
 
+    # log all events relevant for parsing
+    'debug':              '-debug=cmpctblock -debug=net -debug=mempool',
+    'logips':             '-logips',
+    'logtimemicros':      '-logtimemicros',
+
+
+    # activate listen even though explicit -connect will be set
     'listen':             '-listen=1',
-    'listenonion':        '-listenonion=0',  # disable tor
-    'onlynet':            '-onlynet=ipv4',  # disable ipv6
+    'listenonion':        '-listenonion=0',
+    'onlynet':            '-onlynet=ipv4',
     'dnsseed':            '-dnsseed=0',
 
     'reindex':            '-reindex',
