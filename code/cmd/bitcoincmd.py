@@ -5,7 +5,7 @@ daemon = 'bitcoind '
 args = {
     'regtest':            '-regtest',  # activate regtest mode
     'datadir':            '-datadir=' + config.bitcoin_data_dir,  # change the datadir
-    'debug':              '-debug',  # log all events
+    'debug':              '-debug=cmpctblock -debug=net -debug=mempool',  # make sure bitcoind logs all needed events
     'logips':             '-logips',  # enable ip loging
     'logtimemicros':      '-logtimemicros',  # add microseconds to logging flag: DEFAULT_LOGTIMEMICROS
 
