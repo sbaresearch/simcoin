@@ -63,7 +63,6 @@ class PostProcessing:
 
     @staticmethod
     def rm_node(node):
-        logging.info("XXX")
         node.rm()
 
 
