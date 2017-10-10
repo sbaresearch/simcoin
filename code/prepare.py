@@ -139,6 +139,7 @@ class Prepare:
         node.delete_peers_file()
         node.rm()
 
+
 def start_node(node, timeout=DEFAULT_HTTP_TIMEOUT, height=0, connect_to_ips=None):
     node.run(connect_to_ips)
     node.connect_to_rpc(timeout)
