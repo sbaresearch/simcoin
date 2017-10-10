@@ -4,8 +4,8 @@ from cmd import dockercmd
 def run_proxy(node, start_hash, path):
     args = '{} '.format(node.args) if node.args else ''
     return dockercmd.run_selfish_proxy(node, 'python main.py {} --verbose'
-                                             ' --ip-private {} --ips-public {} --start-hash {}'
-                                       .format(args, str(node.private_ip), ' '.join(node.outgoing_ips), start_hash),
+                                             ' --private-ip {} --start-hash {}'
+                                       .format(args, str(node.private_ip), start_hash),
                                        path)
 
 
