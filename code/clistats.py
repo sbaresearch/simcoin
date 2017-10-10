@@ -19,29 +19,36 @@ class CliStats:
         height = self.context.first_block_height
         nodes = self.context.all_bitcoin_nodes.values()
         consensus_chain = []
+        logging.info('Calculating consensus chain starting with height={}'.format(height))
         while True:
-            blocks = []
+            block_hashes = {}
+            failing_nodes = []
+            block_hash = None
             for node in nodes:
                 try:
-                    blocks.append(node.execute_rpc('getblockhash', height))
+                    block_hash = node.execute_rpc('getblockhash', height)
+                    if block_hash in block_hashes:
+                        block_hashes[block_hash].append(node.name)
+                    else:
+                        block_hashes[block_hash] = [node.name]
                 except JSONRPCError:
-                    break
-            if len(blocks) != len(nodes):
-                logging.info('Stopped calculating consensus chain on height={} because'
-                             ' only {} of {} nodes have a block on this height'.format(height, len(blocks), len(nodes)))
+                    failing_nodes.append(node.name)
+            if len(failing_nodes) > 0:
+                logging.info('Stopped calculating consensus chain on height={} because nodes={}'
+                             ' have no block on this height'.format(height, failing_nodes))
                 break
-            elif utils.check_equal(blocks) is False:
+            elif len(block_hashes) > 1:
                 logging.info('Stopped calculating consensus chain on height={} because'
-                             ' not all {} nodes have the same block on this height'.format(height, len(nodes)))
+                             ' nodes have different blocks ({})'.format(height, block_hashes))
                 break
             else:
-                consensus_chain.append(blocks[0])
+                consensus_chain.append(block_hash)
                 height += 1
 
-                logging.info('Added block with hash={} to consensus chain'.format(blocks[0]))
+                logging.info('Added block with hash={} to consensus chain'.format(block_hash))
 
-        logging.info('Calculated {} block long consensus chain from height={} and {} nodes'
-                     .format(len(consensus_chain), height, len(nodes)))
+        logging.info('Calculated {} block long consensus chain from {} nodes and until height={}'
+                     .format(len(consensus_chain), len(nodes), height - 1))
         return consensus_chain
 
     def persist_node_stats(self):

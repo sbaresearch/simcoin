@@ -14,10 +14,6 @@ def sleep(seconds):
     time.sleep(seconds)
 
 
-def check_equal(lst):
-    return not lst or lst.count(lst[0]) == len(lst)
-
-
 def config_logger(verbose):
     log_formatter = logging.Formatter("%(asctime)s.%(msecs)03d000 [%(processName)s-%(threadName)-12.12s] "
                                       "[%(levelname)-5.5s]  %(message)s", "%Y-%m-%d %H:%M:%S")
