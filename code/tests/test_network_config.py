@@ -23,9 +23,10 @@ class TestNetworkConfig(TestCase):
 
         matrix = network_config.create_matrix(header, connectivity)
         for i in range(1, len(header)):
-            for j in range(1, len(header)):
+            for j in range(1, i):
                 if i != j:
-                    self.assertEqual(matrix[i][j], 1)
+                    connection_between_nodes = matrix[i][j] + matrix[j][i]
+                    self.assertEqual(connection_between_nodes, 1)
 
     def test_create_matrix_no_connection(self):
         header = ['', 'node-0', 'node-1', 'node-2']

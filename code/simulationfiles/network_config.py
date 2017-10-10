@@ -85,7 +85,12 @@ def create_matrix(header, connectivity):
             if i is j:
                 matrix[i][i] = 0
             elif random.random() < connectivity:
-                matrix[i][j] = matrix[j][i] = 1
+                if i % 2 == j % 2:
+                    matrix[i][j] = 1
+                    matrix[j][i] = 0
+                else:
+                    matrix[i][j] = 0
+                    matrix[j][i] = 1
             else:
                 matrix[i][j] = matrix[j][i] = 0
     return matrix
