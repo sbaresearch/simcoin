@@ -76,4 +76,10 @@ class Context:
 
         connections = network_config.read_connections()
         for node in self.all_public_nodes.values():
-            node.outgoing_ips = [str(self.all_public_nodes[connection].ip) for connection in connections[node.name]]
+            if type(node) is ProxyNode:
+                for connection in connections[node.name]:
+                    self.all_public_nodes[connection].outgoing_ips.append(node.ip)
+            else:
+                node.outgoing_ips.extend(
+                    [str(self.all_public_nodes[connection].ip) for connection in connections[node.name]]
+                )
