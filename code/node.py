@@ -317,7 +317,6 @@ class ProxyNode(Node, PublicNode):
             utils.sleep(1)
             logging.debug('Waiting for  blocks to spread...')
 
-
     def add_latency(self, zones):
         for cmd in tccmd.create(self.name, zones, self.latency):
             bash.check_output(cmd)
@@ -329,5 +328,6 @@ class TxChain:
         self.address = address
         self.seckey = seckey
         self.amount = amount
+
 
 SpentToAddress = namedtuple('SpentToAddress', 'address seckey')

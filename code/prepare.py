@@ -167,9 +167,6 @@ def add_latency(node, zones):
     node.add_latency(zones)
 
 
-
-
-
 def remove_old_containers_if_exists():
     containers = bash.check_output(dockercmd.ps_containers())
     if len(containers) > 0:
