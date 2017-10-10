@@ -13,9 +13,11 @@ from bitcoin.rpc import DEFAULT_HTTP_TIMEOUT
 class Prepare:
     def __init__(self, context):
         self.context = context
-        self.pool = ThreadPool(5)
+        self.pool = None
 
     def execute(self):
+        self.pool = ThreadPool(5)
+
         logging.info('Begin of prepare step')
 
         self.prepare_simulation_dir()
@@ -32,7 +34,7 @@ class Prepare:
 
         self.start_nodes()
 
-        # self.pool.close()
+        self.pool.close()
 
         logging.info('End of prepare step')
 

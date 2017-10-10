@@ -19,10 +19,13 @@ class PostProcessing:
     def __init__(self, context, writer):
         self.context = context
         self.writer = writer
+        self.pool = None
+        self.thread_pool = None
+
+    def execute(self):
         self.pool = Pool(config.pool_processors)
         self.thread_pool = ThreadPool(5)
 
-    def execute(self):
         cli_stats = CliStats(self.context, self.writer)
         cli_stats.execute()
 
@@ -47,6 +50,7 @@ class PostProcessing:
                      .format(config.report_file_name, config.postprocessing_dir))
 
         self.pool.close()
+        self.thread_pool.close()
         logging.info('Executed post processing')
 
     def clean_up_docker(self):

@@ -13,12 +13,13 @@ class Parser:
     def __init__(self, context, writer):
         self.context = context
         self.writer = writer
-        self.pool = Pool(config.pool_processors)
+        self.pool = None
 
         logging.info('Created parser with host={} and node={} log parsers'
                      .format(len(host_parsers), len(node_parsers)))
 
     def execute(self):
+        self.pool = Pool(config.pool_processors)
 
         for parser in host_parsers + node_parsers:
             write.write_header_csv(parser.file_name, parser.csv_header)
