@@ -45,9 +45,7 @@ class PostProcessing:
         self.context.step_times.append(StepTimes(time.time(), 'postprocessing_end'))
         self.writer.write_csv(config.step_times_csv_file_name, StepTimes.csv_header, self.context.step_times)
 
-        bash.check_output(rcmd.create_report(config.postprocessing_dir, config.report_file_name))
-        logging.info('Created {} report in folder={}'
-                     .format(config.report_file_name, config.postprocessing_dir))
+        create_report()
 
         self.pool.close()
         self.thread_pool.close()
@@ -112,3 +110,10 @@ def try_cmd(cmd):
         return bash.check_output(cmd)
     except subprocess.CalledProcessError:
         return 'cmd={} failed'.format(cmd)
+
+
+def create_report():
+    bash.check_output(rcmd.preprocess(config.postprocessing_dir))
+    bash.check_output(rcmd.create_report(config.postprocessing_dir, config.report_file_name))
+    logging.info('Created {} report in folder={}'
+             .format(config.report_file_name, config.postprocessing_dir))
