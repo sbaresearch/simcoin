@@ -61,6 +61,9 @@ class BitcoinNode(Node):
         ) == 'true'
 
     def rm(self):
+        if self.rpc_connection is not None:
+            self.rpc_connection.__dict__['_BaseProxy__conn'].close()
+            logging.debug('Closed rpc connection to node={}'.format(self.name))
 
         if self.is_running():
             try:
