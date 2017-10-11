@@ -25,7 +25,6 @@ class Prepare:
         remove_old_containers_if_exists()
         recreate_network()
 
-        utils.sleep(1)
         nodes = list(self.context.all_bitcoin_nodes.values())
 
         self.give_nodes_spendable_coins(
