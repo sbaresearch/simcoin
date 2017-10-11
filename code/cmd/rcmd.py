@@ -4,5 +4,4 @@ def create_report(path, file_name):
     change_dir = 'cd {}'.format(path)
     create_report_cmd = r'R -e library\(rmarkdown\)\;rmarkdown::render\(\"{}\",\"pdf_document\"\)\;q\(\)'\
         .format(file_name)
-    delete_report_rmd = 'rm {}'.format(file_name)
-    return ';'.join([cp_report_rmd_cmd, change_dir, create_report_cmd, delete_report_rmd])
+    return ';'.join([cp_report_rmd_cmd, change_dir, create_report_cmd])
