@@ -56,9 +56,6 @@ ticks            <- readLines(file('../ticks.csv'))
 analysed_ticks   <- head(tail(ticks, -skip_ticks), -skip_ticks)
 write(analysed_ticks, 'analysed_ticks.csv')
 
-peer_logic_validation <- read.csv("peer_logic_validation_raw.csv")
-update_tip            <- read.csv("update_tip_raw.csv")
-
 files = c("blocks_create", "blocks_stats", "txs")
 for (i in 1:length(files)) {
   data <- read.csv(paste(files[i], '_raw.csv', sep = ''))
