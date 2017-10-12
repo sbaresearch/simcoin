@@ -174,6 +174,17 @@ selfdemo2:
 				--blocks-per-tick 0.7 \
 				--verbose
 
+problems:
+	cd code; \
+		python3 simcoin.py \
+			run \
+				--group-a bitcoin 1 .85 0 simcoin/patched:v2 \
+				--group-b selfish 1 .15 0 simcoin/proxy:v1 \
+				--amount-of-ticks 200 \
+				--txs-per-tick 60 \
+				--blocks-per-tick 0.1 \
+				--verbose
+
 install:
 	# for kableExtra
 	sudo apt install libmagick++-dev
