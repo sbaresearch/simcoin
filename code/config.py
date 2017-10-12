@@ -68,13 +68,15 @@ proxy_client_dir = '/tmp'
 report_file_name = 'report.Rmd'
 multi_report_file_name = 'multi_report.Rmd'
 
-multi_run_dir = '{}multi-run-{}'.format(data_dir, time.time())
+multi_run_dir_name = 'multi-run-{}'.format(time.time())
+multi_run_dir = '{}{}'.format(data_dir, multi_run_dir_name)
 
 log_file = data_dir + 'debug.log'
 
 last_run = 'last_run'
 soft_link_to_run_dir = '{}{}'.format(data_dir, last_run)
-soft_link_to_multi_run_dir = '{}last_multi_run'.format(data_dir)
+last_multi_run = 'last_multi_run'
+soft_link_to_multi_run_dir = '{}{}'.format(data_dir, last_multi_run)
 run_log = soft_link_to_run_dir + '/run.log'
 
 analysed_tick_infos_file_name = 'analysed_tick_infos.csv'

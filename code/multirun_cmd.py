@@ -83,7 +83,7 @@ def prepare():
 
     if os.path.islink(config.soft_link_to_multi_run_dir):
         bash.check_output('unlink {}'.format(config.soft_link_to_multi_run_dir))
-    bash.check_output('ln -s {} {}'.format(config.multi_run_dir, config.soft_link_to_multi_run_dir))
+    bash.check_output('cd {}; ln -s {} {}'.format(config.data_dir, config.multi_run_dir_name, config.last_multi_run))
 
 
 def concat_files():
