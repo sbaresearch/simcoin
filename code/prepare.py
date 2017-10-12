@@ -129,8 +129,10 @@ class Prepare:
         bash.check_output('cd {}; ln -s {} {}'.format(config.data_dir, self.context.run_name, config.last_run))
         os.makedirs(config.postprocessing_dir)
 
-        for file in [config.network_csv, config.ticks_csv, config.nodes_csv, config.args_csv]:
-            bash.check_output('cp {} {}'.format(file, self.context.run_dir))
+        for file in [config.network_csv_file_name, config.ticks_csv_file_name,
+                     config.nodes_csv_file_name, config.args_csv_file_name]:
+            bash.check_output('cp {}{} {}'.format(config.data_dir, file, self.context.run_dir))
+            bash.check_output('cd {}; ln -s ../{} {}'.format(config.postprocessing_dir, file, file))
         logging.info('Simulation directory created')
 
     @staticmethod
