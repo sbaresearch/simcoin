@@ -67,9 +67,9 @@ analysed_tick_infos  <- read.csv('analysed_tick_infos.csv', dec='.')
 cpu_time <- read.csv("cpu_time.csv", dec=".")
 memory   <- read.csv("memory.csv", dec=".")
 
-args                <- read.csv('args.csv')
-ticks               <- readLines(file('ticks.csv'))
-analysed_ticks      <- readLines(file('analysed_ticks.csv'))
+args           <- read.csv('args.csv')
+ticks          <- readLines(file('ticks.csv'))
+analysed_ticks <- readLines(file('analysed_ticks.csv'))
 
 nodes <- read.csv('nodes.csv', dec='.')
 ```
