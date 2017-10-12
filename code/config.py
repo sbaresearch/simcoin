@@ -71,7 +71,9 @@ multi_report_file_name = 'multi_report.Rmd'
 multi_run_dir = '{}multi-run-{}'.format(data_dir, time.time())
 
 log_file = data_dir + 'debug.log'
-soft_link_to_run_dir = '{}last_run'.format(data_dir)
+
+last_run = 'last_run'
+soft_link_to_run_dir = '{}{}'.format(data_dir, last_run)
 soft_link_to_multi_run_dir = '{}last_multi_run'.format(data_dir)
 run_log = soft_link_to_run_dir + '/run.log'
 

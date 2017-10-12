@@ -126,7 +126,7 @@ class Prepare:
 
         if os.path.islink(config.soft_link_to_run_dir):
             bash.check_output('unlink {}'.format(config.soft_link_to_run_dir))
-        bash.check_output('ln -s {} {}'.format(self.context.run_dir, config.soft_link_to_run_dir))
+        bash.check_output('cd {}; ln -s {} {}'.format(config.data_dir, self.context.run_name, config.last_run))
         os.makedirs(config.postprocessing_dir)
 
         for file in [config.network_csv, config.ticks_csv, config.nodes_csv, config.args_csv]:
