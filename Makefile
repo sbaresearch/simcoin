@@ -200,11 +200,11 @@ problems:
 	cd code; \
 		python3 simcoin.py \
 			run \
-				--group-a bitcoin 1 .85 0 simcoin/patched:v2 \
-				--group-b selfish 1 .15 0 simcoin/proxy:v1 \
-				--amount-of-ticks 200 \
-				--txs-per-tick 60 \
-				--blocks-per-tick 0.1 \
+				--group-a bitcoin 1 .7 0 simcoin/patched:v2 \
+				--group-b selfish 1 .3 0 simcoin/proxy:v1 \
+				--amount-of-ticks 100 \
+				--txs-per-tick 30 \
+				--blocks-per-tick 0.5 \
 				--verbose
 
 install:
