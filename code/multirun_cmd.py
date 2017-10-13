@@ -66,7 +66,7 @@ def run():
 
         run_cmd.run()
         bash.check_output('cp -r {}/postprocessing {}/run-{}'
-                          .format(config.soft_link_to_run_dir, config.multi_run_dir, i + 1))
+                          .format(config.soft_link_to_run_dir, config.soft_link_to_multi_run_dir, i + 1))
         logging.info('Finished {}/{} simulation'.format(i + 1, args.repeat))
 
     for file in [config.args_csv, config.ticks_csv, config.analysed_ticks_csv,
@@ -74,8 +74,8 @@ def run():
         bash.check_output('cp {} {}/.'.format(file, config.soft_link_to_multi_run_dir))
     concat_files()
 
-    bash.check_output(rcmd.create_report(config.multi_run_dir, config.multi_report_file_name))
-    logging.info('Created {} report in folder={}'.format(config.multi_report_file_name, config.multi_run_dir))
+    bash.check_output(rcmd.create_report(config.soft_link_to_multi_run_dir))
+    logging.info('Created report in folder={}'.format(config.soft_link_to_multi_run_dir))
 
 
 def prepare():

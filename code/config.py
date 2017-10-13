@@ -65,18 +65,18 @@ bitcoin_data_dir = '/data'
 client_dir = bitcoin_data_dir + '/regtest'
 proxy_client_dir = '/tmp'
 
-report_file_name = 'report.Rmd'
-multi_report_file_name = 'multi_report.Rmd'
+preprocess_r_file_name = 'preprocess.R'
+report_rmd_file_name = 'report.Rmd'
 
 multi_run_dir_name = 'multi-run-{}'.format(time.time())
 multi_run_dir = '{}{}'.format(data_dir, multi_run_dir_name)
+last_multi_run = 'last_multi_run'
+soft_link_to_multi_run_dir = '{}{}'.format(data_dir, last_multi_run)
 
 log_file = data_dir + 'debug.log'
 
 last_run = 'last_run'
 soft_link_to_run_dir = '{}{}'.format(data_dir, last_run)
-last_multi_run = 'last_multi_run'
-soft_link_to_multi_run_dir = '{}{}'.format(data_dir, last_multi_run)
 run_log = soft_link_to_run_dir + '/run.log'
 
 analysed_tick_infos_file_name = 'analysed_tick_infos.csv'

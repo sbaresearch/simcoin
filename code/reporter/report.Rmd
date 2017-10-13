@@ -1,14 +1,14 @@
 ---
-title: "Simcoin run Report"
+title: "Simcoin Report"
 date: '`r format(Sys.time(), "%d %B, %Y")`'
 author: "simcoin"
-header-includes:
-   - \usepackage{float}
 output:
   pdf_document:
     pandoc_args:
       - -V
       - classoption=twocolumn
+    toc: yes
+  html_document:
     toc: yes
 ---
 
@@ -25,7 +25,7 @@ knitr::opts_chunk$set(
   fig.align='center'
   )
 
-# set working directory for development: knitr::opts_knit$set(root.dir = '/tmp/run/postprocessing/')
+# set working directory for development: knitr::opts_knit$set(root.dir = '/tmp/run/postprocessing')
 ```
 
 ```{r imports}
@@ -33,6 +33,7 @@ library(anytime)
 library(dplyr)
 library(kableExtra)
 library(lattice)
+library(reshape2)
 library(stringr)
 Sys.setenv(TZ='UTC')
 ```
@@ -57,30 +58,32 @@ tips      <- read.csv("tips.csv", dec=".")
 general_infos <- read.csv('general_infos.csv', stringsAsFactors=FALSE)
 step_times    <- read.csv("step_times.csv", dec=".")
 
-tick_infos          <- read.csv("tick_infos.csv", dec=".")
-analysed_tick_infos <- read.csv("analysed_tick_infos.csv", dec=".")
-sim_start           <- tick_infos$actual_start[1]
+tick_infos           <- read.csv("tick_infos.csv", dec=".")
+number_of_runs       <- length(unique(tick_infos$tag))
+sim_starts           <- aggregate(tick_infos$actual_start, by=list(tick_infos$tag), FUN=min)
+colnames(sim_starts) <- c('tag', 'run_start')
+analysed_tick_infos  <- read.csv('analysed_tick_infos.csv', dec='.')
 
-analysed_ticks <- readLines(file("analysed_ticks.csv"))
-
-memory   <- read.csv("memory.csv", dec=".")
 cpu_time <- read.csv("cpu_time.csv", dec=".")
+memory   <- read.csv("memory.csv", dec=".")
 
-args  <- read.csv('../args.csv', stringsAsFactors=FALSE)
-nodes <- read.csv('../nodes.csv', dec='.')
+args           <- read.csv('args.csv')
+ticks          <- readLines(file('ticks.csv'))
+analysed_ticks <- readLines(file('analysed_ticks.csv'))
+
+nodes <- read.csv('nodes.csv', dec='.')
 ```
 
 ## Simulation
-
 ```{r general_infos}
 general_infos_table <- data.frame(
                     c(format(utctime(step_times$timestamp[1]), '%Y-%m-%d %H:%M:%S %Z'),
                       format(utctime(step_times$timestamp[length(step_times)]), '%Y-%m-%d %H:%M:%S %Z'),
-                      nrow(tick_infos),
-                      nrow(analysed_tick_infos),
-                      nrow(tick_infos) - nrow(analysed_tick_infos))
+                      length(ticks),
+                      length(analysed_ticks),
+                      (length(ticks) - length(analysed_ticks)))
                   )
-row.names(general_infos_table)  <- c('Start', 'End', 'Executed ticks', 'Analysed ticks','Skipped ticks')
+row.names(general_infos_table)  <- c('Start', 'End', 'Planned ticks', 'Planned analysed ticks', 'Skipped ticks')
 kable(general_infos_table,
       col.names = c('Value'), caption = 'General information', format = 'latex') %>%
   kable_styling(latex_options = c('scale_down','HOLD_position'))
@@ -88,55 +91,48 @@ kable(general_infos_table,
 
 ```{r start_arguments}
 args_transposed <- as.data.frame(t(args))
-kable(args_transposed, col.names = c('Value'), caption = 'Start arguments', format = 'latex') %>%
+kable(args_transposed, col.names = c('Value'), format = 'latex', caption ='Start arguments') %>%
   kable_styling(latex_options = c('scale_down','HOLD_position'))
 ```
 
 ```{r block_events_summary}
-analysed_blocks  <- analysed_tick_infos %>% summarise(blocks = sum(blocks))
-parsed_blocks   <- blocks_create %>% summarise(n = n())
+analysed_blocks <- analysed_tick_infos %>% group_by(tag) %>% summarise(blocks = sum(blocks))
+parsed_blocks   <- blocks_create %>% group_by(tag) %>% summarise(n = n())
 
 block_count = sum(str_count(analysed_ticks, 'block'))
-summary           <- data.frame(block_count, analysed_blocks$blocks, parsed_blocks$n)
-rownames(summary) <- args$tag
+summary           <- data.frame(rep(block_count, number_of_runs), analysed_blocks$blocks, parsed_blocks$n)
+rownames(summary) <- analysed_blocks$tag
 kable(summary,
       col.names = c('Planned', 'Created', 'Parsed'), caption = 'Blocks events summary', format = 'latex') %>%
   kable_styling(latex_options = c('HOLD_position'))
 ```
 
 ```{r tx_events_summary}
-analysed_txs     <- analysed_tick_infos %>% summarise(txs = sum(txs))
-summary_txs      <- txs %>% summarise(n = n())
+analysed_txs     <- analysed_tick_infos %>% group_by(tag) %>% summarise(txs = sum(txs))
+summary_txs      <- txs %>% group_by(tag) %>% summarise(n = n())
 summary_txs$n    <- summary_txs$n - analysed_blocks$blocks
 
 tx_count = sum(str_count(analysed_ticks, 'tx'))
-summary           <- data.frame(tx_count, analysed_txs$txs, summary_txs$n)
-rownames(summary) <- args$tag
+summary           <- data.frame(rep(tx_count, number_of_runs), analysed_txs$txs, summary_txs$n)
+rownames(summary) <- analysed_txs$tag
 kable(summary,
       col.names = c('Planned', 'Created', 'Parsed'), caption = 'Transaction events summary', format = 'latex') %>%
   kable_styling(latex_options = c('HOLD_position'))
 ```
 
-```{r simulation}
-step_diff                      <- data.frame(diff(step_times$timestamp))
-colnames(step_diff)            <- c('timestamp')
-step_diff_summary              <- rbind(step_diff, apply(step_diff, 2, sum))
-step_diff_summary$duration_min <- step_diff_summary$timestamp/60
-step_diff_summary              <- step_diff_summary %>%
-  mutate_at(.vars = vars(timestamp, duration_min), .funs = funs(round(.,2)))
-rownames(step_diff_summary)    <- c('Preparation step', 'Simulation step', 'Postprocessing step', 'Total')
-
-kable(step_diff_summary, col.names = c('Duration [s]', 'Duration [min]'), caption = 'Duration of different steps', format = 'latex') %>%
-  kable_styling(latex_options = c('scale_down','HOLD_position'))
-```
-
 ```{r step_times_barchart, fig.cap='Step times', fig.pos='H'}
-step_diff             <- round(data.frame(diff(step_times$timestamp))/60, 1)
-t_step_diff           <- t(step_diff)
-colnames(t_step_diff) <- c('Preparation', 'Simulation', 'Postprocessing')
-rownames(t_step_diff) <- c('Run')
-barchart(t_step_diff, stack = TRUE, ref = FALSE, xlab = 'Time [min]',
-         auto.key = list(columns=2, rectangles = TRUE, points = FALSE, space='top', text=colnames(t_step_diff)),
+step_diff <- step_times %>%
+  group_by(tag) %>%
+  mutate(diff = c(NA, diff(timestamp))) %>%
+  filter(!is.na(diff))
+step_diff <- dcast(step_diff, tag~type, value.var = 'diff')
+rownames(step_diff) <- step_diff[,1]
+step_diff           <- step_diff[,-1]
+step_diff           <- step_diff[, c(3,2,1)]
+step_diff           <- round(step_diff/60, 1)
+colnames(step_diff) <- c('Preparation', 'Simulation', 'Postprocessing')
+barchart(as.matrix(step_diff), stack = TRUE, ref = FALSE, xlab = 'Time [min]',
+         auto.key = list(columns=2, rectangles = TRUE, points = FALSE, space='top', text=colnames(step_diff)),
          panel=function(x,y,...){
       panel.barchart(x,y,...)
       xx <- unsplit(unname(lapply(split(x, y), function(t)cumsum(t)-t/2)), y)
@@ -145,7 +141,6 @@ barchart(t_step_diff, stack = TRUE, ref = FALSE, xlab = 'Time [min]',
 ```
 
 ## System
-
 ```{r system_information}
 kable(Sys.info(), col.names = c('Value'), format = 'latex', caption = 'System information') %>%
   kable_styling(latex_options = c('scale_down','HOLD_position'))
@@ -158,48 +153,54 @@ kable(infos, col.names = c('Value'), format = 'latex', caption = 'System hardwar
   kable_styling(latex_options = c('scale_down','HOLD_position'))
 ```
 
-```{r cpu_usage_over_time, fig.cap='CPU usage over time', fig.pos='H'}
+```{r cpu_time_plot, fig.cap='CPU usage over time', fig.pos='H'}
 cpu_time_diff <- cpu_time %>%
+  group_by(tag) %>%
   mutate(idle = c(NA, diff(idle)), user = c(NA, diff(user)), nice = c(NA, diff(nice)), system = c(NA, diff(system))) %>%
   filter(!is.na(idle))
+cpu_time_diff$total <- cpu_time_diff$user + cpu_time_diff$nice + cpu_time_diff$system
 
-cpu_time_diff$total     <- cpu_time_diff$user + cpu_time_diff$nice + cpu_time_diff$system
-cpu_time_diff$usage     <- (1 - cpu_time_diff$idle / (cpu_time_diff$total + cpu_time_diff$idle)) * 100
-
-xyplot(cpu_time_diff$usage ~ cpu_time_diff$timestamp - sim_start, xlab = 'Time [s]', ylab = 'CPU usage [%]', t = 'l')
+cpu_time_diff$usage   <- (1 - cpu_time_diff$idle / (cpu_time_diff$total + cpu_time_diff$idle)) * 100
+cpu_time_diff         <- merge(cpu_time_diff, sim_starts)
+cpu_time_diff$elapsed <- cpu_time_diff$timestamp - cpu_time_diff$run_start
+xyplot(cpu_time_diff$usage ~ cpu_time_diff$elapsed, groups = cpu_time_diff$tag,
+       auto.key = list(space = "top", columns = 2, points = FALSE, lines = TRUE),
+       xlab = 'Time [s]', ylab = 'CPU usage [%]', t = 'l' )
 ```
 
-```{r memory_usage_over_time, fig.cap='Memory usage over time', fig.pos='H'}
-memory$usage <- (1 - memory$available/memory$total) * 100
-xyplot(memory$usage ~ memory$timestamp - sim_start, xlab = 'Time [s]', ylab = 'Memory usage [%]', t = 'l' )
+```{r memory_xyplot, fig.cap='Memory usage over time', fig.pos='H'}
+memory$usage   <- (1 - memory$available/memory$total) * 100
+memory         <- merge(memory, sim_starts)
+memory$elapsed <- memory$timestamp - memory$run_start
+xyplot(memory$usage ~ memory$elapsed, groups = memory$tag,
+       auto.key = list(space = "top", columns = 2, points = FALSE, lines = TRUE),
+       xlab = 'Time [s]', ylab = 'Memory usage [%]', t = 'l' )
 ```
 
 ## Ticks
-
 ```{r tick_duration_summary}
-kable(unclass(summary(tick_infos$duration)), col.names = c('Duration [s]'), digits = 3, caption = 'Tick duration', format = 'latex')  %>%
+kable(unclass(summary(tick_infos$duration)), col.names = c('Duration [s]'), digits = 3, caption = 'Overall tick duration', format = 'latex')  %>%
   kable_styling(latex_options = c('HOLD_position'))
 ```
 
 ```{r tick_duration_xyplot, fig.cap='Tick duration over time', fig.pos='H'}
-xyplot(tick_infos$duration ~ tick_infos$actual_start - sim_start,
-      xlab = 'Time [s]', ylim = c(0, max(max(tick_infos$duration), args$tick_duration) * 1.1), ylab = 'Duration [s]', t = 'l',
-      panel = function(...) {
-        panel.xyplot(...)
-         panel.abline(h = args$tick_duration)
-        })
+ticks         <- merge(tick_infos, sim_starts)
+ticks$elapsed <- ticks$timestamp - ticks$run_start
+xyplot(ticks$duration ~ ticks$elapsed, groups = ticks$tag,
+       auto.key = list(space = "top", columns = 2, points = FALSE, lines = TRUE),
+       xlab = 'Time [s]', ylab = 'Duration [s]', t = 'l')
 ```
 
-```{r tick_duration_boxplot, fig.cap='Tick duration', fig.pos='H'}
-bwplot(tick_infos$duration, xlab='Tick duration [s]')
+```{r tick_duration_median, fig.cap='Tick duration', fig.pos='H'}
+bwplot(tick_infos$duration ~ tick_infos$tag, ylab = 'Duration [s]')
 ```
 
-##  Blocks
-
+## Blocks
 ```{r blocks_setup}
 block_propagation <- rbind(blocks_reconstructed, blocks_received, peer_logic_validation, update_tip[, !(names(update_tip) %in% c('tx', 'height'))])
 
 block_propagation <- merge(block_propagation, blocks_create[,c('timestamp', 'node', 'hash')], by = 'hash')
+
 block_propagation <- block_propagation %>%
   filter(as.character(node.x) != as.character(node.y)) %>%
   select(-node.y, node = node.x) %>% group_by(hash, node) %>%
@@ -207,40 +208,41 @@ block_propagation <- block_propagation %>%
   mutate(propagation_time = timestamp.x - timestamp.y)
 ```
 
-`r if(nrow(blocks_create) == 0) {'There were 0 blocks during this simulation run.'}`
-
 ```{r block_stale_rate_summary}
 consensus_chain$stale = 'Accepted'
 blocks_create <- merge(blocks_create, consensus_chain, all.x = TRUE)
 blocks_create$stale[is.na(blocks_create$stale)] <- 'Stale'
 
-factor_stale_block <- t(table(factor(blocks_create$stale, levels = c('Accepted', 'Stale'))))
-stale_rate <- data.frame(c(round(prop.table(factor_stale_block)[, c('Stale')] * 100, 3)))
-rownames(stale_rate) <- c('Block stale rate')
+stale_block <- table(blocks_create$tag, factor(blocks_create$stale, levels = c('Accepted', 'Stale')))
+stale_rate  <- data.frame(c(round(prop.table(stale_block, 1)[,2] * 100, 3)))
 kable(stale_rate, col.names = c('Rate [%]'), digits = 3, caption = 'Stale block rate', format = 'latex') %>%
   kable_styling(latex_options = c('HOLD_position'))
 ```
 
 ```{r block_stale_barchart, fig.cap='Accepted/stale blocks', fig.pos='H'}
-stale_block <- t(table(blocks_create$stale))
-rownames(stale_block) <- c('Run')
+stale_block <- table(blocks_create$tag, blocks_create$stale)
 barchart(stale_block, stack = TRUE, ref = FALSE, xlab = 'Blocks',
          auto.key = list(columns=2, points = FALSE, rectangles = TRUE), panel=function(x,y,...){
-       panel.barchart(x,y,...)
-       xx <- do.call('c', unname(lapply(split(x, y), function(t)cumsum(t)-t/2)))
-       ltext(xx, y=y, labels=x)
+      panel.barchart(x,y,...)
+      xx <- unsplit(unname(lapply(split(x, y), function(t)cumsum(t)-t/2)), y)
+      xx <-  xx [! x %in% 0]
+      y <-  y [! x %in% 0]
+      x <-  x [! x %in% 0]
+      ltext(xx, y=y, labels=x)
 })
 ```
 
 ```{r block_stale_distribution, eval=nlevels(nodes$group)>1, fig.cap='Stale blocks distribution', fig.pos='H'}
-stale_block_nodes  <- blocks_create %>% filter(stale == 'Stale') %>% select(node)
-stale_block_groups <- merge(stale_block_nodes, nodes, by.x = 'node', by.y = 'name') %>% select(group)
-stale_per_group <- t(table(stale_block_groups$group))
-rownames(stale_per_group) <- c('Run')
+stale_block_nodes  <- blocks_create %>% filter(stale == 'Stale') %>% select(node, tag)
+stale_block_groups <- merge(stale_block_nodes, nodes, by.x = 'node', by.y = 'name') %>% select(group, tag)
+stale_per_group <- table(stale_block_groups$tag, stale_block_groups$group)
 barchart(stale_per_group, stack = TRUE, ref = FALSE, xlab = 'Blocks',
          auto.key = list(columns=2, points = FALSE, rectangles = TRUE), panel=function(x,y,...){
        panel.barchart(x,y,...)
-       xx <- do.call('c', unname(lapply(split(x, y), function(t)cumsum(t)-t/2)))
+       xx <- unsplit(unname(lapply(split(x, y), function(t)cumsum(t)-t/2)), y)
+       xx <-  xx [! x %in% 0]
+       y <-  y [! x %in% 0]
+       x <-  x [! x %in% 0]
        ltext(xx, y=y, labels=x)
 })
 ```
@@ -252,25 +254,33 @@ group_share       <- nodes %>%
 
 accepted_block_nodes  <- blocks_create %>% filter(stale == 'Accepted')
 blocks_with_group     <- merge(accepted_block_nodes, nodes, by.x = 'node', by.y = 'name')
-group_blocks          <- blocks_with_group %>%
-  group_by(group) %>%
-  summarise(block_count = n(), block_share = round(n()/nrow(accepted_block_nodes) * 100, 2))
+tag_size              <- blocks_with_group %>% group_by(tag) %>% summarise(tag_size = n())
+blocks_with_group     <- merge(blocks_with_group, tag_size)
+
+group_blocks <- blocks_with_group %>%
+  group_by(tag, group, tag_size) %>%
+  summarise(block_count = n()) %>%
+  mutate(block_share = round(block_count/tag_size * 100, 2))
 
 block_dist_summary                            <- merge(group_share, group_blocks, all.x = TRUE)
 block_dist_summary[is.na(block_dist_summary)] <- 0
 
-rownames(block_dist_summary) <- block_dist_summary$group
-block_dist_summary           <- block_dist_summary[ , !(names(block_dist_summary) %in% c('group'))]
+block_dist_summary <- block_dist_summary %>% arrange(tag) %>% select(tag, group, share, block_count, block_share)
 
-kable(block_dist_summary, col.names = c('Share [%]', 'Blocks', 'Blocks share [%]'), digits = 2, caption = 'Accepted block distribution summary', format = 'latex') %>%
-  kable_styling(latex_options = c('HOLD_position'))
+kable(block_dist_summary, col.names = c('', 'Group', 'Share [%]', 'Blocks', 'Blocks share [%]'), digits = 2, caption = 'Accepted block distribution summary', format = 'latex') %>%
+  kable_styling(latex_options = c('scale_down', 'HOLD_position')) %>%
+  collapse_rows(columns = 1)
 ```
 
 ```{r block_distribution, eval=nlevels(nodes$group)>1, fig.cap='Accepted block distribution', fig.pos='H'}
-block_dist <- t(block_dist_summary[, 'block_count', drop=FALSE])
-rownames(block_dist) <- c('Run')
-barchart(block_dist, stack = TRUE, ref = FALSE, xlab = 'Blocks',
-         auto.key = list(columns=2, points = FALSE, rectangles = TRUE), panel=function(x,y,...){
+block_dist <- dcast(group_blocks, tag~group, value.var = 'block_count')
+block_dist[is.na(block_dist)] <- 0
+
+rownames(block_dist) <- block_dist$tag
+block_dist           <- block_dist[ , !(names(block_dist) %in% c('tag')), drop = FALSE]
+
+barchart(as.matrix(block_dist), stack = TRUE, ref = FALSE, xlab = 'Blocks',
+         auto.key = list(points = FALSE, rectangles = TRUE), panel=function(x,y,...){
        panel.barchart(x,y,...)
        xx <- unsplit(unname(lapply(split(x, y), function(t)cumsum(t)-t/2)), y)
        xx <-  xx [! x %in% 0]
@@ -281,65 +291,65 @@ barchart(block_dist, stack = TRUE, ref = FALSE, xlab = 'Blocks',
 ```
 
 ```{r block_size_summary}
-kable(unclass(summary(blocks_stats$total_size / 1000)), col.names = c('Size [kB]'), digits = 3, caption = 'Block size', format = 'latex') %>%
+kable(unclass(summary(blocks_stats$total_size / 1000)), col.names = c('Size [kB]'), digits = 3, caption = 'Overall block size', format = 'latex') %>%
   kable_styling(latex_options = c('HOLD_position'))
 ```
 
-```{r block_size_boxplot, fig.cap='Block size', fig.pos='H'}
-bwplot(blocks_stats$total_size / 1000, xlab='Block size [kb]')
+```{r block_size_bloxplot, fig.cap='Block size', fig.pos='H'}
+bwplot(blocks_stats$total_size / 1000 ~ blocks_stats$tag, ylab = 'Block size [kB]')
 ```
 
 ```{r block_propagation_summary}
-kable(unclass(summary(block_propagation$propagation_time * 1000)), col.names = c('Propagation [ms]'), digits = 3, caption = 'Block propagation', format = 'latex') %>%
+kable(unclass(summary(block_propagation$propagation_time * 1000)), col.names = c('Propagation [ms]'), digits = 3, caption = 'Overall block propagation', format = 'latex') %>%
   kable_styling(latex_options = c('HOLD_position'))
 ```
 
 ```{r block_propagation_density, fig.cap='Block propagation density', fig.pos='H'}
-densityplot(~propagation_time, data=block_propagation, auto.key = list(space = "right"), ref = TRUE, xlab = 'Duration [s]', plot.points = FALSE)
+densityplot(~propagation_time, data=block_propagation, groups = tag,
+            auto.key = list(space = "top", columns = 2),
+            ref = TRUE, xlab = 'Duration [s]', plot.points = FALSE)
 ```
 
 ## Transactions
-
-`r if(nrow(txs) == 0) {'There were 0 transactions during this simulation run.'}`
-
 ```{r txs_propagation_summary}
 txs_received <- merge(txs[, c('timestamp', 'hash')], txs_received, by = 'hash')
 txs_received$propagation_duration <- txs_received$timestamp.y - txs_received$timestamp.x
 
-kable(unclass(summary(txs_received$propagation_duration * 1000)), col.names = c('Propagation [ms]'), digits = 3, caption = 'Transactions propagation', format = 'latex') %>%
+kable(unclass(summary(txs_received$propagation_duration * 1000)), col.names = c('Propagation [ms]'), digits = 3, caption = 'Overall transactions propagation', format = 'latex') %>%
   kable_styling(latex_options = c('HOLD_position'))
 ```
 
 ```{r tx_propagation_density, fig.cap='Transaction propagation density', fig.pos='H'}
-densityplot(~propagation_duration, data=txs_received, auto.key = list(space = "right"), ref = TRUE, xlab = 'Duration [s]', plot.points = FALSE)
+densityplot(~propagation_duration, data=txs_received, groups = tag,
+            auto.key = list(space = "top", columns = 2), ref = TRUE,
+            xlab = 'Duration [s]', plot.points = FALSE)
 ```
 
 ```{r txs_per_block_summary}
-kable(unclass(summary(blocks_stats$txs)), digits = 2, caption = 'Transactions per block', format = 'latex') %>%
+kable(unclass(summary(blocks_stats$txs)), digits = 0, caption = 'Overall transactions per block', format = 'latex') %>%
   kable_styling(latex_options = c('HOLD_position'))
 ```
 
-```{r txs_per_block_boxplot, fig.cap='Transactions in block', fig.pos='H'}
-bwplot(blocks_stats$txs, xlab='Transactions')
+```{r txs_per_block_boxplot, fig.cap='Transaction per block boxplot', fig.pos='H'}
+bwplot(blocks_stats$txs ~ blocks_stats$tag, ylab = 'Transactions')
 ```
 
 ## Tips
-
 ```{r tips_setup}
 tips          <- tips[tips$status != 'active',]
-tips_per_node <- data.frame(as.matrix(table(tips$node)))
-colnames(tips_per_node) <- c('count')
+tips_per_node <- tips %>%
+   add_count(node, tag)
 ```
 
-`r if(nrow(tips) == 0) {'There were 0 tips during this simulation run.'}`
+`r if(nrow(tips) == 0) {'There were 0 tips during all simulation runs.'}`
 
 ```{r tips_per_node_summary, eval=nrow(tips) > 0}
-kable(unclass(summary(tips_per_node$count)), digits = 2, caption = 'Tips per node', format = 'latex') %>%
+kable(unclass(summary(tips_per_node$n)), digits = 2, caption = 'Overall tips per node', format = 'latex') %>%
   kable_styling(latex_options = c('HOLD_position'))
 ```
 
 ```{r tips_per_node_boxplot, eval=nrow(tips) > 0, fig.cap='Tips per node', fig.pos='H'}
-bwplot(tips_per_node$count, xlab='Tips')
+bwplot(tips_per_node$n ~ tips_per_node$tag, ylab = 'Tips')
 ```
 
 ```{r tips_branchlen_summary, eval=nrow(tips) > 0}
@@ -348,7 +358,7 @@ kable(unclass(summary(tips$branchlen)), digits = 2, caption = 'Overall branch le
 ```
 
 ```{r tips_branchlen_boxplot, eval=nrow(tips) > 0, fig.cap='Overall branch length of tips', fig.pos='H'}
-bwplot(tips$branchlen, xlab='Branch length')
+bwplot(tips$branchlen ~ tips$tag, ylab = 'Branch length')
 ```
 
 ## Exceptions
@@ -364,43 +374,58 @@ event_exces <- rbind(tx_exces, block_exces)
 
 `r if(nrow(event_exces) == 0) {'There were 0 exceptions during the creation of transaction/block events.'}`
 
-```{r event_exces, eval=nrow(event_exces) > 0, fig.cap='Exceptions transaction/block event', fig.pos='H'}
-barchart(table(factor(event_exces$type, levels = c('Transaction', 'Block'))), ref = FALSE, xlab = 'Amount of exceptions',
-         panel=function(x,y,...){
-          panel.barchart(x,y,...)
-          ltext(x=x, y=y, labels=x, pos = 4)
-})
-```
-
-```{r tx_exces_type, eval=nrow(tx_exces) > 0, fig.cap='Transaction exception types', fig.pos='H'}
-barchart(table(tx_exces$exception), ref = FALSE, xlab = 'Amount of exceptions',
-         panel=function(x,y,...){
-          panel.barchart(x,y,...)
-          ltext(x=x, y=y, labels=x, pos = 4)
-})
-```
-
-```{r block_exces_type, eval=nrow(block_exces) > 0, fig.cap='Block exception types', fig.pos='H'}
-barchart(table(block_exces$exception), ref = FALSE, xlab = 'Amount of exceptions',
-         panel=function(x,y,...){
-          panel.barchart(x,y,...)
-          ltext(x=x, y=y, labels=x, pos = 4)
-})
-```
-
-```{r rpc_exces, eval=nrow(rpc_exces) > 0, fig.cap='RPC exceptions', fig.pos='H'}
-rpc_exces_table <- table(rpc_exces$method, rpc_exces$exception)
-barchart(rpc_exces_table, ref = FALSE, xlab = 'Amount of exceptions',
-         auto.key = list(columns=2, rectangles = TRUE, points = FALSE, space='top', text=colnames(rpc_exces_table)),
-         panel=function(x,y,...){
+```{r event_exces, eval=nrow(event_exces)>0, fig.cap='Exceptions transaction/block event', fig.pos='H'}
+barchart(table(event_exces$tag, event_exces$type), ref = FALSE, xlab = 'Amount of exceptions',
+          auto.key = list(space = "top", columns = 2, points = FALSE, rectangles = TRUE),
+          panel=function(x,y,...){
            panel.barchart(x,y,...)
-              xx <- unsplit(unname(lapply(split(x, y), function(t)cumsum(t)-t/2)), y)
-              xx <-  xx [! x %in% 0]
-              y <-  y [! x %in% 0]
-              x <-  x [! x %in% 0]
-              ltext(xx, y=y, labels=x)
+           xx <- unsplit(unname(lapply(split(x, y), function(t)cumsum(t)-t/2)), y)
+           xx <-  xx [! x %in% 0]
+           y <-  y [! x %in% 0]
+           x <-  x [! x %in% 0]
+           ltext(xx, y=y, labels=x)
 })
 ```
+
+```{r tx_exce_types, eval=nrow(tx_exces)>0, fig.cap='Transaction exception types', fig.pos='H'}
+barchart(table(tx_exces$tag, tx_exces$exception), ref = FALSE, xlab = 'Amount of exceptions',
+          auto.key = list(space = "top", columns = 2, points = FALSE, rectangles = TRUE),
+          panel=function(x,y,...){
+           panel.barchart(x,y,...)
+           xx <- unsplit(unname(lapply(split(x, y), function(t)cumsum(t)-t/2)), y)
+           xx <-  xx [! x %in% 0]
+           y <-  y [! x %in% 0]
+           x <-  x [! x %in% 0]
+           ltext(xx, y=y, labels=x)
+})
+```
+
+```{r block_exce_types, eval=nrow(block_exces)>0, fig.cap='Block exception types', fig.pos='H'}
+barchart(table(block_exces$tag, block_exces$exception), ref = FALSE, xlab = 'Amount of exceptions',
+          auto.key = list(space = "top", columns = 2, points = FALSE, rectangles = TRUE),
+          panel=function(x,y,...){
+           panel.barchart(x,y,...)
+           xx <- unsplit(unname(lapply(split(x, y), function(t)cumsum(t)-t/2)), y)
+           xx <-  xx [! x %in% 0]
+           y <-  y [! x %in% 0]
+           x <-  x [! x %in% 0]
+           ltext(xx, y=y, labels=x)
+})
+```
+
+```{r rpc_excs, eval=nrow(rpc_exces)>0, fig.cap='RPC exceptions', fig.pos='H'}
+barchart(table(rpc_exces$tag, rpc_exces$method), ref = FALSE, xlab = 'Amount of exceptions',
+          auto.key = list(space = "top", columns = 2, points = FALSE, rectangles = TRUE),
+          panel=function(x,y,...){
+           panel.barchart(x,y,...)
+           xx <- unsplit(unname(lapply(split(x, y), function(t)cumsum(t)-t/2)), y)
+           xx <-  xx [! x %in% 0]
+           y <-  y [! x %in% 0]
+           x <-  x [! x %in% 0]
+           ltext(xx, y=y, labels=x)
+})
+```
+
 \clearpage
 
 #### R and package versions used

@@ -242,9 +242,10 @@ cp-run:
 	cp -r data/last_run/* /tmp/run/.
 
 cp-multi:
-	rm -r /tmp/multi; \
-	mkdir /tmp/multi; \
-	cp -r data/last_multi_run/* /tmp/multi/.
+	rm -r /tmp/run; \
+	mkdir /tmp/run; \
+	mkdir /tmp/run/postprocessing; \
+	cp -r data/last_multi_run/* /tmp/run/postprocessing/.
 
 .PHONY : test
 test:

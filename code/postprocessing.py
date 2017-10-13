@@ -114,6 +114,5 @@ def try_cmd(cmd):
 
 def create_report():
     bash.check_output(rcmd.preprocess(config.postprocessing_dir))
-    bash.check_output(rcmd.create_report(config.postprocessing_dir, config.report_file_name))
-    logging.info('Created {} report in folder={}'
-             .format(config.report_file_name, config.postprocessing_dir))
+    bash.check_output(rcmd.create_report(config.postprocessing_dir))
+    logging.info('Created report in folder={}'.format(config.postprocessing_dir))
