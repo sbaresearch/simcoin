@@ -32,7 +32,7 @@ class Event:
                     planned_start_next_tick = start_time + (i + 1) * self.context.args.tick_duration
                     current_time = time.time()
                     duration = current_time - actual_start
-                    logging.info('Tick={} with planned_start={}, actual_start={} and duration={},'
+                    logging.info('Tick={} with planned_start={}, actual_start={} and duration={:F},'
                                  ' created txs={} and blocks={}'
                                  .format(i, planned_start, actual_start, duration,
                                          self.txs_count, self.blocks_count))
