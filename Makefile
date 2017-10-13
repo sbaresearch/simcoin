@@ -174,6 +174,28 @@ selfdemo2:
 				--blocks-per-tick 0.7 \
 				--verbose
 
+workingself1:
+	cd code; \
+		python3 simcoin.py \
+			run \
+				--group-a bitcoin 1 .7 0 simcoin/patched:v2 \
+				--group-b selfish 1 .3 0 simcoin/proxy:v1 \
+				--amount-of-ticks 5000 \
+				--txs-per-tick 0 \
+				--blocks-per-tick 0.1 \
+				--verbose
+
+workingself2:
+	cd code; \
+		python3 simcoin.py \
+			run \
+				--group-a bitcoin 1 .7 0 simcoin/patched:v2 \
+				--group-b selfish 1 .3 0 simcoin/proxy:v1 \
+				--amount-of-ticks 1000 \
+				--txs-per-tick 10 \
+				--blocks-per-tick 0.1 \
+				--verbose
+
 problems:
 	cd code; \
 		python3 simcoin.py \
