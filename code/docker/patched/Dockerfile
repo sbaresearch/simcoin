@@ -6,7 +6,8 @@ RUN git checkout 14cdc69
 
 RUN ./autogen.sh
 RUN ./configure --disable-hardening
-RUN make
+
+RUN make -j
 
 ENV PATH /bitcoin/src:$PATH
 RUN mkdir /data
