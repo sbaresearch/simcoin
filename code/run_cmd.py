@@ -16,4 +16,4 @@ def run():
 
     network_config.create(unknown_arguments=True)
 
-    simulation_cmd.run()
+    simulation_cmd.run(unknown_arguments=True)

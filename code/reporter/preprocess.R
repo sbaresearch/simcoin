@@ -6,16 +6,15 @@ tick_infos <- read.csv("tick_infos.csv")
 tick_infos <- tick_infos %>% arrange(actual_start) %>% mutate(end = actual_start + duration)
 write.csv(tick_infos, 'tick_infos.csv', row.names=FALSE, quote=FALSE)
 
-skip_ticks            <- ceiling(max(
-  ifelse(args$blocks_per_tick == 0, 0, 1/args$blocks_per_tick),
-  ifelse(args$txs_per_tick == 0, 0, 1/args$txs_per_tick),
-  1/args$tick_duration)
-)
-analysed_tick_infos   <- head(tail(tick_infos, -skip_ticks), -skip_ticks)
-write.csv(analysed_tick_infos, 'analysed_tick_infos.csv', row.names=FALSE, quote=FALSE)
-
 ticks            <- readLines(file('../ticks.csv'))
-analysed_ticks   <- head(tail(ticks, -skip_ticks), -skip_ticks)
+if (args$skip_ticks == 0){
+  analysed_tick_infos <- tick_infos
+  analysed_ticks      <- ticks
+} else {
+  analysed_tick_infos <- head(tail(tick_infos, -args$skip_ticks), -args$skip_ticks)
+  analysed_ticks      <- head(tail(ticks, -args$skip_ticks), -args$skip_ticks)
+}
+write.csv(analysed_tick_infos, 'analysed_tick_infos.csv', row.names=FALSE, quote=FALSE)
 write(analysed_ticks, 'analysed_ticks.csv')
 
 files = c("blocks_create", "blocks_stats", "txs")

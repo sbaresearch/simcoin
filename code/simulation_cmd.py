@@ -8,11 +8,33 @@ from context import Context
 from prepare import Prepare
 from write import Writer
 import utils
+import sys
+import argparse
+from simulationfiles import checkargs
 
 
-def run():
+def create_parser():
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument('--skip-ticks'
+                        , type=checkargs.check_positive_int
+                        , default=0
+                        , help='Amount of ticks skipped for analysis at the beginning and at the end of the simulation'
+                        )
+    return parser
+
+
+def run(unknown_arguments=False):
     for file in [config.ticks_csv, config.network_csv, config.nodes_csv]:
         utils.check_for_file(file)
+
+    parser = create_parser()
+    if unknown_arguments:
+        args = parser.parse_known_args(sys.argv[2:])[0]
+    else:
+        args = parser.parse_args(sys.argv[2:])
+    logging.info("Parsed arguments in {}: {}".format(__name__, args))
+    utils.update_args(args)
 
     context = Context()
     context.create()
