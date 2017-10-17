@@ -34,7 +34,7 @@ def parse_args():
 
     parser.add_argument('--tag'
                         , default='run'
-                        , help='A tag that will be added to every csv file.'
+                        , help='Tag that will be added to every csv file.'
                         )
 
     parser.add_argument('--selfish-args'
