@@ -2,7 +2,6 @@ import csv
 import random
 import pandas
 import config
-from simulationfiles import nodes_config
 import argparse
 from simulationfiles import checkargs
 import sys

@@ -13,7 +13,6 @@ import utils
 import multirun_cmd
 import run_cmd
 import logging
-import bash
 
 commands = {
     'nodes':        nodes_config.create,
