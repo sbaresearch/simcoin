@@ -78,7 +78,7 @@ def create(unknown_arguments=False):
 
 def calc_expected_events(number_of_ticks, events_per_tick):
     # 3 times + 10 to have some buffer
-    return int(int(number_of_ticks * (1.0 / events_per_tick)) * 3) + 10
+    return int(number_of_ticks * events_per_tick * 3) + 10
 
 
 def create_block_events(nodes, amount_of_ticks, blocks_per_tick):

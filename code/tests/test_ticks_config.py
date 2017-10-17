@@ -9,12 +9,12 @@ class TestTicksConfig(TestCase):
     def test_calc_expected_events_two_events_per_tick(self):
         expected_events = ticks_config.calc_expected_events(10, 0.5)
 
-        self.assertEqual(expected_events, 70)
+        self.assertEqual(expected_events, 25)
 
     def test_calc_expected_events_one_event_every_two_tick(self):
         expected_events = ticks_config.calc_expected_events(10, 2)
 
-        self.assertEqual(expected_events, 25)
+        self.assertEqual(expected_events, 70)
 
     def test_calc_expected_events_one_event_per_tick(self):
         expected_events = ticks_config.calc_expected_events(10, 1)
