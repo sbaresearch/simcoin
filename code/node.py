@@ -75,10 +75,9 @@ class BitcoinNode(Node):
                     .format(self.name, error)
                 )
                 raise Exception("Could not stop container")
-        logging.debug(
-            'Waiting for container {} to stop'
-            .format(self.name)
-        )
+
+        logging.debug('Waiting for container {} to stop'.format(self.name))
+
         while self.is_running():
             utils.sleep(1)
         logging.debug('Container {}  has stopped'.format(self.name))
@@ -141,26 +140,19 @@ class BitcoinNode(Node):
                 retry -= 1
                 self.connect_to_rpc()
                 logging.warning(
-                    'Node={} could not execute RPC-call={} '
-                    'because of error="{}". '
-                    ' Reconnecting RPC and retrying.'
+                    'Node={} could not execute RPC-call={} because of error="{}". Reconnecting RPC and retrying.'
                     .format(self.name, args[0], error)
                 )
             except CannotSendRequest as exce:
                 retry -= 1
                 self.connect_to_rpc(10)
                 logging.warning(
-                    'Node={} could not execute RPC-call={} '
-                    'because of an CannotSendRequest exception with'
-                    ' error="{}".'
-                    ' Reconnecting RPC and retrying.'
+                    'Node={} could not execute RPC-call={} because of an CannotSendRequest exception with'
+                    ' error="{}". Reconnecting RPC and retrying.'
                     .format(self.name, args[0], exce)
                 )
 
-        logging.error(
-            'Could not execute RPC-call={} on node {}'
-            .format(args[0], self.name)
-        )
+        logging.error('Could not execute RPC-call={} on node {}'.format(args[0], self.name))
         exit(-1)
 
     def transfer_coinbases_to_normal_tx(self):
