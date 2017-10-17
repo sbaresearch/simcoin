@@ -26,6 +26,7 @@ class TestPrepare(TestCase):
         nodes = [node_0, node_1]
         self.context.all_bitcoin_nodes.values.return_value = nodes
 
+        self.prepare.pool = MagicMock()
         self.prepare.give_nodes_spendable_coins(nodes)
 
         self.assertEqual(node_0.execute_rpc.call_count, 2)
@@ -41,7 +42,7 @@ class TestPrepare(TestCase):
         self.prepare.prepare_simulation_dir()
 
         self.assertEqual(m_makedirs.call_count, 2)
-        self.assertEqual(m_check_output.call_count, 5)
+        self.assertEqual(m_check_output.call_count, 9)
 
 
     @patch('bash.check_output')
