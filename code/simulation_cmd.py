@@ -36,6 +36,8 @@ def run(unknown_arguments=False):
     logging.info("Parsed arguments in {}: {}".format(__name__, args))
     utils.update_args(args)
 
+    check_skip_ticks(args.skip_ticks)
+
     context = Context()
     context.create()
 
@@ -61,3 +63,15 @@ def run(unknown_arguments=False):
     runner.run()
 
     logging.info("The duration of the run was {} seconds".format(str(time.time() - start)))
+
+
+def check_skip_ticks(skip_ticks):
+    amount_of_ticks = 0
+    with open(config.ticks_csv, 'r') as file:
+        for _ in file:
+            amount_of_ticks += 1
+
+    if amount_of_ticks <= 2 * skip_ticks:
+        logging.error('You want to skip two times skip_ticks={} but you only have {} ticks in your {}.'
+                      .format(skip_ticks, amount_of_ticks, config.ticks_csv_file_name))
+        exit(-1)
