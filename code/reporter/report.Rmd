@@ -187,8 +187,11 @@ kable(unclass(summary(tick_infos$duration)), col.names = c('Duration [s]'), digi
 ticks         <- merge(tick_infos, sim_starts)
 ticks$elapsed <- ticks$timestamp - ticks$run_start
 xyplot(ticks$duration ~ ticks$elapsed, groups = ticks$tag,
-       auto.key = list(space = "top", columns = 2, points = FALSE, lines = TRUE),
-       xlab = 'Time [s]', ylab = 'Duration [s]', t = 'l')
+      xlab = 'Time [s]', ylim = c(0, max(max(tick_infos$duration), args$tick_duration) * 1.1), ylab = 'Duration [s]', t = 'l',
+      panel = function(...) {
+        panel.xyplot(...)
+         panel.abline(h = args$tick_duration)
+        })
 ```
 
 ```{r tick_duration_median, fig.cap='Tick duration', fig.pos='H'}
