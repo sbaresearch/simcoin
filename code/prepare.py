@@ -93,7 +93,7 @@ class Prepare:
             )
         )
 
-        self.pool.map(self.rm_node, nodes)
+        self.pool.map(rm_node, nodes)
 
     def start_nodes(self):
         nodes = self.context.all_bitcoin_nodes.values()
@@ -134,10 +134,10 @@ class Prepare:
             bash.check_output('cd {}; ln -s ../{} {}'.format(config.postprocessing_dir, file, file))
         logging.info('Simulation directory created')
 
-    @staticmethod
-    def rm_node(node):
-        node.delete_peers_file()
-        node.rm()
+
+def rm_node(node):
+    node.delete_peers_file()
+    node.rm()
 
 
 def start_node(node, timeout=DEFAULT_HTTP_TIMEOUT, height=0, connect_to_ips=None):
