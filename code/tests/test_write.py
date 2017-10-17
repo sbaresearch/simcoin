@@ -1,9 +1,7 @@
 from unittest import TestCase
-import utils
 from mock import patch
 from mock import mock_open
 from mock import Mock
-import argparse
 from write import Writer
 import config
 
