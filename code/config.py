@@ -20,6 +20,8 @@ selfish_node_proxy_postfix = '-proxy'
 selfish_node_name = selfish_node_prefix + '{}'
 selfish_node_proxy_name = selfish_node_name + selfish_node_proxy_postfix
 
+max_wait_time_bitcoin_runs_out = 30
+
 rpc_user = 'admin'
 rpc_password = 'admin'
 rpc_port = 18332

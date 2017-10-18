@@ -8,6 +8,7 @@ import math
 from multiprocessing.dummy import Pool as ThreadPool
 import itertools
 from bitcoin.rpc import DEFAULT_HTTP_TIMEOUT
+import node as node_utils
 
 
 class Prepare:
@@ -93,7 +94,8 @@ class Prepare:
             )
         )
 
-        self.pool.map(rm_node, nodes)
+        self.pool.map(node_utils.rm_peers_file, nodes)
+        node_utils.graceful_rm(self.pool, nodes)
 
     def start_nodes(self):
         nodes = self.context.all_bitcoin_nodes.values()
@@ -133,11 +135,6 @@ class Prepare:
             bash.check_output('cp {}{} {}'.format(config.data_dir, file, self.context.run_dir))
             bash.check_output('cd {}; ln -s ../{} {}'.format(config.postprocessing_dir, file, file))
         logging.info('Simulation directory created')
-
-
-def rm_node(node):
-    node.delete_peers_file()
-    node.rm()
 
 
 def start_node(node, timeout=DEFAULT_HTTP_TIMEOUT, height=0, connect_to_ips=None):

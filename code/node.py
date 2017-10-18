@@ -60,29 +60,13 @@ class BitcoinNode(Node):
             )
         ) == 'true'
 
-    def rm(self):
+    def close_rpc_connection(self):
         if self.rpc_connection is not None:
             self.rpc_connection.__dict__['_BaseProxy__conn'].close()
             logging.debug('Closed rpc connection to node={}'.format(self.name))
 
-        if self.is_running():
-            try:
-                self.execute_rpc('stop')
-
-            except Exception as error:
-                logging.debug(
-                    "Could not stop container {} with error={}"
-                    .format(self.name, error)
-                )
-                raise Exception("Could not stop container")
-
-        logging.debug('Waiting for container {} to stop'.format(self.name))
-
-        while self.is_running():
-            utils.sleep(1)
-        logging.debug('Container {}  has stopped'.format(self.name))
-
-        super(BitcoinNode, self).rm()
+    def stop(self):
+        self.execute_rpc('stop')
 
     def get_log_file(self):
         return self.path + config.bitcoin_log_file_name
@@ -117,7 +101,7 @@ class BitcoinNode(Node):
             timeout=timeout
         )
 
-    def delete_peers_file(self):
+    def rm_peers_file(self):
         return bash.check_output(bitcoincmd.rm_peers(self.name))
 
     def execute_cli(self, *args):
@@ -326,3 +310,34 @@ class TxChain:
 
 
 SpentToAddress = namedtuple('SpentToAddress', 'address seckey')
+
+
+def rm_peers_file(node):
+    node.rm_peers_file()
+
+
+def graceful_rm(pool, nodes):
+    pool.map(stop_node, nodes)
+    pool.map(wait_until_node_stopped, nodes)
+    pool.map(rm_node, nodes)
+
+
+def stop_node(node):
+    node.close_rpc_connection()
+    node.stop()
+    logging.info('Send stop to node={}'.format(node.name))
+
+
+def wait_until_node_stopped(node):
+    parts = 10
+    step = config.max_wait_time_bitcoin_runs_out / parts
+    for i in range(parts):
+        utils.sleep(step)
+        logging.info('Wait until node={} runs out'.format(node.name))
+        if node.is_running() is False:
+            return
+    logging.warning('Node={} did not stopped running'.format(node.name))
+
+
+def rm_node(node):
+    node.rm()

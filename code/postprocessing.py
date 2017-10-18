@@ -9,10 +9,10 @@ import utils
 from multiprocessing import Pool
 from multiprocessing.dummy import Pool as ThreadPool
 import subprocess
-import json
 from runner import StepTimes
 import time
 import csv
+import node as node_utils
 
 
 class PostProcessing:
@@ -52,7 +52,8 @@ class PostProcessing:
         logging.info('Executed post processing')
 
     def clean_up_docker(self):
-        self.thread_pool.map(self.rm_node, self.context.all_nodes.values())
+        node_utils.graceful_rm(self.thread_pool, self.context.all_bitcoin_nodes.values())
+        self.thread_pool.map(node_utils.rm_node, self.context.selfish_node_proxies.values())
         logging.info('Removed all nodes')
 
         utils.sleep(3 + len(self.context.all_nodes) * 0.2)
@@ -62,10 +63,6 @@ class PostProcessing:
 
         bash.check_output(dockercmd.fix_data_dirs_permissions(self.context.run_dir))
         logging.info('Fixed permissions of dirs used by docker')
-
-    @staticmethod
-    def rm_node(node):
-        node.rm()
 
 
 def collect_general_infos():
