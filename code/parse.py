@@ -385,34 +385,36 @@ class TxExceptionEvent(ExceptionEvent):
 
 
 class RPCExceptionEvent(Event):
-    csv_header = Event.csv_header + ['source', 'method', 'exception']
+    csv_header = Event.csv_header + ['source', 'method', 'exception', 'retries_left']
     file_name = 'rpc_exceptions.csv'
 
-    def __init__(self, timestamp, node, source, method, exception):
+    def __init__(self, timestamp, node, source, method, exception, retries_left):
         super().__init__(timestamp, node)
         self.source = source
         self.method = method
         self.exception = exception
+        self.retries_left = retries_left
 
     @classmethod
     def from_log_line(cls, line, node):
         match = re.match(config.log_prefix_timestamp +
-                         '\[.*\] \[.*\]  Node=([a-zA-Z0-9-\.]+) could not execute RPC-call=([a-zA-Z0-9]+)'
-                         ' because of error="(.*)"\. Reconnecting RPC and retrying.', line)
+                         '\[.*\] \[.*\]  Could not execute RPC-call=([a-zA-Z0-9]+) on node=([a-zA-Z0-9-\.]+)'
+                         ' because of error="(.*)"\. Reconnecting and retrying, ([0-9]+) retries left', line)
 
         if match is None:
             raise ParseException("Didn't match 'RPC exception' log line.")
 
         return cls(
             parse_datetime(match.group(1)),
-            str(match.group(2)),
-            node,
             str(match.group(3)),
-            str(match.group(4))
+            node,
+            str(match.group(2)),
+            str(match.group(4)),
+            int(match.group(5))
         )
 
     def vars_to_array(self):
-        return Event.vars_to_array(self) + [self.source, self.method, self.exception]
+        return Event.vars_to_array(self) + [self.source, self.method, self.exception, self.retries_left]
 
 
 class ParseException(Exception):

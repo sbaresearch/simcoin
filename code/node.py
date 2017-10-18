@@ -123,18 +123,15 @@ class BitcoinNode(Node):
             except IOError as error:
                 retry -= 1
                 self.connect_to_rpc()
-                logging.warning(
-                    'Node={} could not execute RPC-call={} because of error="{}". Reconnecting RPC and retrying.'
-                    .format(self.name, args[0], error)
-                )
+                logging.warning('Could not execute RPC-call={} on node={} because of error={}.'
+                                ' Reconnecting and retrying, {} retries left'
+                                .format(args[0], self.name,  error, retry))
             except CannotSendRequest as exce:
                 retry -= 1
                 self.connect_to_rpc(10)
-                logging.warning(
-                    'Node={} could not execute RPC-call={} because of an CannotSendRequest exception with'
-                    ' error="{}". Reconnecting RPC and retrying.'
-                    .format(self.name, args[0], exce)
-                )
+                logging.warning('Could not execute RPC-call={} on node={} because of error={}.'
+                                ' Reconnecting and retrying, {} retries left'
+                                .format(args[0], self.name,  exce, retry))
 
         logging.error('Could not execute RPC-call={} on node {}'.format(args[0], self.name))
         exit(-1)

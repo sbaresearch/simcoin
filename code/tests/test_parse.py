@@ -156,8 +156,9 @@ class TestParse(TestCase):
 
     def test_parse_rpc_exception(self):
         event = parse.RPCExceptionEvent.from_log_line(
-            '2017-08-19 16:05:14.609000 [MainThread  ] [INFO ]  Node=s-node-1.1 could not execute'
-            ' RPC-call=getnewaddress because of error="Connection timeout". Reconnecting RPC and retrying.',
+            '2017-08-19 16:05:14.609000 [MainThread  ] [INFO ]  Could not execute RPC-call=getnewaddress'
+            ' on node=s-node-1.1 because of error="Connection timeout".'
+            ' Reconnecting and retrying, 5 retries left',
             'simcoin'
         )
 
@@ -166,3 +167,4 @@ class TestParse(TestCase):
         self.assertEqual(event.source, 'simcoin')
         self.assertEqual(event.method, 'getnewaddress')
         self.assertEqual(event.exception, 'Connection timeout')
+        self.assertEqual(event.retries_left, 5)
