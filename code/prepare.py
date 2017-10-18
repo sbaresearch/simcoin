@@ -48,11 +48,7 @@ class Prepare:
                     args=(node,
                           DEFAULT_HTTP_TIMEOUT,
                           0,
-                          (
-                              str(node.ip)
-                              for node
-                              in nodes[max(0, i - 5):i]
-                          )
+                          (str(node.ip) for node in nodes[max(0, i - 5):i])
                           )
                 )
             )
@@ -86,13 +82,10 @@ class Prepare:
         current_height += len(nodes)
         self.context.first_block_height = current_height
 
-        self.pool.starmap(
-            wait_until_height_reached,
-            zip(
+        self.pool.starmap(wait_until_height_reached, zip(
                 nodes,
                 itertools.repeat(current_height)
-            )
-        )
+        ))
 
         self.pool.map(node_utils.rm_peers_file, nodes)
         node_utils.graceful_rm(self.pool, nodes)

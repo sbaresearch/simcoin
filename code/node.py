@@ -214,7 +214,7 @@ class BitcoinNode(Node):
         tx_chain.current_unspent_tx = tx_hash
         logging.info(
             '{} sendrawtransaction was successful; tx got hash={}'
-                .format(self.name, tx_hash)
+            .format(self.name, tx_hash)
         )
 
     def set_spent_to_address(self):
