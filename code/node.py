@@ -132,9 +132,8 @@ class BitcoinNode(Node):
                 logging.warning('Could not execute RPC-call={} on node={} because of error={}.'
                                 ' Reconnecting and retrying, {} retries left'
                                 .format(args[0], self.name,  exce, retry))
-
         logging.error('Could not execute RPC-call={} on node {}'.format(args[0], self.name))
-        exit(-1)
+        raise Exception('Could not execute RPC-call={} on node {}'.format(args[0], self.name))
 
     def transfer_coinbases_to_normal_tx(self):
         for tx_chain in self.tx_chains:
