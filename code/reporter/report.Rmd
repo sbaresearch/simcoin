@@ -375,7 +375,7 @@ if (nrow(block_exces) > 0) {
 event_exces <- rbind(tx_exces, block_exces)
 ```
 
-`r if(nrow(event_exces) == 0) {'There were 0 exceptions during the creation of transaction/block events.'}`
+`r if(nrow(event_exces) == 0) {'There were 0 exceptions during the creation of transaction/block events. All events were executed successfully.'}`
 
 ```{r event_exces, eval=nrow(event_exces)>0, fig.cap='Exceptions transaction/block event', fig.pos='H'}
 barchart(table(event_exces$tag, event_exces$type), ref = FALSE, xlab = 'Amount of exceptions',
