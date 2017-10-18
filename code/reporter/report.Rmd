@@ -307,7 +307,7 @@ kable(unclass(summary(block_propagation$propagation_time * 1000)), col.names = c
   kable_styling(latex_options = c('HOLD_position'))
 ```
 
-```{r block_propagation_density, fig.cap='Block propagation density', fig.pos='H'}
+```{r block_propagation_density, eval=nrow(block_propagation)>0, fig.cap='Block propagation density', fig.pos='H'}
 densityplot(~propagation_time, data=block_propagation, groups = tag,
             auto.key = list(space = "top", columns = 2),
             ref = TRUE, xlab = 'Duration [s]', plot.points = FALSE)
@@ -322,7 +322,7 @@ kable(unclass(summary(txs_received$propagation_duration * 1000)), col.names = c(
   kable_styling(latex_options = c('HOLD_position'))
 ```
 
-```{r tx_propagation_density, fig.cap='Transaction propagation density', fig.pos='H'}
+```{r tx_propagation_density, eval=nrow(txs_received)>0, fig.cap='Transaction propagation density', fig.pos='H'}
 densityplot(~propagation_duration, data=txs_received, groups = tag,
             auto.key = list(space = "top", columns = 2), ref = TRUE,
             xlab = 'Duration [s]', plot.points = FALSE)
