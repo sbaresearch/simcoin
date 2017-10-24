@@ -3,7 +3,10 @@ from simulationfiles import checkargs
 import sys
 import utils
 import logging
-import run_cmd
+from simulationfiles import nodes_config
+from simulationfiles import ticks_config
+from simulationfiles import network_config
+import simulation_cmd
 import os
 import config
 import bash
@@ -59,12 +62,16 @@ def run():
 
     prepare()
 
+    nodes_config.create(unknown_arguments=True)
+    ticks_config.create(unknown_arguments=True)
+    network_config.create(unknown_arguments=True)
+
     for i in range(args.repeat):
         logging.info('Starting {}/{} simulation'.format(i + 1, args.repeat))
 
         utils.update_args(Namespace(tag_appendix='_' + str(i + 1)))
+        simulation_cmd.run(unknown_arguments=True)
 
-        run_cmd.run()
         bash.check_output('cp -r {}/postprocessing {}/run-{}'
                           .format(config.soft_link_to_run_dir, config.soft_link_to_multi_run_dir, i + 1))
         logging.info('Finished {}/{} simulation'.format(i + 1, args.repeat))
