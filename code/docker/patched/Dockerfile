@@ -5,7 +5,7 @@ WORKDIR "/bitcoin"
 RUN git checkout simcoin
 
 RUN ./autogen.sh
-RUN ./configure --disable-hardening
+RUN ./configure
 
 RUN make -j
 
