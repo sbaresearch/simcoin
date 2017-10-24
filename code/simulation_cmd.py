@@ -21,6 +21,11 @@ def create_parser():
                         , default=0
                         , help='Amount of ticks skipped for analysis at the beginning and at the end of the simulation'
                         )
+
+    parser.add_argument('--tick-duration'
+                        , default=1
+                        , type=checkargs.check_positive_float
+                        , help='Duration of ticks.')
     return parser
 
 
