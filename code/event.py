@@ -41,8 +41,8 @@ class Event:
                         difference = planned_start_next_tick - current_time
                         logging.info('Sleep {} seconds for next tick={}'.format(difference, i))
                         utils.sleep(difference)
-        except Exception as exce:
-            logging.error('Simulation could not execute all events because of exception={}'.format(exce))
+        except Exception:
+            logging.exception('Simulation could not execute all events because of an exception')
 
     def execute_cmd(self, cmd):
         cmd_parts = cmd.split(' ')
@@ -51,15 +51,15 @@ class Event:
             node = self.context.all_bitcoin_nodes[cmd_parts[1]]
             try:
                 node.generate_tx()
-            except JSONRPCError as exce:
-                logging.info('Could not generate tx for node={}. Exception="{}"'.format(node.name, exce.error))
+            except JSONRPCError:
+                logging.exception('Could not generate tx for node={}'.format(node.name))
             self.txs_count += 1
         elif cmd_parts[0] == 'block':
             node = self.context.all_bitcoin_nodes[cmd_parts[1]]
             try:
                 node.generate_block()
-            except JSONRPCError as exce:
-                logging.info('Could not generate block for node={}. Exception="{}"'.format(node.name, exce.error))
+            except JSONRPCError:
+                logging.exception('Could not generate block for node={}'.format(node.name))
             self.blocks_count += 1
         elif len(cmd) == 0:
             pass

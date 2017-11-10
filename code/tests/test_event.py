@@ -73,7 +73,7 @@ class TestEvent(TestCase):
             e.execute_cmd.side_effect = Exception('mock')
 
             e.execute()
-            self.assertRegex(m_error.call_args[0][0], 'mock')
+            self.assertRegex(m_error.call_args[0][0], 'Simulation could not .*')
 
     def test_execute_cmd_with_block_cmd(self):
         node_1 = MagicMock()
