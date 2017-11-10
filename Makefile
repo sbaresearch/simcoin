@@ -53,6 +53,18 @@ multidemo:
 				--system-snapshots-frequency 1 \
 				--verbose
 
+evaluate:
+	cd code; \
+		python3 simcoin.py \
+			multi-run \
+				--repeat 100 \
+				--group-a bitcoin 20 1 25 simcoin/patched:v2 \
+				--blocks-per-tick 0.0333333333333333 \
+				--amount-of-ticks 60480 \
+				--txs-per-tick 0 \
+				--tick-duration .1 \
+				--verbose
+
 install:
 	# for kableExtra
 	sudo apt install libmagick++-dev
