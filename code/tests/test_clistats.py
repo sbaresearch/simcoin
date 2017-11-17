@@ -18,7 +18,7 @@ class TestCliStats(TestCase):
         node_0 = MagicMock()
         node_0.execute_rpc.side_effect = JSONRPCError({'code': -1, 'message': 'error'})
         self.context.first_block_height = 10
-        self.context.all_bitcoin_nodes = {'0': node_0}
+        self.context.nodes = {'0': node_0}
 
         chain = self.cli_stats.calc_consensus_chain()
 
@@ -29,7 +29,7 @@ class TestCliStats(TestCase):
         node_0.execute_rpc.side_effect = ['hash', JSONRPCError({'code': -1, 'message': 'error'})]
 
         self.context.first_block_height = 10
-        self.context.all_bitcoin_nodes = {'0': node_0}
+        self.context.nodes = {'0': node_0}
 
         chain = self.cli_stats.calc_consensus_chain()
 
@@ -43,7 +43,7 @@ class TestCliStats(TestCase):
         node_1.execute_rpc.side_effect = ['hash1', 'hash2', JSONRPCError({'code': -1, 'message': 'error'})]
 
         self.context.first_block_height = 10
-        self.context.all_bitcoin_nodes = {'0': node_0, '1': node_1}
+        self.context.nodes = {'0': node_0, '1': node_1}
 
         chain = self.cli_stats.calc_consensus_chain()
 
@@ -58,7 +58,7 @@ class TestCliStats(TestCase):
         node_1.execute_rpc.side_effect = ['hash1', JSONRPCError({'code': -1, 'message': 'error'})]
 
         self.context.first_block_height = 10
-        self.context.all_bitcoin_nodes = {'0': node_0, '1': node_1}
+        self.context.nodes = {'0': node_0, '1': node_1}
 
         chain = self.cli_stats.calc_consensus_chain()
 
@@ -72,7 +72,7 @@ class TestCliStats(TestCase):
         node_1.execute_rpc.side_effect = ['hash1', 'hash3', 'hash4']
 
         self.context.first_block_height = 10
-        self.context.all_bitcoin_nodes = {'0': node_0, '1': node_1}
+        self.context.nodes = {'0': node_0, '1': node_1}
 
         chain = self.cli_stats.calc_consensus_chain()
 
@@ -88,7 +88,7 @@ class TestCliStats(TestCase):
         node_2.execute_rpc.side_effect = ['hash1', 'hash3', 'hash4']
 
         self.context.first_block_height = 10
-        self.context.all_bitcoin_nodes = {'0': node_0, '1': node_1, '2': node_2}
+        self.context.nodes = {'0': node_0, '1': node_1, '2': node_2}
 
         chain = self.cli_stats.calc_consensus_chain()
 
@@ -99,7 +99,7 @@ class TestCliStats(TestCase):
         node_0 = MagicMock()
         node_0.name = 'name'
         node_0.execute_rpc.return_value = [{'status': 'active', 'branchlen': 2}]
-        self.context.all_bitcoin_nodes = {'0': node_0}
+        self.context.nodes = {'0': node_0}
 
         self.cli_stats.persist_node_stats()
 

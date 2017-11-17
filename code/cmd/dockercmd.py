@@ -13,21 +13,6 @@ def run_node(node, cmd, path):
             ' ' + node.docker_image +
             ' bash -c "' + cmd + '"')
 
-
-def run_selfish_proxy(node, cmd, path):
-    return (
-        'docker run'
-        ' --cap-add=NET_ADMIN'  # for `tc`
-        ' --detach=true'
-        ' --net=' + config.network_name +
-        ' --ip=' + str(node.ip) +
-        ' --name=' + config.prefix + node.name +
-        ' --hostname=' + config.prefix + node.name +
-        ' --volume $PWD/' + path + ':' + config.proxy_client_dir +
-        ' ' + node.docker_image +
-        ' bash -c "' + cmd + '"')
-
-
 def exec_cmd(node, cmd):
     return 'docker exec {}{} {}'.format(config.prefix, node, cmd)
 

@@ -9,6 +9,7 @@ from multiprocessing.dummy import Pool as ThreadPool
 import itertools
 from bitcoin.rpc import DEFAULT_HTTP_TIMEOUT
 import node as node_utils
+from itertools import islice
 
 
 class Prepare:
@@ -26,11 +27,7 @@ class Prepare:
         remove_old_containers_if_exists()
         recreate_network()
 
-        nodes = list(self.context.all_bitcoin_nodes.values())
-
-        self.give_nodes_spendable_coins(
-            nodes
-        )
+        self.give_nodes_spendable_coins()
 
         self.start_nodes()
 
@@ -38,10 +35,12 @@ class Prepare:
 
         logging.info('End of prepare step')
 
-    def give_nodes_spendable_coins(self, nodes):
-
+    def give_nodes_spendable_coins(self):
+        nodes = list(self.context.nodes.values())
+        print(nodes)
         cbs = []
         for i, node in enumerate(nodes):
+            print(node)
             cbs.append(
                 self.pool.apply_async(
                     start_node,
@@ -91,7 +90,7 @@ class Prepare:
         node_utils.graceful_rm(self.pool, nodes)
 
     def start_nodes(self):
-        nodes = self.context.all_bitcoin_nodes.values()
+        nodes = self.context.nodes.values()
 
         self.pool.starmap(start_node, zip(
             nodes,
@@ -99,20 +98,13 @@ class Prepare:
             itertools.repeat(self.context.first_block_height)
         ))
 
-        start_hash = self.context.one_normal_node.execute_rpc('getbestblockhash')
-        self.pool.starmap(start_proxy_node, zip(
-            self.context.selfish_node_proxies.values(),
-            itertools.repeat(start_hash),
-            itertools.repeat(self.context.one_normal_node)
-        ))
-
         self.pool.starmap(add_latency, zip(
-            self.context.all_public_nodes.values(),
+            self.context.nodes.values(),
             itertools.repeat(self.context.zone.zones)
         ))
 
         logging.info('All nodes for the simulation are started')
-        utils.sleep(3 + len(self.context.all_nodes) * 0.2)
+        utils.sleep(3 + len(self.context.nodes) * 0.2)
 
     def prepare_simulation_dir(self):
         if not os.path.exists(self.context.run_dir):
@@ -135,11 +127,6 @@ def start_node(node, timeout=DEFAULT_HTTP_TIMEOUT, height=0, connect_to_ips=None
     node.connect_to_rpc(timeout)
     node.wait_until_rpc_ready()
     wait_until_height_reached(node, height)
-
-
-def start_proxy_node(node, start_hash, normal_node):
-    node.run(start_hash)
-    node.wait_for_highest_tip_of_node(normal_node)
 
 
 def transfer_coinbase_tx_to_normal_tx(node):

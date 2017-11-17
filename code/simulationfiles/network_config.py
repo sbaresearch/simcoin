@@ -63,8 +63,6 @@ def create_header(nodes):
     header = ['']
     for node in nodes:
         name = node.name
-        if node.node_type == 'selfish':
-            name += '-proxy'
         header.append(name)
 
     return header
@@ -121,12 +119,8 @@ def read_connections():
     network_config = pandas.read_csv(open(config.network_csv), index_col=0)
 
     for node_row, row in network_config.iterrows():
-        if node_row.startswith(config.selfish_node_prefix):
-            node_row += config.selfish_node_proxy_postfix
         connections[node_row] = []
         for node_column, value in row.iteritems():
-            if node_column.startswith(config.selfish_node_prefix):
-                node_column += config.selfish_node_proxy_postfix
             if node_column == node_row:
                 pass
             elif value == 1:

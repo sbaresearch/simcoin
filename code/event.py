@@ -48,14 +48,14 @@ class Event:
         cmd_parts = cmd.split(' ')
 
         if cmd_parts[0] == 'tx':
-            node = self.context.all_bitcoin_nodes[cmd_parts[1]]
+            node = self.context.nodes[cmd_parts[1]]
             try:
                 node.generate_tx()
             except JSONRPCError:
                 logging.exception('Could not generate tx for node={}'.format(node.name))
             self.txs_count += 1
         elif cmd_parts[0] == 'block':
-            node = self.context.all_bitcoin_nodes[cmd_parts[1]]
+            node = self.context.nodes[cmd_parts[1]]
             try:
                 node.generate_block()
             except JSONRPCError:

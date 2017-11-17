@@ -4,7 +4,6 @@ import config
 import bash
 import logging
 from cmd import tccmd
-from cmd import proxycmd
 import utils
 from collections import OrderedDict
 from collections import namedtuple
@@ -18,7 +17,6 @@ from http.client import CannotSendRequest
 from bitcoin.rpc import Proxy
 from bitcoin.rpc import JSONRPCError
 from bitcoin.rpc import DEFAULT_HTTP_TIMEOUT
-import traceback
 
 
 class Node:
@@ -258,43 +256,6 @@ class PublicBitcoinNode(BitcoinNode, PublicNode):
             connect_to_ips = self.outgoing_ips
 
         super(PublicBitcoinNode, self).run(connect_to_ips)
-
-
-class SelfishPrivateNode(BitcoinNode):
-    def __init__(self, name, group, ip, ip_proxy, docker_image, path):
-        super().__init__(name, group, ip, docker_image, path)
-        self.ip_proxy = ip_proxy
-
-    def run(self, connect_to_ips=None):
-        if connect_to_ips is None:
-            connect_to_ips = [self.ip_proxy]
-
-        super(SelfishPrivateNode, self).run(connect_to_ips)
-
-
-class ProxyNode(Node, PublicNode):
-
-    def __init__(self, name, group, ip, private_ip, args, latency, docker_image, path):
-        Node.__init__(self, name, group, ip, docker_image)
-        PublicNode.__init__(self, latency)
-        self.private_ip = private_ip
-        self.args = args
-        self.path = path
-
-    def run(self, start_hash):
-        return bash.check_output(proxycmd.run_proxy(self, start_hash, self.path))
-
-    def wait_for_highest_tip_of_node(self, node):
-        block_hash = node.execute_rpc('getbestblockhash')
-        utils.sleep(1)
-        cmd = proxycmd.get_best_public_block_hash(self.name)
-        while block_hash != bash.check_output(cmd):
-            utils.sleep(1)
-            logging.debug('Waiting for  blocks to spread...')
-
-    def add_latency(self, zones):
-        for cmd in tccmd.create(self.name, zones, self.latency):
-            bash.check_output(cmd)
 
 
 class TxChain:

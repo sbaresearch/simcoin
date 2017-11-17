@@ -17,7 +17,7 @@ class CliStats:
 
     def calc_consensus_chain(self):
         height = self.context.first_block_height
-        nodes = self.context.all_bitcoin_nodes.values()
+        nodes = self.context.nodes.values()
         consensus_chain = []
         logging.info('Calculating consensus chain starting with height={}'.format(height))
         while True:
@@ -53,7 +53,7 @@ class CliStats:
 
     def persist_node_stats(self):
         tips = []
-        for node in self.context.all_bitcoin_nodes.values():
+        for node in self.context.nodes.values():
             tips.extend([Tip.from_dict(node.name, chain_tip) for chain_tip in node.execute_rpc('getchaintips')])
 
         self.writer.write_csv(Tip.file_name, Tip.csv_header, tips)

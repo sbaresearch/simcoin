@@ -33,7 +33,7 @@ class Parser:
             repeat(host_parsers),
         ))
 
-        for node in self.context.all_bitcoin_nodes.values():
+        for node in self.context.nodes.values():
             self.pool.starmap(parse, zip(
                 repeat(self.writer),
                 repeat(node.get_log_file()),

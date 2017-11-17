@@ -7,7 +7,7 @@ from mock import patch
 class TestNodesConfig(TestCase):
 
     def test_check_if_share_sum_is_1_false(self):
-        nodes = [NodeConfig('type', 'group', 'node-0', 0.4, 0, None), NodeConfig('type', 'group', 'node-1', 0.4, 0, None)]
+        nodes = [NodeConfig('group', 'node-0', 0.4, 0, None), NodeConfig('group', 'node-1', 0.4, 0, None)]
 
         with self.assertRaises(SystemExit) as cm:
             nodes_config.check_if_share_sum_is_1(nodes)
@@ -15,7 +15,7 @@ class TestNodesConfig(TestCase):
         self.assertEqual(cm.exception.code, -1)
 
     def test_check_if_share_sum_is_1_true(self):
-        nodes = [NodeConfig('type', 'group', 'node-0', 0.4, 0, None), NodeConfig('type', 'group', 'node-1', 0.6, 0, None)]
+        nodes = [NodeConfig('group', 'node-0', 0.4, 0, None), NodeConfig('group', 'node-1', 0.6, 0, None)]
 
         nodes_config.check_if_share_sum_is_1(nodes)
 

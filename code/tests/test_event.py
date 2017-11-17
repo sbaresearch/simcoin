@@ -79,7 +79,7 @@ class TestEvent(TestCase):
         node_1 = MagicMock()
         cmd = 'block node-1'
         e = Event(MagicMock())
-        e.context.all_bitcoin_nodes = {'node-1': node_1}
+        e.context.nodes = {'node-1': node_1}
         e.execute_cmd(cmd)
 
         self.assertTrue(node_1.generate_block.called)
@@ -100,7 +100,7 @@ class TestEvent(TestCase):
 
         e = Event(MagicMock())
         e.generate_tx = MagicMock()
-        e.context.all_bitcoin_nodes = {'node-1': node}
+        e.context.nodes = {'node-1': node}
         e.execute_cmd(cmd)
 
         self.assertTrue(node.generate_tx.called)
@@ -108,7 +108,7 @@ class TestEvent(TestCase):
     def test_execute_cmd_with_unknown_cmd(self):
         cmd = 'unknown node-1'
         e = Event(MagicMock())
-        e.context.all_bitcoin_nodes = {'node-1': {}}
+        e.context.nodes = {'node-1': {}}
 
         with self.assertRaises(Exception) as context:
             e.execute_cmd(cmd)
@@ -119,7 +119,7 @@ class TestEvent(TestCase):
         context = MagicMock()
         node = MagicMock()
         node.generate_tx.side_effect = JSONRPCError({'code': -1, 'message': 'test_message'})
-        context.all_bitcoin_nodes = {'node-1': node}
+        context.nodes = {'node-1': node}
 
         e = Event(context)
         e.execute_cmd('tx node-1')

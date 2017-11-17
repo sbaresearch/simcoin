@@ -52,11 +52,10 @@ class PostProcessing:
         logging.info('Executed post processing')
 
     def clean_up_docker(self):
-        self.thread_pool.map(node_utils.rm_node, self.context.selfish_node_proxies.values())
-        node_utils.graceful_rm(self.thread_pool, self.context.all_bitcoin_nodes.values())
+        node_utils.graceful_rm(self.thread_pool, self.context.nodes.values())
         logging.info('Removed all nodes')
 
-        utils.sleep(3 + len(self.context.all_nodes) * 0.2)
+        utils.sleep(3 + len(self.context.nodes) * 0.2)
 
         bash.check_output(dockercmd.rm_network())
         logging.info('Deleted docker network')
