@@ -40,7 +40,7 @@ class PostProcessing:
         parser = Parser(self._context, self._writer)
         parser.execute()
 
-        _collect_general_infos()
+        _collect_general_information()
 
         self._context.step_times.append(StepTimes(time.time(), 'postprocessing_end'))
         self._writer.write_csv(config.step_times_csv_file_name, StepTimes.csv_header, self._context.step_times)
@@ -62,19 +62,6 @@ class PostProcessing:
 
         bash.check_output(dockercmd.fix_data_dirs_permissions(self._context.run_dir))
         logging.info('Fixed permissions of dirs used by docker')
-
-
-def _collect_general_infos():
-    general_infos = {
-        'total_memory': _try_cmd('cat /proc/meminfo | sed -n 1p | grep -ohE [0-9]+'),
-        'cpu_model': _try_cmd("lscpu | grep -oP 'Model name:\s+\K(.*)'"),
-        'cpus': _try_cmd("lscpu | grep -oP 'CPU\(s\):\s+\K([0-9]+)$'"),
-    }
-
-    with open(config.general_infos_csv, 'w') as file:
-        writer = csv.writer(file)
-        writer.writerow(general_infos.keys())
-        writer.writerow(general_infos.values())
 
 
 def _flush_log_handlers():
@@ -99,6 +86,19 @@ def _extract_from_file(source, destination, start, end):
                     write = True
     logging.debug('Extracted from file={} lines between start={} and end={} into file {}'
                   .format(source, destination, start, end))
+
+
+def _collect_general_information():
+    general_infos = {
+        'total_memory': _try_cmd('cat /proc/meminfo | sed -n 1p | grep -ohE [0-9]+'),
+        'cpu_model': _try_cmd("lscpu | grep -oP 'Model name:\s+\K(.*)'"),
+        'cpus': _try_cmd("lscpu | grep -oP 'CPU\(s\):\s+\K([0-9]+)$'"),
+    }
+
+    with open(config.general_infos_csv, 'w') as file:
+        writer = csv.writer(file)
+        writer.writerow(general_infos.keys())
+        writer.writerow(general_infos.values())
 
 
 def _try_cmd(cmd):
