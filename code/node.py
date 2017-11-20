@@ -76,7 +76,6 @@ class BitcoinNode(Node):
         return self._path + config.bitcoin_log_file_name
 
     def wait_until_rpc_ready(self):
-        """ Block till port ready """
         while True:
             try:
                 bash.check_output(
