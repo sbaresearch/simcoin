@@ -134,10 +134,6 @@ def _transfer_coinbase_tx_to_normal_tx(node):
     logging.info("Transferred all coinbase-tx to normal tx for node={}".format(node.name))
 
 
-def connect(node):
-    node.connect()
-
-
 def _add_latency(node, zones):
     node.add_latency(zones)
 
@@ -162,22 +158,6 @@ def _wait_until_height_reached(node, height):
     while int(node.execute_rpc('getblockcount')) < height:
         logging.debug('Waiting until node={} reached height={}...'.format(node.name, str(height)))
         utils.sleep(0.2)
-
-
-def _wait_until_height_reached_cli(node, height):
-    msg = bash.check_output(
-        "docker exec simcoin-{} bash -c '"
-        "  while "
-        "    [[ "
-        "      $(bitcoin-cli "
-        "        -regtest "
-        "        --conf=/data/bitcoin.conf "
-        "        getblockcount) -lt {} "
-        "    ]]; "
-        "    do sleep 0.2; "
-        "done; "
-        "echo Block Height reached'".format(node.name, str(height)))
-    logging.debug('Waiting until {}'.format(str(msg)))
 
 
 def _calc_number_of_tx_chains(txs_per_tick, blocks_per_tick, number_of_nodes):
