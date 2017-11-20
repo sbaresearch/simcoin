@@ -107,18 +107,7 @@ class BitcoinNode(Node):
     def rm_peers_file(self):
         return bash.check_output(bitcoincmd.rm_peers(self._name))
 
-    def execute_cli(self, *args):
-        return bash.check_output(
-            "docker exec simcoin-{} bitcoin-cli "
-            "-regtest "
-            "-conf=/data/bitcoin.conf {}"
-            .format(
-              self._name,
-              ' '.join(list(map(str, args)))
-            )
-        )
-
-    def execute_rpc(self,  *args):
+    def execute_rpc(self, *args):
         retry = 30
         while retry >= 0:
             try:
