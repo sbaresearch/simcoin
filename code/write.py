@@ -6,7 +6,7 @@ import config
 
 class Writer:
     def __init__(self, tag):
-        self.tag = tag
+        self._tag = tag
 
     def write_csv(self, file_name, header, elements):
         write_header_csv(file_name, header)
@@ -21,7 +21,7 @@ class Writer:
             w = csv.writer(file)
             for element in elements:
                 row = element.vars_to_array()
-                row.append(self.tag)
+                row.append(self._tag)
                 w.writerow(row)
 
 

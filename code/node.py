@@ -21,32 +21,43 @@ from bitcoin.rpc import DEFAULT_HTTP_TIMEOUT
 
 class Node:
     def __init__(self, name, group, ip, docker_image):
-        self.name = name
-        self.group = group
-        self.ip = ip
-        self.docker_image = docker_image
+        self._name = name
+        self._ip = ip
+        self._docker_image = docker_image
+        self._group = group
 
     def rm(self):
-        return bash.check_output(dockercmd.rm_container(self.name))
+        return bash.check_output(dockercmd.rm_container(self._name))
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def ip(self):
+        return self._ip
 
 
 class PublicNode:
     def __init__(self, latency):
-        self.latency = latency
-        self.outgoing_ips = []
+        self._latency = latency
+        self._outgoing_ips = []
+
+    def set_outgoing_ips(self, outgoing_ips):
+        self._outgoing_ips = outgoing_ips
 
 
 class BitcoinNode(Node):
     def __init__(self, name, group, ip, docker_image, path):
         super().__init__(name, group, ip, docker_image)
-        self.path = path
-        self.spent_to = None
-        self.rpc_connection = None
-        self.current_tx_chain_index = 0
-        self.tx_chains = []
+        self._path = path
+        self._spent_to = None
+        self._rpc_connection = None
+        self._current_tx_chain_index = 0
+        self._tx_chains = []
 
     def run(self, connect_to_ips):
-        bash.check_output(bitcoincmd.start(self, self.path, connect_to_ips))
+        bash.check_output(bitcoincmd.start(self._name, str(self._ip), self._docker_image, self._path, connect_to_ips))
 
         # sleep small amount to avoid 'CannotSendRequest: Request-sent' in bitcoin.rpc
         utils.sleep(0.2)
@@ -54,20 +65,20 @@ class BitcoinNode(Node):
     def is_running(self):
         return bash.check_output(
             dockercmd.check_if_running(
-                self.name
+                self._name
             )
         ) == 'true'
 
     def close_rpc_connection(self):
-        if self.rpc_connection is not None:
-            self.rpc_connection.__dict__['_BaseProxy__conn'].close()
-            logging.debug('Closed rpc connection to node={}'.format(self.name))
+        if self._rpc_connection is not None:
+            self._rpc_connection.__dict__['_BaseProxy__conn'].close()
+            logging.debug('Closed rpc connection to node={}'.format(self._name))
 
     def stop(self):
         self.execute_rpc('stop')
 
     def get_log_file(self):
-        return self.path + config.bitcoin_log_file_name
+        return self._path + config.bitcoin_log_file_name
 
     def wait_until_rpc_ready(self):
         """ Block till port ready """
@@ -75,7 +86,7 @@ class BitcoinNode(Node):
             try:
                 bash.check_output(
                     "nc -z -w1 {} {}"
-                    .format(self.ip, config.rpc_port)
+                    .format(self._ip, config.rpc_port)
                 )
                 break
             except Exception:
@@ -89,18 +100,18 @@ class BitcoinNode(Node):
                 logging.debug(
                     'Exception="{}" while calling RPC. '
                     'Waiting until RPC of node={} is ready.'
-                    .format(exce, self.name)
+                    .format(exce, self._name)
                 )
                 utils.sleep(1)
 
     def connect_to_rpc(self, timeout=DEFAULT_HTTP_TIMEOUT):
-        self.rpc_connection = Proxy(
-            config.create_rpc_connection_string(self.ip),
+        self._rpc_connection = Proxy(
+            config.create_rpc_connection_string(self._ip),
             timeout=timeout
         )
 
     def rm_peers_file(self):
-        return bash.check_output(bitcoincmd.rm_peers(self.name))
+        return bash.check_output(bitcoincmd.rm_peers(self._name))
 
     def execute_cli(self, *args):
         return bash.check_output(
@@ -108,7 +119,7 @@ class BitcoinNode(Node):
             "-regtest "
             "-conf=/data/bitcoin.conf {}"
             .format(
-              self.name,
+              self._name,
               ' '.join(list(map(str, args)))
             )
         )
@@ -117,24 +128,24 @@ class BitcoinNode(Node):
         retry = 30
         while retry >= 0:
             try:
-                return self.rpc_connection.call(args[0], *args[1:])
+                return self._rpc_connection.call(args[0], *args[1:])
             except IOError as error:
                 retry -= 1
                 self.connect_to_rpc()
                 logging.warning('Could not execute RPC-call={} on node={} because of error={}.'
                                 ' Reconnecting and retrying, {} retries left'
-                                .format(args[0], self.name,  error, retry))
+                                .format(args[0], self._name,  error, retry))
             except CannotSendRequest as exce:
                 retry -= 1
                 self.connect_to_rpc(10)
                 logging.warning('Could not execute RPC-call={} on node={} because of error={}.'
                                 ' Reconnecting and retrying, {} retries left'
-                                .format(args[0], self.name,  exce, retry))
-        logging.error('Could not execute RPC-call={} on node {}'.format(args[0], self.name))
-        raise Exception('Could not execute RPC-call={} on node {}'.format(args[0], self.name))
+                                .format(args[0], self._name,  exce, retry))
+        logging.error('Could not execute RPC-call={} on node {}'.format(args[0], self._name))
+        raise Exception('Could not execute RPC-call={} on node {}'.format(args[0], self._name))
 
     def transfer_coinbases_to_normal_tx(self):
-        for tx_chain in self.tx_chains:
+        for tx_chain in self._tx_chains:
             tx_chain.amount /= 2
             tx_chain.amount -= int(config.transaction_fee / 2)
             raw_transaction = self.execute_rpc(
@@ -145,7 +156,7 @@ class BitcoinNode(Node):
                 }],
                 OrderedDict([
                     (tx_chain.address, str(tx_chain.amount / 100000000)),
-                    (self.spent_to.address, str(tx_chain.amount / 100000000))
+                    (self._spent_to.address, str(tx_chain.amount / 100000000))
                 ])
             )
             signed_raw_transaction = self.execute_rpc(
@@ -157,9 +168,9 @@ class BitcoinNode(Node):
             )
 
     def generate_block(self):
-        logging.debug('{} trying to generate block'.format(self.name))
+        logging.debug('{} trying to generate block'.format(self._name))
         block_hash = self.execute_rpc('generate', 1)
-        logging.info('{} generated block with hash={}'.format(self.name, block_hash))
+        logging.info('{} generated block with hash={}'.format(self._name, block_hash))
 
     def generate_tx(self):
         tx_chain = self.get_next_tx_chain()
@@ -168,7 +179,7 @@ class BitcoinNode(Node):
             CMutableTxIn(COutPoint(txid, 0)),
             CMutableTxIn(COutPoint(txid, 1))
         ]
-        txin_seckeys = [tx_chain.seckey, self.spent_to.seckey]
+        txin_seckeys = [tx_chain.seckey, self._spent_to.seckey]
 
         amount_in = tx_chain.amount
         tx_chain.amount -= int(config.transaction_fee / 2)
@@ -179,7 +190,7 @@ class BitcoinNode(Node):
         )
         txout2 = CMutableTxOut(
             tx_chain.amount,
-            CBitcoinAddress(self.spent_to.address).to_scriptPubKey()
+            CBitcoinAddress(self._spent_to.address).to_scriptPubKey()
         )
 
         tx = CMutableTransaction(txins, [txout1, txout2], nVersion=2)
@@ -201,24 +212,24 @@ class BitcoinNode(Node):
             '{} trying to sendrawtransaction'
             ' (in=2x{} out=2x{} fee={} bytes={})'
             ' using tx_chain number={}'
-            .format(self.name,
+            .format(self._name,
                     amount_in,
                     txout1.nValue,
                     (amount_in * 2) - (txout1.nValue * 2),
                     len(tx_serialized),
-                    self.current_tx_chain_index)
+                    self._current_tx_chain_index)
         )
         tx_hash = self.execute_rpc('sendrawtransaction', b2x(tx_serialized))
         tx_chain.current_unspent_tx = tx_hash
         logging.info(
             '{} sendrawtransaction was successful; tx got hash={}'
-            .format(self.name, tx_hash)
+            .format(self._name, tx_hash)
         )
 
-    def set_spent_to_address(self):
+    def generate_spent_to_address(self):
         address = self.execute_rpc('getnewaddress')
         seckey = CBitcoinSecret(self.execute_rpc('dumpprivkey', address))
-        self.spent_to = SpentToAddress(address, seckey)
+        self._spent_to = SpentToAddress(address, seckey)
 
     def create_tx_chains(self):
         for unspent_tx in self.execute_rpc('listunspent'):
@@ -232,12 +243,14 @@ class BitcoinNode(Node):
                 unspent_tx['amount'] * 100000000
             )
 
-            self.tx_chains.append(tx_chain)
+            self._tx_chains.append(tx_chain)
 
     def get_next_tx_chain(self):
-        tx_chain = self.tx_chains[self.current_tx_chain_index]
-        self.current_tx_chain_index = ((self.current_tx_chain_index + 1) %
-                                       len(self.tx_chains))
+        tx_chain = self._tx_chains[self._current_tx_chain_index]
+        self._current_tx_chain_index = (
+            (self._current_tx_chain_index + 1) %
+            len(self._tx_chains)
+        )
 
         return tx_chain
 
@@ -248,22 +261,46 @@ class PublicBitcoinNode(BitcoinNode, PublicNode):
         PublicNode.__init__(self, latency)
 
     def add_latency(self, zones):
-        for cmd in tccmd.create(self.name, zones, self.latency):
+        for cmd in tccmd.create(self._name, zones, self._latency):
             bash.check_output(cmd)
 
     def run(self, connect_to_ips=None):
         if connect_to_ips is None:
-            connect_to_ips = self.outgoing_ips
+            connect_to_ips = self._outgoing_ips
 
         super(PublicBitcoinNode, self).run(connect_to_ips)
 
 
 class TxChain:
     def __init__(self, current_unspent_tx, address, seckey, amount):
-        self.current_unspent_tx = current_unspent_tx
-        self.address = address
-        self.seckey = seckey
-        self.amount = amount
+        self._current_unspent_tx = current_unspent_tx
+        self._address = address
+        self._seckey = seckey
+        self._amount = amount
+
+    @property
+    def current_unspent_tx(self):
+        return self._current_unspent_tx
+
+    @current_unspent_tx.setter
+    def current_unspent_tx(self, unspent_tx):
+        self._current_unspent_tx = unspent_tx
+
+    @property
+    def address(self):
+        return self._address
+
+    @property
+    def seckey(self):
+        return self._seckey
+
+    @property
+    def amount(self):
+        return self._amount
+
+    @amount.setter
+    def amount(self, amount):
+        self._amount = amount
 
 
 SpentToAddress = namedtuple('SpentToAddress', 'address seckey')

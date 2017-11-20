@@ -27,15 +27,15 @@ class TestNode(TestCase):
         self.node.create_tx_chains()
 
         self.assertEqual(self.node.execute_rpc.call_count, 3)
-        self.assertEqual(len(self.node.tx_chains), 2)
+        self.assertEqual(len(self.node._tx_chains), 2)
 
-        chain_1 = self.node.tx_chains[0]
+        chain_1 = self.node._tx_chains[0]
         self.assertEqual(chain_1.current_unspent_tx, 'tx_hash_1')
         self.assertEqual(chain_1.address, 'address_hash_1')
         self.assertEqual(chain_1.seckey,  CBitcoinSecret('cTCrrgVLfBqEZ1dxmCnEwmiEWzeZHU8uw3CNvLVvbT4CrBeDdTqc'))
         self.assertEqual(chain_1.amount, 5000000000)
 
-        chain_2 = self.node.tx_chains[1]
+        chain_2 = self.node._tx_chains[1]
         self.assertEqual(chain_2.current_unspent_tx, 'tx_hash_2')
         self.assertEqual(chain_2.address, 'address_hash_2')
         self.assertEqual(chain_2.amount, 2500000000)

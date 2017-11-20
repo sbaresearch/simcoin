@@ -14,11 +14,11 @@ from itertools import islice
 
 class Prepare:
     def __init__(self, context):
-        self.context = context
-        self.pool = None
+        self._context = context
+        self._pool = None
 
     def execute(self):
-        self.pool = ThreadPool(5)
+        self._pool = ThreadPool(5)
 
         logging.info('Begin of prepare step')
 
@@ -31,18 +31,16 @@ class Prepare:
 
         self.start_nodes()
 
-        self.pool.close()
+        self._pool.close()
 
         logging.info('End of prepare step')
 
     def give_nodes_spendable_coins(self):
-        nodes = list(self.context.nodes.values())
-        print(nodes)
+        nodes = list(self._context.nodes.values())
         cbs = []
         for i, node in enumerate(nodes):
-            print(node)
             cbs.append(
-                self.pool.apply_async(
+                self._pool.apply_async(
                     start_node,
                     args=(node,
                           DEFAULT_HTTP_TIMEOUT,
@@ -55,8 +53,8 @@ class Prepare:
             cb.get()
 
         amount_of_tx_chains = calc_number_of_tx_chains(
-            self.context.args.txs_per_tick,
-            self.context.args.blocks_per_tick,
+            self._context.args.txs_per_tick,
+            self._context.args.blocks_per_tick,
             len(nodes)
         )
         logging.info('Each node receives {} tx-chains'.format(amount_of_tx_chains))
@@ -70,54 +68,54 @@ class Prepare:
         nodes[0].execute_cli('generate', config.blocks_needed_to_make_coinbase_spendable)
         current_height = config.blocks_needed_to_make_coinbase_spendable + amount_of_tx_chains * len(nodes)
 
-        self.pool.starmap(wait_until_height_reached, zip(nodes, itertools.repeat(current_height)))
+        self._pool.starmap(wait_until_height_reached, zip(nodes, itertools.repeat(current_height)))
 
-        self.pool.map(transfer_coinbase_tx_to_normal_tx, nodes)
+        self._pool.map(transfer_coinbase_tx_to_normal_tx, nodes)
 
         for i, node in enumerate(nodes):
             wait_until_height_reached(node, current_height + i)
             node.execute_rpc('generate', 1)
 
         current_height += len(nodes)
-        self.context.first_block_height = current_height
+        self._context.first_block_height = current_height
 
-        self.pool.starmap(wait_until_height_reached, zip(
+        self._pool.starmap(wait_until_height_reached, zip(
                 nodes,
                 itertools.repeat(current_height)
         ))
 
-        self.pool.map(node_utils.rm_peers_file, nodes)
-        node_utils.graceful_rm(self.pool, nodes)
+        self._pool.map(node_utils.rm_peers_file, nodes)
+        node_utils.graceful_rm(self._pool, nodes)
 
     def start_nodes(self):
-        nodes = self.context.nodes.values()
+        nodes = self._context.nodes.values()
 
-        self.pool.starmap(start_node, zip(
+        self._pool.starmap(start_node, zip(
             nodes,
             itertools.repeat(config.rpc_simulation_timeout),
-            itertools.repeat(self.context.first_block_height)
+            itertools.repeat(self._context.first_block_height)
         ))
 
-        self.pool.starmap(add_latency, zip(
-            self.context.nodes.values(),
-            itertools.repeat(self.context.zone.zones)
+        self._pool.starmap(add_latency, zip(
+            self._context.nodes.values(),
+            itertools.repeat(self._context.zone.zones)
         ))
 
         logging.info('All nodes for the simulation are started')
-        utils.sleep(3 + len(self.context.nodes) * 0.2)
+        utils.sleep(3 + len(self._context.nodes) * 0.2)
 
     def prepare_simulation_dir(self):
-        if not os.path.exists(self.context.run_dir):
-            os.makedirs(self.context.run_dir)
+        if not os.path.exists(self._context.run_dir):
+            os.makedirs(self._context.run_dir)
 
         if os.path.islink(config.soft_link_to_run_dir):
             bash.check_output('unlink {}'.format(config.soft_link_to_run_dir))
-        bash.check_output('cd {}; ln -s {} {}'.format(config.data_dir, self.context.run_name, config.last_run))
+        bash.check_output('cd {}; ln -s {} {}'.format(config.data_dir, self._context.run_name, config.last_run))
         os.makedirs(config.postprocessing_dir)
 
         for file in [config.network_csv_file_name, config.ticks_csv_file_name,
                      config.nodes_csv_file_name, config.args_csv_file_name]:
-            bash.check_output('cp {}{} {}'.format(config.data_dir, file, self.context.run_dir))
+            bash.check_output('cp {}{} {}'.format(config.data_dir, file, self._context.run_dir))
             bash.check_output('cd {}; ln -s ../{} {}'.format(config.postprocessing_dir, file, file))
         logging.info('Simulation directory created')
 
@@ -130,7 +128,7 @@ def start_node(node, timeout=DEFAULT_HTTP_TIMEOUT, height=0, connect_to_ips=None
 
 
 def transfer_coinbase_tx_to_normal_tx(node):
-    node.set_spent_to_address()
+    node.generate_spent_to_address()
     node.create_tx_chains()
     node.transfer_coinbases_to_normal_tx()
     logging.info("Transferred all coinbase-tx to normal tx for node={}".format(node.name))

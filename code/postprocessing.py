@@ -17,50 +17,50 @@ import node as node_utils
 
 class PostProcessing:
     def __init__(self, context, writer):
-        self.context = context
-        self.writer = writer
-        self.pool = None
-        self.thread_pool = None
+        self._context = context
+        self._writer = writer
+        self._pool = None
+        self._thread_pool = None
 
     def execute(self):
-        self.pool = Pool(config.pool_processors)
-        self.thread_pool = ThreadPool(5)
+        self._pool = Pool(config.pool_processors)
+        self._thread_pool = ThreadPool(5)
 
-        cli_stats = CliStats(self.context, self.writer)
+        cli_stats = CliStats(self._context, self._writer)
         cli_stats.execute()
 
         self.clean_up_docker()
 
-        logging.info(config.log_line_run_end + self.context.run_name)
+        logging.info(config.log_line_run_end + self._context.run_name)
         flush_log_handlers()
         extract_from_file(config.log_file, config.run_log,
-                          config.log_line_run_start + self.context.run_name,
-                          config.log_line_run_end + self.context.run_name)
+                          config.log_line_run_start + self._context.run_name,
+                          config.log_line_run_end + self._context.run_name)
 
-        parser = Parser(self.context, self.writer)
+        parser = Parser(self._context, self._writer)
         parser.execute()
 
         collect_general_infos()
 
-        self.context.step_times.append(StepTimes(time.time(), 'postprocessing_end'))
-        self.writer.write_csv(config.step_times_csv_file_name, StepTimes.csv_header, self.context.step_times)
+        self._context.step_times.append(StepTimes(time.time(), 'postprocessing_end'))
+        self._writer.write_csv(config.step_times_csv_file_name, StepTimes.csv_header, self._context.step_times)
 
         create_report()
 
-        self.pool.close()
-        self.thread_pool.close()
+        self._pool.close()
+        self._thread_pool.close()
         logging.info('Executed post processing')
 
     def clean_up_docker(self):
-        node_utils.graceful_rm(self.thread_pool, self.context.nodes.values())
+        node_utils.graceful_rm(self._thread_pool, self._context.nodes.values())
         logging.info('Removed all nodes')
 
-        utils.sleep(3 + len(self.context.nodes) * 0.2)
+        utils.sleep(3 + len(self._context.nodes) * 0.2)
 
         bash.check_output(dockercmd.rm_network())
         logging.info('Deleted docker network')
 
-        bash.check_output(dockercmd.fix_data_dirs_permissions(self.context.run_dir))
+        bash.check_output(dockercmd.fix_data_dirs_permissions(self._context.run_dir))
         logging.info('Fixed permissions of dirs used by docker')
 
 

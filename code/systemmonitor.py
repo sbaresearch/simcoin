@@ -32,11 +32,11 @@ class CpuTimeSnapshot:
     csv_header = ['timestamp', 'user', 'nice', 'system', 'idle']
 
     def __init__(self, timestamp, user, nice, system, idle):
-        self.timestamp = timestamp
-        self.user = user
-        self.nice = nice
-        self.system = system
-        self.idle = idle
+        self._timestamp = timestamp
+        self._user = user
+        self._nice = nice
+        self._system = system
+        self._idle = idle
 
     @classmethod
     def from_bash(cls, cpu_time):
@@ -45,7 +45,7 @@ class CpuTimeSnapshot:
         return snapshot
 
     def vars_to_array(self):
-        return [self.timestamp, self.user, self.nice, self.system, self.idle]
+        return [self._timestamp, self._user, self._nice, self._system, self._idle]
 
 
 class MemorySnapshot:
@@ -53,9 +53,9 @@ class MemorySnapshot:
     csv_header = ['timestamp', 'total', 'available']
 
     def __init__(self, timestamp, total, available):
-        self.timestamp = timestamp
-        self.total = total
-        self.available = available
+        self._timestamp = timestamp
+        self._total = total
+        self._available = available
 
     @classmethod
     def from_bash(cls, memory):
@@ -64,4 +64,4 @@ class MemorySnapshot:
         return snapshot
 
     def vars_to_array(self):
-        return [self.timestamp, self.total, self.available]
+        return [self._timestamp, self._total, self._available]

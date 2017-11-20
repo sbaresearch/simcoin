@@ -55,13 +55,13 @@ def run(unknown_arguments=False):
     runner = Runner(context, writer)
 
     prepare = Prepare(context)
-    runner.prepare = prepare
+    runner._prepare = prepare
 
     postprocessing = PostProcessing(context, writer)
-    runner.postprocessing = postprocessing
+    runner._postprocessing = postprocessing
 
     event = Event(context)
-    runner.event = event
+    runner._event = event
 
     start = time.time()
 

@@ -10,15 +10,15 @@ class TestBash(TestCase):
 
         snapshot = CpuTimeSnapshot.from_bash(cpu_time)
 
-        self.assertEqual(snapshot.user, '6993159')
-        self.assertEqual(snapshot.nice, '247853')
-        self.assertEqual(snapshot.system, '1473357')
-        self.assertEqual(snapshot.idle, '6905504')
+        self.assertEqual(snapshot._user, '6993159')
+        self.assertEqual(snapshot._nice, '247853')
+        self.assertEqual(snapshot._system, '1473357')
+        self.assertEqual(snapshot._idle, '6905504')
 
     def test_memory_snapshot_from_bash(self):
         memory = 'MemTotal:        7577060 kB\nMemFree:         8316 kB\nMemAvailable:         1568016 kB'
 
         snapshot = MemorySnapshot.from_bash(memory)
 
-        self.assertEqual(snapshot.total, '7577060')
-        self.assertEqual(snapshot.available, '1568016')
+        self.assertEqual(snapshot._total, '7577060')
+        self.assertEqual(snapshot._available, '1568016')

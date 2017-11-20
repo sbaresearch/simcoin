@@ -11,38 +11,38 @@ import write
 
 class Parser:
     def __init__(self, context, writer):
-        self.context = context
-        self.writer = writer
-        self.pool = None
+        self._context = context
+        self._writer = writer
+        self._pool = None
 
         logging.info('Created parser with host={} and node={} log parsers'
                      .format(len(host_parsers), len(node_parsers)))
 
     def execute(self):
-        self.pool = Pool(config.pool_processors)
+        self._pool = Pool(config.pool_processors)
 
         for parser in host_parsers + node_parsers:
             write.write_header_csv(parser.file_name, parser.csv_header)
         logging.info('Created all empty csv files')
 
-        self.pool.starmap(parse, zip(
-            repeat(self.writer,),
+        self._pool.starmap(parse, zip(
+            repeat(self._writer,),
             repeat(config.run_log),
             repeat('simcoin'),
             Chunker.chunkify(config.run_log, config.file_chunk_size),
             repeat(host_parsers),
         ))
 
-        for node in self.context.nodes.values():
-            self.pool.starmap(parse, zip(
-                repeat(self.writer),
+        for node in self._context.nodes.values():
+            self._pool.starmap(parse, zip(
+                repeat(self._writer),
                 repeat(node.get_log_file()),
                 repeat(node.name),
                 Chunker.chunkify(node.get_log_file(), config.file_chunk_size),
                 repeat(node_parsers),
             ))
 
-        self.pool.close()
+        self._pool.close()
         logging.info('Finished parsing of run_log and all node logs')
 
 
@@ -72,11 +72,11 @@ class Event:
     csv_header = ['timestamp', 'node']
 
     def __init__(self, timestamp, node):
-        self.timestamp = timestamp
-        self.node = node
+        self._timestamp = timestamp
+        self._node = node
 
     def vars_to_array(self):
-        return [self.timestamp, self.node]
+        return [self._timestamp, self._node]
 
 
 class BlockCreateEvent(Event):
@@ -84,9 +84,9 @@ class BlockCreateEvent(Event):
     file_name = 'blocks_create_raw.csv'
     file_name_after_R_preprocessing = 'blocks_create.csv'
 
-    def __init__(self, timestamp, node, hash):
+    def __init__(self, timestamp, node, _hash):
         super().__init__(timestamp, node)
-        self.hash = hash
+        self._hash = _hash
 
     @classmethod
     def from_log_line(cls, line, node):
@@ -103,7 +103,7 @@ class BlockCreateEvent(Event):
         )
 
     def vars_to_array(self):
-        return Event.vars_to_array(self) + [self.hash]
+        return Event.vars_to_array(self) + [self._hash]
 
 
 class BlockStatsEvent(Event):
@@ -113,8 +113,8 @@ class BlockStatsEvent(Event):
 
     def __init__(self, timestamp, node, total_size, txs):
         super().__init__(timestamp, node)
-        self.total_size = total_size
-        self.txs = txs
+        self._total_size = total_size
+        self._txs = txs
 
     @classmethod
     def from_log_line(cls, line, node):
@@ -133,7 +133,7 @@ class BlockStatsEvent(Event):
         )
 
     def vars_to_array(self):
-        return Event.vars_to_array(self) + [self.total_size, self.txs]
+        return Event.vars_to_array(self) + [self._total_size, self._txs]
 
 
 class UpdateTipEvent(Event):
@@ -141,11 +141,11 @@ class UpdateTipEvent(Event):
     file_name = 'update_tip_raw.csv'
     file_name_after_R_preprocessing = 'update_tip.csv'
 
-    def __init__(self, timestamp, node, block_hash, height, tx):
+    def __init__(self, timestamp, node, _hash, height, tx):
         super().__init__(timestamp, node)
-        self.block_hash = block_hash
-        self.height = height
-        self.tx = tx
+        self._hash = _hash
+        self._height = height
+        self._tx = tx
 
     @classmethod
     def from_log_line(cls, line, node):
@@ -167,7 +167,7 @@ class UpdateTipEvent(Event):
         )
 
     def vars_to_array(self):
-        return Event.vars_to_array(self) + [self.block_hash, self.height, self.tx]
+        return Event.vars_to_array(self) + [self._hash, self._height, self._tx]
 
 
 class PeerLogicValidationEvent(Event):
@@ -175,9 +175,9 @@ class PeerLogicValidationEvent(Event):
     file_name = 'peer_logic_validation_raw.csv'
     file_name_after_R_preprocessing = 'peer_logic_validation.csv'
 
-    def __init__(self, timestamp, node, block_hash):
+    def __init__(self, timestamp, node, _hash):
         super().__init__(timestamp, node)
-        self.block_hash = block_hash
+        self._hash = _hash
 
     @classmethod
     def from_log_line(cls, line, node):
@@ -195,7 +195,7 @@ class PeerLogicValidationEvent(Event):
         )
 
     def vars_to_array(self):
-        return Event.vars_to_array(self) + [self.block_hash]
+        return Event.vars_to_array(self) + [self._hash]
 
 
 class TxEvent(Event):
@@ -203,9 +203,9 @@ class TxEvent(Event):
     file_name = 'txs_raw.csv'
     file_name_after_R_preprocessing = 'txs.csv'
 
-    def __init__(self, timestamp, node, tx_hash):
+    def __init__(self, timestamp, node, _hash):
         super().__init__(timestamp, node)
-        self.tx_hash = tx_hash
+        self._hash = _hash
 
     @classmethod
     def from_log_line(cls, line, node):
@@ -221,7 +221,7 @@ class TxEvent(Event):
         )
 
     def vars_to_array(self):
-        return Event.vars_to_array(self) + [self.tx_hash]
+        return Event.vars_to_array(self) + [self._hash]
 
 
 class TickEvent:
@@ -229,14 +229,14 @@ class TickEvent:
     file_name = 'tick_infos.csv'
 
     def __init__(self, timestamp, source, number, planned_start, actual_start, duration, txs, blocks):
-        self.timestamp = timestamp
-        self.source = source
-        self.number = number
-        self.planned_start = planned_start
-        self.actual_start = actual_start
-        self.duration = duration
-        self.txs = txs
-        self.blocks = blocks
+        self._timestamp = timestamp
+        self._source = source
+        self._number = number
+        self._planned_start = planned_start
+        self._actual_start = actual_start
+        self._duration = duration
+        self._txs = txs
+        self._blocks = blocks
 
     @classmethod
     def from_log_line(cls, line, source):
@@ -259,8 +259,8 @@ class TickEvent:
         )
 
     def vars_to_array(self):
-        return [self.timestamp, self.source, self.number, self.planned_start, self.actual_start, self.duration,
-                self.txs, self.blocks]
+        return [self._timestamp, self._source, self._number, self._planned_start, self._actual_start, self._duration,
+                self._txs, self._blocks]
 
 
 class ReceivedEvent(Event):
@@ -337,11 +337,11 @@ class ExceptionEvent(Event):
 
     def __init__(self, timestamp, node, source, exception):
         super().__init__(timestamp, node)
-        self.exception = exception
-        self.source = source
+        self._source = source
+        self._exception = exception
 
     def vars_to_array(self):
-        return Event.vars_to_array(self) + [self.source, self.exception]
+        return Event.vars_to_array(self) + [self._source, self._exception]
 
 
 class BlockExceptionEvent(ExceptionEvent):
@@ -390,10 +390,10 @@ class RPCExceptionEvent(Event):
 
     def __init__(self, timestamp, node, source, method, exception, retries_left):
         super().__init__(timestamp, node)
-        self.source = source
-        self.method = method
-        self.exception = exception
-        self.retries_left = retries_left
+        self._source = source
+        self._method = method
+        self._exception = exception
+        self._retries_left = retries_left
 
     @classmethod
     def from_log_line(cls, line, node):
@@ -414,7 +414,7 @@ class RPCExceptionEvent(Event):
         )
 
     def vars_to_array(self):
-        return Event.vars_to_array(self) + [self.source, self.method, self.exception, self.retries_left]
+        return Event.vars_to_array(self) + [self._source, self._method, self._exception, self._retries_left]
 
 
 class ParseException(Exception):

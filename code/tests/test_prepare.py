@@ -26,7 +26,7 @@ class TestPrepare(TestCase):
         nodes = [node_0, node_1]
         self.context.nodes.values.return_value = nodes
 
-        self.prepare.pool = MagicMock()
+        self.prepare._pool = MagicMock()
         self.prepare.give_nodes_spendable_coins()
 
         self.assertEqual(node_0.execute_rpc.call_count, 2)
