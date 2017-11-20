@@ -80,7 +80,7 @@ class Prepare:
             logging.info('Generated {} blocks for node={} for their tx-chains'.format(amount_of_tx_chains, node.name))
 
         _wait_until_height_reached(nodes[0], amount_of_tx_chains * len(nodes))
-        nodes[0].execute_cli('generate', config.blocks_needed_to_make_coinbase_spendable)
+        nodes[0].generate_blocks(config.blocks_needed_to_make_coinbase_spendable)
         current_height = config.blocks_needed_to_make_coinbase_spendable + amount_of_tx_chains * len(nodes)
 
         self._pool.starmap(_wait_until_height_reached, zip(nodes, itertools.repeat(current_height)))

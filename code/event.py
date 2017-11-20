@@ -57,7 +57,7 @@ class Event:
         elif cmd_parts[0] == 'block':
             node = self._context.nodes[cmd_parts[1]]
             try:
-                node.generate_block()
+                node.generate_blocks()
             except JSONRPCError:
                 logging.exception('Could not generate block for node={}'.format(node.name))
             self._blocks_count += 1

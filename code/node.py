@@ -161,9 +161,9 @@ class BitcoinNode(Node):
                 signed_raw_transaction
             )
 
-    def generate_block(self):
+    def generate_blocks(self, amount=1):
         logging.debug('{} trying to generate block'.format(self._name))
-        block_hash = self.execute_rpc('generate', 1)
+        block_hash = self.execute_rpc('generate', amount)
         logging.info('{} generated block with hash={}'.format(self._name, block_hash))
 
     def generate_tx(self):
