@@ -13,6 +13,7 @@ def run_node(node, cmd, path):
             ' ' + node.docker_image +
             ' bash -c "' + cmd + '"')
 
+
 def exec_cmd(node, cmd):
     return 'docker exec {}{} {}'.format(config.prefix, node, cmd)
 
