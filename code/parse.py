@@ -280,12 +280,12 @@ class TickEvent:
 class ReceivedEvent(Event):
     csv_header = Event.csv_header + ['hash']
 
-    def __init__(self, timestamp, node, obj_hash):
+    def __init__(self, timestamp, node, _hash):
         super().__init__(timestamp, node)
-        self.obj_hash = obj_hash
+        self._hash = _hash
 
     def vars_to_array(self):
-        return Event.vars_to_array(self) + [self.obj_hash]
+        return Event.vars_to_array(self) + [self._hash]
 
 
 class BlockReceivedEvent(ReceivedEvent):
