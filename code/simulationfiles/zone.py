@@ -1,5 +1,6 @@
 import ipaddress
 import config
+from collections import namedtuple
 
 
 class Zone:
@@ -11,12 +12,9 @@ class Zone:
         if latency not in self.zones:
             self.counter += 1
 
-            self.zones[latency] = ZoneConfig(ipaddress.ip_network(config.ip_zones.format(self.counter)), latency)
+            network = ipaddress.ip_network(config.ip_zones.format(self.counter))
+            self.zones[latency] = ZoneConfig(network, network.hosts(), latency)
         return next(self.zones[latency].hosts)
 
 
-class ZoneConfig:
-    def __init__(self, network, latency):
-        self.network = network
-        self.hosts = network.hosts()
-        self.latency = latency
+ZoneConfig = namedtuple('ZoneConfig', 'network hosts latency')
