@@ -10,12 +10,12 @@ class CliStats:
         self._writer = writer
 
     def execute(self):
-        persist_consensus_chain(self.calc_consensus_chain())
-        self.persist_node_stats()
+        _persist_consensus_chain(self._calc_consensus_chain())
+        self._persist_node_stats()
 
         logging.info('Executed cli stats')
 
-    def calc_consensus_chain(self):
+    def _calc_consensus_chain(self):
         height = self._context.first_block_height
         nodes = self._context.nodes.values()
         consensus_chain = []
@@ -51,7 +51,7 @@ class CliStats:
                      .format(len(consensus_chain), len(nodes), height - 1))
         return consensus_chain
 
-    def persist_node_stats(self):
+    def _persist_node_stats(self):
         tips = []
         for node in self._context.nodes.values():
             tips.extend([Tip.from_dict(node.name, chain_tip) for chain_tip in node.execute_rpc('getchaintips')])
@@ -60,7 +60,7 @@ class CliStats:
         logging.info('Collected and persisted {} tips'.format(len(tips)))
 
 
-def persist_consensus_chain(chain):
+def _persist_consensus_chain(chain):
     with open(config.consensus_chain_csv, 'w') as file:
         file.write('hash\n')
         file.writelines('\n'.join(chain))

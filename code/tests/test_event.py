@@ -23,13 +23,13 @@ class TestEvent(TestCase):
             mock = MagicMock()
             mock.args.tick_duration = 1
             e = Event(mock)
-            e.execute_cmd = MagicMock()
+            e._execute_cmd = MagicMock()
 
             m_time.return_value = 0
 
             e.execute()
 
-            self.assertEqual(e.execute_cmd.call_count, 3)
+            self.assertEqual(e._execute_cmd.call_count, 3)
             self.assertTrue(m_sleep.called)
 
     @patch('time.time')
@@ -47,13 +47,13 @@ class TestEvent(TestCase):
             mock = MagicMock()
             mock.args.tick_duration = 1
             e = Event(mock)
-            e.execute_cmd = MagicMock()
+            e._execute_cmd = MagicMock()
 
             m_time.return_value = 0
 
             e.execute()
 
-            self.assertEqual(e.execute_cmd.call_count, 2)
+            self.assertEqual(e._execute_cmd.call_count, 2)
             self.assertTrue(m_sleep.call_count, 2)
 
     @patch('utils.check_for_file', lambda file: None)
@@ -69,8 +69,8 @@ class TestEvent(TestCase):
             mock = MagicMock()
             mock.args.tick_duration = 0
             e = Event(mock)
-            e.execute_cmd = MagicMock()
-            e.execute_cmd.side_effect = Exception('mock')
+            e._execute_cmd = MagicMock()
+            e._execute_cmd.side_effect = Exception('mock')
 
             e.execute()
             self.assertRegex(m_error.call_args[0][0], 'Simulation could not .*')
@@ -80,7 +80,7 @@ class TestEvent(TestCase):
         cmd = 'block node-1'
         e = Event(MagicMock())
         e._context.nodes = {'node-1': node_1}
-        e.execute_cmd(cmd)
+        e._execute_cmd(cmd)
 
         self.assertTrue(node_1.generate_block.called)
 
@@ -89,7 +89,7 @@ class TestEvent(TestCase):
 
         e = Event(MagicMock())
         e.generate_tx = MagicMock()
-        e.execute_cmd('')
+        e._execute_cmd('')
 
         self.assertFalse(node_1.execute_rpc.called)
         self.assertFalse(e.generate_tx.called)
@@ -101,7 +101,7 @@ class TestEvent(TestCase):
         e = Event(MagicMock())
         e.generate_tx = MagicMock()
         e._context.nodes = {'node-1': node}
-        e.execute_cmd(cmd)
+        e._execute_cmd(cmd)
 
         self.assertTrue(node.generate_tx.called)
 
@@ -111,7 +111,7 @@ class TestEvent(TestCase):
         e._context.nodes = {'node-1': {}}
 
         with self.assertRaises(Exception) as context:
-            e.execute_cmd(cmd)
+            e._execute_cmd(cmd)
 
         self.assertTrue('Unknown cmd' in str(context.exception))
 
@@ -122,16 +122,16 @@ class TestEvent(TestCase):
         context.nodes = {'node-1': node}
 
         e = Event(context)
-        e.execute_cmd('tx node-1')
+        e._execute_cmd('tx node-1')
 
     def test_calc_analyze_skip_ticks_1(self):
-        tick_count = event.calc_analyze_skip_ticks(.1, 50)
+        tick_count = event._calc_analyze_skip_ticks(.1, 50)
         self.assertEqual(tick_count, 10)
 
     def test_calc_analyze_skip_ticks_2(self):
-        tick_count = event.calc_analyze_skip_ticks(.1, .05)
+        tick_count = event._calc_analyze_skip_ticks(.1, .05)
         self.assertEqual(tick_count, 20)
 
     def test_calc_analyze_skip_ticks_3(self):
-        tick_count = event.calc_analyze_skip_ticks(100, 50)
+        tick_count = event._calc_analyze_skip_ticks(100, 50)
         self.assertEqual(tick_count, 1)

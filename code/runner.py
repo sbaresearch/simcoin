@@ -22,7 +22,7 @@ class Runner:
         self._q_memory = queue.Queue()
         self._system_monitor = threading.Thread(
             target=systemmonitor.run, args=(self._pill2kill,
-                                            calculate_frequency(
+                                            _calculate_frequency(
                                                 self._context.args.tick_duration,
                                                 self._context.args.amount_of_ticks),
                                             self._q_cpu_time, self._q_memory))
@@ -39,7 +39,7 @@ class Runner:
             self._event.execute()
             logging.info('End of simulation')
 
-            self.persist_system_snapshots()
+            self._persist_system_snapshots()
 
             self._context.step_times.append(StepTimes(time.time(), 'postprocessing_start'))
             self._postprocessing.execute()
@@ -47,7 +47,7 @@ class Runner:
             self._postprocessing.clean_up_docker()
             raise exce
 
-    def persist_system_snapshots(self):
+    def _persist_system_snapshots(self):
         self._pill2kill.set()
         self._system_monitor.join()
         cpu_times = list(self._q_cpu_time.queue)
@@ -79,7 +79,7 @@ class StepTimes:
         return [self._timestamp, self._type]
 
 
-def calculate_frequency(tick_duration, amount_of_ticks):
+def _calculate_frequency(tick_duration, amount_of_ticks):
     frequency = math.ceil(tick_duration * amount_of_ticks / config.amount_of_system_snapshots)
     logging.info('With tick_duration={}, amount_of_ticks={} and amount_of_system_snapshots={}'
                  ' the system monitor needs to take every {}s a snapshot'

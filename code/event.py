@@ -27,7 +27,7 @@ class Event:
                     line = line.rstrip()
                     cmds = line.split(',')
                     for cmd in cmds:
-                        self.execute_cmd(cmd)
+                        self._execute_cmd(cmd)
 
                     planned_start_next_tick = start_time + (i + 1) * self._context.args.tick_duration
                     current_time = time.time()
@@ -44,7 +44,7 @@ class Event:
         except Exception:
             logging.exception('Simulation could not execute all events because of an exception')
 
-    def execute_cmd(self, cmd):
+    def _execute_cmd(self, cmd):
         cmd_parts = cmd.split(' ')
 
         if cmd_parts[0] == 'tx':
@@ -67,7 +67,7 @@ class Event:
             raise SimulationException('Unknown cmd={} in {}-file'.format(cmd_parts[0], config.ticks_csv))
 
 
-def calc_analyze_skip_ticks(blocks_per_tick, tx_per_tick):
+def _calc_analyze_skip_ticks(blocks_per_tick, tx_per_tick):
     return max([1, math.ceil(1/blocks_per_tick), math.ceil(1/tx_per_tick)])
 
 

@@ -19,7 +19,7 @@ node_groups = [
     ]
 
 
-def create_parser():
+def _create_parser():
     parser = argparse.ArgumentParser()
 
     for node_group in node_groups:
@@ -35,7 +35,7 @@ def create_parser():
 def create(unknown_arguments=False):
     logging.info('Called nodes config')
 
-    parser = create_parser()
+    parser = _create_parser()
     if unknown_arguments:
         args = parser.parse_known_args(sys.argv[2:])[0]
     else:
@@ -50,11 +50,11 @@ def create(unknown_arguments=False):
             if len(node_args) != config.number_of_node_group_arguments:
                 parser.exit(-1, 'Pass all {} arguments [amount] [share] [latency] [docker-image] for {}\n'
                             .format(config.number_of_node_group_arguments, node_group['variable']))
-            check_if_image_exists(node_args)
+            _check_if_image_exists(node_args)
 
-            nodes.extend(create_node_group(node_args, node_group['variable'], index + 1))
+            nodes.extend(_create_node_group(node_args, node_group['variable'], index + 1))
 
-    check_if_share_sum_is_1(nodes)
+    _check_if_share_sum_is_1(nodes)
 
     logging.info('Created {}:'.format(config.nodes_csv))
     print(json.dumps([node for node in nodes], indent=4))
@@ -67,7 +67,7 @@ def create(unknown_arguments=False):
     logging.info('End nodes config')
 
 
-def check_if_image_exists(node_args):
+def _check_if_image_exists(node_args):
     docker_image = str(node_args[3])
 
     return_value = bash.call_silent(dockercmd.inspect(docker_image))
@@ -77,7 +77,7 @@ def check_if_image_exists(node_args):
         exit(-1)
 
 
-def check_if_share_sum_is_1(nodes):
+def _check_if_share_sum_is_1(nodes):
     sum_of_shares = 0
     for node in nodes:
         sum_of_shares += node.share
@@ -87,7 +87,7 @@ def check_if_share_sum_is_1(nodes):
         exit(-1)
 
 
-def create_node_group(node_args, group, index):
+def _create_node_group(node_args, group, index):
     amount = int(node_args[0])
     share = float(node_args[1])
     latency = int(node_args[2])

@@ -22,26 +22,26 @@ class Prepare:
 
         logging.info('Begin of prepare step')
 
-        self.prepare_simulation_dir()
+        self._prepare_simulation_dir()
 
-        remove_old_containers_if_exists()
-        recreate_network()
+        _remove_old_containers_if_exists()
+        _recreate_network()
 
-        self.give_nodes_spendable_coins()
+        self._give_nodes_spendable_coins()
 
-        self.start_nodes()
+        self._start_nodes()
 
         self._pool.close()
 
         logging.info('End of prepare step')
 
-    def give_nodes_spendable_coins(self):
+    def _give_nodes_spendable_coins(self):
         nodes = list(self._context.nodes.values())
         cbs = []
         for i, node in enumerate(nodes):
             cbs.append(
                 self._pool.apply_async(
-                    start_node,
+                    _start_node,
                     args=(node,
                           DEFAULT_HTTP_TIMEOUT,
                           0,
@@ -52,7 +52,7 @@ class Prepare:
         for cb in cbs:
             cb.get()
 
-        amount_of_tx_chains = calc_number_of_tx_chains(
+        amount_of_tx_chains = _calc_number_of_tx_chains(
             self._context.args.txs_per_tick,
             self._context.args.blocks_per_tick,
             len(nodes)
@@ -60,26 +60,26 @@ class Prepare:
         logging.info('Each node receives {} tx-chains'.format(amount_of_tx_chains))
 
         for i, node in enumerate(nodes):
-            wait_until_height_reached(node, i * amount_of_tx_chains)
+            _wait_until_height_reached(node, i * amount_of_tx_chains)
             node.execute_rpc('generate', amount_of_tx_chains)
             logging.info('Generated {} blocks for node={} for their tx-chains'.format(amount_of_tx_chains, node.name))
 
-        wait_until_height_reached(nodes[0], amount_of_tx_chains * len(nodes))
+        _wait_until_height_reached(nodes[0], amount_of_tx_chains * len(nodes))
         nodes[0].execute_cli('generate', config.blocks_needed_to_make_coinbase_spendable)
         current_height = config.blocks_needed_to_make_coinbase_spendable + amount_of_tx_chains * len(nodes)
 
-        self._pool.starmap(wait_until_height_reached, zip(nodes, itertools.repeat(current_height)))
+        self._pool.starmap(_wait_until_height_reached, zip(nodes, itertools.repeat(current_height)))
 
-        self._pool.map(transfer_coinbase_tx_to_normal_tx, nodes)
+        self._pool.map(_transfer_coinbase_tx_to_normal_tx, nodes)
 
         for i, node in enumerate(nodes):
-            wait_until_height_reached(node, current_height + i)
+            _wait_until_height_reached(node, current_height + i)
             node.execute_rpc('generate', 1)
 
         current_height += len(nodes)
         self._context.first_block_height = current_height
 
-        self._pool.starmap(wait_until_height_reached, zip(
+        self._pool.starmap(_wait_until_height_reached, zip(
                 nodes,
                 itertools.repeat(current_height)
         ))
@@ -87,16 +87,16 @@ class Prepare:
         self._pool.map(node_utils.rm_peers_file, nodes)
         node_utils.graceful_rm(self._pool, nodes)
 
-    def start_nodes(self):
+    def _start_nodes(self):
         nodes = self._context.nodes.values()
 
-        self._pool.starmap(start_node, zip(
+        self._pool.starmap(_start_node, zip(
             nodes,
             itertools.repeat(config.rpc_simulation_timeout),
             itertools.repeat(self._context.first_block_height)
         ))
 
-        self._pool.starmap(add_latency, zip(
+        self._pool.starmap(_add_latency, zip(
             self._context.nodes.values(),
             itertools.repeat(self._context.zone.zones)
         ))
@@ -104,7 +104,7 @@ class Prepare:
         logging.info('All nodes for the simulation are started')
         utils.sleep(3 + len(self._context.nodes) * 0.2)
 
-    def prepare_simulation_dir(self):
+    def _prepare_simulation_dir(self):
         if not os.path.exists(self._context.run_dir):
             os.makedirs(self._context.run_dir)
 
@@ -120,14 +120,14 @@ class Prepare:
         logging.info('Simulation directory created')
 
 
-def start_node(node, timeout=DEFAULT_HTTP_TIMEOUT, height=0, connect_to_ips=None):
+def _start_node(node, timeout=DEFAULT_HTTP_TIMEOUT, height=0, connect_to_ips=None):
     node.run(connect_to_ips)
     node.connect_to_rpc(timeout)
     node.wait_until_rpc_ready()
-    wait_until_height_reached(node, height)
+    _wait_until_height_reached(node, height)
 
 
-def transfer_coinbase_tx_to_normal_tx(node):
+def _transfer_coinbase_tx_to_normal_tx(node):
     node.generate_spent_to_address()
     node.create_tx_chains()
     node.transfer_coinbases_to_normal_tx()
@@ -138,18 +138,18 @@ def connect(node):
     node.connect()
 
 
-def add_latency(node, zones):
+def _add_latency(node, zones):
     node.add_latency(zones)
 
 
-def remove_old_containers_if_exists():
+def _remove_old_containers_if_exists():
     containers = bash.check_output(dockercmd.ps_containers())
     if len(containers) > 0:
         bash.check_output(dockercmd.remove_all_containers(), lvl=logging.DEBUG)
         logging.info('Old containers removed')
 
 
-def recreate_network():
+def _recreate_network():
     exit_code = bash.call_silent(dockercmd.inspect_network())
     if exit_code == 0:
         bash.check_output(dockercmd.rm_network())
@@ -158,13 +158,13 @@ def recreate_network():
     utils.sleep(1)
 
 
-def wait_until_height_reached(node, height):
+def _wait_until_height_reached(node, height):
     while int(node.execute_rpc('getblockcount')) < height:
         logging.debug('Waiting until node={} reached height={}...'.format(node.name, str(height)))
         utils.sleep(0.2)
 
 
-def wait_until_height_reached_cli(node, height):
+def _wait_until_height_reached_cli(node, height):
     msg = bash.check_output(
         "docker exec simcoin-{} bash -c '"
         "  while "
@@ -180,7 +180,7 @@ def wait_until_height_reached_cli(node, height):
     logging.debug('Waiting until {}'.format(str(msg)))
 
 
-def calc_number_of_tx_chains(txs_per_tick, blocks_per_tick, number_of_nodes):
+def _calc_number_of_tx_chains(txs_per_tick, blocks_per_tick, number_of_nodes):
     txs_per_block = txs_per_tick / blocks_per_tick
     txs_per_block_per_node = txs_per_block / number_of_nodes
 

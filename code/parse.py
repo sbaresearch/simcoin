@@ -25,7 +25,7 @@ class Parser:
             write.write_header_csv(parser.file_name, parser.csv_header)
         logging.info('Created all empty csv files')
 
-        self._pool.starmap(parse, zip(
+        self._pool.starmap(_parse, zip(
             repeat(self._writer,),
             repeat(config.run_log),
             repeat('simcoin'),
@@ -34,7 +34,7 @@ class Parser:
         ))
 
         for node in self._context.nodes.values():
-            self._pool.starmap(parse, zip(
+            self._pool.starmap(_parse, zip(
                 repeat(self._writer),
                 repeat(node.get_log_file()),
                 repeat(node.name),
@@ -46,7 +46,7 @@ class Parser:
         logging.info('Finished parsing of run_log and all node logs')
 
 
-def parse(writer, log_file, name, chunk, parsers):
+def _parse(writer, log_file, name, chunk, parsers):
     parsed_objects = {}
     for line in Chunker.parse(Chunker.read(log_file, chunk)):
         for parser in parsers:
@@ -63,7 +63,7 @@ def parse(writer, log_file, name, chunk, parsers):
                  .format(len(parsed_objects), chunk, log_file, log_file))
 
 
-def parse_datetime(date_time):
+def _parse_datetime(date_time):
     parsed_date_time = datetime.strptime(date_time, config.log_time_format)
     return parsed_date_time.replace(tzinfo=pytz.UTC).timestamp()
 
@@ -101,7 +101,7 @@ class BlockCreateEvent(Event):
             raise ParseException("Didn't match 'CreateNewBlock' log line.")
 
         return cls(
-            parse_datetime(match.group(1)),
+            _parse_datetime(match.group(1)),
             node,
             str(match.group(2)),
         )
@@ -132,7 +132,7 @@ class BlockStatsEvent(Event):
             raise ParseException("Didn't match 'CreateNewBlock' log line.")
 
         return cls(
-            parse_datetime(match.group(1)),
+            _parse_datetime(match.group(1)),
             node,
             int(match.group(2)),
             int(match.group(3)),
@@ -167,7 +167,7 @@ class UpdateTipEvent(Event):
             raise ParseException("Didn't match 'UpdateTip' log line.")
 
         return cls(
-            parse_datetime(match.group(1)),
+            _parse_datetime(match.group(1)),
             node,
             str(match.group(2)),
             int(match.group(3)),
@@ -199,7 +199,7 @@ class PeerLogicValidationEvent(Event):
             raise ParseException("Didn't match 'PeerLogicValidation' log line.")
 
         return cls(
-            parse_datetime(match.group(1)),
+            _parse_datetime(match.group(1)),
             node,
             str(match.group(2))
         )
@@ -227,7 +227,7 @@ class TxEvent(Event):
             raise ParseException("Didn't match 'AddToWallet' log line.")
 
         return cls(
-            parse_datetime(match.group(1)),
+            _parse_datetime(match.group(1)),
             node,
             str(match.group(2)),
         )
@@ -262,7 +262,7 @@ class TickEvent:
             raise ParseException("Didn't match 'Tick' log line.")
 
         return cls(
-            parse_datetime(match.group(1)),
+            _parse_datetime(match.group(1)),
             source,
             int(match.group(2)),
             float(match.group(3)),
@@ -300,7 +300,7 @@ class BlockReceivedEvent(ReceivedEvent):
             raise ParseException("Didn't match 'Received block' log line.")
 
         return cls(
-            parse_datetime(match.group(1)),
+            _parse_datetime(match.group(1)),
             node,
             str(match.group(2)),
         )
@@ -320,7 +320,7 @@ class BlockReconstructEvent(ReceivedEvent):
             raise ParseException("Didn't match 'Reconstructed block' log line.")
 
         return cls(
-            parse_datetime(match.group(1)),
+            _parse_datetime(match.group(1)),
             node,
             str(match.group(2)),
         )
@@ -340,7 +340,7 @@ class TxReceivedEvent(ReceivedEvent):
             raise ParseException("Didn't match 'AcceptToMemoryPool' log line.")
 
         return cls(
-            parse_datetime(match.group(1)),
+            _parse_datetime(match.group(1)),
             node,
             str(match.group(3)),
         )
@@ -373,7 +373,7 @@ class BlockExceptionEvent(ExceptionEvent):
             raise ParseException("Didn't match 'Block exception' log line.")
 
         return cls(
-            parse_datetime(match.group(1)),
+            _parse_datetime(match.group(1)),
             str(match.group(2)),
             node,
             str(match.group(3))
@@ -393,7 +393,7 @@ class TxExceptionEvent(ExceptionEvent):
             raise ParseException("Didn't match 'Tx exception' log line.")
 
         return cls(
-            parse_datetime(match.group(1)),
+            _parse_datetime(match.group(1)),
             str(match.group(2)),
             node,
             str(match.group(3))
@@ -423,7 +423,7 @@ class RPCExceptionEvent(Event):
             raise ParseException("Didn't match 'RPC exception' log line.")
 
         return cls(
-            parse_datetime(match.group(1)),
+            _parse_datetime(match.group(1)),
             str(match.group(3)),
             node,
             str(match.group(2)),

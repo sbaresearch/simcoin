@@ -24,7 +24,7 @@ commands = {
 }
 
 
-def parse_args():
+def _parse_args():
     parser = argparse.ArgumentParser()
 
     parser.add_argument('--verbose'
@@ -81,7 +81,7 @@ def main():
 
     bitcoin.SelectParams('regtest')
 
-    args = parse_args()
+    args = _parse_args()
     utils.config_logger(args.verbose)
     logging.info("Arguments called with: {}".format(sys.argv))
     logging.info("Parsed arguments in simcoin.py: {}".format(args))

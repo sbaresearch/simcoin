@@ -9,7 +9,7 @@ import utils
 import logging
 
 
-def create_parser():
+def _create_parser():
     parser = argparse.ArgumentParser()
 
     parser.add_argument('--seed'
@@ -33,7 +33,7 @@ def create(unknown_arguments=False):
     utils.check_for_file(config.nodes_csv)
     nodes = utils.read_csv(config.nodes_csv)
 
-    parser = create_parser()
+    parser = _create_parser()
     if unknown_arguments:
         args = parser.parse_known_args(sys.argv[2:])[0]
     else:
@@ -43,11 +43,11 @@ def create(unknown_arguments=False):
 
     random.seed(args.seed)
 
-    header = create_header(nodes)
+    header = _create_header(nodes)
 
-    matrix = create_matrix(header, args.connectivity)
+    matrix = _create_matrix(header, args.connectivity)
 
-    if check_if_fully_connected(matrix) is not True:
+    if _check_if_fully_connected(matrix) is not True:
         raise Exception("Not all nodes a reachable. Consider to raise the connectivity.")
 
     logging.info('Created {}:'.format(config.network_csv))
@@ -59,7 +59,7 @@ def create(unknown_arguments=False):
     logging.info('End network config')
 
 
-def create_header(nodes):
+def _create_header(nodes):
     header = ['']
     for node in nodes:
         name = node.name
@@ -68,7 +68,7 @@ def create_header(nodes):
     return header
 
 
-def create_matrix(header, connectivity):
+def _create_matrix(header, connectivity):
     length = len(header)
     matrix = [[] for _ in range(length)]
 
@@ -93,13 +93,13 @@ def create_matrix(header, connectivity):
     return matrix
 
 
-def check_if_fully_connected(matrix):
-    connected = recursive_check(matrix)
+def _check_if_fully_connected(matrix):
+    connected = _recursive_check(matrix)
 
     return len(connected) == len(matrix) - 1
 
 
-def recursive_check(matrix, visited=None, start=1):
+def _recursive_check(matrix, visited=None, start=1):
     if visited is None:
         visited = {key: False for key in range(1, len(matrix))}
 
@@ -109,7 +109,7 @@ def recursive_check(matrix, visited=None, start=1):
     output = [start]
     for neighbour in range(1, len(matrix)):
         if matrix[start][neighbour] > 0:
-            output.extend(recursive_check(matrix, visited, neighbour))
+            output.extend(_recursive_check(matrix, visited, neighbour))
     return output
 
 

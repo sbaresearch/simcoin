@@ -9,7 +9,7 @@ from simulationfiles.nodes_config import NodeConfig
 class TestNetworkConfig(TestCase):
 
     def test_create_header(self, ):
-        header = network_config.create_header([
+        header = network_config._create_header([
             NodeConfig('group', 'node-1', 0, 0, None),
             NodeConfig('group', 'node-2', 0, 0, None)
         ])
@@ -21,7 +21,7 @@ class TestNetworkConfig(TestCase):
         header = ['', 'node-0', 'node-1', 'node-2']
         connectivity = 1
 
-        matrix = network_config.create_matrix(header, connectivity)
+        matrix = network_config._create_matrix(header, connectivity)
         for i in range(1, len(header)):
             for j in range(1, i):
                 if i != j:
@@ -32,7 +32,7 @@ class TestNetworkConfig(TestCase):
         header = ['', 'node-0', 'node-1', 'node-2']
         connectivity = 0
 
-        matrix = network_config.create_matrix(header, connectivity)
+        matrix = network_config._create_matrix(header, connectivity)
         for i in range(1, len(matrix)):
             for j in range(1, len(matrix)):
                 if i != j:
@@ -62,7 +62,7 @@ class TestNetworkConfig(TestCase):
             ['node-0',  1,          0],
             ['node-1',  0,          1]
         ]
-        fully_connected = network_config.check_if_fully_connected(matrix)
+        fully_connected = network_config._check_if_fully_connected(matrix)
 
         self.assertFalse(fully_connected)
 
@@ -72,7 +72,7 @@ class TestNetworkConfig(TestCase):
             ['node-0',  1,          1],
             ['node-1',  1,          1]
         ]
-        fully_connected = network_config.check_if_fully_connected(matrix)
+        fully_connected = network_config._check_if_fully_connected(matrix)
 
         self.assertTrue(fully_connected)
 
@@ -83,7 +83,7 @@ class TestNetworkConfig(TestCase):
             ['node-1',  0,          1,          1],
             ['node-2',  1,          1,          1]
         ]
-        fully_connected = network_config.check_if_fully_connected(matrix)
+        fully_connected = network_config._check_if_fully_connected(matrix)
 
         self.assertTrue(fully_connected)
 
@@ -94,7 +94,7 @@ class TestNetworkConfig(TestCase):
             ['node-1',  0,          1,          0],
             ['node-2',  1,          0,          1]
         ]
-        fully_connected = network_config.check_if_fully_connected(matrix)
+        fully_connected = network_config._check_if_fully_connected(matrix)
 
         self.assertFalse(fully_connected)
 
@@ -107,7 +107,7 @@ class TestNetworkConfig(TestCase):
             ['node-3',  1,          0,          0,          1],
 
         ]
-        fully_connected = network_config.check_if_fully_connected(matrix)
+        fully_connected = network_config._check_if_fully_connected(matrix)
 
         self.assertFalse(fully_connected)
 
@@ -120,6 +120,6 @@ class TestNetworkConfig(TestCase):
             ['node-3',  0,          0,          0,          1],
 
         ]
-        fully_connected = network_config.check_if_fully_connected(matrix)
+        fully_connected = network_config._check_if_fully_connected(matrix)
 
         self.assertFalse(fully_connected)

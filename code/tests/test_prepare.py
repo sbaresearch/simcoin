@@ -27,7 +27,7 @@ class TestPrepare(TestCase):
         self.context.nodes.values.return_value = nodes
 
         self.prepare._pool = MagicMock()
-        self.prepare.give_nodes_spendable_coins()
+        self.prepare._give_nodes_spendable_coins()
 
         self.assertEqual(node_0.execute_rpc.call_count, 2)
         self.assertEqual(node_1.execute_rpc.call_count, 2)
@@ -39,7 +39,7 @@ class TestPrepare(TestCase):
     def test_prepare_simulation_dir(self, m_open, m_check_output, m_makedirs, m_exists):
         m_exists.return_value = False
 
-        self.prepare.prepare_simulation_dir()
+        self.prepare._prepare_simulation_dir()
 
         self.assertEqual(m_makedirs.call_count, 2)
         self.assertEqual(m_check_output.call_count, 9)
@@ -48,7 +48,7 @@ class TestPrepare(TestCase):
     def test_remove_old_containers_if_exists(self, m_check_output):
         m_check_output.return_value = ['container1', 'container2']
 
-        prepare.remove_old_containers_if_exists()
+        prepare._remove_old_containers_if_exists()
 
         self.assertEqual(m_check_output.call_count, 2)
 
@@ -56,7 +56,7 @@ class TestPrepare(TestCase):
     def test_remove_old_containers_if_exists_no_old_containers(self, m_check_output):
         m_check_output.return_value = []
 
-        prepare.remove_old_containers_if_exists()
+        prepare._remove_old_containers_if_exists()
 
         self.assertEqual(m_check_output.call_count, 1)
 
@@ -66,7 +66,7 @@ class TestPrepare(TestCase):
     def test_recreate_network(self, m_check_output, m_call_silent):
         m_call_silent.return_value = 0
 
-        prepare.recreate_network()
+        prepare._recreate_network()
 
         self.assertEqual(m_check_output.call_count, 2)
         self.assertEqual(m_call_silent.call_count, 1)
@@ -77,7 +77,7 @@ class TestPrepare(TestCase):
     def test_recreate_network_no_network(self, m_check_output, m_call_silent):
         m_call_silent.return_value = -1
 
-        prepare.recreate_network()
+        prepare._recreate_network()
 
         self.assertEqual(m_check_output.call_count, 1)
 
@@ -85,7 +85,7 @@ class TestPrepare(TestCase):
     def test_wait_until_height_reached(self, m_sleep):
         node = MagicMock()
         node.execute_rpc.side_effect = ['0', '9', '10']
-        prepare.wait_until_height_reached(node, 10)
+        prepare._wait_until_height_reached(node, 10)
 
         self.assertEqual(m_sleep.call_count, 2)
 
@@ -93,12 +93,12 @@ class TestPrepare(TestCase):
     def test_wait_until_height_reached_already_reached(self, m_sleep):
         node = MagicMock()
         node.execute_rpc.return_value = '10'
-        prepare.wait_until_height_reached(node, 10)
+        prepare._wait_until_height_reached(node, 10)
 
         self.assertFalse(m_sleep.called)
 
     def test_calc_number_of_tx_chains(self):
         config.max_in_mempool_ancestors = 25
-        amount = prepare.calc_number_of_tx_chains(2, 1/600, 10)
+        amount = prepare._calc_number_of_tx_chains(2, 1 / 600, 10)
 
         self.assertEqual(amount, 51)

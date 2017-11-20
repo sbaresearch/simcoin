@@ -32,20 +32,20 @@ class PostProcessing:
         self.clean_up_docker()
 
         logging.info(config.log_line_run_end + self._context.run_name)
-        flush_log_handlers()
-        extract_from_file(config.log_file, config.run_log,
-                          config.log_line_run_start + self._context.run_name,
-                          config.log_line_run_end + self._context.run_name)
+        _flush_log_handlers()
+        _extract_from_file(config.log_file, config.run_log,
+                           config.log_line_run_start + self._context.run_name,
+                           config.log_line_run_end + self._context.run_name)
 
         parser = Parser(self._context, self._writer)
         parser.execute()
 
-        collect_general_infos()
+        _collect_general_infos()
 
         self._context.step_times.append(StepTimes(time.time(), 'postprocessing_end'))
         self._writer.write_csv(config.step_times_csv_file_name, StepTimes.csv_header, self._context.step_times)
 
-        create_report()
+        _create_report()
 
         self._pool.close()
         self._thread_pool.close()
@@ -64,11 +64,11 @@ class PostProcessing:
         logging.info('Fixed permissions of dirs used by docker')
 
 
-def collect_general_infos():
+def _collect_general_infos():
     general_infos = {
-        'total_memory': try_cmd('cat /proc/meminfo | sed -n 1p | grep -ohE [0-9]+'),
-        'cpu_model': try_cmd("lscpu | grep -oP 'Model name:\s+\K(.*)'"),
-        'cpus': try_cmd("lscpu | grep -oP 'CPU\(s\):\s+\K([0-9]+)$'"),
+        'total_memory': _try_cmd('cat /proc/meminfo | sed -n 1p | grep -ohE [0-9]+'),
+        'cpu_model': _try_cmd("lscpu | grep -oP 'Model name:\s+\K(.*)'"),
+        'cpus': _try_cmd("lscpu | grep -oP 'CPU\(s\):\s+\K([0-9]+)$'"),
     }
 
     with open(config.general_infos_csv, 'w') as file:
@@ -77,13 +77,13 @@ def collect_general_infos():
         writer.writerow(general_infos.values())
 
 
-def flush_log_handlers():
+def _flush_log_handlers():
     for handler in logging.getLogger().handlers:
         handler.flush()
     logging.debug('Flushed all logging handlers')
 
 
-def extract_from_file(source, destination, start, end):
+def _extract_from_file(source, destination, start, end):
     with open(source, 'r') as source_file:
         with open(destination, 'w') as destination_file:
             write = False
@@ -101,14 +101,14 @@ def extract_from_file(source, destination, start, end):
                   .format(source, destination, start, end))
 
 
-def try_cmd(cmd):
+def _try_cmd(cmd):
     try:
         return bash.check_output(cmd)
     except subprocess.CalledProcessError:
         return 'cmd={} failed'.format(cmd)
 
 
-def create_report():
+def _create_report():
     bash.check_output(rcmd.preprocess(config.postprocessing_dir))
     bash.check_output(rcmd.create_report(config.postprocessing_dir))
     logging.info('Created report in folder={}'.format(config.postprocessing_dir))

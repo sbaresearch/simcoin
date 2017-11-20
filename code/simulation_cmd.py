@@ -13,7 +13,7 @@ import argparse
 from simulationfiles import checkargs
 
 
-def create_parser():
+def _create_parser():
     parser = argparse.ArgumentParser()
 
     parser.add_argument('--skip-ticks'
@@ -33,7 +33,7 @@ def run(unknown_arguments=False):
     for file in [config.ticks_csv, config.network_csv, config.nodes_csv]:
         utils.check_for_file(file)
 
-    parser = create_parser()
+    parser = _create_parser()
     if unknown_arguments:
         args = parser.parse_known_args(sys.argv[2:])[0]
     else:
@@ -41,7 +41,7 @@ def run(unknown_arguments=False):
     logging.info("Parsed arguments in {}: {}".format(__name__, args))
     utils.update_args(args)
 
-    check_skip_ticks(args.skip_ticks)
+    _check_skip_ticks(args.skip_ticks)
 
     context = Context()
 
@@ -69,7 +69,7 @@ def run(unknown_arguments=False):
     logging.info("The duration of the run was {} seconds".format(str(time.time() - start)))
 
 
-def check_skip_ticks(skip_ticks):
+def _check_skip_ticks(skip_ticks):
     amount_of_ticks = 0
     with open(config.ticks_csv, 'r') as file:
         for _ in file:
