@@ -57,8 +57,8 @@ class TestTicksConfig(TestCase):
 
         self.assertEqual(len(block_events), 10)
 
-    @patch('simulationfiles.ticks_config.calc_expected_events', lambda a, b: 5)
-    @patch('simulationfiles.ticks_config.create_block_series', lambda a, b, c: [10, 11, 9])
+    @patch('simulationfiles.ticks_config._calc_expected_events', lambda a, b: 5)
+    @patch('simulationfiles.ticks_config._create_block_series', lambda a, b, c: [10, 11, 9])
     def test_create_block_events(self):
         nodes = [NodeConfig('group', 'node-0', 0.5, 0, None), NodeConfig('group', 'node-1', 0.5, 0, None)]
         amount_of_ticks = 10

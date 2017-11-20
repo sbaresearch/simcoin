@@ -8,9 +8,9 @@ class TestTccmd(TestCase):
 
     def test_create(self):
         zones = {
-            0: ZoneConfig(ipaddress.ip_network('240.1.0.0/16'), 0),
-            100: ZoneConfig(ipaddress.ip_network('240.2.0.0/16'), 100),
-            200: ZoneConfig(ipaddress.ip_network('240.3.0.0/16'), 200),
+            0: ZoneConfig(ipaddress.ip_network('240.1.0.0/16'), ipaddress.ip_network('240.1.0.0/16').hosts(), 0),
+            100: ZoneConfig(ipaddress.ip_network('240.2.0.0/16'), ipaddress.ip_network('240.2.0.0/16').hosts(), 100),
+            200: ZoneConfig(ipaddress.ip_network('240.3.0.0/16'), ipaddress.ip_network('240.3.0.0/16').hosts(), 200),
         }
 
         cmds = tccmd.create('node-0', zones, 100)[0]

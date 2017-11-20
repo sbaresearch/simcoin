@@ -82,7 +82,7 @@ class TestEvent(TestCase):
         e._context.nodes = {'node-1': node_1}
         e._execute_cmd(cmd)
 
-        self.assertTrue(node_1.generate_block.called)
+        self.assertTrue(node_1.generate_blocks.called)
 
     def test_execute_cmd_with_block_cmd_with_empty_cmd(self):
         node_1 = MagicMock()
