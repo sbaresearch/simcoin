@@ -44,7 +44,6 @@ def run(unknown_arguments=False):
     check_skip_ticks(args.skip_ticks)
 
     context = Context()
-    context.create()
 
     logging.info(config.log_line_run_start + context.run_name)
 

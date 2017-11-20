@@ -14,10 +14,25 @@ class Context:
         self._args = utils.read_args()
         self._zone = Zone()
 
-        self._nodes = None
-
         self._first_block_height = None
         self._step_times = []
+
+        node_configs = utils.read_csv(config.nodes_csv)
+        self._nodes = OrderedDict([])
+
+        for node_config in node_configs:
+            self.nodes.update({node_config.name: PublicBitcoinNode(
+                node_config.name, node_config.group,
+                self.zone.get_ip(node_config.latency),
+                node_config.latency, node_config.docker_image,
+                self.run_dir + node_config.name)})
+
+        connections = network_config.read_connections()
+        for node in self.nodes.values():
+            node.set_outgoing_ips(
+                [self.nodes[connection].ip for connection in connections[node.name]]
+            )
+
 
     @property
     def run_name(self):
@@ -50,20 +65,3 @@ class Context:
     @property
     def step_times(self):
         return self._step_times
-
-    def create(self):
-        node_configs = utils.read_csv(config.nodes_csv)
-
-        self._nodes = OrderedDict([])
-        for node_config in node_configs:
-            self.nodes.update({node_config.name: PublicBitcoinNode(
-                node_config.name, node_config.group,
-                self.zone.get_ip(node_config.latency),
-                node_config.latency, node_config.docker_image,
-                self.run_dir + node_config.name)})
-
-        connections = network_config.read_connections()
-        for node in self.nodes.values():
-            node.set_outgoing_ips(
-                [self.nodes[connection].ip for connection in connections[node.name]]
-            )
