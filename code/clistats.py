@@ -68,6 +68,8 @@ def persist_consensus_chain(chain):
 
 
 class Tip:
+    __slots__ = ['_node', '_status', '_branchlen']
+
     csv_header = ['node', 'status', 'branchlen']
     file_name = 'tips.csv'
 

@@ -28,6 +28,7 @@ def collect(q_cpu_time, q_memory):
 
 
 class CpuTimeSnapshot:
+    __slots__ = ['_timestamp', '_user', '_nice', '_system', '_idle']
     file_name = 'cpu_time.csv'
     csv_header = ['timestamp', 'user', 'nice', 'system', 'idle']
 
@@ -49,6 +50,8 @@ class CpuTimeSnapshot:
 
 
 class MemorySnapshot:
+    __slots__ = ['_timestamp', '_total', '_available']
+
     file_name = 'memory.csv'
     csv_header = ['timestamp', 'total', 'available']
 

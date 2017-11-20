@@ -67,6 +67,8 @@ class Runner:
 
 
 class StepTimes:
+    __slots__ = ['_timestamp', '_type']
+
     csv_header = ['timestamp', 'type']
 
     def __init__(self, timestamp, _type):

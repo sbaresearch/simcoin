@@ -69,6 +69,8 @@ def parse_datetime(date_time):
 
 
 class Event:
+    __slots__ = ['_timestamp', '_node']
+
     csv_header = ['timestamp', 'node']
 
     def __init__(self, timestamp, node):
@@ -80,6 +82,8 @@ class Event:
 
 
 class BlockCreateEvent(Event):
+    __slots__ = ['_hash']
+
     csv_header = Event.csv_header + ['hash']
     file_name = 'blocks_create_raw.csv'
     file_name_after_R_preprocessing = 'blocks_create.csv'
@@ -107,6 +111,8 @@ class BlockCreateEvent(Event):
 
 
 class BlockStatsEvent(Event):
+    __slots__ = ['_total_size', '_txs']
+
     csv_header = Event.csv_header + ['total_size', 'txs']
     file_name = 'blocks_stats_raw.csv'
     file_name_after_R_preprocessing = 'blocks_stats.csv'
@@ -137,6 +143,8 @@ class BlockStatsEvent(Event):
 
 
 class UpdateTipEvent(Event):
+    __slots__ = ['_hash', '_height', '_tx']
+
     csv_header = Event.csv_header + ['hash', 'height', 'tx']
     file_name = 'update_tip_raw.csv'
     file_name_after_R_preprocessing = 'update_tip.csv'
@@ -171,6 +179,8 @@ class UpdateTipEvent(Event):
 
 
 class PeerLogicValidationEvent(Event):
+    __slots__ = ['_hash']
+
     csv_header = Event.csv_header + ['hash']
     file_name = 'peer_logic_validation_raw.csv'
     file_name_after_R_preprocessing = 'peer_logic_validation.csv'
@@ -199,6 +209,8 @@ class PeerLogicValidationEvent(Event):
 
 
 class TxEvent(Event):
+    __slots__ = ['_hash']
+
     csv_header = Event.csv_header + ['hash']
     file_name = 'txs_raw.csv'
     file_name_after_R_preprocessing = 'txs.csv'
@@ -225,6 +237,8 @@ class TxEvent(Event):
 
 
 class TickEvent:
+    __slots__ = ['_timestamp', '_source', '_number', '_planned_start', '_actual_start', '_duration', '_txs', '_blocks']
+
     csv_header = ['timestamp', 'source', 'number', 'planned_start', 'actual_start', 'duration', 'txs', 'blocks']
     file_name = 'tick_infos.csv'
 
@@ -333,6 +347,8 @@ class TxReceivedEvent(ReceivedEvent):
 
 
 class ExceptionEvent(Event):
+    __slots__ = ['_source', '_exception']
+
     csv_header = Event.csv_header + ['source', 'exception']
 
     def __init__(self, timestamp, node, source, exception):
@@ -385,6 +401,8 @@ class TxExceptionEvent(ExceptionEvent):
 
 
 class RPCExceptionEvent(Event):
+    __slots__ = ['_timestamp', '_node', '_source', '_method', '_exception', '_retries_left']
+
     csv_header = Event.csv_header + ['source', 'method', 'exception', 'retries_left']
     file_name = 'rpc_exceptions.csv'
 

@@ -20,6 +20,8 @@ from bitcoin.rpc import DEFAULT_HTTP_TIMEOUT
 
 
 class Node:
+    __slots__ = ['_name', '_ip', '_docker_image', '_group']
+
     def __init__(self, name, group, ip, docker_image):
         self._name = name
         self._ip = ip
@@ -38,16 +40,9 @@ class Node:
         return self._ip
 
 
-class PublicNode:
-    def __init__(self, latency):
-        self._latency = latency
-        self._outgoing_ips = []
-
-    def set_outgoing_ips(self, outgoing_ips):
-        self._outgoing_ips = outgoing_ips
-
-
 class BitcoinNode(Node):
+    __slots__ = ['_path', '_spent_to', '_rpc_connection', '_current_tx_chain_index', '_tx_chains']
+
     def __init__(self, name, group, ip, docker_image, path):
         super().__init__(name, group, ip, docker_image)
         self._path = path
@@ -255,10 +250,16 @@ class BitcoinNode(Node):
         return tx_chain
 
 
-class PublicBitcoinNode(BitcoinNode, PublicNode):
+class PublicBitcoinNode(BitcoinNode):
+    __slots__ = ['_latency', '_outgoing_ips']
+
     def __init__(self, name, group, ip, latency, docker_image, path):
         BitcoinNode.__init__(self, name, group, ip, docker_image, path)
-        PublicNode.__init__(self, latency)
+        self._latency = latency
+        self._outgoing_ips = []
+
+    def set_outgoing_ips(self, outgoing_ips):
+        self._outgoing_ips = outgoing_ips
 
     def add_latency(self, zones):
         for cmd in tccmd.create(self._name, zones, self._latency):
@@ -272,6 +273,8 @@ class PublicBitcoinNode(BitcoinNode, PublicNode):
 
 
 class TxChain:
+    __slots__ = ['_current_unspent_tx', '_address', '_seckey', '_amount']
+
     def __init__(self, current_unspent_tx, address, seckey, amount):
         self._current_unspent_tx = current_unspent_tx
         self._address = address
