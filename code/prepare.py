@@ -35,6 +35,21 @@ class Prepare:
 
         logging.info('End of prepare step')
 
+    def _prepare_simulation_dir(self):
+        if not os.path.exists(self._context.run_dir):
+            os.makedirs(self._context.run_dir)
+
+        if os.path.islink(config.soft_link_to_run_dir):
+            bash.check_output('unlink {}'.format(config.soft_link_to_run_dir))
+        bash.check_output('cd {}; ln -s {} {}'.format(config.data_dir, self._context.run_name, config.last_run))
+        os.makedirs(config.postprocessing_dir)
+
+        for file in [config.network_csv_file_name, config.ticks_csv_file_name,
+                     config.nodes_csv_file_name, config.args_csv_file_name]:
+            bash.check_output('cp {}{} {}'.format(config.data_dir, file, self._context.run_dir))
+            bash.check_output('cd {}; ln -s ../{} {}'.format(config.postprocessing_dir, file, file))
+        logging.info('Simulation directory created')
+
     def _give_nodes_spendable_coins(self):
         nodes = list(self._context.nodes.values())
         cbs = []
@@ -104,20 +119,22 @@ class Prepare:
         logging.info('All nodes for the simulation are started')
         utils.sleep(3 + len(self._context.nodes) * 0.2)
 
-    def _prepare_simulation_dir(self):
-        if not os.path.exists(self._context.run_dir):
-            os.makedirs(self._context.run_dir)
 
-        if os.path.islink(config.soft_link_to_run_dir):
-            bash.check_output('unlink {}'.format(config.soft_link_to_run_dir))
-        bash.check_output('cd {}; ln -s {} {}'.format(config.data_dir, self._context.run_name, config.last_run))
-        os.makedirs(config.postprocessing_dir)
+def _remove_old_containers_if_exists():
+    containers = bash.check_output(dockercmd.ps_containers())
+    if len(containers) > 0:
+        bash.check_output(dockercmd.remove_all_containers(), lvl=logging.DEBUG)
+        logging.info('Old containers removed')
 
-        for file in [config.network_csv_file_name, config.ticks_csv_file_name,
-                     config.nodes_csv_file_name, config.args_csv_file_name]:
-            bash.check_output('cp {}{} {}'.format(config.data_dir, file, self._context.run_dir))
-            bash.check_output('cd {}; ln -s ../{} {}'.format(config.postprocessing_dir, file, file))
-        logging.info('Simulation directory created')
+
+def _calc_number_of_tx_chains(txs_per_tick, blocks_per_tick, number_of_nodes):
+    txs_per_block = txs_per_tick / blocks_per_tick
+    txs_per_block_per_node = txs_per_block / number_of_nodes
+
+    # 10 times + 3 chains in reserve
+    needed_tx_chains = (txs_per_block_per_node / config.max_in_mempool_ancestors) * 10 + 3
+
+    return math.ceil(needed_tx_chains)
 
 
 def _start_node(node, timeout=DEFAULT_HTTP_TIMEOUT, height=0, connect_to_ips=None):
@@ -138,13 +155,6 @@ def _add_latency(node, zones):
     node.add_latency(zones)
 
 
-def _remove_old_containers_if_exists():
-    containers = bash.check_output(dockercmd.ps_containers())
-    if len(containers) > 0:
-        bash.check_output(dockercmd.remove_all_containers(), lvl=logging.DEBUG)
-        logging.info('Old containers removed')
-
-
 def _recreate_network():
     exit_code = bash.call_silent(dockercmd.inspect_network())
     if exit_code == 0:
@@ -158,13 +168,3 @@ def _wait_until_height_reached(node, height):
     while int(node.execute_rpc('getblockcount')) < height:
         logging.debug('Waiting until node={} reached height={}...'.format(node.name, str(height)))
         utils.sleep(0.2)
-
-
-def _calc_number_of_tx_chains(txs_per_tick, blocks_per_tick, number_of_nodes):
-    txs_per_block = txs_per_tick / blocks_per_tick
-    txs_per_block_per_node = txs_per_block / number_of_nodes
-
-    # 10 times + 3 chains in reserve
-    needed_tx_chains = (txs_per_block_per_node / config.max_in_mempool_ancestors) * 10 + 3
-
-    return math.ceil(needed_tx_chains)
