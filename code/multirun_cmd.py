@@ -67,14 +67,16 @@ def run():
     network_config.create(unknown_arguments=True)
 
     for i in range(args.repeat):
-        logging.info('Starting {}/{} simulation'.format(i + 1, args.repeat))
+        run_number = str(i + 1)
+        logging.info('Starting {}/{} simulation'.format(run_number, args.repeat))
 
-        utils.update_args(Namespace(tag_appendix='_' + str(i + 1)))
+        utils.update_args(Namespace(tag_appendix='_' + run_number))
         simulation_cmd.run(unknown_arguments=True)
 
         bash.check_output('cp -r {}/postprocessing {}/run-{}'
-                          .format(config.soft_link_to_run_dir, config.soft_link_to_multi_run_dir, i + 1))
-        logging.info('Finished {}/{} simulation'.format(i + 1, args.repeat))
+                          .format(config.soft_link_to_run_dir, config.soft_link_to_multi_run_dir, run_number))
+        bash.check_output('cp {} {}/run-{}'.format(config.run_log, config.soft_link_to_multi_run_dir, run_number))
+        logging.info('Finished {}/{} simulation'.format(run_number, args.repeat))
 
     for file in [config.args_csv, config.ticks_csv, config.analysed_ticks_csv,
                  config.general_infos_csv, config.nodes_csv, config.network_csv]:
