@@ -51,6 +51,14 @@ The outcome after 200 simulation was a standard deviation of XY with median XY f
 ## Credits
 Ground idea and initial development by Andreas Kern.
 
-Developed in collaboration with Aljosha Judmayer and [SBA-Research](https://www.sba-research.org/).
+&nbsp;
 
-Sponsored by [Netidee](https://www.netidee.at/).
+<img src="https://github.com/simonmulser/simcoin/blob/master/graphics/sba_logo.jpg" alt="Image of SBA-Research logo" style="width: 314px;"/>
+
+Developed in collaboration with Aljosha Judmayer and [SBA-Research](https://www.sba-research.org/) in the context of a thesis.
+
+&nbsp;
+
+<img src="https://github.com/simonmulser/simcoin/blob/master/graphics/netidee_logo_scholarship.jpg" alt="Image of netidee logo scholarship" style="width: 330px;"/>
+
+Additional outcome of a thesis sponsored by [Netidee](https://www.netidee.at/) Scholarship 12th Call, year 2017/2018.
