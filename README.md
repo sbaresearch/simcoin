@@ -17,8 +17,7 @@ Simcoin facilitates simulations of realistic bitcoin networks. The network creat
 The actual limits of the simulation software depend on the specs of the used host machine and restrictions imposed by the operating system such as a maximum number of connections over the network interface.
 
 At 12/2017 the simulation software was able to simulate the following scenario:
-*
-*
+* todo!
 
 on a host machine with the specs:
 * QEMU Virtual CPU version 2.5+ with 16 CPUs
