@@ -10,15 +10,12 @@ ip_range = "240.0.0.0/4"
 ip_zones = '240.{}.0.0/16'
 
 standard_image = 'simcoin/patched:v2'
+number_of_node_group_arguments = 4
 
 network_name = 'simcoin-network'
 prefix = 'simcoin-'
 node_prefix = 'node-'
 node_name = node_prefix + '{}.{}'
-selfish_node_prefix = 'selfish-node-'
-selfish_node_proxy_postfix = '-proxy'
-selfish_node_name = selfish_node_prefix + '{}'
-selfish_node_proxy_name = selfish_node_name + selfish_node_proxy_postfix
 
 max_wait_time_bitcoin_runs_out = 30
 
@@ -65,7 +62,6 @@ args_csv = data_dir + args_csv_file_name
 
 bitcoin_data_dir = '/data'
 client_dir = bitcoin_data_dir + '/regtest'
-proxy_client_dir = '/tmp'
 
 preprocess_r_file_name = 'preprocess.R'
 report_rmd_file_name = 'report.Rmd'

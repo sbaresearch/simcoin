@@ -7,8 +7,7 @@ import config
 class TestBitcoincmd(TestCase):
 
     def test_start(self):
-        node = MagicMock()
-        cmd = bitcoincmd.start(node, '/path', ['ip1', 'ip2'])
+        cmd = bitcoincmd.start('node-1', '1.1.1.1', 'image', '/path', ['ip1', 'ip2'])
 
         self.assertTrue('  ' not in cmd)
 

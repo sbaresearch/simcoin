@@ -24,7 +24,7 @@ commands = {
 }
 
 
-def parse_args():
+def _parse_args():
     parser = argparse.ArgumentParser()
 
     parser.add_argument('--verbose'
@@ -35,10 +35,6 @@ def parse_args():
     parser.add_argument('--tag'
                         , default='run'
                         , help='Tag that will be added to every csv file.'
-                        )
-
-    parser.add_argument('--selfish-args'
-                        , help='General selfish args for selfish mining nodes.'
                         )
 
     args = parser.parse_known_args(sys.argv[2:])[0]
@@ -85,7 +81,7 @@ def main():
 
     bitcoin.SelectParams('regtest')
 
-    args = parse_args()
+    args = _parse_args()
     utils.config_logger(args.verbose)
     logging.info("Arguments called with: {}".format(sys.argv))
     logging.info("Parsed arguments in simcoin.py: {}".format(args))

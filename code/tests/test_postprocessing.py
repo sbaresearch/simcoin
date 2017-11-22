@@ -26,7 +26,7 @@ class TestPostProcessing(TestCase):
         m.return_value.__iter__ = lambda self: self
         m.return_value.__next__ = lambda self: next(iter(self.readline, ''))
         with patch('builtins.open', m) as m_open:
-            postprocessing.extract_from_file('source_file', 'destination_file', 'start', 'end')
+            postprocessing._extract_from_file('source_file', 'destination_file', 'start', 'end')
 
             self.assertEqual(m_open.call_count, 2)
             self.assertEqual(m_open.call_args_list[0][0][0], 'source_file')

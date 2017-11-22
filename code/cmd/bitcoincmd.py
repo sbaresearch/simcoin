@@ -24,12 +24,12 @@ args = {
 }
 
 
-def start(node, path, connect_to_ips):
+def start(name, ip, docker_image, path, connect_to_ips):
     return_args = args.copy()
     cmd = transform_to_cmd(return_args)
-    for ip in connect_to_ips:
-        cmd += ' -connect=' + str(ip)
-    return dockercmd.run_node(node, cmd, path)
+    for _ip in connect_to_ips:
+        cmd += ' -connect=' + str(_ip)
+    return dockercmd.run_node(name, ip, docker_image, cmd, path)
 
 
 def transform_to_cmd(args_to_transform):

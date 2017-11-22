@@ -42,7 +42,7 @@ files_to_concat = [
 ]
 
 
-def parse_args():
+def _parse_args():
     parser = argparse.ArgumentParser()
 
     parser.add_argument('--repeat'
@@ -57,10 +57,10 @@ def parse_args():
 
 
 def run():
-    args = parse_args()
+    args = _parse_args()
     logging.info("Parsed arguments in {}: {}".format(__name__, args))
 
-    prepare()
+    _prepare()
 
     nodes_config.create(unknown_arguments=True)
     ticks_config.create(unknown_arguments=True)
@@ -81,13 +81,13 @@ def run():
     for file in [config.args_csv, config.ticks_csv, config.analysed_ticks_csv,
                  config.general_infos_csv, config.nodes_csv, config.network_csv]:
         bash.check_output('cp {} {}/.'.format(file, config.soft_link_to_multi_run_dir))
-    concat_files()
+    _concat_files()
 
     bash.check_output(rcmd.create_report(config.soft_link_to_multi_run_dir))
     logging.info('Created report in folder={}'.format(config.soft_link_to_multi_run_dir))
 
 
-def prepare():
+def _prepare():
     os.makedirs(config.multi_run_dir)
 
     if os.path.islink(config.soft_link_to_multi_run_dir):
@@ -95,7 +95,7 @@ def prepare():
     bash.check_output('cd {}; ln -s {} {}'.format(config.data_dir, config.multi_run_dir_name, config.last_multi_run))
 
 
-def concat_files():
+def _concat_files():
     for file in files_to_concat:
         bash.check_output('head -n 1 {}/run-1/{} > {}/{}'
                           .format(config.multi_run_dir, file, config.multi_run_dir, file))

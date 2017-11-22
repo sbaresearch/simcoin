@@ -13,12 +13,12 @@ def run(stop_event, frequency, q_cpu_time, q_memory):
     next_execution = time.time()
 
     while not stop_event.wait(0):
-        scheduler.enterabs(next_execution, PRIORITY, collect, (q_cpu_time, q_memory,))
+        scheduler.enterabs(next_execution, PRIORITY, _collect, (q_cpu_time, q_memory,))
         scheduler.run()
         next_execution += frequency
 
 
-def collect(q_cpu_time, q_memory):
+def _collect(q_cpu_time, q_memory):
     cpu_time = bash.check_output('cat /proc/stat | head -1')
     memory = bash.check_output('cat /proc/meminfo | head -3')
     q_cpu_time.put(CpuTimeSnapshot.from_bash(cpu_time))
@@ -28,15 +28,16 @@ def collect(q_cpu_time, q_memory):
 
 
 class CpuTimeSnapshot:
+    __slots__ = ['_timestamp', '_user', '_nice', '_system', '_idle']
     file_name = 'cpu_time.csv'
     csv_header = ['timestamp', 'user', 'nice', 'system', 'idle']
 
     def __init__(self, timestamp, user, nice, system, idle):
-        self.timestamp = timestamp
-        self.user = user
-        self.nice = nice
-        self.system = system
-        self.idle = idle
+        self._timestamp = timestamp
+        self._user = user
+        self._nice = nice
+        self._system = system
+        self._idle = idle
 
     @classmethod
     def from_bash(cls, cpu_time):
@@ -45,17 +46,19 @@ class CpuTimeSnapshot:
         return snapshot
 
     def vars_to_array(self):
-        return [self.timestamp, self.user, self.nice, self.system, self.idle]
+        return [self._timestamp, self._user, self._nice, self._system, self._idle]
 
 
 class MemorySnapshot:
+    __slots__ = ['_timestamp', '_total', '_available']
+
     file_name = 'memory.csv'
     csv_header = ['timestamp', 'total', 'available']
 
     def __init__(self, timestamp, total, available):
-        self.timestamp = timestamp
-        self.total = total
-        self.available = available
+        self._timestamp = timestamp
+        self._total = total
+        self._available = available
 
     @classmethod
     def from_bash(cls, memory):
@@ -64,4 +67,4 @@ class MemorySnapshot:
         return snapshot
 
     def vars_to_array(self):
-        return [self.timestamp, self.total, self.available]
+        return [self._timestamp, self._total, self._available]

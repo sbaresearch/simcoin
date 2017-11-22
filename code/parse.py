@@ -11,42 +11,42 @@ import write
 
 class Parser:
     def __init__(self, context, writer):
-        self.context = context
-        self.writer = writer
-        self.pool = None
+        self._context = context
+        self._writer = writer
+        self._pool = None
 
         logging.info('Created parser with host={} and node={} log parsers'
                      .format(len(host_parsers), len(node_parsers)))
 
     def execute(self):
-        self.pool = Pool(config.pool_processors)
+        self._pool = Pool(config.pool_processors)
 
         for parser in host_parsers + node_parsers:
             write.write_header_csv(parser.file_name, parser.csv_header)
         logging.info('Created all empty csv files')
 
-        self.pool.starmap(parse, zip(
-            repeat(self.writer,),
+        self._pool.starmap(_parse, zip(
+            repeat(self._writer,),
             repeat(config.run_log),
             repeat('simcoin'),
             Chunker.chunkify(config.run_log, config.file_chunk_size),
             repeat(host_parsers),
         ))
 
-        for node in self.context.all_bitcoin_nodes.values():
-            self.pool.starmap(parse, zip(
-                repeat(self.writer),
+        for node in self._context.nodes.values():
+            self._pool.starmap(_parse, zip(
+                repeat(self._writer),
                 repeat(node.get_log_file()),
                 repeat(node.name),
                 Chunker.chunkify(node.get_log_file(), config.file_chunk_size),
                 repeat(node_parsers),
             ))
 
-        self.pool.close()
+        self._pool.close()
         logging.info('Finished parsing of run_log and all node logs')
 
 
-def parse(writer, log_file, name, chunk, parsers):
+def _parse(writer, log_file, name, chunk, parsers):
     parsed_objects = {}
     for line in Chunker.parse(Chunker.read(log_file, chunk)):
         for parser in parsers:
@@ -63,30 +63,34 @@ def parse(writer, log_file, name, chunk, parsers):
                  .format(len(parsed_objects), chunk, log_file, log_file))
 
 
-def parse_datetime(date_time):
+def _parse_datetime(date_time):
     parsed_date_time = datetime.strptime(date_time, config.log_time_format)
     return parsed_date_time.replace(tzinfo=pytz.UTC).timestamp()
 
 
 class Event:
+    __slots__ = ['_timestamp', '_node']
+
     csv_header = ['timestamp', 'node']
 
     def __init__(self, timestamp, node):
-        self.timestamp = timestamp
-        self.node = node
+        self._timestamp = timestamp
+        self._node = node
 
     def vars_to_array(self):
-        return [self.timestamp, self.node]
+        return [self._timestamp, self._node]
 
 
 class BlockCreateEvent(Event):
+    __slots__ = ['_hash']
+
     csv_header = Event.csv_header + ['hash']
     file_name = 'blocks_create_raw.csv'
     file_name_after_R_preprocessing = 'blocks_create.csv'
 
-    def __init__(self, timestamp, node, hash):
+    def __init__(self, timestamp, node, _hash):
         super().__init__(timestamp, node)
-        self.hash = hash
+        self._hash = _hash
 
     @classmethod
     def from_log_line(cls, line, node):
@@ -97,24 +101,26 @@ class BlockCreateEvent(Event):
             raise ParseException("Didn't match 'CreateNewBlock' log line.")
 
         return cls(
-            parse_datetime(match.group(1)),
+            _parse_datetime(match.group(1)),
             node,
             str(match.group(2)),
         )
 
     def vars_to_array(self):
-        return Event.vars_to_array(self) + [self.hash]
+        return Event.vars_to_array(self) + [self._hash]
 
 
 class BlockStatsEvent(Event):
+    __slots__ = ['_total_size', '_txs']
+
     csv_header = Event.csv_header + ['total_size', 'txs']
     file_name = 'blocks_stats_raw.csv'
     file_name_after_R_preprocessing = 'blocks_stats.csv'
 
     def __init__(self, timestamp, node, total_size, txs):
         super().__init__(timestamp, node)
-        self.total_size = total_size
-        self.txs = txs
+        self._total_size = total_size
+        self._txs = txs
 
     @classmethod
     def from_log_line(cls, line, node):
@@ -126,26 +132,28 @@ class BlockStatsEvent(Event):
             raise ParseException("Didn't match 'CreateNewBlock' log line.")
 
         return cls(
-            parse_datetime(match.group(1)),
+            _parse_datetime(match.group(1)),
             node,
             int(match.group(2)),
             int(match.group(3)),
         )
 
     def vars_to_array(self):
-        return Event.vars_to_array(self) + [self.total_size, self.txs]
+        return Event.vars_to_array(self) + [self._total_size, self._txs]
 
 
 class UpdateTipEvent(Event):
+    __slots__ = ['_hash', '_height', '_tx']
+
     csv_header = Event.csv_header + ['hash', 'height', 'tx']
     file_name = 'update_tip_raw.csv'
     file_name_after_R_preprocessing = 'update_tip.csv'
 
-    def __init__(self, timestamp, node, block_hash, height, tx):
+    def __init__(self, timestamp, node, _hash, height, tx):
         super().__init__(timestamp, node)
-        self.block_hash = block_hash
-        self.height = height
-        self.tx = tx
+        self._hash = _hash
+        self._height = height
+        self._tx = tx
 
     @classmethod
     def from_log_line(cls, line, node):
@@ -159,7 +167,7 @@ class UpdateTipEvent(Event):
             raise ParseException("Didn't match 'UpdateTip' log line.")
 
         return cls(
-            parse_datetime(match.group(1)),
+            _parse_datetime(match.group(1)),
             node,
             str(match.group(2)),
             int(match.group(3)),
@@ -167,17 +175,19 @@ class UpdateTipEvent(Event):
         )
 
     def vars_to_array(self):
-        return Event.vars_to_array(self) + [self.block_hash, self.height, self.tx]
+        return Event.vars_to_array(self) + [self._hash, self._height, self._tx]
 
 
 class PeerLogicValidationEvent(Event):
+    __slots__ = ['_hash']
+
     csv_header = Event.csv_header + ['hash']
     file_name = 'peer_logic_validation_raw.csv'
     file_name_after_R_preprocessing = 'peer_logic_validation.csv'
 
-    def __init__(self, timestamp, node, block_hash):
+    def __init__(self, timestamp, node, _hash):
         super().__init__(timestamp, node)
-        self.block_hash = block_hash
+        self._hash = _hash
 
     @classmethod
     def from_log_line(cls, line, node):
@@ -189,23 +199,25 @@ class PeerLogicValidationEvent(Event):
             raise ParseException("Didn't match 'PeerLogicValidation' log line.")
 
         return cls(
-            parse_datetime(match.group(1)),
+            _parse_datetime(match.group(1)),
             node,
             str(match.group(2))
         )
 
     def vars_to_array(self):
-        return Event.vars_to_array(self) + [self.block_hash]
+        return Event.vars_to_array(self) + [self._hash]
 
 
 class TxEvent(Event):
+    __slots__ = ['_hash']
+
     csv_header = Event.csv_header + ['hash']
     file_name = 'txs_raw.csv'
     file_name_after_R_preprocessing = 'txs.csv'
 
-    def __init__(self, timestamp, node, tx_hash):
+    def __init__(self, timestamp, node, _hash):
         super().__init__(timestamp, node)
-        self.tx_hash = tx_hash
+        self._hash = _hash
 
     @classmethod
     def from_log_line(cls, line, node):
@@ -215,28 +227,30 @@ class TxEvent(Event):
             raise ParseException("Didn't match 'AddToWallet' log line.")
 
         return cls(
-            parse_datetime(match.group(1)),
+            _parse_datetime(match.group(1)),
             node,
             str(match.group(2)),
         )
 
     def vars_to_array(self):
-        return Event.vars_to_array(self) + [self.tx_hash]
+        return Event.vars_to_array(self) + [self._hash]
 
 
 class TickEvent:
+    __slots__ = ['_timestamp', '_source', '_number', '_planned_start', '_actual_start', '_duration', '_txs', '_blocks']
+
     csv_header = ['timestamp', 'source', 'number', 'planned_start', 'actual_start', 'duration', 'txs', 'blocks']
     file_name = 'tick_infos.csv'
 
     def __init__(self, timestamp, source, number, planned_start, actual_start, duration, txs, blocks):
-        self.timestamp = timestamp
-        self.source = source
-        self.number = number
-        self.planned_start = planned_start
-        self.actual_start = actual_start
-        self.duration = duration
-        self.txs = txs
-        self.blocks = blocks
+        self._timestamp = timestamp
+        self._source = source
+        self._number = number
+        self._planned_start = planned_start
+        self._actual_start = actual_start
+        self._duration = duration
+        self._txs = txs
+        self._blocks = blocks
 
     @classmethod
     def from_log_line(cls, line, source):
@@ -248,7 +262,7 @@ class TickEvent:
             raise ParseException("Didn't match 'Tick' log line.")
 
         return cls(
-            parse_datetime(match.group(1)),
+            _parse_datetime(match.group(1)),
             source,
             int(match.group(2)),
             float(match.group(3)),
@@ -259,19 +273,19 @@ class TickEvent:
         )
 
     def vars_to_array(self):
-        return [self.timestamp, self.source, self.number, self.planned_start, self.actual_start, self.duration,
-                self.txs, self.blocks]
+        return [self._timestamp, self._source, self._number, self._planned_start, self._actual_start, self._duration,
+                self._txs, self._blocks]
 
 
 class ReceivedEvent(Event):
     csv_header = Event.csv_header + ['hash']
 
-    def __init__(self, timestamp, node, obj_hash):
+    def __init__(self, timestamp, node, _hash):
         super().__init__(timestamp, node)
-        self.obj_hash = obj_hash
+        self._hash = _hash
 
     def vars_to_array(self):
-        return Event.vars_to_array(self) + [self.obj_hash]
+        return Event.vars_to_array(self) + [self._hash]
 
 
 class BlockReceivedEvent(ReceivedEvent):
@@ -286,7 +300,7 @@ class BlockReceivedEvent(ReceivedEvent):
             raise ParseException("Didn't match 'Received block' log line.")
 
         return cls(
-            parse_datetime(match.group(1)),
+            _parse_datetime(match.group(1)),
             node,
             str(match.group(2)),
         )
@@ -306,7 +320,7 @@ class BlockReconstructEvent(ReceivedEvent):
             raise ParseException("Didn't match 'Reconstructed block' log line.")
 
         return cls(
-            parse_datetime(match.group(1)),
+            _parse_datetime(match.group(1)),
             node,
             str(match.group(2)),
         )
@@ -326,22 +340,24 @@ class TxReceivedEvent(ReceivedEvent):
             raise ParseException("Didn't match 'AcceptToMemoryPool' log line.")
 
         return cls(
-            parse_datetime(match.group(1)),
+            _parse_datetime(match.group(1)),
             node,
             str(match.group(3)),
         )
 
 
 class ExceptionEvent(Event):
+    __slots__ = ['_source', '_exception']
+
     csv_header = Event.csv_header + ['source', 'exception']
 
     def __init__(self, timestamp, node, source, exception):
         super().__init__(timestamp, node)
-        self.exception = exception
-        self.source = source
+        self._source = source
+        self._exception = exception
 
     def vars_to_array(self):
-        return Event.vars_to_array(self) + [self.source, self.exception]
+        return Event.vars_to_array(self) + [self._source, self._exception]
 
 
 class BlockExceptionEvent(ExceptionEvent):
@@ -357,7 +373,7 @@ class BlockExceptionEvent(ExceptionEvent):
             raise ParseException("Didn't match 'Block exception' log line.")
 
         return cls(
-            parse_datetime(match.group(1)),
+            _parse_datetime(match.group(1)),
             str(match.group(2)),
             node,
             str(match.group(3))
@@ -377,7 +393,7 @@ class TxExceptionEvent(ExceptionEvent):
             raise ParseException("Didn't match 'Tx exception' log line.")
 
         return cls(
-            parse_datetime(match.group(1)),
+            _parse_datetime(match.group(1)),
             str(match.group(2)),
             node,
             str(match.group(3))
@@ -385,15 +401,17 @@ class TxExceptionEvent(ExceptionEvent):
 
 
 class RPCExceptionEvent(Event):
+    __slots__ = ['_timestamp', '_node', '_source', '_method', '_exception', '_retries_left']
+
     csv_header = Event.csv_header + ['source', 'method', 'exception', 'retries_left']
     file_name = 'rpc_exceptions.csv'
 
     def __init__(self, timestamp, node, source, method, exception, retries_left):
         super().__init__(timestamp, node)
-        self.source = source
-        self.method = method
-        self.exception = exception
-        self.retries_left = retries_left
+        self._source = source
+        self._method = method
+        self._exception = exception
+        self._retries_left = retries_left
 
     @classmethod
     def from_log_line(cls, line, node):
@@ -405,7 +423,7 @@ class RPCExceptionEvent(Event):
             raise ParseException("Didn't match 'RPC exception' log line.")
 
         return cls(
-            parse_datetime(match.group(1)),
+            _parse_datetime(match.group(1)),
             str(match.group(3)),
             node,
             str(match.group(2)),
@@ -414,7 +432,7 @@ class RPCExceptionEvent(Event):
         )
 
     def vars_to_array(self):
-        return Event.vars_to_array(self) + [self.source, self.method, self.exception, self.retries_left]
+        return Event.vars_to_array(self) + [self._source, self._method, self._exception, self._retries_left]
 
 
 class ParseException(Exception):

@@ -6,18 +6,18 @@ import config
 
 class CliStats:
     def __init__(self, context, writer):
-        self.context = context
-        self.writer = writer
+        self._context = context
+        self._writer = writer
 
     def execute(self):
-        persist_consensus_chain(self.calc_consensus_chain())
-        self.persist_node_stats()
+        _persist_consensus_chain(self._calc_consensus_chain())
+        self._persist_node_stats()
 
         logging.info('Executed cli stats')
 
-    def calc_consensus_chain(self):
-        height = self.context.first_block_height
-        nodes = self.context.all_bitcoin_nodes.values()
+    def _calc_consensus_chain(self):
+        height = self._context.first_block_height
+        nodes = self._context.nodes.values()
         consensus_chain = []
         logging.info('Calculating consensus chain starting with height={}'.format(height))
         while True:
@@ -51,16 +51,16 @@ class CliStats:
                      .format(len(consensus_chain), len(nodes), height - 1))
         return consensus_chain
 
-    def persist_node_stats(self):
+    def _persist_node_stats(self):
         tips = []
-        for node in self.context.all_bitcoin_nodes.values():
+        for node in self._context.nodes.values():
             tips.extend([Tip.from_dict(node.name, chain_tip) for chain_tip in node.execute_rpc('getchaintips')])
 
-        self.writer.write_csv(Tip.file_name, Tip.csv_header, tips)
+        self._writer.write_csv(Tip.file_name, Tip.csv_header, tips)
         logging.info('Collected and persisted {} tips'.format(len(tips)))
 
 
-def persist_consensus_chain(chain):
+def _persist_consensus_chain(chain):
     with open(config.consensus_chain_csv, 'w') as file:
         file.write('hash\n')
         file.writelines('\n'.join(chain))
@@ -68,17 +68,19 @@ def persist_consensus_chain(chain):
 
 
 class Tip:
+    __slots__ = ['_node', '_status', '_branchlen']
+
     csv_header = ['node', 'status', 'branchlen']
     file_name = 'tips.csv'
 
     def __init__(self, node, status, branchlen):
-        self.node = node
-        self.status = status
-        self.branchlen = branchlen
+        self._node = node
+        self._status = status
+        self._branchlen = branchlen
 
     @classmethod
     def from_dict(cls, node, chain_tip):
         return cls(node, chain_tip['status'], chain_tip['branchlen'])
 
     def vars_to_array(self):
-        return [self.node, self.status, self.branchlen]
+        return [self._node, self._status, self._branchlen]

@@ -26,9 +26,9 @@ class TestParse(TestCase):
             ' hash:45205cac616c0344721d2552482024528883e9fdf7439bfbfc02567060c56d71', 'node-1'
         )
 
-        self.assertEqual(event.timestamp, datetime(2017, 7, 27, 11, 1, 22, 173139, pytz.UTC).timestamp())
-        self.assertEqual(event.node, 'node-1')
-        self.assertEqual(event.hash, '45205cac616c0344721d2552482024528883e9fdf7439bfbfc02567060c56d71')
+        self.assertEqual(event._timestamp, datetime(2017, 7, 27, 11, 1, 22, 173139, pytz.UTC).timestamp())
+        self.assertEqual(event._node, 'node-1')
+        self.assertEqual(event._hash, '45205cac616c0344721d2552482024528883e9fdf7439bfbfc02567060c56d71')
 
     def test_parse_stats_block(self):
         event = parse.BlockStatsEvent.from_log_line(
@@ -37,10 +37,10 @@ class TestParse(TestCase):
             'node-1'
         )
 
-        self.assertEqual(event.timestamp, datetime(2017, 7, 27, 11, 1, 22, 173139, pytz.UTC).timestamp())
-        self.assertEqual(event.node, 'node-1')
-        self.assertEqual(event.total_size, 226)
-        self.assertEqual(event.txs, 1)
+        self.assertEqual(event._timestamp, datetime(2017, 7, 27, 11, 1, 22, 173139, pytz.UTC).timestamp())
+        self.assertEqual(event._node, 'node-1')
+        self.assertEqual(event._total_size, 226)
+        self.assertEqual(event._txs, 1)
 
     def test_parse_update_tip(self):
         event = parse.UpdateTipEvent.from_log_line(
@@ -50,11 +50,11 @@ class TestParse(TestCase):
             'node-1'
         )
 
-        self.assertEqual(event.timestamp, datetime(2017, 7, 27, 11, 1, 27, 183575, pytz.UTC).timestamp())
-        self.assertEqual(event.node, 'node-1')
-        self.assertEqual(event.block_hash, '1d205cac616c0344721d2552482024528883e9fdf7439bfbfc02567060c56d71')
-        self.assertEqual(event.height, 106)
-        self.assertEqual(event.tx, 113)
+        self.assertEqual(event._timestamp, datetime(2017, 7, 27, 11, 1, 27, 183575, pytz.UTC).timestamp())
+        self.assertEqual(event._node, 'node-1')
+        self.assertEqual(event._hash, '1d205cac616c0344721d2552482024528883e9fdf7439bfbfc02567060c56d71')
+        self.assertEqual(event._height, 106)
+        self.assertEqual(event._tx, 113)
 
     def test_parse_received_block(self):
         event = parse.BlockReceivedEvent.from_log_line(
@@ -64,9 +64,9 @@ class TestParse(TestCase):
             'node-1'
         )
 
-        self.assertEqual(event.timestamp, datetime(2017, 7, 27, 15, 34, 58, 122336, pytz.UTC).timestamp())
-        self.assertEqual(event.node, 'node-1')
-        self.assertEqual(event.obj_hash, '4ec9b518b23d460c01abaf1c6e32ec46dbbfc8c81c599dd71c0c175e2367f278')
+        self.assertEqual(event._timestamp, datetime(2017, 7, 27, 15, 34, 58, 122336, pytz.UTC).timestamp())
+        self.assertEqual(event._node, 'node-1')
+        self.assertEqual(event._hash, '4ec9b518b23d460c01abaf1c6e32ec46dbbfc8c81c599dd71c0c175e2367f278')
 
     def test_successfully_reconstructed_block(self):
         event = parse.BlockReconstructEvent.from_log_line(
@@ -76,9 +76,9 @@ class TestParse(TestCase):
             'node-3'
         )
 
-        self.assertEqual(event.timestamp, datetime(2017, 7, 28, 8, 41, 43, 637277, pytz.UTC).timestamp())
-        self.assertEqual(event.node, 'node-3')
-        self.assertEqual(event.obj_hash, '27ebf5f20b3860fb3a8ed82f0721300bf96c1836252fddd67b60f48d227d3a3c')
+        self.assertEqual(event._timestamp, datetime(2017, 7, 28, 8, 41, 43, 637277, pytz.UTC).timestamp())
+        self.assertEqual(event._node, 'node-3')
+        self.assertEqual(event._hash, '27ebf5f20b3860fb3a8ed82f0721300bf96c1836252fddd67b60f48d227d3a3c')
 
     def test_parse_add_to_wallet(self):
         event = parse.TxEvent.from_log_line(
@@ -87,9 +87,9 @@ class TestParse(TestCase):
             'node-1'
         )
 
-        self.assertEqual(event.timestamp, datetime(2017, 7, 30, 7, 48, 48, 337577, pytz.UTC).timestamp())
-        self.assertEqual(event.node, 'node-1')
-        self.assertEqual(event.tx_hash, '2e1b05f9248ae5f29b2234ac0eb86e0fccbacc084ed91937eee7eea248fc9a6a')
+        self.assertEqual(event._timestamp, datetime(2017, 7, 30, 7, 48, 48, 337577, pytz.UTC).timestamp())
+        self.assertEqual(event._node, 'node-1')
+        self.assertEqual(event._hash, '2e1b05f9248ae5f29b2234ac0eb86e0fccbacc084ed91937eee7eea248fc9a6a')
 
     def test_parse_accept_to_memory_pool(self):
         event = parse.TxReceivedEvent.from_log_line(
@@ -99,9 +99,9 @@ class TestParse(TestCase):
             'node-2'
         )
 
-        self.assertEqual(event.timestamp, datetime(2017, 7, 30, 7, 48, 42, 907223, pytz.UTC).timestamp())
-        self.assertEqual(event.node, 'node-2')
-        self.assertEqual(event.obj_hash, '701cd618d630780ac19a78325f24cdd13cbf87279103c7e9cec9fb6382e90ce7')
+        self.assertEqual(event._timestamp, datetime(2017, 7, 30, 7, 48, 42, 907223, pytz.UTC).timestamp())
+        self.assertEqual(event._node, 'node-2')
+        self.assertEqual(event._hash, '701cd618d630780ac19a78325f24cdd13cbf87279103c7e9cec9fb6382e90ce7')
 
     def test_parse_peer_logic_validation(self):
         event = parse.PeerLogicValidationEvent.from_log_line(
@@ -111,9 +111,9 @@ class TestParse(TestCase):
             'node-0'
         )
 
-        self.assertEqual(event.timestamp, datetime(2017, 7, 31, 16, 9, 28, 663985, pytz.UTC).timestamp())
-        self.assertEqual(event.node, 'node-0')
-        self.assertEqual(event.block_hash, '107692460326feaa6f0c6c35bb218bdb3ff2adbc0d10a3a36b8252acf54e0c03')
+        self.assertEqual(event._timestamp, datetime(2017, 7, 31, 16, 9, 28, 663985, pytz.UTC).timestamp())
+        self.assertEqual(event._node, 'node-0')
+        self.assertEqual(event._hash, '107692460326feaa6f0c6c35bb218bdb3ff2adbc0d10a3a36b8252acf54e0c03')
 
     def test_parse_tick(self):
         event = parse.TickEvent.from_log_line('2017-08-19 16:05:14.609000 [MainThread  ] [INFO ]  Tick=11 with'
@@ -121,14 +121,14 @@ class TestParse(TestCase):
                                               ' created txs=101 and blocks=45', 'simcoin'
         )
 
-        self.assertEqual(event.timestamp, datetime(2017, 8, 19, 16, 5, 14, 609000, pytz.UTC).timestamp())
-        self.assertEqual(event.source, 'simcoin')
-        self.assertEqual(event.number, 11)
-        self.assertEqual(event.planned_start, 45.12)
-        self.assertEqual(event.actual_start, 110.01)
-        self.assertEqual(event.duration, 0.9823310375213623)
-        self.assertEqual(event.txs, 101)
-        self.assertEqual(event.blocks, 45)
+        self.assertEqual(event._timestamp, datetime(2017, 8, 19, 16, 5, 14, 609000, pytz.UTC).timestamp())
+        self.assertEqual(event._source, 'simcoin')
+        self.assertEqual(event._number, 11)
+        self.assertEqual(event._planned_start, 45.12)
+        self.assertEqual(event._actual_start, 110.01)
+        self.assertEqual(event._duration, 0.9823310375213623)
+        self.assertEqual(event._txs, 101)
+        self.assertEqual(event._blocks, 45)
 
     def test_parse_tx_creation_exception(self):
         event = parse.TxExceptionEvent.from_log_line(
@@ -137,10 +137,10 @@ class TestParse(TestCase):
             'simcoin'
         )
 
-        self.assertEqual(event.timestamp, datetime(2017, 8, 19, 16, 5, 14, 609000, pytz.UTC).timestamp())
-        self.assertEqual(event.node, 's-node-1.1')
-        self.assertEqual(event.source, 'simcoin')
-        self.assertEqual(event.exception, '41: too-long-mempool-chain')
+        self.assertEqual(event._timestamp, datetime(2017, 8, 19, 16, 5, 14, 609000, pytz.UTC).timestamp())
+        self.assertEqual(event._node, 's-node-1.1')
+        self.assertEqual(event._source, 'simcoin')
+        self.assertEqual(event._exception, '41: too-long-mempool-chain')
 
     def test_parse_block_creation_exception(self):
         event = parse.BlockExceptionEvent.from_log_line(
@@ -149,10 +149,10 @@ class TestParse(TestCase):
             'simcoin'
         )
 
-        self.assertEqual(event.timestamp, datetime(2017, 8, 19, 16, 5, 14, 609000, pytz.UTC).timestamp())
-        self.assertEqual(event.node, 's-node-1.2')
-        self.assertEqual(event.source, 'simcoin')
-        self.assertEqual(event.exception, '41: no tx')
+        self.assertEqual(event._timestamp, datetime(2017, 8, 19, 16, 5, 14, 609000, pytz.UTC).timestamp())
+        self.assertEqual(event._node, 's-node-1.2')
+        self.assertEqual(event._source, 'simcoin')
+        self.assertEqual(event._exception, '41: no tx')
 
     def test_parse_rpc_exception(self):
         event = parse.RPCExceptionEvent.from_log_line(
@@ -162,9 +162,9 @@ class TestParse(TestCase):
             'simcoin'
         )
 
-        self.assertEqual(event.timestamp, datetime(2017, 8, 19, 16, 5, 14, 609000, pytz.UTC).timestamp())
-        self.assertEqual(event.node, 's-node-1.1')
-        self.assertEqual(event.source, 'simcoin')
-        self.assertEqual(event.method, 'getnewaddress')
-        self.assertEqual(event.exception, 'Connection timeout')
-        self.assertEqual(event.retries_left, 5)
+        self.assertEqual(event._timestamp, datetime(2017, 8, 19, 16, 5, 14, 609000, pytz.UTC).timestamp())
+        self.assertEqual(event._node, 's-node-1.1')
+        self.assertEqual(event._source, 'simcoin')
+        self.assertEqual(event._method, 'getnewaddress')
+        self.assertEqual(event._exception, 'Connection timeout')
+        self.assertEqual(event._retries_left, 5)
