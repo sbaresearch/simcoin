@@ -21,6 +21,8 @@ args = {
     'reindex':            '-reindex',
     'checkmempool':       '-checkmempool=0',
     'keypool':            '-keypool=1',
+
+    'rpcservertimeout':   '-rpcservertimeout=' + str(config.rpc_timeout)
 }
 
 

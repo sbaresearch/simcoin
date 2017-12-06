@@ -106,7 +106,7 @@ class BitcoinNode(Node):
     def connect_to_rpc(self):
         self._rpc_connection = Proxy(
             btc_conf_file=config.btc_conf_file.format(self.name),
-            timeout=config.rpc_simulation_timeout
+            timeout=config.rpc_timeout
         )
 
     def rm_peers_file(self):
