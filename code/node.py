@@ -345,8 +345,8 @@ def graceful_rm(pool, nodes):
 
 
 def stop_node(node):
-    node.close_rpc_connection()
     node.stop()
+    node.close_rpc_connection()
 
 
 def rm_node(node):
