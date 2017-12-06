@@ -117,22 +117,15 @@ class BitcoinNode(Node):
 
     def execute_rpc(self, *args):
         retry = 30
-        while retry >= 0:
+        while retry > 0:
             try:
                 return self._rpc_connection.call(args[0], *args[1:])
-            except IOError as error:
+            except (IOError, CannotSendRequest) as error:
+                logging.exception('Could not execute RPC-call={} on node={} because of error={}.'
+                                  ' Reconnecting and retrying, {} retries left'
+                                  .format(args[0], self._name,  error, retry))
                 retry -= 1
                 self.connect_to_rpc()
-                logging.warning('Could not execute RPC-call={} on node={} because of error={}.'
-                                ' Reconnecting and retrying, {} retries left'
-                                .format(args[0], self._name,  error, retry))
-            except CannotSendRequest as exce:
-                retry -= 1
-                self.connect_to_rpc(10)
-                logging.warning('Could not execute RPC-call={} on node={} because of error={}.'
-                                ' Reconnecting and retrying, {} retries left'
-                                .format(args[0], self._name,  exce, retry))
-        logging.error('Could not execute RPC-call={} on node {}'.format(args[0], self._name))
         raise Exception('Could not execute RPC-call={} on node {}'.format(args[0], self._name))
 
     def transfer_coinbases_to_normal_tx(self):
