@@ -24,11 +24,6 @@ rpc_password = 'admin'
 rpc_port = 18332
 rpc_simulation_timeout = 0.25
 
-
-def create_rpc_connection_string(ip):
-    return 'http://{}:{}@{}:{}'.format(rpc_user, rpc_password, ip, rpc_port)
-
-
 reference_node = 'node-0'
 
 blocks_needed_to_make_coinbase_spendable = 100
@@ -82,6 +77,8 @@ step_times_csv_file_name = 'step_times.csv'
 consensus_chain_csv_file_name = 'consensus_chain.csv'
 
 postprocessing_dir = soft_link_to_run_dir + '/postprocessing/'
+node_config = soft_link_to_run_dir + '/node_config/'
+btc_conf_file = node_config + '{}.conf'
 consensus_chain_csv = postprocessing_dir + consensus_chain_csv_file_name
 general_infos_csv = postprocessing_dir + 'general_infos.csv'
 analysed_ticks_csv = postprocessing_dir + 'analysed_ticks.csv'

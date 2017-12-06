@@ -51,6 +51,14 @@ class BitcoinNode(Node):
         self._current_tx_chain_index = 0
         self._tx_chains = []
 
+    def create_conf_file(self):
+        # file is needed for RPC connection
+        with open(config.btc_conf_file.format(self.name), 'w') as file:
+            file.write('rpcconnect={}\n'.format(self._ip))
+            file.write('rpcport={}\n'.format(config.rpc_port))
+            file.write('rpcuser={}\n'.format(config.rpc_user))
+            file.write('rpcpassword={}\n'.format(config.rpc_password))
+
     def run(self, connect_to_ips):
         bash.check_output(bitcoincmd.start(self._name, str(self._ip), self._docker_image, self._path, connect_to_ips))
 
@@ -100,7 +108,7 @@ class BitcoinNode(Node):
 
     def connect_to_rpc(self, timeout=DEFAULT_HTTP_TIMEOUT):
         self._rpc_connection = Proxy(
-            config.create_rpc_connection_string(self._ip),
+            btc_conf_file=config.btc_conf_file.format(self.name),
             timeout=timeout
         )
 
@@ -295,6 +303,10 @@ class TxChain:
 
 
 SpentToAddress = namedtuple('SpentToAddress', 'address seckey')
+
+
+def create_conf_file(node):
+    node.create_conf_file()
 
 
 def rm_peers_file(node):

@@ -48,6 +48,10 @@ class Prepare:
                      config.nodes_csv_file_name, config.args_csv_file_name]:
             bash.check_output('cp {}{} {}'.format(config.data_dir, file, self._context.run_dir))
             bash.check_output('cd {}; ln -s ../{} {}'.format(config.postprocessing_dir, file, file))
+
+        os.makedirs(config.node_config)
+        self._pool.map(node_utils.create_conf_file, self._context.nodes.values())
+
         logging.info('Simulation directory created')
 
     def _give_nodes_spendable_coins(self):

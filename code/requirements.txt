@@ -1,4 +1,4 @@
 numpy>=1.12
 mock
 pandas
-python-bitcoinlib==0.7.0
+python-bitcoinlib==0.8.0
