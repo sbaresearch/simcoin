@@ -22,7 +22,7 @@ max_wait_time_bitcoin_runs_out = 30
 rpc_user = 'admin'
 rpc_password = 'admin'
 rpc_port = 18332
-rpc_simulation_timeout = 1
+rpc_simulation_timeout = 10
 
 reference_node = 'node-0'
 
