@@ -99,7 +99,7 @@ class BitcoinNode(Node):
             try:
                 self.execute_rpc('getnetworkinfo')
                 break
-            except JSONRPCError as exce:
+            except JSONRPCError:
                 logging.debug('Waiting until RPC of node={} is ready.'.format(self._name))
                 utils.sleep(1)
 
