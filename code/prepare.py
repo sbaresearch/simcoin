@@ -9,7 +9,6 @@ from multiprocessing.dummy import Pool as ThreadPool
 import itertools
 from bitcoin.rpc import DEFAULT_HTTP_TIMEOUT
 import node as node_utils
-from itertools import islice
 
 
 class Prepare:
