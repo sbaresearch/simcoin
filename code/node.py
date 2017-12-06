@@ -309,6 +309,41 @@ def create_conf_file(node):
     node.create_conf_file()
 
 
+def start_node(node, timeout=DEFAULT_HTTP_TIMEOUT, height=0, connect_to_ips=None):
+    node.run(connect_to_ips)
+    node.connect_to_rpc(timeout)
+    node.wait_until_rpc_ready()
+    wait_until_height_reached(node, height)
+
+
+def wait_until_height_reached(node, height):
+    while int(node.execute_rpc('getblockcount')) < height:
+        logging.debug('Waiting until node={} reached height={}...'.format(node.name, str(height)))
+        utils.sleep(0.2)
+
+
+def transfer_coinbase_tx_to_normal_tx(node):
+    node.generate_spent_to_address()
+    node.create_tx_chains()
+    node.transfer_coinbases_to_normal_tx()
+    logging.info("Transferred all coinbase-tx to normal tx for node={}".format(node.name))
+
+
+def add_latency(node, zones):
+    node.add_latency(zones)
+
+
+def wait_until_node_stopped(node):
+    parts = 10
+    step = config.max_wait_time_bitcoin_runs_out / parts
+    for i in range(parts):
+        utils.sleep(step)
+        logging.info('Wait until node={} runs out'.format(node.name))
+        if node.is_running() is False:
+            return
+    logging.warning('Node={} did not stopped running'.format(node.name))
+
+
 def rm_peers_file(node):
     node.rm_peers_file()
 
@@ -323,17 +358,6 @@ def stop_node(node):
     node.close_rpc_connection()
     node.stop()
     logging.info('Send stop to node={}'.format(node.name))
-
-
-def wait_until_node_stopped(node):
-    parts = 10
-    step = config.max_wait_time_bitcoin_runs_out / parts
-    for i in range(parts):
-        utils.sleep(step)
-        logging.info('Wait until node={} runs out'.format(node.name))
-        if node.is_running() is False:
-            return
-    logging.warning('Node={} did not stopped running'.format(node.name))
 
 
 def rm_node(node):

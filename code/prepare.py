@@ -59,7 +59,7 @@ class Prepare:
         for i, node in enumerate(nodes):
             cbs.append(
                 self._pool.apply_async(
-                    _start_node,
+                    node_utils.start_node,
                     args=(node,
                           DEFAULT_HTTP_TIMEOUT,
                           0,
@@ -78,26 +78,26 @@ class Prepare:
         logging.info('Each node receives {} tx-chains'.format(amount_of_tx_chains))
 
         for i, node in enumerate(nodes):
-            _wait_until_height_reached(node, i * amount_of_tx_chains)
+            node_utils.wait_until_height_reached(node, i * amount_of_tx_chains)
             node.execute_rpc('generate', amount_of_tx_chains)
             logging.info('Generated {} blocks for node={} for their tx-chains'.format(amount_of_tx_chains, node.name))
 
-        _wait_until_height_reached(nodes[0], amount_of_tx_chains * len(nodes))
+        node_utils.wait_until_height_reached(nodes[0], amount_of_tx_chains * len(nodes))
         nodes[0].generate_blocks(config.blocks_needed_to_make_coinbase_spendable)
         current_height = config.blocks_needed_to_make_coinbase_spendable + amount_of_tx_chains * len(nodes)
 
-        self._pool.starmap(_wait_until_height_reached, zip(nodes, itertools.repeat(current_height)))
+        self._pool.starmap(node_utils.wait_until_height_reached, zip(nodes, itertools.repeat(current_height)))
 
-        self._pool.map(_transfer_coinbase_tx_to_normal_tx, nodes)
+        self._pool.map(node_utils.transfer_coinbase_tx_to_normal_tx, nodes)
 
         for i, node in enumerate(nodes):
-            _wait_until_height_reached(node, current_height + i)
+            node_utils.wait_until_height_reached(node, current_height + i)
             node.execute_rpc('generate', 1)
 
         current_height += len(nodes)
         self._context.first_block_height = current_height
 
-        self._pool.starmap(_wait_until_height_reached, zip(
+        self._pool.starmap(node_utils.wait_until_height_reached, zip(
                 nodes,
                 itertools.repeat(current_height)
         ))
@@ -108,13 +108,13 @@ class Prepare:
     def _start_nodes(self):
         nodes = self._context.nodes.values()
 
-        self._pool.starmap(_start_node, zip(
+        self._pool.starmap(node_utils.start_node, zip(
             nodes,
             itertools.repeat(config.rpc_simulation_timeout),
             itertools.repeat(self._context.first_block_height)
         ))
 
-        self._pool.starmap(_add_latency, zip(
+        self._pool.starmap(node_utils.add_latency, zip(
             self._context.nodes.values(),
             itertools.repeat(self._context.zone.zones)
         ))
@@ -140,24 +140,6 @@ def _calc_number_of_tx_chains(txs_per_tick, blocks_per_tick, number_of_nodes):
     return math.ceil(needed_tx_chains)
 
 
-def _start_node(node, timeout=DEFAULT_HTTP_TIMEOUT, height=0, connect_to_ips=None):
-    node.run(connect_to_ips)
-    node.connect_to_rpc(timeout)
-    node.wait_until_rpc_ready()
-    _wait_until_height_reached(node, height)
-
-
-def _transfer_coinbase_tx_to_normal_tx(node):
-    node.generate_spent_to_address()
-    node.create_tx_chains()
-    node.transfer_coinbases_to_normal_tx()
-    logging.info("Transferred all coinbase-tx to normal tx for node={}".format(node.name))
-
-
-def _add_latency(node, zones):
-    node.add_latency(zones)
-
-
 def _recreate_network():
     exit_code = bash.call_silent(dockercmd.inspect_network())
     if exit_code == 0:
@@ -165,9 +147,3 @@ def _recreate_network():
     bash.check_output(dockercmd.create_network())
     logging.info('Docker network {} created'.format(config.network_name))
     utils.sleep(1)
-
-
-def _wait_until_height_reached(node, height):
-    while int(node.execute_rpc('getblockcount')) < height:
-        logging.debug('Waiting until node={} reached height={}...'.format(node.name, str(height)))
-        utils.sleep(0.2)
