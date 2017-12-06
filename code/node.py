@@ -79,6 +79,7 @@ class BitcoinNode(Node):
 
     def stop(self):
         self.execute_rpc('stop')
+        logging.info('Send stop to node={}'.format(self.name))
 
     def get_log_file(self):
         return self._path + config.bitcoin_log_file_name
@@ -99,11 +100,7 @@ class BitcoinNode(Node):
                 self.execute_rpc('getnetworkinfo')
                 break
             except JSONRPCError as exce:
-                logging.debug(
-                    'Exception="{}" while calling RPC. '
-                    'Waiting until RPC of node={} is ready.'
-                    .format(exce, self._name)
-                )
+                logging.debug('Waiting until RPC of node={} is ready.'.format(self._name))
                 utils.sleep(1)
 
     def connect_to_rpc(self):
@@ -350,7 +347,6 @@ def graceful_rm(pool, nodes):
 def stop_node(node):
     node.close_rpc_connection()
     node.stop()
-    logging.info('Send stop to node={}'.format(node.name))
 
 
 def rm_node(node):
