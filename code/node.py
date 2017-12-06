@@ -106,10 +106,10 @@ class BitcoinNode(Node):
                 )
                 utils.sleep(1)
 
-    def connect_to_rpc(self, timeout=DEFAULT_HTTP_TIMEOUT):
+    def connect_to_rpc(self):
         self._rpc_connection = Proxy(
             btc_conf_file=config.btc_conf_file.format(self.name),
-            timeout=timeout
+            timeout=config.rpc_simulation_timeout
         )
 
     def rm_peers_file(self):
@@ -302,9 +302,9 @@ def create_conf_file(node):
     node.create_conf_file()
 
 
-def start_node(node, timeout=DEFAULT_HTTP_TIMEOUT, height=0, connect_to_ips=None):
+def start_node(node, height=0, connect_to_ips=None):
     node.run(connect_to_ips)
-    node.connect_to_rpc(timeout)
+    node.connect_to_rpc()
     node.wait_until_rpc_ready()
     wait_until_height_reached(node, height)
 

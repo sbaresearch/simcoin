@@ -61,7 +61,6 @@ class Prepare:
                 self._pool.apply_async(
                     node_utils.start_node,
                     args=(node,
-                          DEFAULT_HTTP_TIMEOUT,
                           0,
                           (str(node.ip) for node in nodes[max(0, i - 5):i])
                           )
@@ -110,7 +109,6 @@ class Prepare:
 
         self._pool.starmap(node_utils.start_node, zip(
             nodes,
-            itertools.repeat(config.rpc_simulation_timeout),
             itertools.repeat(self._context.first_block_height)
         ))
 
