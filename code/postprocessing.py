@@ -55,7 +55,7 @@ class PostProcessing:
         node_utils.graceful_rm(self._thread_pool, self._context.nodes.values())
         logging.info('Removed all nodes')
 
-        utils.sleep(3 + len(self._context.nodes) * 0.2)
+        utils.sleep(1)
 
         bash.check_output(dockercmd.rm_network())
         logging.info('Deleted docker network')

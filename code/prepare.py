@@ -118,7 +118,7 @@ class Prepare:
         ))
 
         logging.info('All nodes for the simulation are started')
-        utils.sleep(3 + len(self._context.nodes) * 0.2)
+        utils.sleep(1)
 
 
 def _remove_old_containers_if_exists():
