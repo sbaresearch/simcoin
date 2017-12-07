@@ -21,3 +21,17 @@ ssh -p 2222 -L 9099:localhost:9090 simon@128.131.169.35
 // google perfomance tool
 https://wiki.geany.org/howtos/profiling/gperftools
 google-pprof ../patched_bitcoin_client_cpp/src/bitcoind ~/Desktop/bitcoin-1.prof
+
+// check kernel messages
+dmesg -w
+
+// increase arp cache
+sudo sysctl -w net.ipv4.neigh.default.gc_thresh1=8192
+sudo sysctl -w net.ipv4.neigh.default.gc_thresh2=16384
+sudo sysctl -w net.ipv4.neigh.default.gc_thresh3=32768
+
+// check arp cache length
+watch -n3 "arp -n | wc -l"
+
+// check sockets
+watch -n5 ss -s -a -t
