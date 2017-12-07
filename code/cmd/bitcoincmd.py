@@ -22,7 +22,11 @@ args = {
     'checkmempool':       '-checkmempool=0',
     'keypool':            '-keypool=1',
 
-    'rpcservertimeout':   '-rpcservertimeout=' + str(config.rpc_timeout)
+    # RPC configuration
+    'rpcuser':            '-rpcuser=admin',
+    'rpcpassword':        '-rpcpassword=admin',
+    'rpcallowip':         '-rpcallowip=1.1.1.1/0.0.0.0',
+    'rpcservertimeout':   '-rpcservertimeout=' + str(config.rpc_timeout),
 }
 
 

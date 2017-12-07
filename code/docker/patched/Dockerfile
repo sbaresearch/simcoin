@@ -11,6 +11,5 @@ RUN make -j
 
 ENV PATH /bitcoin/src:$PATH
 RUN mkdir /data
-COPY bitcoin.conf /data
 
 EXPOSE 18332
