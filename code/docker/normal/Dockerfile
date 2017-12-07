@@ -6,7 +6,6 @@ RUN \
      apt-get update && \
      apt-get install -y bitcoind iproute2 jq
 RUN mkdir /data
-COPY bitcoin.conf /data
 
 # adapted from https://hub.docker.com/r/abrkn/bitcoind/~/dockerfile/
 
