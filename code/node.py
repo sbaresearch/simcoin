@@ -307,8 +307,12 @@ def start_node(node, height=0, connect_to_ips=None):
 
 
 def wait_until_height_reached(node, height):
-    while int(node.execute_rpc('getblockcount')) < height:
-        logging.debug('Waiting until node={} reached height={}...'.format(node.name, str(height)))
+    while True:
+        node_height = node.execute_rpc('getblockcount')
+        if height <= int(node_height):
+            break
+        logging.debug('Waiting until node={} with current height={} reached height={}...'
+                      .format(node.name, node_height, height))
         utils.sleep(0.2)
 
 
