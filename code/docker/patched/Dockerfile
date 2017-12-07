@@ -7,7 +7,9 @@ RUN git checkout simcoin
 RUN ./autogen.sh
 RUN ./configure
 
-RUN make -j
+RUN make
+# multi-threaded
+#RUN make -j4
 
 ENV PATH /bitcoin/src:$PATH
 RUN mkdir /data
