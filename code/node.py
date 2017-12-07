@@ -62,9 +62,6 @@ class BitcoinNode(Node):
     def run(self, connect_to_ips):
         bash.check_output(bitcoincmd.start(self._name, str(self._ip), self._docker_image, self._path, connect_to_ips))
 
-        # sleep small amount to avoid 'CannotSendRequest: Request-sent' in bitcoin.rpc
-        utils.sleep(0.2)
-
     def is_running(self):
         return bash.check_output(
             dockercmd.check_if_running(
@@ -299,8 +296,11 @@ def create_conf_file(node):
     node.create_conf_file()
 
 
-def start_node(node, height=0, connect_to_ips=None):
+def start_node(node, connect_to_ips=None):
     node.run(connect_to_ips)
+
+
+def check_startup_node(node, height=0):
     node.connect_to_rpc()
     node.wait_until_rpc_ready()
     wait_until_height_reached(node, height)

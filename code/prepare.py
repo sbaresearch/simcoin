@@ -60,14 +60,13 @@ class Prepare:
             cbs.append(
                 self._pool.apply_async(
                     node_utils.start_node,
-                    args=(node,
-                          0,
-                          (str(node.ip) for node in nodes[max(0, i - 5):i])
-                          )
+                    args=(node, (str(node.ip) for node in nodes[max(0, i - 5):i]))
                 )
             )
         for cb in cbs:
             cb.get()
+
+        self._pool.map(node_utils.check_startup_node, nodes)
 
         amount_of_tx_chains = _calc_number_of_tx_chains(
             self._context.args.txs_per_tick,
@@ -107,7 +106,8 @@ class Prepare:
     def _start_nodes(self):
         nodes = self._context.nodes.values()
 
-        self._pool.starmap(node_utils.start_node, zip(
+        self._pool.map(node_utils.start_node, nodes)
+        self._pool.starmap(node_utils.check_startup_node, zip(
             nodes,
             itertools.repeat(self._context.first_block_height)
         ))
