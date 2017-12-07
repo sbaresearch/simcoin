@@ -26,9 +26,9 @@ google-pprof ../patched_bitcoin_client_cpp/src/bitcoind ~/Desktop/bitcoin-1.prof
 dmesg -w
 
 // increase arp cache
-sudo sysctl -w net.ipv4.neigh.default.gc_thresh1=8192
-sudo sysctl -w net.ipv4.neigh.default.gc_thresh2=16384
-sudo sysctl -w net.ipv4.neigh.default.gc_thresh3=32768
+sudo sysctl -w net.ipv4.neigh.default.gc_thresh1=16384
+sudo sysctl -w net.ipv4.neigh.default.gc_thresh2=32768
+sudo sysctl -w net.ipv4.neigh.default.gc_thresh3=65536
 
 // check arp cache length
 watch -n3 "arp -n | wc -l"
