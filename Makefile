@@ -5,8 +5,8 @@ demo:
 	cd code; \
 		python3 simcoin.py \
 			run \
-				--group-a 2 .6 0 simcoin/patched:v2 \
-				--group-b 1 .4 0 simcoin/patched:v2 \
+				--group-a 2 .6 0 simcoin/bitcoin:v2 \
+				--group-b 1 .4 0 simcoin/bitcoin:v2 \
 				--amount-of-ticks 10 \
 				--txs-per-tick 2 \
 				--blocks-per-tick 0.7 \
@@ -18,8 +18,8 @@ multidemo:
 		python3 simcoin.py \
 			multi-run \
 				--repeat 2 \
-				--group-a 2 .6 10 simcoin/patched:v2 \
-				--group-b 1 .4 10 simcoin/patched:v2 \
+				--group-a 2 .6 10 simcoin/bitcoin:v2 \
+				--group-b 1 .4 10 simcoin/bitcoin:v2 \
 				--blocks-per-tick 0.9 \
 				--amount-of-ticks 7 \
 				--txs-per-tick 10 \
@@ -36,25 +36,11 @@ install:
 	# https://stackoverflow.com/questions/20923209/problems-installing-the-devtools-package
 
 build-image:
-	cd ./code/docker/normal; \
-		docker build --tag simcoin/normal:v3 .
+	cd ./code/docker; \
+	docker build --no-cache --tag simcoin/bitcoin:v2 .
 
 rm-image:
-	docker rmi simcoin/normal:v3
-
-build-patched-image : build-base-image
-	cd ./code/docker/patched; \
-	docker build --no-cache --tag simcoin/patched:v2 .
-
-rm-patched-image:
-	docker rmi simcoin/patched:v2
-
-build-base-image:
-	cd ./code/docker/base; \
-	docker build --tag simcoin/base:v1 .
-
-rm-base-image:
-	docker rmi simcoin/base:v1
+	docker rmi simcoin/bitcoin:v2
 
 cp-run:
 	rm -r /tmp/run; \
