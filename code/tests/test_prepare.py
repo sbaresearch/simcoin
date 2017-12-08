@@ -33,17 +33,18 @@ class TestPrepare(TestCase):
         self.assertEqual(node_1.execute_rpc.call_count, 2)
 
     @patch('os.path.exists')
+    @patch('os.path.islink')
     @patch('os.makedirs')
     @patch('bash.check_output')
     @patch('builtins.open', new_callable=mock_open)
-    def test_prepare_simulation_dir(self, m_open, m_check_output, m_makedirs, m_exists):
+    def test_prepare_simulation_dir(self, m_open, m_check_output, m_makedirs, m_islink, m_exists):
         m_exists.return_value = False
         self.prepare._pool = MagicMock()
 
         self.prepare._prepare_simulation_dir()
 
         self.assertEqual(m_makedirs.call_count, 3)
-        self.assertEqual(m_check_output.call_count, 9)
+        self.assertEqual(m_check_output.call_count, 10)
 
     @patch('bash.check_output')
     def test_remove_old_containers_if_exists(self, m_check_output):
