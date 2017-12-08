@@ -8,8 +8,8 @@ Prerequisites: `python3`, `docker`, `make` and `R`. Check if you have them insta
 * `cd simcoin`
 * `make install`
 * `make build-image`
-* `make test`
-* `make run`
+* `make demo`
+* checkout results under `data/last_run` and the generated report `data/last_run/postprocessing/report.pdf`
 
 ## Stack 📚
 * [Python 3](https://www.python.org/)
