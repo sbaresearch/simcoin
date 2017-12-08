@@ -1,4 +1,4 @@
-# Simcoin - Blockchain Simulation Software 💸
+##  Simcoin - Blockchain Simulation Software 🏗️
 Simcoin facilitates simulations of realistic bitcoin networks. The network created by the simulation software is virtualised by the simulation software on one single host machine. To be able to spawn multiple peers the CPU-heavy proof-of-work is deactivated. Blocks and transactions are created by sending respective commands over RPC to the nodes according to a pre-configured simulation scenario.
 
 ## Getting started 🏁
@@ -11,7 +11,7 @@ Prerequisities: `python3`, `docker`, `make` and `R`. Check if you have them inst
 * `make test`
 * `make run`
 
-## Stack 🏭
+## Stack 📚
 * [Python 3](https://www.python.org/)
 * [Docker](https://www.docker.com/)
 * [R Markdown](http://rmarkdown.rstudio.com/)
