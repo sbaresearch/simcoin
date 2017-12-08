@@ -3,7 +3,6 @@ import random
 import pandas
 import numpy as np
 import config
-from simulationfiles import nodes_config
 import argparse
 from simulationfiles import checkargs
 import sys
