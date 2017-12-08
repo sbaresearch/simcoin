@@ -10,8 +10,7 @@ demo:
 				--amount-of-ticks 10 \
 				--txs-per-tick 2 \
 				--blocks-per-tick 0.7 \
-				--system-snapshots-frequency 2 \
-				--verbose
+				--system-snapshots-frequency 2
 
 multidemo:
 	cd code; \
@@ -24,8 +23,7 @@ multidemo:
 				--amount-of-ticks 7 \
 				--txs-per-tick 10 \
 				--tick-duration 1 \
-				--system-snapshots-frequency 1 \
-				--verbose
+				--system-snapshots-frequency 1
 
 install:
 	# for kableExtra
