@@ -16,7 +16,7 @@ Simcoin facilitates simulations of realistic bitcoin networks. The network creat
 ## Performance
 When running a simulation monitor the host machine closley. Check utilisation of RAM, CPU, Disk and Network. Further control the log created by the host system (`dmesg`) and the log produced by the simulation software. To improve the performance consider the follwoing:
 * Increase the ARP-cache if you encounter a neighbour table (ARP-cache) overflow in the kernel messages (`dmesg`).
-* Run the whole simulation in RAM by using tmpfs,
+* Run the whole simulation in RAM by using tmpfs.
 
 ## Outlook/Possible improvements
 * Improving performance and stability by [using Unix domain sockets](https://github.com/bitcoin/bitcoin/pull/9979) for host to peer communication. 
