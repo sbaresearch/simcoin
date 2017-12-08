@@ -20,7 +20,7 @@ Prerequisites: `python3`, `docker`, `make` and `R`. Check if you have them insta
 When running a simulation, monitor the host machine closely. Check utilisation of RAM, CPU, Disk and Network. Further, control the log created by the host system (`dmesg`) and the log produced by the simulation software (`data/debug.log`) and nodes (`data/last_run/node-X/debug.log`). To improve the performance consider the following:
 * Increase the ARP-cache if you encounter a neighbour table (ARP-cache) overflow in the kernel messages (`dmesg`).
 * Run the whole simulation in RAM by using tmpfs.
-* Use a better host machine 😉
+* Use a better host machine! 😉
 
 ## Outlook/Possible improvements 🔮
 * Improving performance and stability by [using Unix domain sockets](https://github.com/bitcoin/bitcoin/pull/9979) for host to peer communication. 
