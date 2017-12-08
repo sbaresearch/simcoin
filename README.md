@@ -2,7 +2,7 @@
 Simcoin facilitates simulations of realistic bitcoin networks. The network created by the simulation software is virtualised by the simulation software on one single host machine. To be able to spawn multiple peers the CPU-heavy proof-of-work is deactivated. Blocks and transactions are created by sending respective commands over RPC to the nodes according to a pre-configured simulation scenario.
 
 ## Getting started 🏁
-Prerequisites: `python3`, `docker`, `make` and `R`. Check if you have them installed.
+Prerequisites: `python3`, `pip3`, `docker`, `make` and `R`. Check if you have them installed.
 
 * `git clone git@github.com:simonmulser/simcoin.git`
 * `cd simcoin`
