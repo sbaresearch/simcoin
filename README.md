@@ -2,7 +2,7 @@
 Simcoin facilitates simulations of realistic bitcoin networks. The network created by the simulation software is virtualised by the simulation software on one single host machine. To be able to spawn multiple peers the CPU-heavy proof-of-work is deactivated. Blocks and transactions are created by sending respective commands over RPC to the nodes according to a pre-configured simulation scenario.
 
 ## Getting started 🏁
-Prerequisities: `python3`, `docker`, `make` and `R`. Check if you have them installed.
+Prerequisites: `python3`, `docker`, `make` and `R`. Check if you have them installed.
 
 * `git clone git@github.com:simonmulser/simcoin.git`
 * `cd simcoin`
@@ -17,7 +17,7 @@ Prerequisities: `python3`, `docker`, `make` and `R`. Check if you have them inst
 * [R Markdown](http://rmarkdown.rstudio.com/)
 
 ## Performance 🚀
-When running a simulation monitor the host machine closley. Check utilisation of RAM, CPU, Disk and Network. Further control the log created by the host system (`dmesg`) and the log produced by the simulation software (`data/debug.log`) and nodes (`data/last_run/node-X/debug.log`). To improve the performance consider the follwoing:
+When running a simulation, monitor the host machine closely. Check utilisation of RAM, CPU, Disk and Network. Further, control the log created by the host system (`dmesg`) and the log produced by the simulation software (`data/debug.log`) and nodes (`data/last_run/node-X/debug.log`). To improve the performance consider the following:
 * Increase the ARP-cache if you encounter a neighbour table (ARP-cache) overflow in the kernel messages (`dmesg`).
 * Run the whole simulation in RAM by using tmpfs.
 * Use a better host machine 😉
