@@ -2,9 +2,15 @@ from unittest import TestCase
 from mock import patch
 from simulationfiles import ticks_config
 from simulationfiles.nodes_config import NodeConfig
+import sys
+import os
 
 
 class TestTicksConfig(TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        sys.stdout = open(os.devnull, 'w')
 
     def test_calc_expected_events_two_events_per_tick(self):
         expected_events = ticks_config._calc_expected_events(10, 0.5)

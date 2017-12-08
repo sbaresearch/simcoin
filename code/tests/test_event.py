@@ -5,9 +5,14 @@ from unittest.mock import MagicMock
 from unittest.mock import mock_open
 from bitcoin.rpc import JSONRPCError
 import event
+import logging
 
 
 class TestEvent(TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        logging.disable(logging.CRITICAL)
 
     @patch('time.time')
     @patch('utils.sleep')
