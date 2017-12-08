@@ -1,32 +1,6 @@
 all:
 	echo "Run the following targets manually install, build-image, test, run"
 
-run:
-	cd code; \
-		python3 ./simcoin.py run      ;
-
-smoke:
-	cd code; \
-		python3 ./simcoin.py nodes    ;\
-		python3 ./simcoin.py network  ;\
-		python3 ./simcoin.py ticks    ;\
-
-simulate:
-	cd code; \
-		python3 ./simcoin.py simulate ;
-report:
-	cd code; \
-		cp reporter/report.Rmd ../data/last_run/postprocessing/;cd ../data/last_run/postprocessing/;R -e library\(rmarkdown\)\;rmarkdown::render\(\"report.Rmd\",\"pdf_document\"\)\;q\(\);rm report.Rmd
-
-RSCRPT=library\(rmarkdown\)\;rmarkdown::render\(\"multi_report.Rmd\",\"pdf_document\"\)\;q\(\);
-
-multi-report:
-	cd code; \
-		cp reporter/multi_report.Rmd ../data/last_multi_run/; \
-		cd ../data/last_multi_run/; \
-		R -e $(RSCRPT)
-		rm multi_report.Rmd
-
 demo:
 	cd code; \
 		python3 simcoin.py \
@@ -51,18 +25,6 @@ multidemo:
 				--txs-per-tick 10 \
 				--tick-duration 1 \
 				--system-snapshots-frequency 1 \
-				--verbose
-
-evaluate:
-	cd code; \
-		python3 simcoin.py \
-			multi-run \
-				--repeat 100 \
-				--group-a 20 1 25 simcoin/patched:v2 \
-				--blocks-per-tick 0.0333333333333333 \
-				--amount-of-ticks 60480 \
-				--txs-per-tick 0 \
-				--tick-duration .1 \
 				--verbose
 
 install:
