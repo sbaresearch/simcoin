@@ -4,7 +4,7 @@ Simcoin facilitates simulations of realistic bitcoin networks. The network creat
 ## Getting started 🏁
 Prerequisites: `python3`, `pip3`, `docker`, `make` and `R`. Check if you have them installed.
 
-* `git clone git@github.com:simonmulser/simcoin.git`
+* `git clone https://github.com/simonmulser/simcoin.git`
 * `cd simcoin`
 * `make install` (if fails check output, you may need to install other dependencies depending on your OS)
 * `make build-image` (consider to use multiple threads to build the image - check Dockerfile under `code/docker`)
