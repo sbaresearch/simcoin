@@ -1,5 +1,5 @@
 ---
-title: "Simcoin Report"
+title: "Report"
 date: '`r format(Sys.time(), "%d %B, %Y")`'
 author: "simcoin"
 output:
