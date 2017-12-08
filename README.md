@@ -6,7 +6,7 @@ Prerequisites: `python3`, `pip3`, `docker`, `make` and `R`. Check if you have th
 
 * `git clone git@github.com:simonmulser/simcoin.git`
 * `cd simcoin`
-* `make install`
+* `make install` (if fails check output, you may need to install other dependencies depending on your OS)
 * `make build-image` (consider to use multiple threads to build the image - check Dockerfile under `code/docker`)
 * `make demo`
 * checkout results under `data/last_run` and the generated report `data/last_run/postprocessing/report.pdf`
