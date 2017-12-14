@@ -28,6 +28,8 @@ When running a simulation, monitor the host machine closely. Check utilisation o
 * Using the [ELK-Stack](https://www.elastic.co/products) to parse, store and analyse the log files.
 
 ## Credits 🙏
+_This whole section including the addresses will be removed at the 1. February since the project should transit to a community project._
+
 Ground idea and initial development by Andreas Kern.
 
 &nbsp;
@@ -41,3 +43,11 @@ Developed in collaboration with Aljosha Judmayer and [SBA-Research](https://www.
 <img src="https://github.com/simonmulser/simcoin/blob/master/graphics/netidee_logo_scholarship.jpg" alt="Image of netidee logo scholarship" style="width: 248px;"/>
 
 Additional outcome of a thesis sponsored by [Netidee](https://www.netidee.at/) Scholarship 12th Call, year 2017/2018.
+
+&nbsp;
+
+If you want to award my (Simon Mulser) efforts:
+
+BTC: 1JhcdkezyEWpYz9xit6YU9C4MMPYg8HujF  
+LTC: LYjmCsjVobaGg1p4ZDMDDcfKmn2dXz25r5  
+ETH: 0x00d40D0Cd0924282dedcb957cdaF32AC0038C5c1
