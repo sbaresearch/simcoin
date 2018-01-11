@@ -28,7 +28,7 @@ When running a simulation, monitor the host machine closely. Check utilisation o
 * Using the [ELK-Stack](https://www.elastic.co/products) to parse, store and analyse the log files.
 
 ## Credits 🙏
-_This whole section including the addresses will be removed at the 1. February since the project should transit to a community project._
+_This whole section including the addresses will be removed at the 1. March since the project should transit to a community project._
 
 Ground idea and initial development by Andreas Kern.
 
