@@ -5,8 +5,8 @@ demo:
 	cd code; \
 		python3 simcoin.py \
 			run \
-				--group-a 2 .6 0 simcoin/bitcoin:v2 \
-				--group-b 1 .4 0 simcoin/bitcoin:v2 \
+				--group-a 2 .6 0 simcoin/bitcoin:v15.0.1 \
+				--group-b 1 .4 0 simcoin/bitcoin:v15.0.1 \
 				--amount-of-ticks 10 \
 				--txs-per-tick 2 \
 				--blocks-per-tick 0.7 \
@@ -17,8 +17,8 @@ multidemo:
 		python3 simcoin.py \
 			multi-run \
 				--repeat 2 \
-				--group-a 2 .6 10 simcoin/bitcoin:v2 \
-				--group-b 1 .4 10 simcoin/bitcoin:v2 \
+				--group-a 2 .6 10 simcoin/bitcoin:v15.0.1 \
+				--group-b 1 .4 10 simcoin/bitcoin:v15.0.1 \
 				--blocks-per-tick 0.9 \
 				--amount-of-ticks 7 \
 				--txs-per-tick 10 \
@@ -35,10 +35,10 @@ install:
 
 build-image:
 	cd ./code/docker; \
-	docker build --no-cache --tag simcoin/bitcoin:v2 .
+	docker build --no-cache --tag simcoin/bitcoin:v15.0.1 .
 
 rm-image:
-	docker rmi simcoin/bitcoin:v2
+	docker rmi simcoin/bitcoin:v15.0.1
 
 cp-run:
 	rm -r /tmp/run; \
