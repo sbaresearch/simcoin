@@ -26,6 +26,7 @@ When running a simulation, monitor the host machine closely. Check utilisation o
 * Improving performance and stability by [using Unix domain sockets](https://github.com/bitcoin/bitcoin/pull/9979) for host to peer communication. 
 * Sustaining different blockchain projects such as Ethereum or Litecoin.
 * Using the [ELK-Stack](https://www.elastic.co/products) to parse, store and analyse the log files.
+* Using [Kubernetes](https://kubernetes.io/) to orchestrate containers
 
 ## Credits 🙏
 _This whole section including the addresses will be removed at the 1. March since the project should transit to a community project._
