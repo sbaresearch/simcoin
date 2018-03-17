@@ -104,6 +104,5 @@ def _create_ticks(nodes, block_events, txs_per_tick, amount_of_ticks):
                 block_events[node].pop(0)
                 pop_count += 1
             if pop_count > 1:
-                print('A tick contains multiple block events for one node. '
-                      'Please change your input arguments')
+                exit('A tick contains multiple block events of one node. Change your input arguments.')
     return ticks

@@ -183,6 +183,12 @@ kable(unclass(summary(tick_infos$duration)), col.names = c('Duration [s]'), digi
   kable_styling(latex_options = c('HOLD_position'))
 ```
 
+```{r ticks_wait}
+tick_infos$wait <- args$tick_duration - tick_infos$duration
+```
+
+`r sum(tick_infos$wait < 0)` times the execution of tick events took longer than the defined tick duration.
+
 ```{r tick_duration_xyplot, fig.cap='Tick duration over time', fig.pos='H'}
 ticks         <- merge(tick_infos, sim_starts)
 ticks$elapsed <- ticks$timestamp - ticks$run_start
