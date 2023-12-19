@@ -116,14 +116,15 @@ def _recursive_check(matrix, visited=None, start=1):
 def read_connections():
     utils.check_for_file(config.network_csv)
     connections = {}
-    network_config = pandas.read_csv(open(config.network_csv), index_col=0)
-
-    for node_row, row in network_config.iterrows():
-        connections[node_row] = []
-        for node_column, value in row.iteritems():
-            if node_column == node_row:
-                pass
-            elif value == 1:
-                connections[node_row].append(node_column)
+    with open(config.network_csv) as f:
+        network_config = pandas.read_csv(f, index_col=0)
+    
+        for node_row, row in network_config.iterrows():
+            connections[node_row] = []
+            for node_column, value in row.iteritems():
+                if node_column == node_row:
+                    pass
+                elif value == 1:
+                    connections[node_row].append(node_column)
 
     return connections
